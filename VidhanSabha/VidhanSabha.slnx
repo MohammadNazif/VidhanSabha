@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="VidhanSabha.Application/VidhanSabha.Application.csproj" />
+  <Project Path="VidhanSabha.Domain/VidhanSabha.Domain.csproj" />
+  <Project Path="VidhanSabha.Infrastructure/VidhanSabha.Infrastructure.csproj" />
+  <Project Path="VidhanSabha/VidhanSabha.Api.csproj" />
+</Solution>
