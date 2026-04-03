@@ -1,0 +1,6 @@
+@VidhanSabha.Api_HostAddress = http://localhost:5160
+
+GET {{VidhanSabha.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

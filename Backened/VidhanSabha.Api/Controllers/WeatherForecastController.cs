@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 
-namespace VidhanSabha.Controllers
+namespace VidhanSabha.Api.Controllers
 {
     [ApiController]
     [Route("[controller]")]

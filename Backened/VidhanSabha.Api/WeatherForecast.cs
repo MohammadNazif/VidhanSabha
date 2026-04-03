@@ -1,4 +1,4 @@
-namespace VidhanSabha
+namespace VidhanSabha.Api
 {
     public class WeatherForecast
     {
