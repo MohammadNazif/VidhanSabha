@@ -1,0 +1,45 @@
+<div class="px-6 py-8">
+  <!-- Header Section with Buttons -->
+  <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
+    <div>
+      <h1 class="text-2xl lg:text-3xl font-bold text-slate-900 tracking-tight">Members Registry</h1>
+      <p class="text-sm text-slate-500 mt-1.5 font-medium">Manage and view all elected members of the legislative assembly.</p>
+    </div>
+    <div class="flex items-center gap-3">
+      <!-- Conditional Export Control -->
+      <div *ngIf="membersData && membersData.length > 0" class="relative">
+        <select #exportSelect (change)="handleExport(exportSelect.value); exportSelect.value = ''"
+                class="px-4 py-2 pr-8 rounded-xl text-sm font-bold text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 transition-all shadow-sm appearance-none cursor-pointer outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+          <option value="" disabled selected>Export as...</option>
+          <option value="csv">Export to CSV</option>
+          <option value="pdf">Export to PDF</option>
+          <option value="excel">Export to Excel</option>
+        </select>
+        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-500">
+          <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+            <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/>
+          </svg>
+        </div>
+      </div>
+      <app-generic-modal-button
+        [config]="addMemberConfig"
+        label="Add Member"
+        icon="+"
+        variant="primary"
+        (formSubmit)="handleNewMember($event)"
+      ></app-generic-modal-button>
+    </div>
+  </div>
+
+  <!-- Table Card Wrapper -->
+  <div class="rounded-2xl border border-slate-200 bg-white shadow-sm p-1 lg:p-3 overflow-hidden">
+    <app-generic-table
+      [data]="membersData"
+      [columns]="columns"
+      [config]="config"
+      [actions]="actions"
+      (actionClick)="handleAction($event)"
+      (selectionChange)="handleSelection($event)"
+    ></app-generic-table>
+  </div>
+</div>

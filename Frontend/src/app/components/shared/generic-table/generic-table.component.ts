@@ -1,0 +1,364 @@
+import {
+  Component,
+  Input,
+  Output,
+  EventEmitter,
+  OnInit,
+  OnChanges,
+  SimpleChanges,
+  TemplateRef,
+  ContentChild,
+  TrackByFunction
+} from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import {
+  TableColumn,
+  TableAction,
+  TableConfig,
+  SortState,
+  PageState,
+  SortDirection,
+  BadgeVariant
+} from './generic-table.types';
+
+@Component({
+  selector: 'app-generic-table',
+  standalone: true,
+  imports: [CommonModule, FormsModule],
+  templateUrl: './generic-table.component.html',
+  styleUrl: './generic-table.component.css'
+})
+export class GenericTableComponent implements OnInit, OnChanges {
+  // ── Inputs ──
+  @Input() data: any[] = [];
+  @Input() columns: TableColumn[] = [];
+  @Input() actions: TableAction[] = [];
+  @Input() config: TableConfig = {};
+  @Input() loading = false;
+
+  // ── Custom Templates ──
+  @ContentChild('cellTemplate') cellTemplate!: TemplateRef<any>;
+  @ContentChild('headerTemplate') headerTemplate!: TemplateRef<any>;
+  @ContentChild('expandedRowTemplate') expandedRowTemplate!: TemplateRef<any>;
+
+  // ── Outputs ──
+  @Output() rowClick = new EventEmitter<{ row: any; index: number }>();
+  @Output() rowDoubleClick = new EventEmitter<{ row: any; index: number }>();
+  @Output() actionClick = new EventEmitter<{ action: TableAction; row: any; index: number }>();
+  @Output() selectionChange = new EventEmitter<any[]>();
+  @Output() sortChange = new EventEmitter<SortState>();
+  @Output() pageChange = new EventEmitter<PageState>();
+  @Output() searchChange = new EventEmitter<string>();
+
+  // ── Internal State ──
+  processedData: any[] = [];
+  displayedData: any[] = [];
+  searchTerm = '';
+  sortState: SortState = { column: '', direction: null };
+  selectedRows: Set<number> = new Set();
+  allSelected = false;
+
+  pageState: PageState = {
+    currentPage: 1,
+    pageSize: 10,
+    totalItems: 0,
+    totalPages: 0
+  };
+
+  // Default config
+  private defaultConfig: TableConfig = {
+    selectable: false,
+    paginated: true,
+    pageSizeOptions: [5, 10, 25, 50],
+    defaultPageSize: 10,
+    searchable: true,
+    searchPlaceholder: 'Search records...',
+    hoverable: true,
+    striped: false,
+    showRowNumbers: false,
+    emptyMessage: 'No records found',
+    emptyIcon: '📭',
+    loading: false,
+    compact: false,
+    exportable: false
+  };
+
+  get mergedConfig(): TableConfig {
+    return { ...this.defaultConfig, ...this.config };
+  }
+
+  get visibleColumns(): TableColumn[] {
+    return this.columns.filter(c => c.visible !== false);
+  }
+
+  get totalColumnCount(): number {
+    let count = this.visibleColumns.length;
+    if (this.mergedConfig.selectable) count++;
+    if (this.mergedConfig.showRowNumbers) count++;
+    if (this.actions.length > 0) count++;
+    return count;
+  }
+
+  trackByIndex: TrackByFunction<any> = (index: number) => index;
+
+  ngOnInit() {
+    this.pageState.pageSize = this.mergedConfig.defaultPageSize || 10;
+    this.processData();
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['data'] || changes['columns']) {
+      this.processData();
+    }
+    if (changes['loading']) {
+      this.loading = changes['loading'].currentValue;
+    }
+  }
+
+  // ── Data Processing ──
+  processData() {
+    let result = [...this.data];
+
+    // Search / Filter
+    if (this.searchTerm.trim()) {
+      const term = this.searchTerm.toLowerCase();
+      const searchCols = this.mergedConfig.searchableColumns || this.columns.map(c => c.key);
+      result = result.filter(row =>
+        searchCols.some(key => {
+          const val = this.getNestedValue(row, key);
+          return val != null && String(val).toLowerCase().includes(term);
+        })
+      );
+    }
+
+    // Sort
+    if (this.sortState.column && this.sortState.direction) {
+      const col = this.sortState.column;
+      const dir = this.sortState.direction === 'asc' ? 1 : -1;
+      result.sort((a, b) => {
+        const aVal = this.getNestedValue(a, col);
+        const bVal = this.getNestedValue(b, col);
+        if (aVal == null && bVal == null) return 0;
+        if (aVal == null) return 1;
+        if (bVal == null) return -1;
+        if (typeof aVal === 'number' && typeof bVal === 'number') {
+          return (aVal - bVal) * dir;
+        }
+        return String(aVal).localeCompare(String(bVal)) * dir;
+      });
+    }
+
+    this.processedData = result;
+    this.pageState.totalItems = result.length;
+    this.pageState.totalPages = Math.ceil(result.length / this.pageState.pageSize) || 1;
+
+    // Reset to page 1 if current page exceeds total
+    if (this.pageState.currentPage > this.pageState.totalPages) {
+      this.pageState.currentPage = 1;
+    }
+
+    this.updateDisplayedData();
+  }
+
+  updateDisplayedData() {
+    if (this.mergedConfig.paginated) {
+      const start = (this.pageState.currentPage - 1) * this.pageState.pageSize;
+      const end = start + this.pageState.pageSize;
+      this.displayedData = this.processedData.slice(start, end);
+    } else {
+      this.displayedData = this.processedData;
+    }
+  }
+
+  // ── Sorting ──
+  onSort(column: TableColumn) {
+    if (!column.sortable) return;
+
+    if (this.sortState.column === column.key) {
+      // Toggle: asc -> desc -> null
+      if (this.sortState.direction === 'asc') {
+        this.sortState.direction = 'desc';
+      } else if (this.sortState.direction === 'desc') {
+        this.sortState = { column: '', direction: null };
+      }
+    } else {
+      this.sortState = { column: column.key, direction: 'asc' };
+    }
+
+    this.sortChange.emit(this.sortState);
+    this.processData();
+  }
+
+  getSortIcon(column: TableColumn): string {
+    if (this.sortState.column !== column.key || !this.sortState.direction) return '⇅';
+    return this.sortState.direction === 'asc' ? '↑' : '↓';
+  }
+
+  // ── Search ──
+  onSearch() {
+    this.pageState.currentPage = 1;
+    this.searchChange.emit(this.searchTerm);
+    this.processData();
+  }
+
+  clearSearch() {
+    this.searchTerm = '';
+    this.onSearch();
+  }
+
+  // ── Pagination ──
+  goToPage(page: number) {
+    if (page < 1 || page > this.pageState.totalPages) return;
+    this.pageState.currentPage = page;
+    this.updateDisplayedData();
+    this.pageChange.emit(this.pageState);
+  }
+
+  onPageSizeChange(size: number) {
+    this.pageState.pageSize = size;
+    this.pageState.currentPage = 1;
+    this.processData();
+    this.pageChange.emit(this.pageState);
+  }
+
+  get pageNumbers(): number[] {
+    const total = this.pageState.totalPages;
+    const current = this.pageState.currentPage;
+    const pages: number[] = [];
+
+    if (total <= 5) {
+      for (let i = 1; i <= total; i++) pages.push(i);
+    } else {
+      pages.push(1);
+      if (current > 3) pages.push(-1); // ellipsis
+      const start = Math.max(2, current - 1);
+      const end = Math.min(total - 1, current + 1);
+      for (let i = start; i <= end; i++) pages.push(i);
+      if (current < total - 2) pages.push(-1); // ellipsis
+      pages.push(total);
+    }
+    return pages;
+  }
+
+  get showingFrom(): number {
+    return (this.pageState.currentPage - 1) * this.pageState.pageSize + 1;
+  }
+
+  get showingTo(): number {
+    return Math.min(
+      this.pageState.currentPage * this.pageState.pageSize,
+      this.pageState.totalItems
+    );
+  }
+
+  // ── Selection ──
+  toggleSelectAll() {
+    if (this.allSelected) {
+      this.selectedRows.clear();
+      this.allSelected = false;
+    } else {
+      this.displayedData.forEach((_, i) => {
+        const globalIndex = (this.pageState.currentPage - 1) * this.pageState.pageSize + i;
+        this.selectedRows.add(globalIndex);
+      });
+      this.allSelected = true;
+    }
+    this.emitSelection();
+  }
+
+  toggleRowSelect(index: number) {
+    const globalIndex = (this.pageState.currentPage - 1) * this.pageState.pageSize + index;
+    if (this.selectedRows.has(globalIndex)) {
+      this.selectedRows.delete(globalIndex);
+    } else {
+      this.selectedRows.add(globalIndex);
+    }
+    this.allSelected = this.displayedData.every((_, i) => {
+      const gi = (this.pageState.currentPage - 1) * this.pageState.pageSize + i;
+      return this.selectedRows.has(gi);
+    });
+    this.emitSelection();
+  }
+
+  isRowSelected(index: number): boolean {
+    const globalIndex = (this.pageState.currentPage - 1) * this.pageState.pageSize + index;
+    return this.selectedRows.has(globalIndex);
+  }
+
+  private emitSelection() {
+    const selected = Array.from(this.selectedRows).map(i => this.processedData[i]).filter(Boolean);
+    this.selectionChange.emit(selected);
+  }
+
+  // ── Row Events ──
+  onRowClick(row: any, index: number) {
+    this.rowClick.emit({ row, index });
+  }
+
+  onRowDoubleClick(row: any, index: number) {
+    this.rowDoubleClick.emit({ row, index });
+  }
+
+  onActionClick(action: TableAction, row: any, index: number, event: Event) {
+    event.stopPropagation();
+    if (action.disabled && action.disabled(row)) return;
+    this.actionClick.emit({ action, row, index });
+  }
+
+  // ── Helpers ──
+  getNestedValue(obj: any, path: string): any {
+    return path.split('.').reduce((acc, part) => acc && acc[part], obj);
+  }
+
+  getCellValue(row: any, column: TableColumn): any {
+    const value = this.getNestedValue(row, column.key);
+    if (column.formatter) {
+      return column.formatter(value, row);
+    }
+    return value;
+  }
+
+  getBadgeVariant(value: any, row: any, column: TableColumn): BadgeVariant {
+    if (column.badgeVariant) {
+      return column.badgeVariant(value, row);
+    }
+    return 'default';
+  }
+
+  getProgressColor(value: number, row: any, column: TableColumn): string {
+    if (column.progressColor) {
+      return column.progressColor(value, row);
+    }
+    if (value >= 80) return 'linear-gradient(90deg, #10b981, #059669)';
+    if (value >= 50) return 'linear-gradient(90deg, #f59e0b, #d97706)';
+    return 'linear-gradient(90deg, #ef4444, #dc2626)';
+  }
+
+  getProgressPercent(value: number, column: TableColumn): number {
+    const max = column.progressMax || 100;
+    return Math.min((value / max) * 100, 100);
+  }
+
+  getInitials(name: string): string {
+    if (!name) return '?';
+    return name
+      .split(' ')
+      .map(n => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  }
+
+  getRowNumber(index: number): number {
+    return (this.pageState.currentPage - 1) * this.pageState.pageSize + index + 1;
+  }
+
+  isActionVisible(action: TableAction, row: any): boolean {
+    return action.show ? action.show(row) : true;
+  }
+
+  isActionDisabled(action: TableAction, row: any): boolean {
+    return action.disabled ? action.disabled(row) : false;
+  }
+}

@@ -1,6 +1,6 @@
 <Solution>
+  <Project Path="VidhanSabha.Api/VidhanSabha.Api.csproj" Id="1239f04b-4c75-4200-bda4-fb283a5d2dcc" />
   <Project Path="VidhanSabha.Application/VidhanSabha.Application.csproj" />
   <Project Path="VidhanSabha.Domain/VidhanSabha.Domain.csproj" />
   <Project Path="VidhanSabha.Infrastructure/VidhanSabha.Infrastructure.csproj" />
-  <Project Path="VidhanSabha/VidhanSabha.Api.csproj" />
 </Solution>

@@ -1,0 +1,13 @@
+:host {
+  display: block;
+}
+
+.nav-active {
+  background: rgba(99, 102, 241, 0.12) !important;
+  color: #a5b4fc !important;
+  border-left: 3px solid #6366f1;
+}
+
+.nav-active span:first-child {
+  transform: scale(1.1);
+}

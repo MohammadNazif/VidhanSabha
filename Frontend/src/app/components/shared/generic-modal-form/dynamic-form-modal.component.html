@@ -1,0 +1,109 @@
+<div class="fixed inset-0 z-[9999] overflow-y-auto bg-black/40 backdrop-blur-sm animate-fade-in"
+     (click)="onCancel()"
+>
+  <div class="flex min-h-full items-center justify-center p-4">
+    <div class="bg-white/95 backdrop-blur-xl w-full max-w-3xl rounded-2xl shadow-2xl overflow-hidden animate-slide-up"
+         (click)="$event.stopPropagation()"
+    >
+      <!-- Modal Header -->
+      <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-blue-50/50 to-indigo-50/50">
+        <h3 class="text-xl font-bold text-gray-800 tracking-tight">{{ config.title }}</h3>
+        <button (click)="onCancel()" 
+                class="p-2 hover:bg-white/80 rounded-full transition-all group duration-200"
+        >
+          <span class="text-gray-400 group-hover:text-red-500 font-bold">×</span>
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="p-6 max-h-[75vh] overflow-y-auto custom-scrollbar">
+      <form [formGroup]="form" class="grid grid-cols-1 md:grid-cols-12 gap-x-6 gap-y-5">
+        <ng-container *ngFor="let field of config.fields">
+          <div [ngClass]="getFieldColumnClass(field)"
+               *ngIf="fieldVisibility[field.id]"
+               class="flex flex-col gap-1.5 transition-all duration-300 animate-fade-in"
+          >
+            <label [for]="field.id" 
+                   class="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1"
+            >
+              {{ field.label }}
+              <span *ngIf="field.validations?.length" class="text-red-500 ml-0.5">*</span>
+            </label>
+
+            <!-- Standard Input Types -->
+            <input *ngIf="['text', 'number', 'email', 'password', 'date'].includes(field.type)"
+                   [type]="field.type"
+                   [id]="field.id"
+                   [formControlName]="field.id"
+                   [placeholder]="field.placeholder || ''"
+                   class="w-full px-4 py-2.5 bg-gray-50 hover:bg-white border border-gray-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all duration-200 text-sm font-medium text-gray-700 shadow-sm"
+                   [class.border-red-400]="form.get(field.id)?.touched && form.get(field.id)?.invalid"
+            />
+
+            <!-- Select Dropdown -->
+            <select *ngIf="field.type === 'select'"
+                    [id]="field.id"
+                    [formControlName]="field.id"
+                    class="w-full px-4 py-2.5 bg-gray-50 hover:bg-white border border-gray-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all duration-200 text-sm font-medium text-gray-700 shadow-sm appearance-none bg-[url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%2364748b\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'%3e%3cpolyline points=\'6 9 12 15 18 9\'%3e%3c/polyline%3e%3c/svg%3e')] bg-no-repeat bg-[right_12px_center] bg-[length:14px]"
+                    [class.border-red-400]="form.get(field.id)?.touched && form.get(field.id)?.invalid"
+            >
+              <option value="" disabled selected>{{ field.placeholder || 'Select ' + field.label }}</option>
+              <option *ngFor="let option of fieldOptions[field.id] || []" [value]="option.value">
+                {{ option.label }}
+              </option>
+            </select>
+
+            <!-- Textarea -->
+            <textarea *ngIf="field.type === 'textarea'"
+                      [id]="field.id"
+                      [formControlName]="field.id"
+                      [placeholder]="field.placeholder || ''"
+                      rows="3"
+                      class="w-full px-4 py-2.5 bg-gray-50 hover:bg-white border border-gray-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all duration-200 text-sm font-medium text-gray-700 shadow-sm resize-none"
+                      [class.border-red-400]="form.get(field.id)?.touched && form.get(field.id)?.invalid"
+            ></textarea>
+
+            <!-- Profile/File Input -->
+            <div *ngIf="field.type === 'file'" class="flex items-center gap-4 p-4 bg-gray-50 rounded-xl border border-dashed border-gray-300 hover:border-blue-400 hover:bg-blue-50/10 transition-all cursor-pointer relative">
+              <div class="h-16 w-16 bg-white border border-gray-200 rounded-full flex items-center justify-center overflow-hidden shadow-sm flex-shrink-0">
+                <img *ngIf="previews[field.id]" [src]="previews[field.id]" class="h-full w-full object-cover" />
+                <span *ngIf="!previews[field.id]" class="text-2xl text-gray-300 font-bold">👤</span>
+              </div>
+              <div class="flex-1">
+                <span class="block text-sm font-bold text-gray-700">Profile Photo</span>
+                <span class="block text-xs text-gray-500">{{ fileData[field.id] ? fileData[field.id].name : 'Click or drag to upload' }}</span>
+              </div>
+              <input type="file" 
+                     (change)="onFileChange($event, field.id)"
+                     accept="image/*"
+                     class="absolute inset-0 opacity-0 cursor-pointer"
+              />
+            </div>
+
+            <!-- Error Message -->
+            <span *ngIf="form.get(field.id)?.touched && form.get(field.id)?.invalid" 
+                  class="text-[10px] text-red-500 font-bold uppercase tracking-wider ml-1 mt-0.5"
+            >
+              This field is required
+            </span>
+          </div>
+        </ng-container>
+      </form>
+    </div>
+
+    <!-- Modal Footer -->
+    <div class="px-6 py-4 bg-gray-50/80 border-t border-gray-100 flex items-center justify-end gap-3 glass-footer">
+      <button (click)="onCancel()"
+              class="px-5 py-2.5 text-sm font-bold text-gray-600 hover:text-gray-800 hover:bg-white rounded-xl transition-all duration-200"
+      >
+        {{ config.cancelLabel || 'Cancel' }}
+      </button>
+      <button (click)="onSubmit()"
+              [disabled]="form.invalid"
+              class="px-8 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:shadow-lg hover:shadow-blue-500/30 text-white text-sm font-bold rounded-xl transition-all duration-200 disabled:opacity-50 disabled:shadow-none active:scale-[0.98]"
+      >
+        {{ config.submitLabel }}
+      </button>
+    </div>
+  </div>
+</div>

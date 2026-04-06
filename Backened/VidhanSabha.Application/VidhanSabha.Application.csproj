@@ -10,4 +10,30 @@
     <ProjectReference Include="..\VidhanSabha.Domain\VidhanSabha.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Pannels\Admin\VidhansabhaRegistration\Commands\" />
+    <Folder Include="Pannels\Admin\VidhansabhaRegistration\DTOs\" />
+    <Folder Include="Pannels\Admin\VidhansabhaRegistration\Interfaces\" />
+    <Folder Include="Pannels\Admin\VidhansabhaRegistration\Queries\" />
+    <Folder Include="Pannels\Booth\Commands\" />
+    <Folder Include="Pannels\Booth\DTOs\" />
+    <Folder Include="Pannels\Booth\Interfaces\" />
+    <Folder Include="Pannels\Booth\Queries\" />
+    <Folder Include="Pannels\Sector\Commands\" />
+    <Folder Include="Pannels\Sector\DTOs\" />
+    <Folder Include="Pannels\Sector\Interfaces\" />
+    <Folder Include="Pannels\Sector\Queries\" />
+    <Folder Include="Pannels\SuperAdmin\Commands\" />
+    <Folder Include="Pannels\SuperAdmin\DTOs\" />
+    <Folder Include="Pannels\SuperAdmin\Interfaces\" />
+    <Folder Include="Pannels\SuperAdmin\Queries\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FluentValidation" Version="12.1.1" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
+    <PackageReference Include="MediatR" Version="14.1.0" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="7.0.0" />
+  </ItemGroup>
+
 </Project>

@@ -1,0 +1,21 @@
+.header-container {
+    position: relative;
+    z-index: 50;
+    animation: slide-down 0.5s ease-out forwards;
+}
+
+.header-title {
+    background: linear-gradient(to bottom right, #0f172a, #334155);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+@keyframes slide-down {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
