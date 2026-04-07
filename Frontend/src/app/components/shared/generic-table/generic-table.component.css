@@ -53,7 +53,7 @@
   font-family: 'Inter', sans-serif;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
   height: 100%;
 }
 
@@ -315,7 +315,7 @@
   gap: 10px;
 }
 
-.avatar-circle {
+/* .avatar-circle {
   width: 28px;
   height: 28px;
   border-radius: 50%;
@@ -329,7 +329,7 @@
   flex-shrink: 0;
   box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
   border: 2px solid #ffffff;
-}
+} */
 
 .avatar-name {
   font-weight: 600;
@@ -350,7 +350,7 @@
   border-radius: 3px;
   background: #e2e8f0;
   overflow: hidden;
-  box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .progress-bar-fill {
@@ -403,11 +403,11 @@
   justify-content: center;
 }
 
-.custom-checkbox:hover input ~ .checkmark {
+.custom-checkbox:hover input~.checkmark {
   border-color: #94a3b8;
 }
 
-.custom-checkbox input:checked ~ .checkmark {
+.custom-checkbox input:checked~.checkmark {
   background-color: #2563eb;
   border-color: #2563eb;
   box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
@@ -426,7 +426,7 @@
   transform: rotate(45deg);
 }
 
-.custom-checkbox input:checked ~ .checkmark:after {
+.custom-checkbox input:checked~.checkmark:after {
   display: block;
 }
 
@@ -482,8 +482,9 @@
   background: #ffffff;
   color: #475569;
   border-color: #e2e8f0;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
+
 .action-default:hover {
   background: #f8fafc;
   color: #0f172a;
@@ -495,6 +496,7 @@
   color: #1d4ed8;
   border-color: #bfdbfe;
 }
+
 .action-primary:hover {
   background: #dbeafe;
   color: #1e40af;
@@ -505,6 +507,7 @@
   color: #dc2626;
   border-color: #fecaca;
 }
+
 .action-danger:hover {
   background: #fee2e2;
   color: #b91c1c;
@@ -515,6 +518,7 @@
   color: #d97706;
   border-color: #fde68a;
 }
+
 .action-warning:hover {
   background: #fef3c7;
   color: #b45309;
@@ -528,11 +532,13 @@
 }
 
 /* ─── Loading / Empty States ─── */
-.loading-row td, .empty-row td {
+.loading-row td,
+.empty-row td {
   border: none !important;
 }
 
-.loading-container, .empty-container {
+.loading-container,
+.empty-container {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -552,7 +558,9 @@
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .loading-container span {
@@ -627,7 +635,7 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
 }
 
 .page-btn:hover:not(.disabled):not(.active) {
@@ -677,7 +685,7 @@
   cursor: pointer;
   outline: none;
   transition: all 0.2s ease;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
   appearance: none;
   background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
   background-repeat: no-repeat;

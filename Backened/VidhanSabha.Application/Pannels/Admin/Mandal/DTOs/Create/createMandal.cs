@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace VidhanSabha.Application.Pannels.Admin.Mandal.DTOs
+namespace VidhanSabha.Application.Pannels.Admin.Mandal.DTOs.Create
 {
     public class MandalResponseDto
     {
@@ -17,6 +17,12 @@ namespace VidhanSabha.Application.Pannels.Admin.Mandal.DTOs
     public class CreateMandalRequestDto
     {
         public int VidhanId { get; set; }
+        public string Name { get; set; }
+    }
+
+    public class UpdateMandalRequestDto
+    {
+        public int Id { get; set; }
         public string Name { get; set; }
     }
 }

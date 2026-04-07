@@ -16,22 +16,33 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
 
         public MandalRepository(DatabaseContext context) => _context = context;
 
-            public async Task<List<Tbl_Mandal>> GetAllAsync()
-                => await _context.Set<Tbl_Mandal>()
-                     .Where(m => m.Status)
-                     .OrderBy(m => m.Name)
-                     .ToListAsync();    
+        public async Task<List<Tbl_Mandal>> GetAllAsync()
+            => await _context.Set<Tbl_Mandal>()
+                 .OrderBy(m => m.Name)
+                 .ToListAsync();
 
-          public async Task<bool> ExistsByNameAsync(int vidhanId, string name)
-            => await _context.Set<Tbl_Mandal>().
-                              Where(m => m.Status)
-                             .AnyAsync(m => m.VidhanId == vidhanId
-                                         && m.Name == name.Trim());
 
-          public async Task AddAsync(Tbl_Mandal mandal)
-          {
+        public async Task<Tbl_Mandal> GetByIdAsync(int id)
+            => await _context.Set<Tbl_Mandal>()
+                     .FirstOrDefaultAsync(x => x.Id == id);
+
+
+        public async Task<bool> ExistsByNameAsync(int vidhanId, string name)
+          => await _context.Set<Tbl_Mandal>().
+                            Where(m => m.Status)
+                           .AnyAsync(m => m.VidhanId == vidhanId
+                                       && m.Name == name.Trim());
+
+        public async Task AddAsync(Tbl_Mandal mandal)
+        {
             await _context.Set<Tbl_Mandal>().AddAsync(mandal);
             await _context.SaveChangesAsync();
-          }
+        }
+
+        public async Task UpdateAsync(Tbl_Mandal mandal)
+        {
+             _context.Set<Tbl_Mandal>().Update(mandal);
+            await _context.SaveChangesAsync();
+        }
     }
 }

@@ -24,7 +24,8 @@ export class FormDataService {
     // Prefix relative URLs with base API URL
     const finalUrl = url.startsWith('http') ? url : `${environment.apiUrl}${url.startsWith('/') ? '' : '/'}${url}`;
     
-    return this.http.get<any>(finalUrl).pipe(
+    const headers = { 'X-Skip-Loader': 'true' };
+    return this.http.get<any>(finalUrl, { headers }).pipe(
       map(response => {
         if (mapper) {
           return mapper(response, formValues);

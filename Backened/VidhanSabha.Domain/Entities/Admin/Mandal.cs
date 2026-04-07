@@ -32,6 +32,15 @@ namespace VidhanSabha.Domain.Entities.Admin
             };
         }
 
+        public void Update(string name)
+        {
+            ValidateName(name);
+
+            _name = name;
+            Status = true;
+            
+        }
+
         // ── Behaviors ────────────────────────────────────────────
         public bool IsActive() => Status;
 

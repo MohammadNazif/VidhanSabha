@@ -19,6 +19,7 @@ import { DynamicFormModalComponent } from './dynamic-form-modal.component';
     <app-dynamic-form-modal 
       *ngIf="isModalOpen"
       [config]="config"
+      [initialData]="initialData"
       (close)="closeModal()"
       (submitForm)="handleSubmit($event)"
     ></app-dynamic-form-modal>
@@ -36,8 +37,9 @@ export class GenericModalButtonComponent {
   @Input() variant: 'primary' | 'secondary' | 'danger' | 'success' | 'outline' = 'primary';
   
   @Output() formSubmit = new EventEmitter<FormResult>();
-
+  
   isModalOpen = false;
+  initialData: any;
 
   get buttonClass(): string {
     const base = '';
@@ -51,7 +53,8 @@ export class GenericModalButtonComponent {
     return variants[this.variant] || variants.primary;
   }
 
-  openModal(): void {
+  openModal(data?: any): void {
+    this.initialData = data;
     this.isModalOpen = true;
     // Prevent body scrolling when modal is open
     document.body.style.overflow = 'hidden';

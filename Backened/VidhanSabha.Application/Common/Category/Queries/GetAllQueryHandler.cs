@@ -9,15 +9,15 @@ using VidhanSabha.Application.Common.Category.Interfaces;
 
 namespace VidhanSabha.Application.Common.Category.Queries
 {
-    public class GetAllQueryHandler : IRequestHandler<getall, List<CategoryResponseDto>>
+    public class GetAllCatgeoryQueryHandler : IRequestHandler<GetallCatgeory, List<CategoryResponseDto>>
     {
         private ICategoryRepository _repo;
 
-        public GetAllQueryHandler(ICategoryRepository  repo)
+        public GetAllCatgeoryQueryHandler(ICategoryRepository  repo)
         {
             _repo = repo;
         }
-        public async Task<List<CategoryResponseDto>> Handle(getall request, CancellationToken cancellationToken)
+        public async Task<List<CategoryResponseDto>> Handle(GetallCatgeory request, CancellationToken cancellationToken)
         {
             var categories =  await _repo.GetAllAsync();
             return categories.Select(c => new CategoryResponseDto

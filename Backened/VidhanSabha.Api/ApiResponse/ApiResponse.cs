@@ -18,11 +18,11 @@
         private ApiResponse() { }
 
         // ── Success ────────────────────────────────────────────
-        public static ApiResponse<T> Ok(T data, object? meta = null) =>
+        public static ApiResponse<T> Ok(T data, string? detail = null) =>
             new ApiResponse<T>
             {
                 Data = data,
-                Meta = meta,
+                Detail = detail,
                 Status = 200,
                 Title = "Success"
             };

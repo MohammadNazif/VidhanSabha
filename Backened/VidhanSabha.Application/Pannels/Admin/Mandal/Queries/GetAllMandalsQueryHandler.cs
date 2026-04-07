@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MediatR;
 using VidhanSabha.Application.Exceptions;
-using VidhanSabha.Application.Pannels.Admin.Mandal.DTOs;
+using VidhanSabha.Application.Pannels.Admin.Mandal.DTOs.Create;
 using VidhanSabha.Application.Pannels.Admin.Mandal.Interfaces;
 
 namespace VidhanSabha.Application.Pannels.Admin.Mandal.Queries

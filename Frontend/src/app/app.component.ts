@@ -2,11 +2,14 @@ import { Component, OnInit, HostListener } from '@angular/core';
 import { RouterOutlet, Router, NavigationEnd } from '@angular/router';
 import { SidebarComponent } from './components/sidebar/sidebar.component';
 import { CommonModule } from '@angular/common';
+import { LoaderComponent } from './components/shared/loader/loader.component';
+import { ToastComponent } from './components/shared/toast/toast.component';
+import { LoaderService } from './Services/loader/loader.service';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, SidebarComponent, CommonModule],
+  imports: [RouterOutlet, SidebarComponent, CommonModule, LoaderComponent, ToastComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
@@ -16,7 +19,7 @@ export class AppComponent implements OnInit {
   isLoginPage = false;
   isMobile = false;
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, public loaderService: LoaderService) {}
 
   ngOnInit() {
     this.router.events.subscribe(event => {

@@ -8,7 +8,7 @@ using VidhanSabha.Application.Common.Category.DTOs;
 
 namespace VidhanSabha.Application.Common.Category.Queries
 {
-    public class getall : IRequest<List<CategoryResponseDto>>
+    public class GetallCatgeory: IRequest<List<CategoryResponseDto>>
     { 
     }
 }

@@ -36,39 +36,21 @@ export class DashboardComponent implements OnInit, AfterViewInit {
 
   currentDate = new Date();
 
-  statCards: StatCard[] = [
-    {
-      title: 'Total Members',
-      value: '543',
-      change: '+12',
-      changeType: 'up',
-      icon: '👥',
-      gradient: 'linear-gradient(135deg, #6366f1, #8b5cf6)'
-    },
-    {
-      title: 'Active Sessions',
-      value: '24',
-      change: '+3',
-      changeType: 'up',
-      icon: '📅',
-      gradient: 'linear-gradient(135deg, #06b6d4, #3b82f6)'
-    },
-    {
-      title: 'Bills Passed',
-      value: '187',
-      change: '+28',
-      changeType: 'up',
-      icon: '📋',
-      gradient: 'linear-gradient(135deg, #10b981, #059669)'
-    },
-    {
-      title: 'Pending Bills',
-      value: '43',
-      change: '-5',
-      changeType: 'down',
-      icon: '⏳',
-      gradient: 'linear-gradient(135deg, #f59e0b, #ef4444)'
-    }
+  statCards = [
+    { title: 'Mandal', value: 5, icon: '🏛️', gradient: 'linear-gradient(135deg, #6366f1, #4f46e5)', change: '+0%', changeType: 'up' },
+    { title: 'Sector', value: 83, icon: '📍', gradient: 'linear-gradient(135deg, #0ea5e9, #0284c7)', change: '+0%', changeType: 'up' },
+    { title: 'Booth', value: 419, icon: '🗳️', gradient: 'linear-gradient(135deg, #22c55e, #16a34a)', change: '+0%', changeType: 'up' },
+    { title: 'PannaPramukh', value: 2, icon: '📘', gradient: 'linear-gradient(135deg, #f59e0b, #d97706)', change: '+0%', changeType: 'up' },
+    { title: 'Sahmat', value: 0, icon: '👍', gradient: 'linear-gradient(135deg, #10b981, #059669)', change: '+0%', changeType: 'up' },
+    { title: 'Asahmat', value: 0, icon: '👎', gradient: 'linear-gradient(135deg, #ef4444, #dc2626)', change: '+0%', changeType: 'down' },
+    { title: 'Activities', value: 1, icon: '📋', gradient: 'linear-gradient(135deg, #8b5cf6, #7c3aed)', change: '+0%', changeType: 'up' },
+    { title: 'Pravasi', value: 3, icon: '🚶', gradient: 'linear-gradient(135deg, #06b6d4, #0891b2)', change: '+0%', changeType: 'up' },
+    { title: 'New Voters', value: 1, icon: '🆕', gradient: 'linear-gradient(135deg, #84cc16, #65a30d)', change: '+0%', changeType: 'up' },
+    { title: 'Double Voter', value: 1, icon: '⚠️', gradient: 'linear-gradient(135deg, #f97316, #ea580c)', change: '+0%', changeType: 'down' },
+    { title: 'Prabhavshali Vyakti', value: 1, icon: '⭐', gradient: 'linear-gradient(135deg, #eab308, #ca8a04)', change: '+0%', changeType: 'up' },
+    { title: 'Block', value: 1, icon: '🏢', gradient: 'linear-gradient(135deg, #64748b, #475569)', change: '+0%', changeType: 'up' },
+    { title: 'BDC', value: 126, icon: '📊', gradient: 'linear-gradient(135deg, #14b8a6, #0f766e)', change: '+0%', changeType: 'up' },
+    { title: 'Influencer Person', value: 0, icon: '🎯', gradient: 'linear-gradient(135deg, #ec4899, #db2777)', change: '+0%', changeType: 'up' }
   ];
 
   recentActivities: RecentActivity[] = [
@@ -117,13 +99,12 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     { name: 'Vikram Singh', party: 'BJP', attendance: 89, bills: 7, avatar: 'V' },
   ];
 
-  ngOnInit() {}
+  ngOnInit() { }
 
   ngAfterViewInit() {
     this.createRevenueChart();
-    this.createSessionChart();
     this.createPartyChart();
-    this.createAttendanceChart();
+
   }
 
   private createRevenueChart() {
@@ -173,6 +154,11 @@ export class DashboardComponent implements OnInit, AfterViewInit {
         ]
       },
       options: {
+        animation: {
+          duration: 1000,
+          easing: 'easeOutQuart',
+          delay: 500
+        },
         responsive: true,
         maintainAspectRatio: false,
         interaction: {
@@ -222,68 +208,6 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     });
   }
 
-  private createSessionChart() {
-    const ctx = this.sessionChartRef.nativeElement.getContext('2d')!;
-
-    new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-        datasets: [{
-          label: 'Hours in Session',
-          data: [6.5, 8.2, 7.8, 9.1, 5.5, 3.2],
-          backgroundColor: [
-            'rgba(29, 78, 216, 0.8)',
-            'rgba(234, 88, 12, 0.8)',
-            'rgba(22, 163, 74, 0.8)',
-            'rgba(2, 132, 199, 0.8)',
-            'rgba(147, 51, 234, 0.8)',
-            'rgba(71, 85, 105, 0.8)',
-          ],
-          borderColor: [
-            '#1d4ed8',
-            '#ea580c',
-            '#16a34a',
-            '#0284c7',
-            '#9333ea',
-            '#475569',
-          ],
-          borderWidth: 1,
-          borderRadius: 6,
-          borderSkipped: false,
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { display: false },
-          tooltip: {
-            backgroundColor: '#ffffff',
-            titleColor: '#0f172a',
-            bodyColor: '#475569',
-            borderColor: '#e2e8f0',
-            borderWidth: 1,
-            cornerRadius: 8,
-            padding: 12,
-          }
-        },
-        scales: {
-          x: {
-            grid: { display: false },
-            ticks: { color: '#64748b', font: { family: 'Inter', size: 11 } },
-            border: { display: false }
-          },
-          y: {
-            grid: { color: 'rgba(0,0,0,0.05)' },
-            ticks: { color: '#64748b', font: { family: 'Inter', size: 11 } },
-            border: { display: false },
-            beginAtZero: true
-          }
-        }
-      }
-    });
-  }
 
   private createPartyChart() {
     const ctx = this.partyChartRef.nativeElement.getContext('2d')!;
@@ -309,6 +233,11 @@ export class DashboardComponent implements OnInit, AfterViewInit {
         }]
       },
       options: {
+        animation: {
+          duration: 1200,
+          easing: 'easeOutBounce',
+          delay: 500
+        },
         responsive: true,
         maintainAspectRatio: false,
         cutout: '72%',
@@ -338,62 +267,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     });
   }
 
-  private createAttendanceChart() {
-    const ctx = this.attendanceChartRef.nativeElement.getContext('2d')!;
-
-    const gradient = ctx.createLinearGradient(0, 0, 0, 200);
-    gradient.addColorStop(0, 'rgba(22, 163, 74, 0.2)');
-    gradient.addColorStop(1, 'rgba(22, 163, 74, 0.0)');
-
-    new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: ['W1', 'W2', 'W3', 'W4', 'W5', 'W6', 'W7', 'W8'],
-        datasets: [{
-          label: 'Attendance %',
-          data: [82, 86, 79, 91, 88, 94, 87, 92],
-          borderColor: '#16a34a',
-          backgroundColor: gradient,
-          borderWidth: 2.5,
-          fill: true,
-          tension: 0.4,
-          pointBackgroundColor: '#16a34a',
-          pointBorderColor: '#ffffff',
-          pointBorderWidth: 2,
-          pointRadius: 4,
-          pointHoverRadius: 7,
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { display: false },
-          tooltip: {
-            backgroundColor: '#ffffff',
-            titleColor: '#0f172a',
-            bodyColor: '#475569',
-            borderColor: '#e2e8f0',
-            borderWidth: 1,
-            cornerRadius: 8,
-            padding: 12,
-          }
-        },
-        scales: {
-          x: {
-            grid: { display: false },
-            ticks: { color: '#64748b', font: { family: 'Inter', size: 10 } },
-            border: { display: false }
-          },
-          y: {
-            grid: { color: 'rgba(0,0,0,0.05)' },
-            ticks: { color: '#64748b', font: { family: 'Inter', size: 10 } },
-            border: { display: false },
-            min: 70,
-            max: 100
-          }
-        }
-      }
-    });
-  }
 }
+
+
+

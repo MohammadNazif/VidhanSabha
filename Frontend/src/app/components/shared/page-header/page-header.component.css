@@ -1,6 +1,6 @@
 .header-container {
     position: relative;
-    z-index: 50;
+    z-index: 20;
     animation: slide-down 0.5s ease-out forwards;
 }
 

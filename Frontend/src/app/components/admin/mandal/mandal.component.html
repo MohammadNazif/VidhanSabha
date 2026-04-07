@@ -6,11 +6,12 @@
         <div class="flex items-center gap-3">
 
             <app-generic-modal-button 
+                #mandalModal
                 [config]="addMandalConfig" 
                 label="Add Mandal" 
                 icon="+" 
                 variant="primary"
-                (formSubmit)="handleNewMember($event)">
+                (formSubmit)="handleFormSubmit($event)">
             </app-generic-modal-button>
         </div>
     </app-page-header>

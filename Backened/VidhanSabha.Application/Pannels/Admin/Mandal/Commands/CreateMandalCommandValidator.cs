@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using FluentValidation;
 
-namespace VidhanSabha.Application.Pannels.Admin.Mandal.Commands
+namespace VidhanSabha.Application.Pannels.Admin.Mandal.Commands.Create
 {
     public class CreateMandalCommandValidator
          : AbstractValidator<CreateMandalCommand>

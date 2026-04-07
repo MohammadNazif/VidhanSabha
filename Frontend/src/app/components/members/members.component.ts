@@ -5,6 +5,7 @@ import { GenericTableComponent } from '../shared/generic-table/generic-table.com
 import { TableColumn, TableConfig, TableAction, BadgeVariant } from '../shared/generic-table/generic-table.types';
 import { GenericModalButtonComponent } from '../shared/generic-modal-form/generic-modal-button.component';
 import { FormConfig, FormResult } from '../shared/generic-modal-form/generic-form.types';
+import { ToastService } from '../../Services/toast/toast.service';
 
 @Component({
   selector: 'app-members',
@@ -14,6 +15,8 @@ import { FormConfig, FormResult } from '../shared/generic-modal-form/generic-for
   styleUrl: './members.component.css'
 })
 export class MembersComponent {
+  constructor(private toastService: ToastService) { }
+
   addMemberConfig: FormConfig = {
     title: 'Register New Member',
     submitLabel: 'Register Member',
@@ -102,7 +105,7 @@ export class MembersComponent {
     };
 
     this.membersData = [newMember, ...this.membersData];
-    alert('Member registered successfully!');
+    this.toastService.showSuccess('Success', 'Member registered successfully!');
   }
   columns: TableColumn[] = [
     { key: 'name', label: 'Name', type: 'avatar', sortable: true, avatarFallbackKey: 'name' },
@@ -164,7 +167,7 @@ export class MembersComponent {
 
   handleAction(event: any) {
     console.log('Action clicked:', event);
-    alert(`Action ${event.action.id} clicked for ${event.row.name}`);
+    this.toastService.showWarning('Action Selected', `Action ${event.action.id} clicked for ${event.row.name}`);
   }
 
   handleSelection(selected: any[]) {
@@ -176,6 +179,6 @@ export class MembersComponent {
 
     // In a real application, you would generate and download the file here
     console.log(`Generating ${format.toUpperCase()} export for ${this.membersData.length} records...`);
-    alert(`Successfully generated ${format.toUpperCase()} export!`);
+    this.toastService.showSuccess('Export Started', `Successfully generated ${format.toUpperCase()} export!`);
   }
 }

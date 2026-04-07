@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
 import { AuthServiceService } from '../../../Services/Auth/auth.service';
+import { ToastService } from '../../../Services/toast/toast.service';
 
 import { CommonModule } from '@angular/common';
 
@@ -19,13 +20,13 @@ export class LoginComponent {
     password: new FormControl('', [Validators.required, Validators.minLength(6)])
   });
 
-  constructor(private router: Router, private http: HttpClient, private authService: AuthServiceService) { }
+  constructor(private router: Router, private http: HttpClient, private authService: AuthServiceService, private toastService: ToastService) { }
 
   onLogin(event: Event) {
     event.preventDefault();
 
     if (this.loginForm.invalid) {
-      alert('Please enter a valid mobile number and password.');
+      this.toastService.showWarning('Invalid Input', 'Please enter a valid mobile number and password.');
       return;
     }
 
@@ -34,7 +35,7 @@ export class LoginComponent {
     this.http.post('https://localhost:7093/api/auth/login', payload)
       .subscribe({
         next: (res: any) => {
-          alert('Login Successful!');
+          this.toastService.showSuccess('Success', 'Login Successful!');
           const role = res.role || 'ADMIN'; 
           this.authService.setRole(role);
           this.router.navigate(['/']);
@@ -44,15 +45,15 @@ export class LoginComponent {
           const mobile = this.loginForm.get('mobileNumber')?.value;
           if (mobile === '9999999999') {
              this.authService.setRole('ADMIN');
-             alert('Test Login Successful as ADMIN');
+             this.toastService.showSuccess('Test Mode', 'Test Login Successful as ADMIN');
              this.router.navigate(['/']);
           } else if (mobile === '8888888888') {
              this.authService.setRole('SECTOR');
-             alert('Test Login Successful as SECTOR');
+             this.toastService.showSuccess('Test Mode', 'Test Login Successful as SECTOR');
              this.router.navigate(['/']);
           } else {
              const msg = err.error?.detail || 'Invalid credentials';
-             alert(`Login Failed: ${msg}`);
+             this.toastService.showError('Login Failed', msg);
           }
         }
       });

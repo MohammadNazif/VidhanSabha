@@ -11,8 +11,7 @@ namespace VidhanSabha.Domain.Entities.Common
     {
             private string _name;
 
-            private Tbl_Category() { }
-
+           
             public int Id { get; private set; }
             public string Name { get => _name; private set => _name = value; }
             public bool Status { get; private set; }

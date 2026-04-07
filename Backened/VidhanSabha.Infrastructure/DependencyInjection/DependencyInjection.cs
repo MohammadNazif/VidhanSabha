@@ -3,8 +3,10 @@ using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using VidhanSabha.Application.Common.Cast.Interfaces;
 using VidhanSabha.Application.Common.Category.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.Mandal.Interfaces;
+using VidhanSabha.Application.Pannels.Admin.Sector.Interface;
 using VidhanSabha.Application.Pannels.Auth.Commands.Login;
 using VidhanSabha.Application.Pannels.Auth.Interfaces;
 using VidhanSabha.Application.Pannels.Auth.Queries.GetMobileNumber;
@@ -28,7 +30,10 @@ namespace VidhanSabha.Infrastructure.DependencyInjection
 
             services.AddScoped<ILoginRepository, LoginRepository>();
             services.AddScoped<ICategoryRepository,Categories>();
+            services.AddScoped<ICastRepository, Cast>();
+            services.AddScoped<IVillageRepository,Village>();
             services.AddScoped<IMandalRepository, MandalRepository>();
+            services.AddScoped<ISectorRepository, SectorRepository>();
 
             return services;
         }

@@ -5,11 +5,11 @@ using System.Text;
 using System.Threading.Tasks;
 using MediatR;
 using VidhanSabha.Application.Exceptions;
-using VidhanSabha.Application.Pannels.Admin.Mandal.DTOs;
+using VidhanSabha.Application.Pannels.Admin.Mandal.DTOs.Create;
 using VidhanSabha.Application.Pannels.Admin.Mandal.Interfaces; // Add this using directive at the top
 using VidhanSabha.Domain.Entities.Admin; // Add this using directive at the top
 
-namespace VidhanSabha.Application.Pannels.Admin.Mandal.Commands
+namespace VidhanSabha.Application.Pannels.Admin.Mandal.Commands.Create
 {
     public class CreateMandalCommandHandler
          : IRequestHandler<CreateMandalCommand, MandalResponseDto>

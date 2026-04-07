@@ -7,7 +7,7 @@ using VidhanSabha.Domain.Entities.Common;
 
 namespace VidhanSabha.Application.Common.Category.Interfaces
 {
-    public interface  ICategoryRepository
+    public interface ICategoryRepository
     {
         Task<List<Tbl_Category>> GetAllAsync();
     }

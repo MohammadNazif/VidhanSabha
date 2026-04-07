@@ -14,6 +14,7 @@ import { Subscription, isObservable, of, Observable } from 'rxjs';
 })
 export class DynamicFormModalComponent implements OnInit, OnDestroy {
   @Input({ required: true }) config!: FormConfig;
+  @Input() initialData: any; // Add this
   @Output() close = new EventEmitter<void>();
   @Output() submitForm = new EventEmitter<FormResult>();
 
@@ -44,7 +45,10 @@ export class DynamicFormModalComponent implements OnInit, OnDestroy {
     const group: any = {};
 
     this.config.fields.forEach(field => {
-      group[field.id] = [field.defaultValue ?? '', field.validations || []];
+      const value = (this.initialData && this.initialData[field.id] !== undefined) 
+        ? this.initialData[field.id] 
+        : (field.defaultValue ?? '');
+      group[field.id] = [value, field.validations || []];
       this.fieldVisibility[field.id] = !field.visibleIf;
     });
 

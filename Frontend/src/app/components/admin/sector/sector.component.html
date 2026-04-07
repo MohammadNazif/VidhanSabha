@@ -21,11 +21,12 @@
             </div>
 
             <app-generic-modal-button 
+                #sectorModal
                 [config]="addSectorConfig" 
                 label="Add Sector" 
                 icon="+" 
                 variant="primary"
-                (formSubmit)="handleNewMember($event)">
+                (formSubmit)="handleFormSubmit($event)">
             </app-generic-modal-button>
         </div>
     </app-page-header>

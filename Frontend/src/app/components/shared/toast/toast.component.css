@@ -1,0 +1,136 @@
+.toast-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 10000;
+  pointer-events: none;
+}
+
+.toast-item {
+  pointer-events: auto;
+}
+
+.card {
+  width: 330px;
+  min-height: 80px;
+  border-radius: 8px;
+  box-sizing: border-box;
+  padding: 10px 15px;
+  background-color: #ffffff;
+  box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  gap: 15px;
+  transition: all 0.3s;
+}
+
+.wave {
+  position: absolute;
+  transform: rotate(90deg);
+  left: -31px;
+  top: 32px;
+  width: 80px;
+}
+
+.icon-container {
+  width: 35px;
+  height: 35px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  margin-left: 8px;
+  flex-shrink: 0;
+}
+
+.icon {
+  width: 17px;
+  height: 17px;
+}
+
+.message-text-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  flex-grow: 1;
+}
+
+.message-text,
+.sub-text {
+  margin: 0;
+  cursor: default;
+}
+
+.message-text {
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.sub-text {
+  font-size: 13px;
+  color: #555;
+  margin-top: 3px;
+}
+
+.cross-icon {
+  width: 18px;
+  height: 18px;
+  color: #555;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: color 0.2s;
+}
+.cross-icon:hover {
+  color: #333;
+}
+
+/* === MODIFIERS === */
+
+/* SUCCESS */
+.card.success .wave { fill: #bbf7d03a; }
+.card.success .icon-container { background-color: #dcfce748; }
+.card.success .icon { color: #16a34a; }
+.card.success .message-text { color: #16a34a; }
+
+/* ERROR */
+.card.error .wave { fill: #fecaca3a; }
+.card.error .icon-container { background-color: #fee2e248; }
+.card.error .icon { color: #dc2626; }
+.card.error .message-text { color: #dc2626; }
+
+/* WARNING */
+.card.warning .wave { fill: #ffa30d3a; }
+.card.warning .icon-container { background-color: #ffa30d48; }
+.card.warning .icon { color: #db970e; }
+.card.warning .message-text { color: #db970e; }
+
+
+@keyframes slideIn {
+  from {
+    transform: translateX(110%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOut {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(110%);
+    opacity: 0;
+  }
+}

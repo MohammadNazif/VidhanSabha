@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Validators } from '@angular/forms';
 import { GenericTableComponent } from '../../shared/generic-table/generic-table.component';
@@ -8,6 +8,8 @@ import { FormConfig, FormResult } from '../../shared/generic-modal-form/generic-
 
 import { PageHeaderComponent } from '../../shared/page-header/page-header.component';
 import { MandalService } from '../../../Services/mandal/mandal.service';
+import { ToastService } from '../../../Services/toast/toast.service';
+import { CrudHandlerService } from '../../../Services/common/crud-handler.service';
 
 
 @Component({
@@ -18,7 +20,13 @@ import { MandalService } from '../../../Services/mandal/mandal.service';
   styleUrl: './mandal.component.css'
 })
 export class MandalComponent implements OnInit {
-  constructor(private mandalService: MandalService) { }
+  @ViewChild('mandalModal') mandalModal!: GenericModalButtonComponent;
+
+  constructor(
+    private mandalService: MandalService, 
+    private toastService: ToastService,
+    private crudHandler: CrudHandlerService
+  ) { }
 
   ngOnInit() {
     this.loadMandals();
@@ -86,28 +94,45 @@ export class MandalComponent implements OnInit {
   ];
 
 
-  handleNewMember(result: FormResult) {
-    console.log('Form submitted:', result);
-    if (result.status) {
-      this.mandalService.createMandal(result.data).subscribe({
-        next: (response) => {
-          console.log('Mandal created successfully:', response);
-          alert('Mandal created successfully!');
-          this.loadMandals();
-        },
-        error: (err) => {
-          console.error('Error creating mandal:', err);
-          alert('Failed to create Mandal. Please try again.');
-        }
-      });
+
+
+  handleAction(event: any) {
+    const { action, row } = event;
+    console.log(`Action [${action.id}] triggered for:`, row);
+
+    if (action.id === 'delete') {
+      this.crudHandler.handleRequest(
+        this.mandalService.deleteMandal(row.id),
+        'Deleted',
+        'Mandal deleted successfully!',
+        () => this.loadMandals()
+      );
+    } else if (action.id === 'edit') {
+      this.mandalModal.openModal(row);
+    } else {
+      this.toastService.showWarning('Action Selected', `Action ${action.id} clicked for ${row.name || 'this item'}`);
     }
   }
 
-  handleAction(event: any) {
-    console.log('Action clicked:', event);
-    alert(`Action ${event.action.id} clicked for ${event.row.name}`);
-  }
+  handleFormSubmit(result: FormResult) {
+    if (!result.status) return;
 
+    const isUpdate = result.data.id || (this.mandalModal.initialData && this.mandalModal.initialData.id);
+    if (isUpdate && !result.data.id) {
+       result.data.id = this.mandalModal.initialData.id;
+    }
+
+    const request = isUpdate 
+      ? this.mandalService.updateMandal(result.data)
+      : this.mandalService.createMandal(result.data);
+
+    this.crudHandler.handleRequest(
+      request,
+      isUpdate ? 'Updated' : 'Success',
+      `Mandal ${isUpdate ? 'updated' : 'created'} successfully!`,
+      () => this.loadMandals()
+    );
+  }
   handleSelection(selected: any[]) {
     console.log('Selected rows:', selected);
   }
@@ -115,6 +140,6 @@ export class MandalComponent implements OnInit {
   handleExport(format: string) {
     if (!format) return;
     console.log(`Generating ${format.toUpperCase()} export...`);
-    alert(`Successfully generated ${format.toUpperCase()} export!`);
+    this.toastService.showSuccess('Export Started', `Successfully generated ${format.toUpperCase()} export!`);
   }
 }

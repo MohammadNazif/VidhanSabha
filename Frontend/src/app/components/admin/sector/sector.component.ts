@@ -7,6 +7,10 @@ import { GenericTableComponent } from '../../shared/generic-table/generic-table.
 import { GenericModalButtonComponent } from '../../shared/generic-modal-form/generic-modal-button.component';
 
 import { PageHeaderComponent } from '../../shared/page-header/page-header.component';
+import { ToastService } from '../../../Services/toast/toast.service';
+import { SectorService } from '../../../Services/sector/sector.service';
+import { CrudHandlerService } from '../../../Services/common/crud-handler.service';
+import { ViewChild, OnInit } from '@angular/core';
 
 @Component({
   selector: 'app-sector',
@@ -15,7 +19,28 @@ import { PageHeaderComponent } from '../../shared/page-header/page-header.compon
   templateUrl: './sector.component.html',
   styleUrl: './sector.component.css'
 })
-export class SectorComponent {
+export class SectorComponent implements OnInit {
+  @ViewChild('sectorModal') sectorModal!: GenericModalButtonComponent;
+
+  constructor(
+    private sectorService: SectorService,
+    private crudHandler: CrudHandlerService,
+    private toastService: ToastService
+  ) { }
+
+  ngOnInit() {
+    this.loadSectors();
+  }
+
+  loadSectors() {
+    this.sectorService.getAllSectors().subscribe({
+      next: (response) => {
+        this.membersData = response.data || response;
+      },
+      error: (err) => console.error('Error loading sectors:', err)
+    });
+  }
+
 
   addSectorConfig: FormConfig = {
     title: 'Register New Sector',
@@ -26,14 +51,19 @@ export class SectorComponent {
         name: 'Mandal',
         label: 'Mandal',
         type: 'select',
-        options: [
-          { label: 'Select Mandal', value: '' },
-          { label: 'Mandawar', value: 'Mandawar' },
-          { label: 'Mohammadpur Deomal', value: 'Mohammadpur Deomal' },
-          { label: 'Jhalu', value: 'Jhalu' },
-          { label: 'Bijnor City', value: 'Bijnor City' },
-          { label: 'Adampur', value: 'Adampur' },
-        ],
+        placeholder: '--Select Mandal--',
+        apiUrl: '/mandal/getall',
+        apiMapper: (data: any) => {
+          if (Array.isArray(data?.data)) {
+            return data.data.map((item: any) => {
+              return {
+                value: item.id,
+                label: item.name
+              }
+            })
+          }
+          return []
+        },
         validations: [Validators.required],
         gridColSpan: 6
       },
@@ -42,14 +72,20 @@ export class SectorComponent {
         name: 'Village',
         label: 'Village',
         type: 'select',
-        options: [
-          { label: 'Select Village', value: '' },
-          { label: 'Mandawar', value: 'Mandawar' },
-          { label: 'Mohammadpur Deomal', value: 'Mohammadpur Deomal' },
-          { label: 'Jhalu', value: 'Jhalu' },
-          { label: 'Bijnor City', value: 'Bijnor City' },
-          { label: 'Adampur', value: 'Adampur' },
-        ],
+        dependsOn: 'MandalId',
+        placeholder: '--Select Village--',
+        apiUrl: (mandalId: any) => `common/village?id=${mandalId}`,
+        apiMapper: (data: any) => {
+          if (Array.isArray(data?.data)) {
+            return data.data.map((item: any) => {
+              return {
+                value: item.id,
+                label: item.name
+              }
+            })
+          }
+          return []
+        },
         validations: [Validators.required],
         gridColSpan: 6
       },
@@ -129,7 +165,7 @@ export class SectorComponent {
         type: 'select',
         placeholder: '-- Select Caste --',
         dependsOn: 'category',
-        apiUrl: (catId: any) => `/common/subcaste?categoryId=${catId}`,
+        apiUrl: (catId: any) => `/common/cast?id=${catId}`,
         apiMapper: (data: any) => {
           if (Array.isArray(data?.data)) {
             return data.data.map((item: any) => ({
@@ -219,23 +255,40 @@ export class SectorComponent {
 
 
 
-  handleNewMember(result: FormResult) {
-    console.log('New Sector Data:', result.data);
-    const newId = this.membersData.length + 1;
-    const newSector = {
-      id: newId,
-      name: result.data.SectorName,
-      mandal: result.data.MandalId,
-      village: result.data.VillageId,
-      sanyojak: result.data['Sector Sanyojak']
-    };
-    this.membersData = [newSector, ...this.membersData];
-    alert('Sector registered successfully!');
+  handleFormSubmit(result: FormResult) {
+    if (!result.status) return;
+
+    const isUpdate = result.data.id || (this.sectorModal.initialData && this.sectorModal.initialData.id);
+    if (isUpdate && !result.data.id) {
+      result.data.id = this.sectorModal.initialData.id;
+    }
+
+    const request = isUpdate
+      ? this.sectorService.updateSector(result.data)
+      : this.sectorService.createSector(result.data);
+
+    this.crudHandler.handleRequest(
+      request,
+      isUpdate ? 'Updated' : 'Registered',
+      `Sector ${isUpdate ? 'updated' : 'registered'} successfully!`,
+      () => this.loadSectors()
+    );
   }
 
   handleAction(event: any) {
-    console.log('Action clicked:', event);
-    alert(`Action ${event.action.id} clicked for ${event.row.name}`);
+    const { action, row } = event;
+    if (action.id === 'delete') {
+      this.crudHandler.handleRequest(
+        this.sectorService.deleteSector(row.id),
+        'Deleted',
+        'Sector deleted successfully!',
+        () => this.loadSectors()
+      );
+    } else if (action.id === 'edit') {
+      this.sectorModal.openModal(row);
+    } else {
+      this.toastService.showWarning('Action Selected', `Action ${action.id} clicked for ${row.name || 'this item'}`);
+    }
   }
 
   handleSelection(selected: any[]) {
@@ -245,7 +298,7 @@ export class SectorComponent {
   handleExport(format: string) {
     if (!format) return;
     console.log(`Generating ${format.toUpperCase()} export...`);
-    alert(`Successfully generated ${format.toUpperCase()} export!`);
+    this.toastService.showSuccess('Export Started', `Successfully generated ${format.toUpperCase()} export!`);
   }
 
 }
