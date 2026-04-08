@@ -22,14 +22,18 @@ namespace VidhanSabha.Application.Pannels.Admin.Sector.Queries
             return sectors.Select(s => new SectorResponseDto
             {
                 Id = s.Id,
+                MandalId = s.MandalId,
                 MandalName = s.Mandal.Name,
+                VillageId = s.VillageId,
                 VillageName = s.Village.VillageName,
                 SectorName = s.SectorName,
                 IsSectorSanyojak = s.IsSectorSanyojak,
                 InchargeName = s.InchargeName,
                 Age = s.Age,
                 FatherName = s.FatherName,
+                CategoryId = s.CategoryId,
                 CategoryName = s.Category?.Name,
+                CastId = s.CastId,
                 CastName = s.Cast?.CastName,
                 EducationLevel = s.EducationLevel,
                 PhoneNumber = s.PhoneNumber,

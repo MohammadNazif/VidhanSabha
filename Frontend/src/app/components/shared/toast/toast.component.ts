@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ToastService } from '../../../Services/toast/toast.service';
+import { ToastService } from '../../../Services/common/toast/toast.service';
 import { trigger, transition, style, animate } from '@angular/animations';
 
 @Component({

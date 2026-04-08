@@ -97,6 +97,23 @@ public static class AdminEndpoints
         .Produces<List<SectorResponseDto>>(200);
 
 
+        sector.MapPost("/delete", async (int id, IMediator mediator) =>
+        {
+            bool result = await mediator.Send(new DeleteSectorCommand(id));
+            var response = Results.Ok(ApiResponse<bool>.Ok(result, "Sector Deleted Successfully"));
+            return Results.Ok(response);
+        })
+        .WithName("DeleteSector")
+        .Produces<bool>(200);
+
+        sector.MapGet("/getByMandalId", async (int id, IMediator mediator) =>
+        {
+            var result = await mediator.Send(new GetSectorByMandalIdQuery(id));
+            return Results.Ok(ApiResponse<List<SectorByMAndalResponseDto>>.Ok(result));
+        })
+            .WithName("GetSectorByMandal")
+            .Produces<List<SectorByMAndalResponseDto>>(200);
+
         //sector.MapPost("/delete", async (int id, IMediator mediator) =>
         //{
         //    var result = await mediator.Send(new DeleteSectorCommand(id));

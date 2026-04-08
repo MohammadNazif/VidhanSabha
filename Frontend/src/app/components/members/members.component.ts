@@ -5,7 +5,7 @@ import { GenericTableComponent } from '../shared/generic-table/generic-table.com
 import { TableColumn, TableConfig, TableAction, BadgeVariant } from '../shared/generic-table/generic-table.types';
 import { GenericModalButtonComponent } from '../shared/generic-modal-form/generic-modal-button.component';
 import { FormConfig, FormResult } from '../shared/generic-modal-form/generic-form.types';
-import { ToastService } from '../../Services/toast/toast.service';
+import { ToastService } from '../../Services/common/toast/toast.service';
 
 @Component({
   selector: 'app-members',

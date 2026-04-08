@@ -4,7 +4,7 @@ import { SidebarComponent } from './components/sidebar/sidebar.component';
 import { CommonModule } from '@angular/common';
 import { LoaderComponent } from './components/shared/loader/loader.component';
 import { ToastComponent } from './components/shared/toast/toast.component';
-import { LoaderService } from './Services/loader/loader.service';
+import { LoaderService } from './Services/common/loader/loader.service';
 
 @Component({
   selector: 'app-root',
@@ -19,7 +19,7 @@ export class AppComponent implements OnInit {
   isLoginPage = false;
   isMobile = false;
 
-  constructor(private router: Router, public loaderService: LoaderService) {}
+  constructor(private router: Router, public loaderService: LoaderService) { }
 
   ngOnInit() {
     this.router.events.subscribe(event => {

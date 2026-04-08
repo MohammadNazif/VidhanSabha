@@ -7,8 +7,8 @@ import { GenericModalButtonComponent } from '../../shared/generic-modal-form/gen
 import { FormConfig, FormResult } from '../../shared/generic-modal-form/generic-form.types';
 
 import { PageHeaderComponent } from '../../shared/page-header/page-header.component';
-import { MandalService } from '../../../Services/mandal/mandal.service';
-import { ToastService } from '../../../Services/toast/toast.service';
+import { MandalService } from '../../../Services/Admin/mandal/mandal.service';
+import { ToastService } from '../../../Services/common/toast/toast.service';
 import { CrudHandlerService } from '../../../Services/common/crud-handler.service';
 
 
@@ -23,7 +23,7 @@ export class MandalComponent implements OnInit {
   @ViewChild('mandalModal') mandalModal!: GenericModalButtonComponent;
 
   constructor(
-    private mandalService: MandalService, 
+    private mandalService: MandalService,
     private toastService: ToastService,
     private crudHandler: CrudHandlerService
   ) { }
@@ -119,10 +119,10 @@ export class MandalComponent implements OnInit {
 
     const isUpdate = result.data.id || (this.mandalModal.initialData && this.mandalModal.initialData.id);
     if (isUpdate && !result.data.id) {
-       result.data.id = this.mandalModal.initialData.id;
+      result.data.id = this.mandalModal.initialData.id;
     }
 
-    const request = isUpdate 
+    const request = isUpdate
       ? this.mandalService.updateMandal(result.data)
       : this.mandalService.createMandal(result.data);
 

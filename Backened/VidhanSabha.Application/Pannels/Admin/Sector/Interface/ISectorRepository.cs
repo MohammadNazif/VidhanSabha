@@ -10,7 +10,9 @@ namespace VidhanSabha.Application.Pannels.Admin.Sector.Interface
     public interface ISectorRepository
     {
         Task<List<Tbl_Sector>> GetAllAsync();
-        Task<Tbl_Sector?> GetByIdAsync(int id);
+        Task<List<Tbl_Sector>?> GetByMandalIdAsync(int id);
+
+        Task<Tbl_Sector> GetByIdAsync(int id);
         Task AddAsync(Tbl_Sector sector);
         Task UpdateAsync(Tbl_Sector sector);
         Task DeleteAsync(Tbl_Sector sector);

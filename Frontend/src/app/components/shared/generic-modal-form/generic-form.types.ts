@@ -11,7 +11,8 @@ export type FieldType =
   | 'file'
   | 'textarea'
   | 'checkbox'
-  | 'radio';
+  | 'radio'
+  | 'selection-table';
 
 export interface DropdownOption {
   value: any;
@@ -40,6 +41,7 @@ export interface FormField {
   apiMapper?: (data: any, formValues?: any) => DropdownOption[];
   dependsOn?: string; // ID of the field this field depends on
   optionsMap?: { [key: string]: DropdownOption[] }; // Map of parent values to child options
+  multiple?: boolean; // Whether to allow multiple selections
 }
 
 export interface FormConfig {

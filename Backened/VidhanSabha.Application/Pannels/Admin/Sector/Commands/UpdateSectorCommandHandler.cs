@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using MediatR;
 using VidhanSabha.Application.Pannels.Admin.Sector.DTOs;
 using VidhanSabha.Application.Pannels.Admin.Sector.Interface;
+using VidhanSabha.Domain.Entities.Admin;
 
 namespace VidhanSabha.Application.Pannels.Admin.Sector.Commands
 {
@@ -26,7 +27,7 @@ namespace VidhanSabha.Application.Pannels.Admin.Sector.Commands
 
             var sector = await _sectorRepository.GetByIdAsync(dto.Id)
                 ?? throw new KeyNotFoundException($"Sector with Id {dto.Id} not found.");
-
+      
             if (!dto.IsSectorSanyojak)
             {
                 sector.UpdateBasic(dto.MandalId, dto.VillageId, dto.SectorName);

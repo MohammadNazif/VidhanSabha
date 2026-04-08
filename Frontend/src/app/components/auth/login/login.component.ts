@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
 import { AuthServiceService } from '../../../Services/Auth/auth.service';
-import { ToastService } from '../../../Services/toast/toast.service';
+import { ToastService } from '../../../Services/common/toast/toast.service';
 
 import { CommonModule } from '@angular/common';
 
@@ -36,7 +36,7 @@ export class LoginComponent {
       .subscribe({
         next: (res: any) => {
           this.toastService.showSuccess('Success', 'Login Successful!');
-          const role = res.role || 'ADMIN'; 
+          const role = res.role || 'ADMIN';
           this.authService.setRole(role);
           this.router.navigate(['/']);
         },
@@ -44,16 +44,16 @@ export class LoginComponent {
           // Check for mock login for testing purposes
           const mobile = this.loginForm.get('mobileNumber')?.value;
           if (mobile === '9999999999') {
-             this.authService.setRole('ADMIN');
-             this.toastService.showSuccess('Test Mode', 'Test Login Successful as ADMIN');
-             this.router.navigate(['/']);
+            this.authService.setRole('ADMIN');
+            this.toastService.showSuccess('Test Mode', 'Test Login Successful as ADMIN');
+            this.router.navigate(['/']);
           } else if (mobile === '8888888888') {
-             this.authService.setRole('SECTOR');
-             this.toastService.showSuccess('Test Mode', 'Test Login Successful as SECTOR');
-             this.router.navigate(['/']);
+            this.authService.setRole('SECTOR');
+            this.toastService.showSuccess('Test Mode', 'Test Login Successful as SECTOR');
+            this.router.navigate(['/']);
           } else {
-             const msg = err.error?.detail || 'Invalid credentials';
-             this.toastService.showError('Login Failed', msg);
+            const msg = err.error?.detail || 'Invalid credentials';
+            this.toastService.showError('Login Failed', msg);
           }
         }
       });

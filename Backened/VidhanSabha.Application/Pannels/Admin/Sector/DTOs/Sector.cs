@@ -30,6 +30,14 @@ namespace VidhanSabha.Application.Pannels.Admin.Sector.DTOs
         public int Id { get; set; }
     }
 
+
+    public class SectorByMAndalResponseDto
+    {
+        public int MandalId { get; set; }
+        public int SectorId { get; set; }
+        public string SectorName { get; set; }
+
+    }
     public class SectorResponseDto
     {
         public int Id { get; set; }

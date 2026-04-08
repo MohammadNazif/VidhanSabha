@@ -1,109 +1,214 @@
-<div class="fixed inset-0 z-[9999] overflow-y-auto bg-black/40 backdrop-blur-sm animate-fade-in"
-     (click)="onCancel()"
->
+<div class="fixed inset-0 z-[999] overflow-y-auto bg-black/60 backdrop-blur-md animate-fade-in" (click)="onCancel()">
   <div class="flex min-h-full items-center justify-center p-4">
-    <div class="bg-white/95 backdrop-blur-xl w-full max-w-3xl rounded-2xl shadow-2xl overflow-hidden animate-slide-up"
-         (click)="$event.stopPropagation()"
-    >
-      <!-- Modal Header -->
-      <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-blue-50/50 to-indigo-50/50">
-        <h3 class="text-xl font-bold text-gray-800 tracking-tight">{{ config.title }}</h3>
-        <button (click)="onCancel()" 
-                class="p-2 hover:bg-white/80 rounded-full transition-all group duration-200"
-        >
-          <span class="text-gray-400 group-hover:text-red-500 font-bold">×</span>
+    <div
+      class="bg-white w-full max-w-3xl rounded-2xl shadow-2xl overflow-hidden animate-slide-up border border-white/20"
+      (click)="$event.stopPropagation()">
+      <!-- Modal Header - Lighter Gradient -->
+      <div
+        class="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-blue-50 via-indigo-50 to-blue-50">
+        <h3
+          class="text-xl font-bold bg-gradient-to-r from-blue-700 to-indigo-700 bg-clip-text text-transparent tracking-tight">
+          {{ config.title }}</h3>
+        <button (click)="onCancel()" class="p-2 hover:bg-white/80 rounded-full transition-all group duration-200">
+          <span class="text-gray-400 group-hover:text-red-500 font-bold text-xl">×</span>
         </button>
       </div>
 
       <!-- Modal Body -->
-      <div class="p-6 max-h-[75vh] overflow-y-auto custom-scrollbar">
-      <form [formGroup]="form" class="grid grid-cols-1 md:grid-cols-12 gap-x-6 gap-y-5">
-        <ng-container *ngFor="let field of config.fields">
-          <div [ngClass]="getFieldColumnClass(field)"
-               *ngIf="fieldVisibility[field.id]"
-               class="flex flex-col gap-1.5 transition-all duration-300 animate-fade-in"
-          >
-            <label [for]="field.id" 
-                   class="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1"
-            >
-              {{ field.label }}
-              <span *ngIf="field.validations?.length" class="text-red-500 ml-0.5">*</span>
-            </label>
+      <div class="relative overflow-visible bg-gradient-to-b from-gray-50 to-white">
+        <div #scrollContainer class="max-h-[75vh] overflow-y-auto custom-scrollbar">
+          <div class="p-6">
+            <form [formGroup]="form" class="grid grid-cols-1 md:grid-cols-12 gap-x-6 gap-y-5">
+              <ng-container *ngFor="let field of config.fields">
+                <div [ngClass]="getFieldColumnClass(field)" *ngIf="fieldVisibility[field.id]"
+                  class="flex flex-col gap-1.5 transition-all duration-300 animate-fade-in">
+                  <label [for]="field.id" class="text-xs font-bold text-gray-600 uppercase tracking-wider ml-1">
+                    {{ field.label }}
+                    <span *ngIf="field.validations?.length" class="text-red-500 ml-0.5">*</span>
+                  </label>
 
-            <!-- Standard Input Types -->
-            <input *ngIf="['text', 'number', 'email', 'password', 'date'].includes(field.type)"
-                   [type]="field.type"
-                   [id]="field.id"
-                   [formControlName]="field.id"
-                   [placeholder]="field.placeholder || ''"
-                   class="w-full px-4 py-2.5 bg-gray-50 hover:bg-white border border-gray-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all duration-200 text-sm font-medium text-gray-700 shadow-sm"
-                   [class.border-red-400]="form.get(field.id)?.touched && form.get(field.id)?.invalid"
-            />
+                  <!-- Standard Input Types -->
+                  <input *ngIf="['text', 'number', 'email', 'password', 'date'].includes(field.type)"
+                    [type]="field.type" [id]="field.id" [formControlName]="field.id"
+                    [placeholder]="field.placeholder || ''"
+                    class="w-full px-4 py-2.5 bg-white border-2 border-gray-200 rounded-xl focus:border-blue-400 focus:ring-4 focus:ring-blue-400/20 outline-none transition-all duration-200 text-sm font-medium text-gray-700 shadow-sm hover:border-gray-300"
+                    [class.border-red-400]="form.get(field.id)?.touched && form.get(field.id)?.invalid" />
 
-            <!-- Select Dropdown -->
-            <select *ngIf="field.type === 'select'"
-                    [id]="field.id"
-                    [formControlName]="field.id"
-                    class="w-full px-4 py-2.5 bg-gray-50 hover:bg-white border border-gray-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all duration-200 text-sm font-medium text-gray-700 shadow-sm appearance-none bg-[url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%2364748b\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'%3e%3cpolyline points=\'6 9 12 15 18 9\'%3e%3c/polyline%3e%3c/svg%3e')] bg-no-repeat bg-[right_12px_center] bg-[length:14px]"
-                    [class.border-red-400]="form.get(field.id)?.touched && form.get(field.id)?.invalid"
-            >
-              <option value="" disabled selected>{{ field.placeholder || 'Select ' + field.label }}</option>
-              <option *ngFor="let option of fieldOptions[field.id] || []" [value]="option.value">
-                {{ option.label }}
-              </option>
-            </select>
+                  <!-- Select Dropdown -->
+                  <ng-container *ngIf="field.type === 'select'">
+                    <!-- Single Select -->
+                    <select *ngIf="!field.multiple" [id]="field.id" [formControlName]="field.id"
+                      class="w-full px-4 py-2.5 bg-white border-2 border-gray-200 rounded-xl focus:border-blue-400 focus:ring-4 focus:ring-blue-400/20 outline-none transition-all duration-200 text-sm font-medium text-gray-700 shadow-sm hover:border-gray-300 appearance-none bg-[url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%2364748b\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'%3e%3cpolyline points=\'6 9 12 15 18 9\'%3e%3c/polyline%3e%3c/svg%3e')] bg-no-repeat bg-[right_12px_center] bg-[length:14px]"
+                      [class.border-red-400]="form.get(field.id)?.touched && form.get(field.id)?.invalid">
+                      <option value="" disabled selected>{{ field.placeholder || 'Select ' + field.label }}</option>
+                      <option *ngFor="let option of fieldOptions[field.id] || []" [value]="option.value">
+                        {{ option.label }}
+                      </option>
+                    </select>
 
-            <!-- Textarea -->
-            <textarea *ngIf="field.type === 'textarea'"
-                      [id]="field.id"
-                      [formControlName]="field.id"
-                      [placeholder]="field.placeholder || ''"
-                      rows="3"
-                      class="w-full px-4 py-2.5 bg-gray-50 hover:bg-white border border-gray-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all duration-200 text-sm font-medium text-gray-700 shadow-sm resize-none"
-                      [class.border-red-400]="form.get(field.id)?.touched && form.get(field.id)?.invalid"
-            ></textarea>
+                    <!-- Multi Select Custom UI -->
+                    <div *ngIf="field.multiple" class="relative">
+                      <div (click)="toggleDropdown(field.id, $event)"
+                        class="w-full px-4 py-2.5 bg-white border-2 border-gray-200 rounded-xl focus-within:border-blue-400 focus-within:ring-4 focus-within:ring-blue-400/20 transition-all duration-200 text-sm font-medium text-gray-700 shadow-sm min-h-[42px] flex items-center justify-between cursor-pointer hover:border-gray-300"
+                        [class.border-red-400]="form.get(field.id)?.touched && form.get(field.id)?.invalid">
+                        <div class="flex flex-wrap gap-1 items-center">
+                          <span class="text-gray-400 font-normal" *ngIf="!form.get(field.id)?.value?.length">
+                            {{ field.placeholder || 'Select ' + field.label }}
+                          </span>
+                          <div *ngFor="let val of form.get(field.id)?.value"
+                            class="bg-gradient-to-r from-blue-400 to-blue-500 text-white text-[10px] px-2 py-0.5 rounded-md flex items-center gap-1 font-bold animate-fade-in shadow-sm">
+                            {{ getSelectedLabels(field.id).split(', ')[form.get(field.id)?.value.indexOf(val)] }}
+                            <span (click)="toggleMultiSelectOption(field.id, val); $event.stopPropagation()"
+                              class="hover:text-red-200 cursor-pointer ml-0.5">×</span>
+                          </div>
+                        </div>
+                        <span class="text-gray-400 text-xs transition-transform duration-200"
+                          [class.rotate-180]="activeMultiDropdown === field.id">▼</span>
+                      </div>
+                    </div>
+                  </ng-container>
 
-            <!-- Profile/File Input -->
-            <div *ngIf="field.type === 'file'" class="flex items-center gap-4 p-4 bg-gray-50 rounded-xl border border-dashed border-gray-300 hover:border-blue-400 hover:bg-blue-50/10 transition-all cursor-pointer relative">
-              <div class="h-16 w-16 bg-white border border-gray-200 rounded-full flex items-center justify-center overflow-hidden shadow-sm flex-shrink-0">
-                <img *ngIf="previews[field.id]" [src]="previews[field.id]" class="h-full w-full object-cover" />
-                <span *ngIf="!previews[field.id]" class="text-2xl text-gray-300 font-bold">👤</span>
-              </div>
-              <div class="flex-1">
-                <span class="block text-sm font-bold text-gray-700">Profile Photo</span>
-                <span class="block text-xs text-gray-500">{{ fileData[field.id] ? fileData[field.id].name : 'Click or drag to upload' }}</span>
-              </div>
-              <input type="file" 
-                     (change)="onFileChange($event, field.id)"
-                     accept="image/*"
-                     class="absolute inset-0 opacity-0 cursor-pointer"
-              />
-            </div>
+                  <!-- Textarea -->
+                  <textarea *ngIf="field.type === 'textarea'" [id]="field.id" [formControlName]="field.id"
+                    [placeholder]="field.placeholder || ''" rows="3"
+                    class="w-full px-4 py-2.5 bg-white border-2 border-gray-200 rounded-xl focus:border-blue-400 focus:ring-4 focus:ring-blue-400/20 outline-none transition-all duration-200 text-sm font-medium text-gray-700 shadow-sm resize-none hover:border-gray-300"
+                    [class.border-red-400]="form.get(field.id)?.touched && form.get(field.id)?.invalid"></textarea>
 
-            <!-- Error Message -->
-            <span *ngIf="form.get(field.id)?.touched && form.get(field.id)?.invalid" 
-                  class="text-[10px] text-red-500 font-bold uppercase tracking-wider ml-1 mt-0.5"
-            >
-              This field is required
-            </span>
+                  <!-- Profile/File Input -->
+                  <div *ngIf="field.type === 'file'"
+                    class="flex items-center gap-4 p-4 bg-gradient-to-br from-gray-50 to-white rounded-xl border-2 border-dashed border-gray-300 hover:border-blue-400 hover:bg-blue-50/20 transition-all cursor-pointer relative">
+                    <div
+                      class="h-16 w-16 bg-gradient-to-br from-blue-100 to-indigo-100 border-2 border-white rounded-full flex items-center justify-center overflow-hidden shadow-md flex-shrink-0">
+                      <img *ngIf="previews[field.id]" [src]="previews[field.id]" class="h-full w-full object-cover" />
+                      <span *ngIf="!previews[field.id]" class="text-2xl text-blue-400 font-bold">👤</span>
+                    </div>
+                    <div class="flex-1">
+                      <span class="block text-sm font-bold text-gray-700">Profile Photo</span>
+                      <span class="block text-xs text-gray-500">{{ fileData[field.id] ? fileData[field.id].name : 'Click
+                        or drag to upload' }}</span>
+                    </div>
+                    <input type="file" (change)="onFileChange($event, field.id)" accept="image/*"
+                      class="absolute inset-0 opacity-0 cursor-pointer" />
+                  </div>
+
+                  <!-- Selection Table (Premium Redesign) -->
+                  <div *ngIf="field.type === 'selection-table' && form.get(field.id)?.value?.length"
+                    class="mt-3 overflow-hidden border-2 border-gray-200 rounded-xl bg-white shadow-sm">
+
+                    <!-- Header -->
+                    <div
+                      class="px-4 py-2 border-b border-gray-200 bg-gradient-to-r from-blue-50 via-indigo-50 to-blue-50 flex items-center justify-between">
+                      <span class="text-[9px] font-black text-blue-700 uppercase tracking-wider">Village Details</span>
+                      <span
+                        class="text-[9px] font-bold px-2 py-0.5 rounded-md bg-gradient-to-r from-blue-400 to-blue-500 text-white shadow-sm">
+                        {{ form.get(field.id)?.value?.length }} Selected
+                      </span>
+                    </div>
+
+                    <!-- Table -->
+                    <table class="w-full text-left text-sm">
+                      <thead>
+                        <tr class="bg-gray-50 border-b border-gray-200">
+                          <th class="px-4 py-2 text-[9px] font-bold text-gray-600 uppercase w-12">S.No</th>
+                          <th class="px-4 py-2 text-[9px] font-bold text-gray-600 uppercase">Village Name</th>
+                          <th class="px-4 py-2 text-[9px] font-bold text-gray-600 uppercase text-right w-28">Anshik?
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody class="divide-y divide-gray-100">
+                        <tr *ngFor="let row of form.get(field.id)?.value; let i = index"
+                          class="hover:bg-blue-50/30 transition-colors duration-150">
+
+                          <!-- S.No -->
+                          <td class="px-4 py-2">
+                            <span
+                              class="inline-flex items-center justify-center w-5 h-5 rounded-md bg-gray-100 text-[9px] font-bold text-gray-600">
+                              {{ i + 1 }}
+                            </span>
+                          </td>
+
+                          <!-- Village Name -->
+                          <td class="px-4 py-2">
+                            <span class="text-xs font-semibold text-gray-800">{{ row.name }}</span>
+                          </td>
+
+                          <!-- Anshik Toggle -->
+                          <td class="px-4 py-2 text-right">
+                            <div class="inline-flex p-0.5 bg-gray-100 rounded-lg gap-0.5 shadow-inner">
+                              <button type="button" (click)="setTableCellValue(field.id, row.id, 'anshik', 'Yes')"
+                                class="px-3 py-1 text-[9px] font-bold uppercase rounded-md transition-all duration-150"
+                                [class.bg-gradient-to-r]="row.anshik === 'Yes'"
+                                [class.from-blue-400]="row.anshik === 'Yes'" [class.to-blue-500]="row.anshik === 'Yes'"
+                                [class.shadow-sm]="row.anshik === 'Yes'" [class.text-white]="row.anshik === 'Yes'"
+                                [class.bg-white]="row.anshik !== 'Yes'" [class.text-blue-600]="row.anshik !== 'Yes'"
+                                [class.border]="row.anshik !== 'Yes'" [class.border-gray-200]="row.anshik !== 'Yes'">
+                                Yes
+                              </button>
+                              <button type="button" (click)="setTableCellValue(field.id, row.id, 'anshik', 'No')"
+                                class="px-3 py-1 text-[9px] font-bold uppercase rounded-md transition-all duration-150"
+                                [class.bg-gradient-to-r]="row.anshik === 'No'"
+                                [class.from-red-400]="row.anshik === 'No'" [class.to-red-500]="row.anshik === 'No'"
+                                [class.shadow-sm]="row.anshik === 'No'" [class.text-white]="row.anshik === 'No'"
+                                [class.bg-white]="row.anshik !== 'No'" [class.text-red-600]="row.anshik !== 'No'"
+                                [class.border]="row.anshik !== 'No'" [class.border-gray-200]="row.anshik !== 'No'">
+                                No
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <!-- Error Message -->
+                  <span *ngIf="form.get(field.id)?.touched && form.get(field.id)?.invalid"
+                    class="text-[10px] text-red-500 font-bold uppercase tracking-wider ml-1 mt-0.5">
+                    This field is required
+                  </span>
+                </div>
+              </ng-container>
+            </form>
           </div>
-        </ng-container>
-      </form>
-    </div>
+        </div>
 
-    <!-- Modal Footer -->
-    <div class="px-6 py-4 bg-gray-50/80 border-t border-gray-100 flex items-center justify-end gap-3 glass-footer">
-      <button (click)="onCancel()"
-              class="px-5 py-2.5 text-sm font-bold text-gray-600 hover:text-gray-800 hover:bg-white rounded-xl transition-all duration-200"
-      >
-        {{ config.cancelLabel || 'Cancel' }}
-      </button>
-      <button (click)="onSubmit()"
-              [disabled]="form.invalid"
-              class="px-8 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:shadow-lg hover:shadow-blue-500/30 text-white text-sm font-bold rounded-xl transition-all duration-200 disabled:opacity-50 disabled:shadow-none active:scale-[0.98]"
-      >
-        {{ config.submitLabel }}
-      </button>
+        <!-- Modal Footer -->
+        <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex items-center justify-end gap-3">
+          <button (click)="onCancel()"
+            class="px-5 py-2.5 text-sm font-bold text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-xl transition-all duration-200">
+            {{ config.cancelLabel || 'Cancel' }}
+          </button>
+          <button (click)="onSubmit()" [disabled]="form.invalid"
+            class="px-8 py-2.5 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 shadow-lg shadow-blue-500/25 text-white text-sm font-bold rounded-xl transition-all duration-200 disabled:opacity-50 disabled:shadow-none active:scale-[0.98]">
+            {{ config.submitLabel }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Dropdown Menu - Rendered outside the scroll container but inside modal -->
+<div *ngIf="activeMultiDropdown" class="fixed z-[10000]" [style.top.px]="dropdownPosition.top"
+  [style.left.px]="dropdownPosition.left" [style.min-width.px]="dropdownPosition.width">
+  <div class="bg-white border-2 border-gray-200 rounded-xl shadow-2xl p-2 max-h-60 overflow-y-auto custom-scrollbar"
+    (click)="$event.stopPropagation()">
+    <div *ngFor="let option of fieldOptions[activeMultiDropdown] || []"
+      (click)="toggleMultiSelectOption(activeMultiDropdown, option.value)"
+      class="flex items-center gap-3 px-3 py-2 hover:bg-blue-50 rounded-lg cursor-pointer transition-colors group">
+      <div
+        class="w-4 h-4 border-2 border-gray-300 rounded flex items-center justify-center transition-all group-hover:border-blue-400"
+        [class.bg-gradient-to-r]="isOptionSelected(activeMultiDropdown, option.value)"
+        [class.from-blue-400]="isOptionSelected(activeMultiDropdown, option.value)"
+        [class.to-blue-500]="isOptionSelected(activeMultiDropdown, option.value)"
+        [class.border-blue-400]="isOptionSelected(activeMultiDropdown, option.value)">
+        <span *ngIf="isOptionSelected(activeMultiDropdown, option.value)" class="text-[10px] text-white">✓</span>
+      </div>
+      <span class="text-sm text-gray-700 font-medium"
+        [class.text-blue-700]="isOptionSelected(activeMultiDropdown, option.value)">{{
+        option.label }}</span>
+    </div>
+    <div *ngIf="!(fieldOptions[activeMultiDropdown] || []).length" class="p-4 text-center text-xs text-gray-700 italic">
+      No options available
     </div>
   </div>
 </div>

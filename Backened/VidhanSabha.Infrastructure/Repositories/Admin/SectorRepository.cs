@@ -31,7 +31,15 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
                 .Include(s => s.Category)
                 .Include(s => s.Cast)
                 .FirstOrDefaultAsync(s => s.Id == id && s.Status);
-
+        public async Task<List<Tbl_Sector>?> GetByMandalIdAsync(int id)
+      => await _context.Tbl_Sector
+          .Where(s => s.MandalId == id && s.Status)
+          .Include(s => s.Mandal)
+          .Include(s => s.Village)
+          .Include(s => s.Category)
+          .Include(s => s.Cast)
+            .ToListAsync();
+        
         public async Task AddAsync(Tbl_Sector sector)
         {
             await _context.Tbl_Sector.AddAsync(sector);

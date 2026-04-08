@@ -1,14 +1,14 @@
 import { Component } from '@angular/core';
 import { TableAction, TableColumn, TableConfig } from '../../shared/generic-table/generic-table.types';
 import { Validators } from '@angular/forms';
-import { FormConfig, FormResult } from '../../shared/generic-modal-form/generic-form.types';
+import { FormConfig, FormResult, FormField } from '../../shared/generic-modal-form/generic-form.types';
 import { CommonModule } from '@angular/common';
 import { GenericTableComponent } from '../../shared/generic-table/generic-table.component';
 import { GenericModalButtonComponent } from '../../shared/generic-modal-form/generic-modal-button.component';
 
 import { PageHeaderComponent } from '../../shared/page-header/page-header.component';
-import { ToastService } from '../../../Services/toast/toast.service';
-import { SectorService } from '../../../Services/sector/sector.service';
+import { ToastService } from '../../../Services/common/toast/toast.service';
+import { SectorService } from '../../../Services/Admin/sector/sector.service';
 import { CrudHandlerService } from '../../../Services/common/crud-handler.service';
 import { ViewChild, OnInit } from '@angular/core';
 
@@ -21,6 +21,203 @@ import { ViewChild, OnInit } from '@angular/core';
 })
 export class SectorComponent implements OnInit {
   @ViewChild('sectorModal') sectorModal!: GenericModalButtonComponent;
+
+  membersData: any[] = [];
+
+  columns: TableColumn[] = [
+    { key: 'mandalName', label: 'Mandal', type: 'avatar', sortable: true, avatarFallbackKey: 'name' },
+    { key: 'villageName', label: 'Village', sortable: true },
+    { key: 'sectorName', label: 'Sector', sortable: true },
+    { key: 'inchargeName', label: 'Sector Sanyojak', sortable: true },
+    { key: 'phoneNumber', label: 'Contact', sortable: true },
+    // { key: 'profileImage', label: 'Profile Image', sortable: true, avatarFallbackKey: 'name' },
+  ];
+
+  config: TableConfig = {
+    selectable: false,
+    filterable: true,
+    paginated: true,
+    defaultPageSize: 10,
+    pageSizeOptions: [10, 20, 50],
+    searchable: true,
+    searchPlaceholder: 'Search sectors...',
+    showRowNumbers: true,
+    striped: true,
+    hoverable: true
+  };
+
+  actions: TableAction[] = [
+    { id: 'edit', label: '', variant: 'default', icon: '✏️' },
+    { id: 'delete', label: '', variant: 'danger', icon: '🗑️' }
+  ];
+
+  addSectorConfig: FormConfig = {
+    title: 'Register New Sector',
+    submitLabel: 'Register Sector',
+    fields: [
+      {
+        id: 'mandalId',
+        name: 'Mandal',
+        label: 'Mandal',
+        type: 'select',
+        placeholder: '--Select Mandal--',
+        apiUrl: 'mandal/getall',
+        apiMapper: (data: any) => {
+          const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
+          return list.map((item: any) => ({
+            value: String(item.id),
+            label: item.name
+          }));
+        },
+        validations: [Validators.required],
+        gridColSpan: 6
+      },
+      {
+        id: 'villageId',
+        name: 'Village',
+        label: 'Village',
+        type: 'select',
+        dependsOn: 'mandalId',
+        placeholder: '--Select Village--',
+        apiUrl: (mandalId: any) => `common/village?id=${mandalId}`,
+        apiMapper: (data: any) => {
+          const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
+          return list.map((item: any) => ({
+            value: String(item.id),
+            label: item.name
+          }));
+        },
+        validations: [Validators.required],
+        gridColSpan: 6,
+        multiple: true
+      },
+      {
+        id: 'sectorName',
+        name: 'sectorName',
+        label: 'Sector Name',
+        type: 'text',
+        placeholder: 'Enter sector name',
+        validations: [Validators.required],
+        gridColSpan: 6
+      },
+
+      {
+        id: 'isSectorSanyojak',
+        name: 'isSectorSanyojak',
+        label: 'Sector Sanyojak',
+        type: 'select',
+        placeholder: '-- Select Yes/No --',
+        options: [
+          { label: 'Yes', value: 'Yes' },
+          { label: 'No', value: 'No' }
+        ],
+        validations: [Validators.required],
+        gridColSpan: 6
+      },
+      {
+        id: 'inchargeName',
+        name: 'inchargeName',
+        label: 'Incharge Name',
+        type: 'text',
+        placeholder: 'Enter incharge full name',
+        visibleIf: { field: 'isSectorSanyojak', operator: '==', value: 'Yes' },
+        gridColSpan: 6
+      },
+      {
+        id: 'age',
+        name: 'age',
+        label: 'Age',
+        type: 'number',
+        placeholder: 'Age',
+        visibleIf: { field: 'isSectorSanyojak', operator: '==', value: 'Yes' },
+        gridColSpan: 2
+      },
+      {
+        id: 'fatherName',
+        name: 'fatherName',
+        label: 'Father Name',
+        type: 'text',
+        placeholder: "Enter father's full name",
+        visibleIf: { field: 'isSectorSanyojak', operator: '==', value: 'Yes' },
+        gridColSpan: 4
+      },
+      {
+        id: 'categoryId',
+        name: 'categoryId',
+        label: 'Category',
+        type: 'select',
+        placeholder: '-- Select Category --',
+        apiUrl: 'common/category',
+        apiMapper: (data: any) => {
+          if (Array.isArray(data?.data)) {
+            return data.data.map((item: any) => ({
+              value: String(item.id),
+              label: item.name
+            }));
+          }
+          return [];
+        },
+        visibleIf: { field: 'isSectorSanyojak', operator: '==', value: 'Yes' },
+        gridColSpan: 6
+      },
+      {
+        id: 'castId',
+        name: 'castId',
+        label: 'Caste',
+        type: 'select',
+        placeholder: '-- Select Caste --',
+        dependsOn: 'categoryId',
+        apiUrl: (catId: any) => `common/cast?id=${catId}`,
+        apiMapper: (data: any) => {
+          if (Array.isArray(data?.data)) {
+            return data.data.map((item: any) => ({
+              value: String(item.id),
+              label: item.name
+            }));
+          }
+          return [];
+        },
+        visibleIf: { field: 'isSectorSanyojak', operator: '==', value: 'Yes' },
+        gridColSpan: 6
+      },
+      {
+        id: 'educationLevel',
+        name: 'educationLevel',
+        label: 'Education Level',
+        type: 'text',
+        placeholder: 'Enter highest education (e.g., B.A., 12th)',
+        visibleIf: { field: 'isSectorSanyojak', operator: '==', value: 'Yes' },
+        gridColSpan: 6
+      },
+      {
+        id: 'phoneNumber',
+        name: 'phoneNumber',
+        label: 'Phone Number',
+        type: 'text',
+        placeholder: 'Enter 10-digit mobile number',
+        validations: [Validators.pattern('^[0-9]{10}$')],
+        visibleIf: { field: 'isSectorSanyojak', operator: '==', value: 'Yes' },
+        gridColSpan: 6
+      },
+      {
+        id: 'address',
+        name: 'address',
+        label: 'Address',
+        type: 'textarea',
+        placeholder: 'Enter full address with landmark',
+        visibleIf: { field: 'isSectorSanyojak', operator: '==', value: 'Yes' },
+        gridColSpan: 12
+      },
+      {
+        id: 'profileImage',
+        name: 'profileImage',
+        label: 'Profile Image',
+        type: 'file',
+        visibleIf: { field: 'isSectorSanyojak', operator: '==', value: 'Yes' },
+        gridColSpan: 12
+      }
+    ]
+  };
 
   constructor(
     private sectorService: SectorService,
@@ -41,231 +238,39 @@ export class SectorComponent implements OnInit {
     });
   }
 
-
-  addSectorConfig: FormConfig = {
-    title: 'Register New Sector',
-    submitLabel: 'Register Sector',
-    fields: [
-      {
-        id: 'MandalId',
-        name: 'Mandal',
-        label: 'Mandal',
-        type: 'select',
-        placeholder: '--Select Mandal--',
-        apiUrl: '/mandal/getall',
-        apiMapper: (data: any) => {
-          if (Array.isArray(data?.data)) {
-            return data.data.map((item: any) => {
-              return {
-                value: item.id,
-                label: item.name
-              }
-            })
-          }
-          return []
-        },
-        validations: [Validators.required],
-        gridColSpan: 6
-      },
-      {
-        id: 'VillageId',
-        name: 'Village',
-        label: 'Village',
-        type: 'select',
-        dependsOn: 'MandalId',
-        placeholder: '--Select Village--',
-        apiUrl: (mandalId: any) => `common/village?id=${mandalId}`,
-        apiMapper: (data: any) => {
-          if (Array.isArray(data?.data)) {
-            return data.data.map((item: any) => {
-              return {
-                value: item.id,
-                label: item.name
-              }
-            })
-          }
-          return []
-        },
-        validations: [Validators.required],
-        gridColSpan: 6
-      },
-      {
-        id: 'sectorName',
-        name: 'sectorName',
-        label: 'Sector Name',
-        type: 'text',
-        placeholder: 'Enter sector name',
-        validations: [Validators.required],
-        gridColSpan: 6
-      },
-      {
-        id: 'isSanyojak',
-        name: 'isSanyojak',
-        label: 'Sector Sanyojak',
-        type: 'select',
-        placeholder: '-- Select Yes/No --',
-        options: [
-          { label: 'Yes', value: 'Yes' },
-          { label: 'No', value: 'No' }
-        ],
-        validations: [Validators.required],
-        gridColSpan: 6
-      },
-      // Conditional Fields (Visible if isSanyojak == 'Yes')
-      {
-        id: 'inchargeName',
-        name: 'inchargeName',
-        label: 'Incharge Name',
-        type: 'text',
-        placeholder: 'Enter incharge full name',
-        visibleIf: { field: 'isSanyojak', operator: '==', value: 'Yes' },
-        gridColSpan: 6
-      },
-      {
-        id: 'age',
-        name: 'age',
-        label: 'Age',
-        type: 'number',
-        placeholder: 'Age',
-        visibleIf: { field: 'isSanyojak', operator: '==', value: 'Yes' },
-        gridColSpan: 2
-      },
-      {
-        id: 'fatherName',
-        name: 'fatherName',
-        label: 'Father Name',
-        type: 'text',
-        placeholder: "Enter father's full name",
-        visibleIf: { field: 'isSanyojak', operator: '==', value: 'Yes' },
-        gridColSpan: 4
-      },
-      {
-        id: 'category',
-        name: 'category',
-        label: 'Category',
-        type: 'select',
-        placeholder: '-- Select Category --',
-        apiUrl: '/common/category',
-        apiMapper: (data: any) => {
-          if (Array.isArray(data?.data)) {
-            return data.data.map((item: any) => ({
-              value: item.id,
-              label: item.name
-            }));
-          }
-          return [];
-        },
-        visibleIf: { field: 'isSanyojak', operator: '==', value: 'Yes' },
-        gridColSpan: 6
-      },
-      {
-        id: 'caste',
-        name: 'caste',
-        label: 'Caste',
-        type: 'select',
-        placeholder: '-- Select Caste --',
-        dependsOn: 'category',
-        apiUrl: (catId: any) => `/common/cast?id=${catId}`,
-        apiMapper: (data: any) => {
-          if (Array.isArray(data?.data)) {
-            return data.data.map((item: any) => ({
-              value: item.name,
-              label: item.name
-            }));
-          }
-          return [];
-        },
-        visibleIf: { field: 'isSanyojak', operator: '==', value: 'Yes' },
-        gridColSpan: 6
-      },
-      {
-        id: 'education',
-        name: 'education',
-        label: 'Education Level',
-        type: 'text',
-        placeholder: 'Enter highest education (e.g., B.A., 12th)',
-        visibleIf: { field: 'isSanyojak', operator: '==', value: 'Yes' },
-        gridColSpan: 6
-      },
-      {
-        id: 'phone',
-        name: 'phone',
-        label: 'Phone Number',
-        type: 'text',
-        placeholder: 'Enter 10-digit mobile number',
-        validations: [Validators.pattern('^[0-9]{10}$')],
-        visibleIf: { field: 'isSanyojak', operator: '==', value: 'Yes' },
-        gridColSpan: 6
-      },
-      {
-        id: 'address',
-        name: 'address',
-        label: 'Address',
-        type: 'textarea',
-        placeholder: 'Enter full address with landmark',
-        visibleIf: { field: 'isSanyojak', operator: '==', value: 'Yes' },
-        gridColSpan: 12
-      },
-      {
-        id: 'profileImage',
-        name: 'profileImage',
-        label: 'Profile Image',
-        type: 'file',
-        visibleIf: { field: 'isSanyojak', operator: '==', value: 'Yes' },
-        gridColSpan: 12
-      }
-    ]
-  };
-
-  membersData = [
-    { id: 1, name: 'Mandawar', },
-    { id: 2, name: 'Mohammadpur Deomal' },
-    { id: 3, name: 'Jhalu' },
-    { id: 4, name: 'Bijnor City' },
-    { id: 5, name: 'Adampur' },
-  ];
-
-  columns: TableColumn[] = [
-    { key: 'mandal', label: 'Mandal', type: 'avatar', sortable: true, avatarFallbackKey: 'name' },
-    { key: 'village', label: 'Village ', sortable: true },
-    { key: 'sector', label: 'Sector', sortable: true },
-    { key: 'sanyojak', label: 'Sector Sanyojak', sortable: true },
-    { key: 'contact', label: 'Contact', sortable: true },
-    { key: 'profileImage', label: 'Profile Image', sortable: true, avatarFallbackKey: 'name' },
-
-  ];
-
-  config: TableConfig = {
-    selectable: false,
-    filterable: true,
-    paginated: true,
-    defaultPageSize: 10,
-    pageSizeOptions: [10, 20, 50],
-    searchable: true,
-    searchPlaceholder: 'Search members...',
-    showRowNumbers: true,
-    striped: true,
-    hoverable: true
-  };
-
-  actions: TableAction[] = [
-    { id: 'edit', label: '', variant: 'default', icon: '✏️' },
-    { id: 'delete', label: '', variant: 'danger', icon: '🗑️' }
-  ];
-
-
-
   handleFormSubmit(result: FormResult) {
     if (!result.status) return;
+    console.log(result.data);
+    const raw = { ...result.data };
 
-    const isUpdate = result.data.id || (this.sectorModal.initialData && this.sectorModal.initialData.id);
-    if (isUpdate && !result.data.id) {
-      result.data.id = this.sectorModal.initialData.id;
+    const submitData: any = {
+      id: raw.id || (this.sectorModal.initialData && this.sectorModal.initialData.id),
+      mandalId: Number(raw.mandalId),
+      villageId: Array.isArray(raw.villageId) ? raw.villageId.map((v: any) => Number(v)) : Number(raw.villageId),
+      sectorName: raw.sectorName,
+      isSectorSanyojak: raw.isSectorSanyojak === 'Yes'
+    };
+
+    if (submitData.isSectorSanyojak) {
+      submitData.inchargeName = raw.inchargeName || null;
+      submitData.age = raw.age ? Number(raw.age) : null;
+      submitData.fatherName = raw.fatherName || null;
+      submitData.categoryId = raw.categoryId ? Number(raw.categoryId) : null;
+      submitData.castId = raw.castId ? Number(raw.castId) : null;
+      submitData.educationLevel = raw.educationLevel || null;
+      submitData.phoneNumber = raw.phoneNumber || null;
+      submitData.address = raw.address || null;
+      submitData.profileImage = raw.profileImage || null;
+    }
+
+    const isUpdate = !!(submitData.id || (this.sectorModal.initialData && this.sectorModal.initialData.id));
+    if (isUpdate && !submitData.id) {
+      submitData.id = this.sectorModal.initialData.id;
     }
 
     const request = isUpdate
-      ? this.sectorService.updateSector(result.data)
-      : this.sectorService.createSector(result.data);
+      ? this.sectorService.updateSector(submitData)
+      : this.sectorService.createSector(submitData);
 
     this.crudHandler.handleRequest(
       request,
@@ -285,7 +290,17 @@ export class SectorComponent implements OnInit {
         () => this.loadSectors()
       );
     } else if (action.id === 'edit') {
-      this.sectorModal.openModal(row);
+      const editData = { ...row };
+
+      // Convert IDs to strings to ensure matching with dropdown values
+      ['mandalId', 'villageId', 'categoryId', 'castId'].forEach(key => {
+        if (editData[key]) editData[key] = String(editData[key]);
+      });
+
+      if (editData.isSectorSanyojak !== undefined) {
+        editData.isSectorSanyojak = editData.isSectorSanyojak ? 'Yes' : 'No';
+      }
+      this.sectorModal.openModal(editData);
     } else {
       this.toastService.showWarning('Action Selected', `Action ${action.id} clicked for ${row.name || 'this item'}`);
     }
@@ -300,5 +315,4 @@ export class SectorComponent implements OnInit {
     console.log(`Generating ${format.toUpperCase()} export...`);
     this.toastService.showSuccess('Export Started', `Successfully generated ${format.toUpperCase()} export!`);
   }
-
 }

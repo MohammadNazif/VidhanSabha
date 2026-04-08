@@ -10,5 +10,10 @@ namespace VidhanSabha.Application.Pannels.Admin.Sector.Commands
     public class DeleteSectorCommand : IRequest<bool>
     {
         public int Id { get; set; }
+
+        public DeleteSectorCommand(int id)
+        {
+            Id = id;
+        }
     }
 }

@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { finalize } from 'rxjs/operators';
-import { ToastService } from '../toast/toast.service';
-import { LoaderService } from '../loader/loader.service';
+import { ToastService } from './toast/toast.service';
+import { LoaderService } from './loader/loader.service';
 
 @Injectable({
   providedIn: 'root'

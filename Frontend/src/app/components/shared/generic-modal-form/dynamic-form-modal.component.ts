@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output, OnDestroy } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, OnDestroy, HostListener, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { FormConfig, FormField, FormResult, DropdownOption } from './generic-form.types';
@@ -17,6 +17,7 @@ export class DynamicFormModalComponent implements OnInit, OnDestroy {
   @Input() initialData: any; // Add this
   @Output() close = new EventEmitter<void>();
   @Output() submitForm = new EventEmitter<FormResult>();
+  @ViewChild('scrollContainer') scrollContainer!: ElementRef;
 
   form!: FormGroup;
   fieldOptions: { [key: string]: DropdownOption[] } = {};
@@ -25,6 +26,9 @@ export class DynamicFormModalComponent implements OnInit, OnDestroy {
   previews: { [key: string]: string | ArrayBuffer | null } = {};
 
   private subscriptions: Subscription = new Subscription();
+  private isInitializing = true;
+  activeMultiDropdown: string | null = null;
+  dropdownPosition: { top: number; left: number; width: number } = { top: 0, left: 0, width: 0 };
 
   constructor(
     private fb: FormBuilder,
@@ -34,7 +38,13 @@ export class DynamicFormModalComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.createForm();
     this.initializeOptions();
-    this.setupConditionalVisibility();
+    this.setupFieldInteractions();
+    this.updateCascadingOptions();
+
+    // Disable reset logic for first 500ms to allow APIs to load
+    setTimeout(() => {
+      this.isInitializing = false;
+    }, 500);
   }
 
   ngOnDestroy(): void {
@@ -45,9 +55,13 @@ export class DynamicFormModalComponent implements OnInit, OnDestroy {
     const group: any = {};
 
     this.config.fields.forEach(field => {
-      const value = (this.initialData && this.initialData[field.id] !== undefined) 
-        ? this.initialData[field.id] 
-        : (field.defaultValue ?? '');
+      const defaultValue = field.multiple ? [] : (field.defaultValue ?? '');
+      const value = (this.initialData && this.initialData[field.id] !== undefined)
+        ? (field.multiple && !Array.isArray(this.initialData[field.id])
+          ? [this.initialData[field.id]]
+          : this.initialData[field.id])
+        : defaultValue;
+
       group[field.id] = [value, field.validations || []];
       this.fieldVisibility[field.id] = !field.visibleIf;
     });
@@ -63,6 +77,12 @@ export class DynamicFormModalComponent implements OnInit, OnDestroy {
           this.subscriptions.add(
             this.formDataService.getOptionsFromApi(apiUrl, field.apiMapper, this.form.value).subscribe(options => {
               this.fieldOptions[field.id] = options;
+
+              // Re-apply current value to fix binding if rows are loaded after value is set
+              const currentValue = this.form.get(field.id)?.value;
+              if (currentValue) {
+                this.form.get(field.id)?.patchValue(currentValue, { emitEvent: false });
+              }
             })
           );
         } else if (field.options) {
@@ -80,13 +100,14 @@ export class DynamicFormModalComponent implements OnInit, OnDestroy {
     });
   }
 
-  private setupConditionalVisibility(): void {
-    const dependentFields = this.config.fields.filter(f => f.visibleIf);
+  private setupFieldInteractions(): void {
+    const hasDependencies = this.config.fields.some(f => f.visibleIf || f.dependsOn);
 
-    if (dependentFields.length === 0) return;
+    if (!hasDependencies) return;
 
     // Initial check
     this.updateVisibility();
+    this.updateCascadingOptions();
 
     // Monitor changes
     this.subscriptions.add(
@@ -167,17 +188,134 @@ export class DynamicFormModalComponent implements OnInit, OnDestroy {
         this.subscriptions.add(
           this.formDataService.getOptionsFromApi(url, field.apiMapper, formValues).subscribe(options => {
             this.fieldOptions[field.id] = options;
+
+            // Re-apply current value to fix binding if rows are loaded after value is set
+            const currentValue = this.form.get(field.id)?.value;
+            if (currentValue) {
+              this.form.get(field.id)?.patchValue(currentValue, { emitEvent: false });
+            }
+
             this.handleChildValueReset(field.id, options);
           })
         );
       }
+
+      // Scenario C: Selection Table (Populating rows from parent selection)
+      else if (field.type === 'selection-table' && field.dependsOn) {
+        const parentControl = this.form.get(field.dependsOn);
+        const parentValues = parentControl?.value;
+
+        if (Array.isArray(parentValues)) {
+          const parentOptions = this.fieldOptions[field.dependsOn] || [];
+          const currentTableData = this.form.get(field.id)?.value || [];
+
+          const newTableData = parentValues.map(val => {
+            const existing = currentTableData.find((row: any) => String(row.id) === String(val));
+            const option = parentOptions.find(o => String(o.value) === String(val));
+            return {
+              id: val,
+              name: option?.label || 'Unknown',
+              anshik: existing ? existing.anshik : 'No' // Default to No
+            };
+          });
+
+          // Only update if data has actually changed to avoid loop
+          if (JSON.stringify(newTableData) !== JSON.stringify(currentTableData)) {
+            this.form.get(field.id)?.setValue(newTableData, { emitEvent: false });
+          }
+        }
+      }
     });
   }
 
+  setTableCellValue(fieldId: string, rowId: any, key: string, value: any): void {
+    const control = this.form.get(fieldId);
+    const currentData = control?.value || [];
+    const newData = currentData.map((row: any) => {
+      if (String(row.id) === String(rowId)) {
+        return { ...row, [key]: value };
+      }
+      return row;
+    });
+
+    control?.setValue(newData);
+    control?.markAsDirty();
+  }
+
   private handleChildValueReset(fieldId: string, newOptions: DropdownOption[]): void {
+    if (this.isInitializing) return;
+
+    const field = this.config.fields.find(f => f.id === fieldId);
     const currentValue = this.form.get(fieldId)?.value;
-    if (currentValue && !newOptions.find(o => o.value === currentValue)) {
+
+    if (!currentValue) return;
+
+    if (field?.multiple && Array.isArray(currentValue)) {
+      const validValues = currentValue.filter(val =>
+        newOptions.some(o => String(o.value) == String(val))
+      );
+      if (validValues.length !== currentValue.length) {
+        this.form.get(fieldId)?.setValue(validValues, { emitEvent: false });
+      }
+    } else if (!newOptions.find(o => String(o.value) == String(currentValue))) {
       this.form.get(fieldId)?.setValue('', { emitEvent: false });
+    }
+  }
+
+  toggleMultiSelectOption(fieldId: string, value: any): void {
+    const control = this.form.get(fieldId);
+    const currentValues = Array.isArray(control?.value) ? [...control.value] : [];
+
+    // Convert to string for consistent comparison if needed, but try to keep original for binding
+    const index = currentValues.findIndex(v => String(v) === String(value));
+
+    if (index > -1) {
+      currentValues.splice(index, 1);
+    } else {
+      currentValues.push(value);
+    }
+
+    control?.setValue(currentValues);
+    control?.markAsDirty();
+    control?.markAsTouched();
+  }
+
+  isOptionSelected(fieldId: string, value: any): boolean {
+    const currentValues = this.form.get(fieldId)?.value;
+    if (!Array.isArray(currentValues)) return false;
+    return currentValues.some(v => String(v) === String(value));
+  }
+
+  getSelectedLabels(fieldId: string): string {
+    const currentValues = this.form.get(fieldId)?.value;
+    if (!Array.isArray(currentValues) || currentValues.length === 0) return '';
+
+    const options = this.fieldOptions[fieldId] || [];
+    return currentValues
+      .map(val => options.find(o => String(o.value) === String(val))?.label)
+      .filter(l => l)
+      .join(', ');
+  }
+
+  closeActiveDropdown(): void {
+    if (this.activeMultiDropdown) {
+      this.activeMultiDropdown = null;
+    }
+  }
+
+  toggleDropdown(fieldId: string, event: Event): void {
+    event.stopPropagation();
+    if (this.activeMultiDropdown === fieldId) {
+      this.activeMultiDropdown = null;
+    } else {
+      this.activeMultiDropdown = fieldId;
+      const trigger = (event.currentTarget as HTMLElement);
+      const rect = trigger.getBoundingClientRect();
+      this.dropdownPosition = {
+        top: rect.bottom + 8,
+        left: rect.left,
+        width: rect.width
+      };
     }
   }
 
@@ -210,6 +348,13 @@ export class DynamicFormModalComponent implements OnInit, OnDestroy {
 
   onCancel(): void {
     this.close.emit();
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    if (this.activeMultiDropdown) {
+      this.activeMultiDropdown = null;
+    }
   }
 
   getFieldColumnClass(field: FormField): string {

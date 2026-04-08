@@ -4,6 +4,7 @@ import { MembersComponent } from './components/members/members.component';
 import { LoginComponent } from './components/auth/login/login.component';
 import { MandalComponent } from './components/admin/mandal/mandal.component';
 import { SectorComponent } from './components/admin/sector/sector.component';
+import { BoothComponent } from './components/admin/booth/booth.component';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -11,5 +12,6 @@ export const routes: Routes = [
   { path: 'members', component: MembersComponent },
   { path: 'mandal', component: MandalComponent },
   { path: 'sector', component: SectorComponent },
+  { path: 'booth', component: BoothComponent },
   { path: '**', redirectTo: '' }
 ];

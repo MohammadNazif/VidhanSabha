@@ -1,0 +1,26 @@
+import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
+import { BaseApiService } from '../../common/base-api.service';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class BoothService extends BaseApiService {
+  private entity = 'booth';
+
+  createBooth(data: any): Observable<any> {
+    return this.create(this.entity, data);
+  }
+
+  getAllBooths(): Observable<any> {
+    return this.getAll(this.entity);
+  }
+
+  deleteBooth(id: number | string): Observable<any> {
+    return this.delete(this.entity, id);
+  }
+
+  updateBooth(data: any): Observable<any> {
+    return this.update(this.entity, data);
+  }
+}

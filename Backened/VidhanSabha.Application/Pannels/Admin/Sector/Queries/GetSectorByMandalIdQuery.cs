@@ -8,8 +8,12 @@ using VidhanSabha.Application.Pannels.Admin.Sector.DTOs;
 
 namespace VidhanSabha.Application.Pannels.Admin.Sector.Queries
 {
-    internal class GetSectorByMandalIdQuery : IRequest<SectorResponseDto>
+    public class GetSectorByMandalIdQuery : IRequest<List<SectorByMAndalResponseDto>>
     {
         public int Id { get; set; }
+        public GetSectorByMandalIdQuery(int id)
+        {
+            Id = id;
+        }
     }
 }
