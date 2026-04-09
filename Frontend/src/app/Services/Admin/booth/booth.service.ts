@@ -12,8 +12,11 @@ export class BoothService extends BaseApiService {
     return this.create(this.entity, data);
   }
 
-  getAllBooths(): Observable<any> {
-    return this.getAll(this.entity);
+  getAllBooths(mandalId?: number, sectorId?: number): Observable<any> {
+    let params: any = {};
+    if (mandalId) params['mandalId'] = mandalId;
+    if (sectorId) params['sectorId'] = sectorId;
+    return this.getAllByParams(this.entity, params);
   }
 
   deleteBooth(id: number | string): Observable<any> {

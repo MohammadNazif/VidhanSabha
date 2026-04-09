@@ -15,6 +15,9 @@ export class BaseApiService {
    * Generic GET request for a list of entities.
    * Pattern: /[entity]/getAll
    */
+  getAllByParams<T>(entity: string, params?: any): Observable<T> {
+    return this.http.get<T>(`${this.apiUrl}/${entity}/getAll`, { params });
+  }
   getAll<T>(entity: string): Observable<T> {
     return this.http.get<T>(`${this.apiUrl}/${entity}/getAll`);
   }

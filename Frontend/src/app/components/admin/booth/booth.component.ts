@@ -259,14 +259,37 @@ export class BoothComponent implements OnInit {
   columns: TableColumn[] = [
     { key: 'mandalName', label: 'Mandal', sortable: true },
     { key: 'sectorName', label: 'Sector', sortable: true },
-    { key: 'villageName', label: 'Village', sortable: true },
+    {
+      key: 'villageName',
+      label: 'Village',
+      sortable: true,
+      formatter: (val: any, row: any) => {
+        if (row.villages && Array.isArray(row.villages)) {
+          return row.villages.map((v: any) => v.villageName).join(', ');
+        }
+        return val || 'N/A';
+      }
+    },
     { key: 'pollingStationName', label: 'Polling Station Name', sortable: true },
-    { key: 'boothAathyaksh', label: 'Booth Aathyaksh', sortable: true },
-    { key: 'contactNumber', label: 'Contact Number', sortable: true },
-    { key: 'castName', label: 'Cast', sortable: true },
-    // {key:'profileImage',label:'Profile Image',sortable:true},
-    { key: 'location', label: 'Location', sortable: true }
-
+    {
+      key: 'boothAathyaksh',
+      label: 'Booth Aathyaksh',
+      sortable: true,
+      formatter: (val: any, row: any) => row.sanyojak?.inchargeName || 'N/A'
+    },
+    {
+      key: 'contactNumber',
+      label: 'Contact Number',
+      sortable: true,
+      formatter: (val: any, row: any) => row.sanyojak?.phoneNumber || 'N/A'
+    },
+    {
+      key: 'castName',
+      label: 'Cast',
+      sortable: true,
+      formatter: (val: any, row: any) => row.sanyojak?.castName || 'N/A'
+    },
+    { key: 'pollingStationLocation', label: 'Location', sortable: true }
   ];
 
   config: TableConfig = {
@@ -297,10 +320,36 @@ export class BoothComponent implements OnInit {
         () => this.loadBooths()
       );
     } else if (action.id === 'edit') {
-      const editData = { ...row };
-      ['mandalId', 'sectorId'].forEach(key => {
-        if (editData[key]) editData[key] = String(editData[key]);
-      });
+      // Flatten nested data for form editing
+      const editData: any = {
+        ...row,
+        mandalId: String(row.mandalId),
+        sectorId: String(row.sectorId),
+        isBoothSanyojak: row.isBoothSanyojak ? 'Yes' : 'No'
+      };
+
+      // Flatten sanyojak fields
+      if (row.sanyojak) {
+        editData.inchargeName = row.sanyojak.inchargeName;
+        editData.age = row.sanyojak.age;
+        editData.fatherName = row.sanyojak.fatherName;
+        editData.categoryId = String(row.sanyojak.categoryId);
+        editData.castId = String(row.sanyojak.castId);
+        editData.educationLevel = row.sanyojak.educationLevel;
+        editData.phoneNumber = row.sanyojak.phoneNumber;
+        editData.address = row.sanyojak.address;
+      }
+
+      // Transform villages for selection-table and multi-select
+      if (row.villages && Array.isArray(row.villages)) {
+        editData.villageId = row.villages.map((v: any) => String(v.villageId));
+        editData.anshikData = row.villages.map((v: any) => ({
+          id: String(v.villageId),
+          name: v.villageName,
+          anshik: v.hasAnshik ? 'Yes' : 'No'
+        }));
+      }
+
       this.boothModal.openModal(editData);
     } else {
       this.toastService.showWarning('Action Selected', `Action ${action.id} clicked for ${row.boothName || 'this item'}`);
@@ -311,12 +360,46 @@ export class BoothComponent implements OnInit {
     if (!result.status) return;
 
     const raw = result.data;
-    const submitData = {
-      ...raw,
+    const isSanyojak = raw.isBoothSanyojak === 'Yes';
+
+    const submitData: any = {
       id: raw.id || (this.boothModal.initialData && this.boothModal.initialData.id),
       mandalId: Number(raw.mandalId),
-      sectorId: Number(raw.sectorId)
+      sectorId: Number(raw.sectorId),
+      boothNumber: Number(raw.boothNumber),
+      pollingStationName: raw.pollingStationName,
+      pollingStationLocation: raw.pollingStationLocation,
+      isBoothSanyojak: isSanyojak,
+      villages: []
     };
+
+    // Transform anshikData to villages array
+    if (raw.anshikData && Array.isArray(raw.anshikData)) {
+      submitData.villages = raw.anshikData.map((v: any) => ({
+        villageId: Number(v.id || v.villageId),
+        hasAnshik: v.anshik === 'Yes'
+      }));
+    } else if (raw.villageId) {
+      const ids = Array.isArray(raw.villageId) ? raw.villageId : [raw.villageId];
+      submitData.villages = ids.map((id: any) => ({
+        villageId: Number(id),
+        hasAnshik: false
+      }));
+    }
+
+    // Nest sanyojak details if applicable
+    if (isSanyojak) {
+      submitData.sanyojak = {
+        inchargeName: raw.inchargeName,
+        age: Number(raw.age),
+        fatherName: raw.fatherName,
+        categoryId: Number(raw.categoryId),
+        castId: Number(raw.castId),
+        educationLevel: raw.educationLevel,
+        phoneNumber: raw.phoneNumber,
+        address: raw.address
+      };
+    }
 
     const isUpdate = !!submitData.id;
 

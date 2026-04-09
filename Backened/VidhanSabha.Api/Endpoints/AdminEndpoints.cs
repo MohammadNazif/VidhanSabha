@@ -1,6 +1,10 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Components.Forms;
+using Microsoft.AspNetCore.Mvc;
 using VidhanSabha.Api.Responses;
+using VidhanSabha.Application.Pannels.Admin.Booth.Command;
+using VidhanSabha.Application.Pannels.Admin.Booth.Dtos;
+using VidhanSabha.Application.Pannels.Admin.Booth.Queries;
 using VidhanSabha.Application.Pannels.Admin.Mandal.Commands;
 using VidhanSabha.Application.Pannels.Admin.Mandal.DTOs.Create;
 using VidhanSabha.Application.Pannels.Admin.Mandal.Queries;
@@ -17,6 +21,9 @@ public static class AdminEndpoints
 
         var sector = app.MapGroup("/api/sector")
                        .WithTags("Sector");
+
+        var booth = app.MapGroup("/api/booth")
+                     .WithTags("Booth");
 
         var admin = app.MapGroup("/api/admin")
                         .WithTags("Admin");
@@ -113,6 +120,41 @@ public static class AdminEndpoints
         })
             .WithName("GetSectorByMandal")
             .Produces<List<SectorByMAndalResponseDto>>(200);
+
+
+        #region Booth
+        booth.MapPost("/create", async (BoothRequestDto dto, IMediator mediator, HttpContext http) =>
+        {
+            //var userId = 1;
+            //var userName = "Admin";
+
+            var result = await mediator.Send(new CreateBoothCommand(dto));
+            return Results.Ok(ApiResponse<int>.Ok(result, "Booth Created Successfully"));
+        })
+        .WithName("CreateBooth")
+        .Produces<int>(200);
+
+       booth.MapPost("/update", async (updateBoothRequestDto dto, IMediator mediator, HttpContext http) =>
+        {
+            //var userId = 1;
+            //var userName = "Admin";
+
+         bool result = await mediator.Send(new updateBoothCommand(dto));
+            return Results.Ok(ApiResponse<bool>.Ok(result, "Booth Created Successfully"));
+        })
+   .WithName("CreateBooth")
+   .Produces<int>(200);
+
+        booth.MapGet("/getAll", async (
+         int? mandalId,
+           int? sectorId,
+           IMediator mediator) =>
+        {
+            var result = await mediator.Send(new GetAllBoothsQuery(mandalId, sectorId));
+            return Results.Ok(ApiResponse<List<BoothResponseDto>>.Ok(result));
+        });
+
+        #endregion
 
         //sector.MapPost("/delete", async (int id, IMediator mediator) =>
         //{

@@ -214,7 +214,7 @@ export class DynamicFormModalComponent implements OnInit, OnDestroy {
             const option = parentOptions.find(o => String(o.value) === String(val));
             return {
               id: val,
-              name: option?.label || 'Unknown',
+              name: option?.label || existing?.name || 'Unknown',
               anshik: existing ? existing.anshik : 'No' // Default to No
             };
           });

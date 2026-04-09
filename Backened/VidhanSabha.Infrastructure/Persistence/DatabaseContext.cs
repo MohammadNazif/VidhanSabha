@@ -27,6 +27,12 @@ namespace VidhanSabha.Infrastructure.Persistence
 
          public DbSet<Tbl_Sector> Tbl_Sector { get; set; }
 
+         public DbSet<Tbl_Booth> Tbl_Booth { get; set; }
+
+        public DbSet<Tbl_BoothVillage> Tbl_BoothVillage { get; set; }
+
+        public DbSet<Tbl_BoothSanyojak> Tbl_BoothSanyojak { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Tbl_Login>(entity =>
@@ -115,6 +121,87 @@ namespace VidhanSabha.Infrastructure.Persistence
                       .WithMany()
                       .HasForeignKey(e => e.MandalId)
                       .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<Tbl_Booth>(entity =>
+            {
+                entity.ToTable("Tbl_Booth");
+
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.MandalId).IsRequired();
+                entity.Property(e => e.SectorId).IsRequired();
+                entity.Property(e => e.BoothNumber).IsRequired();
+
+                entity.Property(e => e.PollingStationName)
+                      .HasMaxLength(200)
+                      .IsRequired();
+
+                entity.Property(e => e.PollingStationLocation)
+                      .HasMaxLength(300)
+                      .IsRequired();
+
+                entity.Property(e => e.IsBoothSanyojak)
+                      .HasDefaultValue(false)
+                      .IsRequired()
+                       .ValueGeneratedNever(); ;
+
+                // ✅ UNIQUE
+                entity.HasIndex(e => new { e.MandalId, e.BoothNumber })
+                      .IsUnique();
+
+                // 🔥 FIX: Explicit 1-1 mapping
+                entity.HasOne(e => e.Sanyojak)
+                      .WithOne()
+                      .HasForeignKey<Tbl_BoothSanyojak>(s => s.BoothId)
+                      .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<Tbl_BoothVillage>(entity =>
+            {
+                entity.ToTable("Tbl_BoothVillage");
+
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.VillageId).IsRequired();
+                entity.Property(e => e.HasAnshik).IsRequired();
+
+                // 🔥 FIX: Navigation based mapping
+                entity.HasOne(e => e.Booth)
+                      .WithMany(b => b.Villages)
+                      .HasForeignKey(e => e.BoothId)
+                      .OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(e => e.Village)
+              .WithMany()
+              .HasForeignKey(e => e.VillageId)
+              .OnDelete(DeleteBehavior.Restrict);
+                entity.Navigation(e => e.Village).AutoInclude(false);
+            });
+
+            modelBuilder.Entity<Tbl_BoothSanyojak>(entity =>
+            {
+                entity.ToTable("Tbl_BoothSanyojak");
+
+                entity.HasKey(e => e.Id); // ✅ enough
+
+                entity.Property(e => e.InchargeName).HasMaxLength(150).IsRequired();
+                entity.Property(e => e.FatherName).HasMaxLength(150).IsRequired();
+                entity.Property(e => e.PhoneNumber).HasMaxLength(20).IsRequired();
+
+                entity.Property(e => e.Address).HasMaxLength(300);
+                entity.Property(e => e.ProfileImagePath).HasMaxLength(500);
+
+                // ❌ REMOVE shadow Id
+                // entity.Property<int>("Id") ❌ DELETE THIS
+
+                // 🔥 FK constraint
+                entity.HasIndex(e => e.BoothId).IsUnique();
+
+                entity.HasOne(e => e.Cast)
+      .WithMany()
+      .HasForeignKey(e => e.CastId)
+      .OnDelete(DeleteBehavior.Restrict);
+                entity.Navigation(e => e.Cast).AutoInclude(false);
             });
         }
     }

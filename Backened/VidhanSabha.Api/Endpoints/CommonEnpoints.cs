@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Mvc;
 using VidhanSabha.Api.Responses;
 using VidhanSabha.Application.Common.Cast.DTOs;
 using VidhanSabha.Application.Common.Cast.Queries;
@@ -35,13 +36,13 @@ namespace VidhanSabha.Api.Endpoints
              .WithName("GetCast")
              .Produces<ApiResponse<List<CastResponseDto>>>(200);
 
-            common.MapGet("/village", async (int id,IMediator mediator) =>
+            common.MapGet("/village", async (int id, IMediator mediator) =>
             {
                 var result = await mediator.Send(new GetallVillage(id));
                 return Results.Ok(ApiResponse<List<VillageResponseDto>>.Ok(result));
             })
              .WithName("GetAllVillages")
-             .Produces<ApiResponse<List<VillageResponseDto>>>(200);
+             .Produces<List<VillageResponseDto>>(200);
         }
     }
 }

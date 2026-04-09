@@ -12,7 +12,7 @@ namespace VidhanSabha.Domain.Entities.Common
 
         public int Id { get; private set; }
         public int MandalId { get; private set; }
-        public string VillageName { get => _name; private set => _name = value; }
+        public string? VillageName { get => _name; private set => _name = value; }
         public bool Status { get; private set; }
     }
 }
