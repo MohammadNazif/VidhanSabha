@@ -9,11 +9,11 @@ using VidhanSabha.Application.Common.Village.DTOs;
 
 namespace VidhanSabha.Application.Common.Category.Queries
 {
-    public class GetallVillage : IRequest<List<VillageResponseDto>>
+    public class GetallVillageByMandalId : IRequest<List<VillageResponseDto>>
     {
         public int id { get; set; }
 
-        public GetallVillage(int id)
+        public GetallVillageByMandalId(int id)
         {
             this.id = id;
         }

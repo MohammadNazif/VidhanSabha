@@ -8,6 +8,9 @@ using VidhanSabha.Application.Pannels.Admin.Booth.Queries;
 using VidhanSabha.Application.Pannels.Admin.Mandal.Commands;
 using VidhanSabha.Application.Pannels.Admin.Mandal.DTOs.Create;
 using VidhanSabha.Application.Pannels.Admin.Mandal.Queries;
+using VidhanSabha.Application.Pannels.Admin.PannaPramukh.Command;
+using VidhanSabha.Application.Pannels.Admin.PannaPramukh.Dtos;
+using VidhanSabha.Application.Pannels.Admin.PannaPramukh.Queries;
 using VidhanSabha.Application.Pannels.Admin.Sector.Commands;
 using VidhanSabha.Application.Pannels.Admin.Sector.DTOs;
 using VidhanSabha.Application.Pannels.Admin.Sector.Queries;
@@ -27,6 +30,9 @@ public static class AdminEndpoints
 
         var admin = app.MapGroup("/api/admin")
                         .WithTags("Admin");
+
+        var pannapramukh = app.MapGroup("/api/pannapramukh")
+                        .WithTags("PannaPramukh");
         #region Mandal
         mandal.MapGet("/getAll", async (IMediator mediator) =>
         {
@@ -140,9 +146,9 @@ public static class AdminEndpoints
             //var userName = "Admin";
 
          bool result = await mediator.Send(new updateBoothCommand(dto));
-            return Results.Ok(ApiResponse<bool>.Ok(result, "Booth Created Successfully"));
+            return Results.Ok(ApiResponse<bool>.Ok(result, "Booth Updated Successfully"));
         })
-   .WithName("CreateBooth")
+   .WithName("UpdateBooth")
    .Produces<int>(200);
 
         booth.MapGet("/getAll", async (
@@ -154,33 +160,39 @@ public static class AdminEndpoints
             return Results.Ok(ApiResponse<List<BoothResponseDto>>.Ok(result));
         });
 
+        booth.MapPost("/delete", async (int id, IMediator mediator) =>
+        {
+            await mediator.Send(new DeleteBoothCommand(id));
+            return Results.Ok("Booth Deleted Successfully");
+        });
+
         #endregion
 
-        //sector.MapPost("/delete", async (int id, IMediator mediator) =>
-        //{
-        //    var result = await mediator.Send(new DeleteSectorCommand(id));
-        //    return Results.Ok(ApiResponse<int>.Ok(result, "Sector Deleted Successfully"));
-        //})
-        //.WithName("DeleteSector")
-        //.Produces<int>(200);
+        #region PannaPramukh
 
+        pannapramukh.MapGet("/getAll", async (IMediator mediator) =>
+         {
+             var result = await mediator.Send(new GetAllPannaQuery());
+             return Results.Ok(ApiResponse<List<PannaPramukhResponseDto>>.Ok(result));
+         })
+         .WithName("GetAllPannaPramukh")
+         .Produces<ApiResponse<List<PannaPramukhResponseDto>>>(200);
 
-        //sector.MapGet("/getbyid", async (int id, IMediator mediator) =>
-        //{
-        //    var result = await mediator.Send(new GetSectorByIdQuery(id));
-        //    return Results.Ok(ApiResponse<SectorResponseDto>.Ok(result, "Sector Fetched Successfully"));
-        //})
-        //.WithName("GetSectorById")
-        //.Produces<SectorResponseDto>(200);
-
-
-        //sector.MapGet("/getall", async (IMediator mediator) =>
-        //{
-        //    var result = await mediator.Send(new GetAllSectorsQuery());
-        //    return Results.Ok(ApiResponse<List<SectorResponseDto>>.Ok(result, "Sectors Fetched Successfully"));
-        //})
-        //.WithName("GetAllSectors")
-        //.Produces<List<SectorResponseDto>>(200);
+        pannapramukh.MapPost("/create", async (CreatePannaPramukhRequestDto dto, IMediator mediator) =>
+                {
+                    var result = await mediator.Send(new CreatePannaCommand(dto));
+                    return Results.Ok(ApiResponse<int>.Ok(result, "Panna Pramukh Created Successfully"));
+                })
+                .WithName("CreatePannaPramukh")
+                .Produces<int>(200);
+                //pannapramukh.MapPost("/update", async (PannaPramukhRequestDto dto, IMediator mediator) =>
+                //    {
+                //        var result = await mediator.Send(new UpdatePannaPramukhCommand(dto));
+                //        return Results.Ok(ApiResponse<int>.Ok(result, "Panna Pramukh Updated Successfully"));
+                //    })
+                //    .WithName("UpdatePannaPramukh")
+                //    .Produces<int>(200);
+        #endregion
     }
 
 

@@ -346,7 +346,6 @@ export class GenericTableComponent implements OnInit, OnChanges {
       .split(' ')
       .map(n => n[0])
       .join('')
-      .toUpperCase()
       .slice(0, 2);
   }
 

@@ -297,6 +297,12 @@ export class DynamicFormModalComponent implements OnInit, OnDestroy {
       .join(', ');
   }
 
+  getOptionLabel(fieldId: string, value: any): string {
+    const options = this.fieldOptions[fieldId] || [];
+    const option = options.find(o => String(o.value) === String(value));
+    return option ? option.label : 'Loading...';
+  }
+
   closeActiveDropdown(): void {
     if (this.activeMultiDropdown) {
       this.activeMultiDropdown = null;

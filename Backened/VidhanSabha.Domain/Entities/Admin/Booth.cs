@@ -18,6 +18,7 @@ namespace VidhanSabha.Domain.Entities.Admin
         public string PollingStationLocation { get; private set; }
         public bool IsBoothSanyojak { get; private set; }
 
+        public bool Status { get; private set; } = true;
         public Tbl_Sector Sector { get; private set; }
         public Tbl_Mandal Mandal { get; private set; }
       
@@ -94,6 +95,23 @@ namespace VidhanSabha.Domain.Entities.Admin
             _villages.Clear();
             _villages.AddRange(villages);
         }
+
+        public void Delete()
+        {
+            Status = false;
+
+            // delete sanyojak if exists
+            if (Sanyojak != null)
+            {
+                Sanyojak.Delete();
+            }
+
+            // delete villages
+            foreach (var village in _villages)
+            {
+                village.Delete();
+            }
+        }
     }
 
     // ── Village join entity ──────────────────────────────────────
@@ -105,6 +123,7 @@ namespace VidhanSabha.Domain.Entities.Admin
 
         public bool HasAnshik { get; private set; }
 
+        public bool Status { get; private set; } = true;
         public Tbl_Village? Village { get; private set; }
         public Tbl_Booth Booth { get; set; }
         private Tbl_BoothVillage() { }
@@ -115,6 +134,11 @@ namespace VidhanSabha.Domain.Entities.Admin
                 VillageId = villageId,
                 HasAnshik = hasAnshik,
             };
+
+        public void Delete()
+        {
+            Status = false;
+        }
     }
 
 
@@ -133,6 +157,8 @@ namespace VidhanSabha.Domain.Entities.Admin
         public string? Address { get; private set; }
         public string? ProfileImagePath { get; private set; }
         public Tbl_Cast? Cast { get; private set; }
+
+        public Boolean Status { get; private set; } = true;
         private Tbl_BoothSanyojak() { }
 
         public static Tbl_BoothSanyojak Create(
@@ -160,8 +186,8 @@ namespace VidhanSabha.Domain.Entities.Admin
          string fatherName,
          int categoryId,
         int castId,
-        string phoneNumber,
         string? educationLevel,
+         string phoneNumber,
         string? address)
         {
             // validation (important)
@@ -179,6 +205,11 @@ namespace VidhanSabha.Domain.Entities.Admin
             EducationLevel = educationLevel;
             PhoneNumber = phoneNumber;
             Address = address;
+        }
+
+        public void Delete()
+        {
+            Status = false;
         }
     }
 }

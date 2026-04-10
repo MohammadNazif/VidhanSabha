@@ -5,6 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using VidhanSabha.Application.Common.Category.Interfaces;
+using VidhanSabha.Application.Common.Village.DTOs;
+using VidhanSabha.Application.Pannels.Admin.Booth.Dtos;
+using VidhanSabha.Domain.Entities.Admin;
 using VidhanSabha.Domain.Entities.Common;
 using VidhanSabha.Infrastructure.Persistence;
 
@@ -30,6 +33,19 @@ namespace VidhanSabha.Infrastructure.Repositories.Common
             return await _context.Set<Tbl_Village>().
                   Where(m => m.MandalId == mandalId).
                    OrderBy(c => c.VillageName).
+                   ToListAsync();
+        }
+
+        public async Task<List<VillageByBoothResponseDto>> GetAllByBoothIdAsync(int boothId)
+        {
+            return await _context.Set<Tbl_BoothVillage>().
+                  Where(m => m.BoothId == boothId)
+                  .Select(m => new VillageByBoothResponseDto
+                  {
+                      Id = m.VillageId,
+                      Name = m.Village.VillageName
+                  }
+                  ).
                    ToListAsync();
         }
     }

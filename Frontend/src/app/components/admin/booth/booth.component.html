@@ -1,17 +1,17 @@
-<div class="px-6 py-8">
-    <app-page-header title="Booth Registry" subtitle="Manage and view all Booths in the legislative assembly.">
+<div class="h-screen p-6 flex flex-col overflow-hidden">
+    <app-page-header title="Booth Registration" subtitle="Manage and view all Booths in the legislative assembly.">
 
         <div class="flex items-center gap-3">
 
-            <app-generic-modal-button #boothModal [config]="addBoothConfig" label="Add Booth" icon="+"
-                variant="primary" (formSubmit)="handleFormSubmit($event)">
+            <app-generic-modal-button #boothModal [config]="addBoothConfig" label="Add Booth" icon="+" variant="primary"
+                (formSubmit)="handleFormSubmit($event)">
             </app-generic-modal-button>
         </div>
     </app-page-header>
 
     <!-- Table Card Wrapper -->
-    <div class="rounded-2xl border border-slate-200 bg-white shadow-sm p-1 lg:p-3 overflow-hidden">
-        <app-generic-table [data]="boothList" [columns]="columns" [config]="config" [actions]="actions"
+    <div class="flex-1 min-h-0 rounded-2xl border border-slate-200 bg-white shadow-sm p-1 lg:p-3 overflow-hidden flex flex-col">
+        <app-generic-table class="flex-1 min-h-0" [data]="boothList" [columns]="columns" [config]="config" [actions]="actions"
             (actionClick)="handleAction($event)" (selectionChange)="handleSelection($event)">
         </app-generic-table>
     </div>

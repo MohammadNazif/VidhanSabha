@@ -1,0 +1,15 @@
+<div class="h-screen p-6 flex flex-col overflow-hidden">
+    <app-page-header title="Panna Pramukh Management" subtitle="Manage and organize Panna Pramukhs across booths">
+        <div class="flex gap-3">
+            <app-generic-modal-button #pannaModal [config]="addPannaConfig" label="Add Panna Pramukh" icon="+"
+                (formSubmit)="handleFormSubmit($event)" variant="primary">
+            </app-generic-modal-button>
+        </div>
+    </app-page-header>
+
+    <div class="flex-1 min-h-0 bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
+        <app-generic-table class="flex-1 min-h-0" [data]="pannaList" [columns]="columns" [config]="config" [actions]="actions"
+            (actionClick)="handleAction($event)">
+        </app-generic-table>
+    </div>
+</div>

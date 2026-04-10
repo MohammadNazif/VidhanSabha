@@ -7,6 +7,7 @@ using VidhanSabha.Application.Common.Cast.Interfaces;
 using VidhanSabha.Application.Common.Category.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.Booth.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.Mandal.Interfaces;
+using VidhanSabha.Application.Pannels.Admin.PannaPramukh.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.Sector.Interface;
 using VidhanSabha.Application.Pannels.Auth.Commands.Login;
 using VidhanSabha.Application.Pannels.Auth.Interfaces;
@@ -36,6 +37,7 @@ namespace VidhanSabha.Infrastructure.DependencyInjection
             services.AddScoped<IMandalRepository, MandalRepository>();
             services.AddScoped<ISectorRepository, SectorRepository>();
             services.AddScoped<IBoothRepository, BoothRepository>();
+            services.AddScoped<IPannaPramukhRepository,PannaPramukh>();
 
             return services;
         }

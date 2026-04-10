@@ -228,7 +228,7 @@ export class BoothComponent implements OnInit {
         id: 'phoneNumber',
         name: 'phoneNumber',
         label: 'Phone Number',
-        type: 'text',
+        type: 'number',
         placeholder: 'Enter 10-digit mobile number',
         validations: [Validators.pattern('^[0-9]{10}$')],
         visibleIf: { field: 'isBoothSanyojak', operator: '==', value: 'Yes' },

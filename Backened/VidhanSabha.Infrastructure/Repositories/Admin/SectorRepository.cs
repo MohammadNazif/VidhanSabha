@@ -34,11 +34,11 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
         public async Task<List<Tbl_Sector>?> GetByMandalIdAsync(int id)
       => await _context.Tbl_Sector
           .Where(s => s.MandalId == id && s.Status)
-          .Include(s => s.Mandal)
-          .Include(s => s.Village)
-          .Include(s => s.Category)
-          .Include(s => s.Cast)
-            .ToListAsync();
+           .Include(s => s.Mandal)
+           .Include(s => s.Village)
+           .Include(s => s.Category)
+           .Include(s => s.Cast)
+           .ToListAsync();
         
         public async Task AddAsync(Tbl_Sector sector)
         {
@@ -54,7 +54,7 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
 
         public async Task DeleteAsync(Tbl_Sector sector)
         {
-            sector.Delete();
+             sector.Delete();
             _context.Tbl_Sector.Update(sector);
             await _context.SaveChangesAsync();
         }

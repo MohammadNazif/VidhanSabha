@@ -11,15 +11,15 @@ using VidhanSabha.Application.Exceptions;
 
 namespace VidhanSabha.Application.Common.Category.Queries
 {
-    public class GetAllVillageQueryHandler : IRequestHandler<GetallVillage, List<VillageResponseDto>>
+    public class GetAllVillageByMandalIdQueryHandler : IRequestHandler<GetallVillageByMandalId, List<VillageResponseDto>>
     {
         private IVillageRepository _repo;
 
-        public GetAllVillageQueryHandler(IVillageRepository repo)
+        public GetAllVillageByMandalIdQueryHandler(IVillageRepository repo)
         {
             _repo = repo;
         }
-        public async Task<List<VillageResponseDto>> Handle(GetallVillage request, CancellationToken cancellationToken)
+        public async Task<List<VillageResponseDto>> Handle(GetallVillageByMandalId request, CancellationToken cancellationToken)
         {
             var villages =  await _repo.GetAllByMandalIdAsync(request.id);
 

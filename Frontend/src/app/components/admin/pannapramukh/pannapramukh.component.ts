@@ -1,0 +1,256 @@
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Validators } from '@angular/forms';
+import { GenericTableComponent } from '../../shared/generic-table/generic-table.component';
+import { TableAction, TableColumn, TableConfig } from '../../shared/generic-table/generic-table.types';
+import { GenericModalButtonComponent } from '../../shared/generic-modal-form/generic-modal-button.component';
+import { FormConfig, FormResult } from '../../shared/generic-modal-form/generic-form.types';
+import { PageHeaderComponent } from '../../shared/page-header/page-header.component';
+import { PannapramukhService } from '../../../Services/Admin/pannapramukh/pannapramukh.service';
+import { ToastService } from '../../../Services/common/toast/toast.service';
+import { CrudHandlerService } from '../../../Services/common/crud-handler.service';
+
+@Component({
+  selector: 'app-pannapramukh',
+  standalone: true,
+  imports: [CommonModule, PageHeaderComponent, GenericTableComponent, GenericModalButtonComponent],
+  templateUrl: './pannapramukh.component.html',
+  styleUrl: './pannapramukh.component.css'
+})
+export class PannapramukhComponent implements OnInit {
+  @ViewChild('pannaModal') pannaModal!: GenericModalButtonComponent;
+
+  pannaList: any[] = [];
+
+  columns: TableColumn[] = [
+    { key: 'boothNumber', label: 'Booth Number', sortable: true },
+    {
+      key: 'villageName', label: 'Village', sortable: true, formatter: (val: any, row: any) => {
+        if (row.villages && Array.isArray(row.villages)) {
+          return row.villages.map((v: any) => v.villageName).join(', ');
+        }
+        return val || 'N/A';
+      }
+    },
+    { key: 'pannaPramukhName', label: 'Panna Pramukh', sortable: true },
+    { key: 'pannaNumber', label: 'Panna No.', sortable: true },
+    { key: 'castName', label: 'Cast', sortable: true },
+    { key: 'voterId', label: 'Voter ID', sortable: true },
+    { key: 'address', label: 'Address', sortable: true },
+    { key: 'phoneNumber', label: 'Phone Number', sortable: true }
+
+  ];
+
+  config: TableConfig = {
+    searchable: true,
+    paginated: true,
+    filterable: false,
+    showRowNumbers: true,
+    striped: true,
+    hoverable: true
+  };
+
+  actions: TableAction[] = [
+    { id: 'edit', label: '', variant: 'default', icon: '✏️' },
+    { id: 'delete', label: '', variant: 'danger', icon: '🗑️' }
+  ];
+
+  addPannaConfig: FormConfig = {
+    title: 'Add Panna Pramukh',
+    submitLabel: 'Save',
+    fields: [
+      {
+        id: 'boothId',
+        name: 'boothId',
+        label: 'Booth',
+        type: 'select',
+        placeholder: '--Select Booth--',
+        apiUrl: 'booth/getall',
+        apiMapper: (data: any) => {
+          const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
+          return list.map((item: any) => ({
+            value: String(item.id),
+            label: `BoothNumber ${item.boothNumber} - ${item.pollingStationName}`
+          }));
+        },
+        validations: [Validators.required],
+        gridColSpan: 6
+      },
+      {
+        id: 'villageId',
+        name: 'villageIds',
+        label: 'Village',
+        type: 'select',
+        placeholder: '--Select Village--',
+        dependsOn: 'boothId',
+        apiUrl: (boothId: string) => `common/villagesByBoothId?boothId=${boothId}`,
+        apiMapper: (data: any) => {
+          const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
+          return list.map((item: any) => ({
+            value: String(item.id),
+            label: item.name
+          }));
+        },
+        validations: [Validators.required],
+        gridColSpan: 6,
+        multiple: true
+      },
+      {
+        id: 'pannaPramukhName',
+        name: 'pannaPramukhName',
+        label: 'Panna Pramukh',
+        type: 'text',
+        placeholder: 'Enter Panna Pramukh Name',
+        validations: [Validators.required],
+        gridColSpan: 6
+      },
+      {
+        id: 'pannaNumber',
+        name: 'pannaNumber',
+        label: 'Panna Number From',
+        type: 'number',
+        placeholder: 'Enter panna number',
+        validations: [Validators.required],
+        gridColSpan: 6
+      },
+      {
+        id: 'categoryId',
+        name: 'categoryId',
+        label: 'Category',
+        type: 'select',
+        placeholder: '--Select Category--',
+        apiUrl: 'common/category',
+        apiMapper: (data: any) => {
+          const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
+          return list.map((item: any) => ({
+            value: String(item.id),
+            label: item.name
+          }));
+        },
+        validations: [Validators.required],
+        gridColSpan: 6
+      },
+      {
+        id: 'castId',
+        name: 'castId',
+        label: 'Cast',
+        type: 'select',
+        placeholder: '--Select Cast--',
+        dependsOn: 'categoryId',
+        apiUrl: (categoryId: string) => `common/cast?id=${categoryId}`,
+        apiMapper: (data: any) => {
+          const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
+          return list.map((item: any) => ({
+            value: String(item.id),
+            label: item.name
+          }));
+        },
+        validations: [Validators.required],
+        gridColSpan: 6
+      },
+      {
+        id: 'voterId',
+        name: 'voterId',
+        label: 'Voter ID',
+        type: 'number',
+        placeholder: 'Enter voter id',
+        validations: [Validators.required],
+        gridColSpan: 6
+      },
+
+      {
+        id: 'phoneNumber',
+        name: 'phoneNumber',
+        label: 'Phone Number',
+        type: 'text',
+        placeholder: 'Enter phone number',
+        validations: [Validators.required, Validators.pattern('^[0-9]{10}$')],
+        gridColSpan: 6
+      },
+      {
+        id: 'address',
+        name: 'address',
+        label: 'Address',
+        type: 'textarea',
+        placeholder: 'Enter address',
+        validations: [Validators.required],
+        gridColSpan: 12
+      },
+      {
+        id: 'profilePicture',
+        name: 'profilePicture',
+        label: 'Profile Picture',
+        type: 'file',
+        placeholder: 'Upload profile picture',
+        validations: [],
+        gridColSpan: 12
+      }
+    ]
+  };
+
+  constructor(
+    private pannaService: PannapramukhService,
+    private toastService: ToastService,
+    private crudHandler: CrudHandlerService
+  ) { }
+
+  ngOnInit() {
+    this.loadPannas();
+  }
+
+  loadPannas() {
+    this.pannaService.getAllPannapramukhs().subscribe({
+      next: (response) => {
+        this.pannaList = response.data || (Array.isArray(response) ? response : []);
+
+      },
+      error: (err) => {
+        console.error('Error fetching panna pramukhs:', err);
+      }
+    });
+  }
+
+  handleAction(event: any) {
+    const { action, row } = event;
+    if (action.id === 'delete') {
+      this.crudHandler.handleRequest(
+        this.pannaService.deletePannapramukh(row.id),
+        'Deleted',
+        'Panna Pramukh deleted successfully!',
+        () => this.loadPannas()
+      );
+    } else if (action.id === 'edit') {
+      const editData = { ...row };
+
+      // Map villages to villageId string array for multi-select binding
+      if (editData.villages && Array.isArray(editData.villages)) {
+        editData.villageId = editData.villages.map((v: any) => String(v.villageId));
+      }
+
+      // Convert critical IDs to strings for dropdown matching and cascading triggers
+      ['id', 'boothId', 'categoryId', 'castId'].forEach(key => {
+        if (editData[key]) {
+          editData[key] = String(editData[key]);
+        }
+      });
+
+      this.pannaModal.openModal(editData);
+    }
+  }
+
+  handleFormSubmit(result: FormResult) {
+    if (!result.status) return;
+
+    const isUpdate = !!result.data.id;
+    const request = isUpdate
+      ? this.pannaService.updatePannapramukh(result.data)
+      : this.pannaService.createPannapramukh(result.data);
+
+    this.crudHandler.handleRequest(
+      request,
+      isUpdate ? 'Updated' : 'Success',
+      `Panna Pramukh ${isUpdate ? 'updated' : 'created'} successfully!`,
+      () => this.loadPannas()
+    );
+  }
+}

@@ -10,9 +10,9 @@ import { DynamicFormModalComponent } from './dynamic-form-modal.component';
   template: `
     <button (click)="openModal()" 
             [class]="buttonClass"
-            class="flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all duration-200 active:scale-95 shadow-sm hover:shadow-md"
+            class="flex items-center gap-2 px-3.5 py-1.5 rounded-lg font-medium text-sm transition-all duration-200 active:scale-95 shadow-sm hover:shadow-md"
     >
-      <span *ngIf="icon" class="text-lg">{{ icon }}</span>
+      <span *ngIf="icon" class="text-base">{{ icon }}</span>
       <span>{{ label }}</span>
     </button>
 

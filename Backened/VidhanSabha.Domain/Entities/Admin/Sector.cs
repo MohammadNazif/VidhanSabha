@@ -162,6 +162,6 @@ namespace VidhanSabha.Domain.Entities.Admin
             UpdatedAt = DateTime.UtcNow;
         }
 
-        public void Delete() => Status = true;
+        public void Delete() => Status = false;
     }
 }

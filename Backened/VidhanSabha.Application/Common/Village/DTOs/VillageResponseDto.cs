@@ -10,8 +10,15 @@ namespace VidhanSabha.Application.Common.Village.DTOs
     {
         public int Id { get; set; }
 
+
         public int MandalId { get; set; }
         public string Name { get; set; }
         public bool Status { get; set; }
+    }
+
+    public class VillageByBoothResponseDto
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
     }
 }

@@ -11,6 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Common\Booth\Interface\" />
     <Folder Include="Pannels\Admin\VidhansabhaRegistration\Commands\" />
     <Folder Include="Pannels\Admin\VidhansabhaRegistration\DTOs\" />
     <Folder Include="Pannels\Admin\VidhansabhaRegistration\Interfaces\" />

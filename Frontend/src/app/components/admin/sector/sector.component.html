@@ -1,8 +1,6 @@
-<div class="px-6 py-8">
-    <app-page-header 
-        title="Sectors Registry" 
-        subtitle="Manage and view all sectors in the assembly.">
-        
+<div class="h-screen p-6 flex flex-col overflow-hidden">
+    <app-page-header title="Sectors Registration" subtitle="Manage and view all sectors in the assembly.">
+
         <div class="flex items-center gap-3">
             <!-- Conditional Export Control -->
             <div *ngIf="membersData && membersData.length > 0" class="relative">
@@ -15,31 +13,22 @@
                 </select>
                 <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-500">
                     <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                        <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
+                        <path
+                            d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
                     </svg>
                 </div>
             </div>
 
-            <app-generic-modal-button 
-                #sectorModal
-                [config]="addSectorConfig" 
-                label="Add Sector" 
-                icon="+" 
-                variant="primary"
-                (formSubmit)="handleFormSubmit($event)">
+            <app-generic-modal-button #sectorModal [config]="addSectorConfig" label="Add Sector" icon="+"
+                variant="primary" (formSubmit)="handleFormSubmit($event)">
             </app-generic-modal-button>
         </div>
     </app-page-header>
 
     <!-- Table Card Wrapper -->
-    <div class="rounded-2xl border border-slate-200 bg-white shadow-sm p-1 lg:p-3 overflow-hidden">
-        <app-generic-table 
-            [data]="membersData" 
-            [columns]="columns" 
-            [config]="config" 
-            [actions]="actions"
-            (actionClick)="handleAction($event)" 
-            (selectionChange)="handleSelection($event)">
+    <div class="flex-1 min-h-0 rounded-2xl border border-slate-200 bg-white shadow-sm p-1 lg:p-3 overflow-hidden flex flex-col">
+        <app-generic-table class="flex-1 min-h-0" [data]="membersData" [columns]="columns" [config]="config" [actions]="actions"
+            (actionClick)="handleAction($event)" (selectionChange)="handleSelection($event)">
         </app-generic-table>
     </div>
 </div>

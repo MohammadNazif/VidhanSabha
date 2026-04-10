@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using MediatR;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using VidhanSabha.Application.Common.Booth.Dtos;
 using VidhanSabha.Application.Pannels.Admin.Booth.Dtos;
 using VidhanSabha.Application.Pannels.Admin.Booth.Interfaces;
 using VidhanSabha.Domain.Entities.Admin;
@@ -33,14 +34,24 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
             }
         }
 
-        public Task<bool> BoothNumberExistsAsync(int mandalId, int boothNumber, int? excludeId, CancellationToken ct = default)
+        public Task<List<BoothNumberDto>> BoothNumberExistsAsync()
         {
-            throw new NotImplementedException();
+          var res = _context.Tbl_Booth
+             
+               .Select(b => new BoothNumberDto
+             {
+                 BoothId = b.Id,
+                 BoothNumber = b.BoothNumber,
+                 BoothName = b.PollingStationName
+             }).ToListAsync();
+            return res;
         }
 
-        public void Delete(Tbl_Booth booth)
+        public async Task Delete(Tbl_Booth booth)
         {
-            throw new NotImplementedException();
+             _context.Tbl_Booth.Update(booth);
+              await _context.SaveChangesAsync();
+            
         }
 
         public async Task<List<BoothResponseDto>> GetAllAsync(
@@ -91,8 +102,8 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
         public async Task<Tbl_Booth?> GetByIdAsync(int id, CancellationToken ct)
         {
             return await _context.Tbl_Booth
-                .Include(b => b.Villages)    // ✅ must include for _villages.Clear() to work
-                .Include(b => b.Sanyojak)   // ✅ must include for sanyojak update logic
+                .Include(b => b.Villages)    
+                .Include(b => b.Sanyojak)   
                 .FirstOrDefaultAsync(b => b.Id == id, ct);
         }
 
