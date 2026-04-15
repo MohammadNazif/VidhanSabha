@@ -39,6 +39,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseRouting();
 app.UseAuthorization();
+app.MapSuperAdminEndpoints();
 app.MapAdminEndpoints();
 app.MapCommonEndpoints();
 app.MapAuthEndpoints();

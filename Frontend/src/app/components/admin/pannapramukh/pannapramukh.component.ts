@@ -23,7 +23,7 @@ export class PannapramukhComponent implements OnInit {
   pannaList: any[] = [];
 
   columns: TableColumn[] = [
-    { key: 'boothNumber', label: 'Booth Number', sortable: true },
+    { key: 'boothNumber', label: 'Booth No.', sortable: true },
     {
       key: 'villageName', label: 'Village', sortable: true, formatter: (val: any, row: any) => {
         if (row.villages && Array.isArray(row.villages)) {
@@ -51,14 +51,20 @@ export class PannapramukhComponent implements OnInit {
   };
 
   actions: TableAction[] = [
-    { id: 'edit', label: '', variant: 'default', icon: '✏️' },
-    { id: 'delete', label: '', variant: 'danger', icon: '🗑️' }
+    { id: 'edit', label: '', variant: 'default', icon: 'edit' },
+    { id: 'delete', label: '', variant: 'danger', icon: 'delete' }
   ];
 
   addPannaConfig: FormConfig = {
     title: 'Add Panna Pramukh',
     submitLabel: 'Save',
     fields: [
+      {
+        id: 'id',
+        name: 'id',
+        label: 'ID',
+        type: 'hidden'
+      },
       {
         id: 'boothId',
         name: 'boothId',
@@ -78,7 +84,7 @@ export class PannapramukhComponent implements OnInit {
       },
       {
         id: 'villageId',
-        name: 'villageIds',
+        name: 'villageId',
         label: 'Village',
         type: 'select',
         placeholder: '--Select Village--',
@@ -221,7 +227,6 @@ export class PannapramukhComponent implements OnInit {
       );
     } else if (action.id === 'edit') {
       const editData = { ...row };
-
       // Map villages to villageId string array for multi-select binding
       if (editData.villages && Array.isArray(editData.villages)) {
         editData.villageId = editData.villages.map((v: any) => String(v.villageId));
@@ -241,10 +246,22 @@ export class PannapramukhComponent implements OnInit {
   handleFormSubmit(result: FormResult) {
     if (!result.status) return;
 
-    const isUpdate = !!result.data.id;
+    const raw = result.data;
+    const submitData: any = {
+      ...raw,
+      id: raw.id ? Number(raw.id) : null,
+      boothId: Number(raw.boothId),
+      categoryId: Number(raw.categoryId),
+      castId: Number(raw.castId),
+      pannaNumber: Number(raw.pannaNumber),
+      voterId: String(raw.voterId), // voterId is string in response JSON
+      villageId: Array.isArray(raw.villageId) ? raw.villageId.map((v: any) => Number(v)) : Number(raw.villageId)
+    };
+
+    const isUpdate = !!submitData.id;
     const request = isUpdate
-      ? this.pannaService.updatePannapramukh(result.data)
-      : this.pannaService.createPannapramukh(result.data);
+      ? this.pannaService.updatePannapramukh(submitData)
+      : this.pannaService.createPannapramukh(submitData);
 
     this.crudHandler.handleRequest(
       request,

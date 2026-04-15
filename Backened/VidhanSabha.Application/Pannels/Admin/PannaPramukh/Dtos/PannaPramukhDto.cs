@@ -50,24 +50,9 @@ namespace VidhanSabha.Application.Pannels.Admin.PannaPramukh.Dtos
         public string VillageName { get; set; } = string.Empty;
     }
     // ── Update Request ────────────────────────────────────────────
-    public class UpdatePannaPramukhRequestDto
+    public class UpdatePannaPramukhRequestDto : CreatePannaPramukhRequestDto
     {
-        public int BoothId { get; set; }
-        public List<int> VillageIds { get; set; } = new();
-        public string PannaPramukhName { get; set; } = string.Empty;
-        public int PannaNumber { get; set; }
-        public int CategoryId { get; set; }
-        public int CastId { get; set; }
-        public string VoterId { get; set; } = string.Empty;
-        public string PhoneNumber { get; set; } = string.Empty;
-        public string Address { get; set; } = string.Empty;
-
-        /// <summary>
-        /// null bhejo = purani image rakho
-        /// naya file bhejo = replace ho jayegi
-        /// </summary>
-        //public IFormFile? ProfilePicture { get; set; }
-
-       
+        public int Id { get; set; }
+ 
     }
 }

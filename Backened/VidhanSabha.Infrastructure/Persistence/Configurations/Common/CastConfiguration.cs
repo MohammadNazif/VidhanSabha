@@ -5,20 +5,20 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using VidhanSabha.Domain.Entities.Admin;
+using VidhanSabha.Domain.Entities.Common;
 
-namespace VidhanSabha.Infrastructure.Persistence.Configurations
+namespace VidhanSabha.Infrastructure.Persistence.Configurations.Common
 {
-    public class MandalConfiguration : IEntityTypeConfiguration<Tbl_Mandal>
+    public class CastConfiguration : IEntityTypeConfiguration<Tbl_Cast>
     {
-        public void Configure(EntityTypeBuilder<Tbl_Mandal> entity)
+        public void Configure(EntityTypeBuilder<Tbl_Cast> entity)
         {
-            entity.ToTable("Tbl_Mandal");
+            entity.ToTable("Tbl_Cast");
             entity.HasQueryFilter(e => e.Status);
             entity.HasKey(e => e.Id);
             entity.Property(e => e.Id).UseIdentityColumn();
-            entity.Property(e => e.VidhanId).IsRequired();
-            entity.Property(e => e.Name).HasMaxLength(255).IsRequired();
+            entity.Property(e => e.CategoryId).IsRequired();
+            entity.Property(e => e.CastName).HasMaxLength(255).IsRequired();
             entity.Property(e => e.Status).HasDefaultValue(true);
         }
     }

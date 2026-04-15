@@ -162,7 +162,7 @@
                 <button [class]="'action-btn action-' + (action.variant || 'default')"
                   [class.disabled]="isActionDisabled(action, row)" [title]="action.label"
                   (click)="onActionClick(action, row, i, $event)" *ngIf="isActionVisible(action, row)">
-                  <span *ngIf="action.icon" class="action-icon">{{ action.icon }}</span>
+                  <span *ngIf="action.icon" class="action-icon" [innerHTML]="getSafeIcon(action.icon)"></span>
                   <span class="action-label">{{ action.label }}</span>
                 </button>
               </ng-container>

@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using VidhanSabha.Domain.Entities.Admin;
 
-namespace VidhanSabha.Infrastructure.Persistence.Configurations
+namespace VidhanSabha.Infrastructure.Persistence.Configurations.Admin
 {
     public class SectorConfiguration : IEntityTypeConfiguration<Tbl_Sector>
     {

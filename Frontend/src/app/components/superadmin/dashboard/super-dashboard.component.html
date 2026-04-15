@@ -1,0 +1,104 @@
+<div class="dashboard-container p-4 lg:p-6 min-h-screen">
+  
+  <!-- 🔥 Compact Header -->
+  <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-5 gap-3">
+    <div>
+      <h1 class="text-lg md:text-xl font-bold text-slate-900 leading-tight">
+        Welcome back, 
+        <span class="text-transparent bg-clip-text" style="background-image: linear-gradient(135deg, #4f46e5, #6366f1);">
+          Superadmin
+        </span> 👑
+      </h1>
+      <p class="text-xs text-slate-500 mt-0.5">Global oversight and administrative controls</p>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <div class="px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 bg-white border border-slate-200 shadow-sm">
+        📅 {{ currentDate | date:'mediumDate' }}
+      </div>
+      <button class="px-3 py-1.5 rounded-lg text-xs font-bold text-white transition-all duration-300 shadow-sm hover:shadow-md hover:-translate-y-0.5"
+              style="background: linear-gradient(135deg, #4f46e5, #6366f1);">
+        + Master Data
+      </button>
+    </div>
+  </div>
+
+  <!-- 🔥 Thin Stat Cards (Admin Design) -->
+  <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-4 gap-4 mb-6">
+    <div *ngFor="let card of statCards; let i = index" 
+         (click)="navigateTo(card.route)"
+         class="stat-card group relative overflow-hidden rounded-xl p-3 bg-white border border-slate-200 cursor-pointer shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md"
+         [style.animation-delay]="i * 20 + 'ms'">
+      <!-- Glow -->
+      <div class="absolute -top-8 -right-8 w-20 h-20 rounded-full opacity-10 blur-2xl transition-opacity duration-500 group-hover:opacity-20"
+           [style.background]="card.gradient"></div>
+
+      <div class="flex items-center justify-between relative z-10">
+        <div>
+          <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+            {{ card.title }}
+          </p>
+          <p class="text-lg md:text-xl font-bold text-slate-800 leading-none">
+            {{ card.value }}
+          </p>
+          
+          <div class="flex items-center gap-1 mt-1">
+            <span class="text-[10px] font-bold px-1.5 py-0.5 rounded"
+                  [class]="card.changeType === 'up' ? 'text-green-700 bg-green-100' : 'text-red-700 bg-red-100'">
+              {{ card.changeType === 'up' ? '↑' : '↓' }} {{ card.change }}
+            </span>
+          </div>
+        </div>
+
+        <!-- High-Visibility Icon Box -->
+        <div class="w-9 h-9 rounded-lg flex items-center justify-center absolute right-3 top-3 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3 shadow-sm text-white"
+             [style.background]="card.gradient">
+          <lucide-icon [name]="card.icon" [size]="18" [strokeWidth]="2.5"></lucide-icon>
+        </div>
+      </div>
+
+      <!-- Bottom bar -->
+      <div class="absolute bottom-0 left-0 right-0 h-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+           [style.background]="card.gradient"></div>
+    </div>
+  </div>
+
+  <!-- Charts Row -->
+  <div class="grid grid-cols-1 xl:grid-cols-3 gap-5 mb-5">
+    <!-- Distribution Chart -->
+    <div class="chart-card rounded-2xl p-5 bg-white border border-slate-200 shadow-sm">
+      <div class="mb-4">
+        <h3 class="text-base font-bold text-slate-800">Prabhari Assignment</h3>
+        <p class="text-xs text-slate-500 mt-0.5 font-medium">Vidhan Sabha distribution</p>
+      </div>
+      <div class="h-[240px] flex items-center justify-center">
+        <canvas #prabhariChart></canvas>
+      </div>
+    </div>
+
+    <!-- Quick Actions/Activities -->
+    <div class="xl:col-span-2 chart-card rounded-2xl p-5 bg-white border border-slate-200 shadow-sm">
+      <div class="mb-6 flex items-center justify-between">
+        <div>
+          <h3 class="text-base font-bold text-slate-800">Recent System Activities</h3>
+          <p class="text-xs text-slate-500 mt-0.5 font-medium">Key events across all districts</p>
+        </div>
+        <button class="text-xs font-bold text-indigo-600 hover:underline">View All</button>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div *ngFor="let item of [1,2,3,4]" class="flex items-center gap-4 p-4 rounded-xl border border-slate-50 hover:bg-slate-50 transition-colors cursor-pointer group">
+          <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 transition-colors group-hover:bg-indigo-100 group-hover:text-indigo-600">
+            ⚙️
+          </div>
+          <div class="flex-1">
+            <h4 class="text-sm font-bold text-slate-800">New Designation Added</h4>
+            <p class="text-[11px] text-slate-500">Mandal Sanyojak role created by Admin</p>
+          </div>
+          <span class="text-[10px] font-bold text-slate-400">2h ago</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

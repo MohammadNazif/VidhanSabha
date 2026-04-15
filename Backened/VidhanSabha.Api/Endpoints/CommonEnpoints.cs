@@ -8,6 +8,10 @@ using VidhanSabha.Application.Common.Cast.DTOs;
 using VidhanSabha.Application.Common.Cast.Queries;
 using VidhanSabha.Application.Common.Category.DTOs;
 using VidhanSabha.Application.Common.Category.Queries;
+using VidhanSabha.Application.Common.DesignatinType.Dto;
+using VidhanSabha.Application.Common.DesignatinType.Query;
+using VidhanSabha.Application.Common.State.Dto;
+using VidhanSabha.Application.Common.State.Query;
 using VidhanSabha.Application.Common.Village.DTOs;
 using VidhanSabha.Application.Common.Village.Queries;
 using VidhanSabha.Application.Pannels.Auth.DTOs;
@@ -23,19 +27,19 @@ namespace VidhanSabha.Api.Endpoints
                           .WithTags("Common");
 
             // ── LOGIN ────────────────────────────────────────────
-          common.MapGet("/category", async (IMediator mediator) =>
-            {
-                var result = await mediator.Send(new GetallCatgeory());
-               return Results.Ok(ApiResponse<List<CategoryResponseDto>>.Ok(result));
-            })
-          .WithName("GetAllCategories")
-          .Produces<ApiResponse<List<CategoryResponseDto>>>(200);
+            common.MapGet("/category", async (IMediator mediator) =>
+              {
+                  var result = await mediator.Send(new GetallCatgeory());
+                  return Results.Ok(ApiResponse<List<CategoryResponseDto>>.Ok(result));
+              })
+            .WithName("GetAllCategories")
+            .Produces<ApiResponse<List<CategoryResponseDto>>>(200);
 
             common.MapGet("/cast", async (IMediator mediator, int id) =>
             {
                 var result = await mediator.Send(new getAllCastQuery(id));
                 return Results.Ok(ApiResponse<List<CastResponseDto>>.Ok(result));
-  
+
             })
              .WithName("GetCast")
              .Produces<ApiResponse<List<CastResponseDto>>>(200);
@@ -55,15 +59,31 @@ namespace VidhanSabha.Api.Endpoints
             })
              .WithName("GetBoothNumbers")
              .Produces<List<BoothNumberDto>>(200);
-       
-         common.MapGet("/villagesByBoothId", async(int boothId,IMediator mediator) =>
-            {
-                var result = await mediator.Send(new GetallVillageByBoothId(boothId));
-                return Results.Ok(ApiResponse<List<VillageByBoothResponseDto>>.Ok(result));
-            })
-             .WithName("GetVillagesByBoothId")
-             .Produces<List<VillageByBoothResponseDto>>(200);
-        }
 
+            common.MapGet("/villagesByBoothId", async (int boothId, IMediator mediator) =>
+               {
+                   var result = await mediator.Send(new GetallVillageByBoothId(boothId));
+                   return Results.Ok(ApiResponse<List<VillageByBoothResponseDto>>.Ok(result));
+               })
+                .WithName("GetVillagesByBoothId")
+                .Produces<List<VillageByBoothResponseDto>>(200);
+
+            common.MapGet("/designationType", async (IMediator mediator) =>
+            {
+                var result = await mediator.Send(new getdesignationTypeQuery());
+                return Results.Ok(ApiResponse<List<DesignationTypeResponseDto>>.Ok(result));
+            })
+             .WithName("GetDesignationTypes")
+             .Produces<List<DesignationTypeResponseDto>>(200);
+
+            common.MapGet("/getstates", async (IMediator mediator) =>
+            {
+                var result = await mediator.Send(new getAllStateQuery());
+                return Results.Ok(ApiResponse<IReadOnlyList<StateResponseDto>>.Ok(result));
+             })
+             .WithName("getstates")
+             .Produces<List<StateResponseDto>>(200);
+
+        }
     }
 }

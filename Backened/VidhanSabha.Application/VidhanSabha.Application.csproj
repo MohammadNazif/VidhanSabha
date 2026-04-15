@@ -24,10 +24,6 @@
     <Folder Include="Pannels\Sector\DTOs\" />
     <Folder Include="Pannels\Sector\Interfaces\" />
     <Folder Include="Pannels\Sector\Queries\" />
-    <Folder Include="Pannels\SuperAdmin\Commands\" />
-    <Folder Include="Pannels\SuperAdmin\DTOs\" />
-    <Folder Include="Pannels\SuperAdmin\Interfaces\" />
-    <Folder Include="Pannels\SuperAdmin\Queries\" />
   </ItemGroup>
 
   <ItemGroup>

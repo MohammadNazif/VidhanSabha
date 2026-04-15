@@ -89,8 +89,8 @@ export class MandalComponent implements OnInit {
   };
 
   actions: TableAction[] = [
-    { id: 'edit', label: '', variant: 'default', icon: '✏️' },
-    { id: 'delete', label: '', variant: 'danger', icon: '🗑️' }
+    { id: 'edit', label: '', variant: 'default', icon: 'edit' },
+    { id: 'delete', label: '', variant: 'danger', icon: 'delete' }
   ];
 
 

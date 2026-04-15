@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using VidhanSabha.Application.Pannels.Admin.PannaPramukh.Dtos;
 using VidhanSabha.Application.Pannels.Admin.PannaPramukh.Interfaces;
 using VidhanSabha.Domain.Entities.Admin;
@@ -59,12 +60,19 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
             return  res;
         }
 
-        public Task<Tbl_PannaPramukh?> GetByIdAsync(int id, CancellationToken ct = default)
+        public async Task<Tbl_PannaPramukh?> GetByIdAsync(int id)
         {
-            throw new NotImplementedException();
+            try {
+                return await _context.Tbl_PannaPramukh
+                 .Include(p => p.Villages)
+                 .FirstOrDefaultAsync(e => e.Id == id);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
-
-        public Task<bool> PannaNumberExistsAsync(int boothId, int pannaNumber, int? excludeId = null, CancellationToken ct = default)
+          public Task<bool> PannaNumberExistsAsync(int boothId, int pannaNumber, int? excludeId = null, CancellationToken ct = default)
         {
             throw new NotImplementedException();
         }
@@ -74,9 +82,10 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
             throw new NotImplementedException();
         }
 
-        public void Update(Tbl_PannaPramukh panna)
-        {
-            throw new NotImplementedException();
+        public int Update(Tbl_PannaPramukh panna)
+            {
+            _context.Tbl_PannaPramukh.Update(panna);
+           return  _context.SaveChanges();
         }
     }
 }

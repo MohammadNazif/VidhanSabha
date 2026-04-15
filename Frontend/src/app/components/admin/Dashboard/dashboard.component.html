@@ -31,7 +31,8 @@
   <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-4 mb-6">
     <div *ngFor="let card of statCards; let i = index"
       class="stat-card group relative overflow-hidden rounded-xl p-3 bg-white border border-slate-200 cursor-pointer shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md"
-      [style.animation-delay]="i * 20 + 'ms'">
+      [style.animation-delay]="i * 20 + 'ms'"
+      (click)="navigateTo(card.route)">
       <!-- Glow -->
       <div
         class="absolute -top-8 -right-8 w-20 h-20 rounded-full opacity-10 blur-2xl transition-opacity duration-500 group-hover:opacity-20"
@@ -55,16 +56,10 @@
           </div>
         </div>
 
-        <!-- Icon bg -->
-        <div
-          class="w-8 h-8 rounded-lg flex items-center justify-center text-base transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6"
-          [style.background]="card.gradient" style="opacity: 0.15;">
-        </div>
-
-        <!-- Icon -->
-        <div
-          class="w-8 h-8 rounded-lg flex items-center justify-center text-base absolute right-2 top-2 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6">
-          <span>{{ card.icon }}</span>
+        <!-- High-Visibility Icon Box -->
+        <div class="w-9 h-9 rounded-lg flex items-center justify-center absolute right-3 top-3 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3 shadow-sm text-white"
+             [style.background]="card.gradient">
+          <lucide-icon [name]="card.icon" [size]="18" [strokeWidth]="2.5"></lucide-icon>
         </div>
       </div>
 

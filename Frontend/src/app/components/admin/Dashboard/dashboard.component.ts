@@ -1,16 +1,32 @@
 import { Component, OnInit, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Chart, registerables } from 'chart.js';
+import { 
+  LucideAngularModule, 
+  Building, 
+  Map, 
+  Vote, 
+  BookOpen, 
+  ShieldCheck, 
+  ShieldAlert, 
+  Calendar, 
+  Users, 
+  Plus, 
+  Database 
+} from 'lucide-angular';
+
+import { Router } from '@angular/router';
 
 Chart.register(...registerables);
 
 interface StatCard {
   title: string;
-  value: string;
+  value: string | number;
   change: string;
   changeType: 'up' | 'down';
   icon: string;
   gradient: string;
+  route?: string;
 }
 
 interface RecentActivity {
@@ -24,7 +40,10 @@ interface RecentActivity {
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule],
+  imports: [
+    CommonModule, 
+    LucideAngularModule
+  ],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css'
 })
@@ -36,22 +55,30 @@ export class DashboardComponent implements OnInit, AfterViewInit {
 
   currentDate = new Date();
 
-  statCards = [
-    { title: 'Mandal', value: 5, icon: '🏛️', gradient: 'linear-gradient(135deg, #6366f1, #4f46e5)', change: '+0%', changeType: 'up' },
-    { title: 'Sector', value: 83, icon: '📍', gradient: 'linear-gradient(135deg, #0ea5e9, #0284c7)', change: '+0%', changeType: 'up' },
-    { title: 'Booth', value: 419, icon: '🗳️', gradient: 'linear-gradient(135deg, #22c55e, #16a34a)', change: '+0%', changeType: 'up' },
-    { title: 'PannaPramukh', value: 2, icon: '📘', gradient: 'linear-gradient(135deg, #f59e0b, #d97706)', change: '+0%', changeType: 'up' },
-    { title: 'Sahmat', value: 0, icon: '👍', gradient: 'linear-gradient(135deg, #10b981, #059669)', change: '+0%', changeType: 'up' },
-    { title: 'Asahmat', value: 0, icon: '👎', gradient: 'linear-gradient(135deg, #ef4444, #dc2626)', change: '+0%', changeType: 'down' },
-    { title: 'Activities', value: 1, icon: '📋', gradient: 'linear-gradient(135deg, #8b5cf6, #7c3aed)', change: '+0%', changeType: 'up' },
-    { title: 'Pravasi', value: 3, icon: '🚶', gradient: 'linear-gradient(135deg, #06b6d4, #0891b2)', change: '+0%', changeType: 'up' },
-    { title: 'New Voters', value: 1, icon: '🆕', gradient: 'linear-gradient(135deg, #84cc16, #65a30d)', change: '+0%', changeType: 'up' },
-    { title: 'Double Voter', value: 1, icon: '⚠️', gradient: 'linear-gradient(135deg, #f97316, #ea580c)', change: '+0%', changeType: 'down' },
-    { title: 'Prabhavshali Vyakti', value: 1, icon: '⭐', gradient: 'linear-gradient(135deg, #eab308, #ca8a04)', change: '+0%', changeType: 'up' },
-    { title: 'Block', value: 1, icon: '🏢', gradient: 'linear-gradient(135deg, #64748b, #475569)', change: '+0%', changeType: 'up' },
-    { title: 'BDC', value: 126, icon: '📊', gradient: 'linear-gradient(135deg, #14b8a6, #0f766e)', change: '+0%', changeType: 'up' },
-    { title: 'Influencer Person', value: 0, icon: '🎯', gradient: 'linear-gradient(135deg, #ec4899, #db2777)', change: '+0%', changeType: 'up' }
+  statCards: StatCard[] = [
+    { title: 'Mandal', value: 5, icon: 'building', gradient: 'linear-gradient(135deg, #6366f1, #4f46e5)', change: '+0%', changeType: 'up', route: '/mandal' },
+    { title: 'Sector', value: 83, icon: 'map', gradient: 'linear-gradient(135deg, #0ea5e9, #0284c7)', change: '+0%', changeType: 'up', route: '/sector' },
+    { title: 'Booth', value: 419, icon: 'vote', gradient: 'linear-gradient(135deg, #22c55e, #16a34a)', change: '+0%', changeType: 'up', route: '/booth' },
+    { title: 'PannaPramukh', value: 2, icon: 'book-open', gradient: 'linear-gradient(135deg, #f59e0b, #d97706)', change: '+0%', changeType: 'up', route: '/panna-pramukh' },
+    { title: 'Sahmat', value: 0, icon: 'shield-check', gradient: 'linear-gradient(135deg, #10b981, #059669)', change: '+0%', changeType: 'up', route: '/sahmat-list' },
+    { title: 'Asahmat', value: 0, icon: 'shield-alert', gradient: 'linear-gradient(135deg, #ef4444, #dc2626)', change: '+0%', changeType: 'down', route: '/asahmat-list' },
+    { title: 'Activities', value: 1, icon: 'calendar', gradient: 'linear-gradient(135deg, #8b5cf6, #7c3aed)', change: '+0%', changeType: 'up', route: '/activity' },
+    { title: 'Pravasi', value: 3, icon: 'users', gradient: 'linear-gradient(135deg, #06b6d4, #0891b2)', change: '+0%', changeType: 'up', route: '/pravasi-voter' },
+    { title: 'New Voters', value: 1, icon: 'plus', gradient: 'linear-gradient(135deg, #84cc16, #65a30d)', change: '+0%', changeType: 'up', route: '/new-voter-list' },
+    { title: 'Double Voter', value: 1, icon: 'shield-alert', gradient: 'linear-gradient(135deg, #f97316, #ea580c)', change: '+0%', changeType: 'down', route: '/double-voter-list' },
+    { title: 'Prabhavshali Vyakti', value: 1, icon: 'users', gradient: 'linear-gradient(135deg, #eab308, #ca8a04)', change: '+0%', changeType: 'up', route: '/prabhavshali-vyakt' },
+    { title: 'Block', value: 1, icon: 'building', gradient: 'linear-gradient(135deg, #64748b, #475569)', change: '+0%', changeType: 'up', route: '/block' },
+    { title: 'BDC', value: 126, icon: 'database', gradient: 'linear-gradient(135deg, #14b8a6, #0f766e)', change: '+0%', changeType: 'up', route: '/bdc' },
+    { title: 'Influencer Person', value: 0, icon: 'users', gradient: 'linear-gradient(135deg, #ec4899, #db2777)', change: '+0%', changeType: 'up', route: '/influencer-person' }
   ];
+
+  constructor(private router: Router) { }
+
+  navigateTo(route?: string) {
+    if (route) {
+      this.router.navigate([route]);
+    }
+  }
 
   recentActivities: RecentActivity[] = [
     {

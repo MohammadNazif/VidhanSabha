@@ -2,28 +2,27 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
+import { BaseApiService } from '../../common/base-api.service';
 
 @Injectable({
   providedIn: 'root'
 })
-export class PannapramukhService {
-  private apiUrl = `${environment.apiUrl}/pannapramukh`;
-
-  constructor(private http: HttpClient) { }
+export class PannapramukhService extends BaseApiService {
+  private entity = 'pannapramukh';
 
   getAllPannapramukhs(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/getall`);
+    return this.getAll(this.entity);
   }
 
   createPannapramukh(data: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/create`, data);
+    return this.create(this.entity, data);
   }
 
   updatePannapramukh(data: any): Observable<any> {
-    return this.http.put(`${this.apiUrl}/update`, data);
+    return this.update(this.entity, data);
   }
 
   deletePannapramukh(id: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/delete?id=${id}`);
+    return this.delete(this.entity, id);
   }
 }

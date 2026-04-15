@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using VidhanSabha.Domain.Entities.Auth;
 
-namespace VidhanSabha.Infrastructure.Persistence.Configurations
+namespace VidhanSabha.Infrastructure.Persistence.Configurations.Admin
 {
     public class LoginConfiguration : IEntityTypeConfiguration<Tbl_Login>
     {

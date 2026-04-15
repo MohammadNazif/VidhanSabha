@@ -69,43 +69,63 @@ namespace VidhanSabha.Domain.Entities.Admin
             return panna;
         }
 
-        public void Update(
-            int boothId,
-            int pannaNumber,
-            string pannaPramukhName,
-            int categoryId,
-            int castId,
-            string voterId,
-            string phoneNumber,
-            string address,
-            List<int> villageIds,
-            string? profilePicturePath = null)
-        {
-            if (string.IsNullOrWhiteSpace(pannaPramukhName)) throw new ArgumentException("Name required.");
-            if (!System.Text.RegularExpressions.Regex.IsMatch(phoneNumber, @"^[0-9]{10}$"))
-                throw new ArgumentException("Phone number should be of 10 digits.");
+            public void Update(
+                int boothId,
+                int pannaNumber,
+                string pannaPramukhName,
+                int categoryId,
+                int castId,
+                string voterId,
+                string phoneNumber,
+                string address,
+                List<int> villageIds,
+                string? profilePicturePath = null)
+            {
+                if (string.IsNullOrWhiteSpace(pannaPramukhName)) throw new ArgumentException("Name required.");
+                if (!System.Text.RegularExpressions.Regex.IsMatch(phoneNumber, @"^[0-9]{10}$"))
+                    throw new ArgumentException("Phone number should be of 10 digits.");
 
-            BoothId = boothId;
-            PannaNumber = pannaNumber;
-            PannaPramukhName = pannaPramukhName.Trim();
-            CategoryId = categoryId;
-            CastId = castId;
-            VoterId = voterId.ToString().Trim();
-            PhoneNumber = phoneNumber.Trim();
-            Address = address?.Trim() ?? string.Empty;
+                BoothId = boothId;
+                PannaNumber = pannaNumber;
+                PannaPramukhName = pannaPramukhName.Trim();
+                CategoryId = categoryId;
+                CastId = castId;
+                VoterId = voterId.ToString().Trim();
+                PhoneNumber = phoneNumber.Trim();
+                Address = address?.Trim() ?? string.Empty;
 
-            // Image update sirf tab jab naya aaya ho
-            if (profilePicturePath is not null)
-                ProfilePicturePath = profilePicturePath;
+                // Image update sirf tab jab naya aaya ho
+                if (profilePicturePath is not null)
+                    ProfilePicturePath = profilePicturePath;
 
-            SetVillages(villageIds);
-        }
+                SetVillages(villageIds);
+            }
 
         private void SetVillages(List<int> villageIds)
         {
-            _villages.Clear();
-            foreach (var vid in villageIds)
-                _villages.Add(Tbl_PannaPramukhVillage.Create(vid));
+            // Step 1: Remove villages that are no longer in the new list
+            var toRemove = _villages
+                .Where(v => !villageIds.Contains(v.VillageId))
+                .ToList();
+
+            foreach (var v in toRemove)
+                _villages.Remove(v); // ✅ EF sees this as DELETE
+
+            // Step 2: Add only new villages not already present
+            var existingIds = _villages.Select(v => v.VillageId).ToHashSet();
+
+            foreach (var vid in villageIds.Where(id => !existingIds.Contains(id)))
+                _villages.Add(Tbl_PannaPramukhVillage.Create(vid)); // ✅ EF sees this as INSERT
+        }
+
+        public void Delete()
+        {
+            Status = false;
+
+            foreach (var village in _villages)
+            {
+                village.Delete();
+            }
         }
     }
 
@@ -116,13 +136,19 @@ namespace VidhanSabha.Domain.Entities.Admin
         public int PannaPramukhId { get; private set; }
         public int VillageId { get; private set; }
 
-         public Tbl_PannaPramukh PannaPramukh { get; set; } = null!;
+        public bool Status { get; set; } = true;
+        public Tbl_PannaPramukh PannaPramukh { get; set; } = null!;
         private Tbl_PannaPramukhVillage() { }
         public Tbl_Village Village { get; set; } = null!;
         public static Tbl_PannaPramukhVillage Create(int villageId)
         {
             if (villageId <= 0) throw new ArgumentException("Village is invalid.");
             return new Tbl_PannaPramukhVillage { VillageId = villageId };
+        }
+
+        public void Delete()
+        {
+            Status = false;
         }
     }
 }

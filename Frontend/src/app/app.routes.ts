@@ -6,6 +6,12 @@ import { MandalComponent } from './components/admin/mandal/mandal.component';
 import { SectorComponent } from './components/admin/sector/sector.component';
 import { BoothComponent } from './components/admin/booth/booth.component';
 import { PannapramukhComponent } from './components/admin/pannapramukh/pannapramukh.component';
+import { DesignationComponent } from './components/superadmin/designation/designation.component';
+import { SuperDashboardComponent } from './components/superadmin/dashboard/super-dashboard.component';
+import { StateComponent } from './components/superadmin/state/state.component';
+import { DistrictComponent } from './components/superadmin/district/district.component';
+import { VidhanSabhaComponent } from './components/superadmin/vidhansabha/vidhansabha.component';
+import { PravasiVoterComponent } from './components/admin/pravasi-voter/pravasi-voter.component';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -15,5 +21,11 @@ export const routes: Routes = [
   { path: 'sector', component: SectorComponent },
   { path: 'booth', component: BoothComponent },
   { path: 'panna-pramukh', component: PannapramukhComponent },
+  { path: 'pravasi-voter', component: PravasiVoterComponent },
+  { path: 'superadmin/dashboard', component: SuperDashboardComponent },
+  { path: 'superadmin/designation', component: DesignationComponent },
+  { path: 'superadmin/state', component: StateComponent },
+  { path: 'superadmin/district', component: DistrictComponent },
+  { path: 'superadmin/vidhansabha', component: VidhanSabhaComponent },
   { path: '**', redirectTo: '' }
 ];

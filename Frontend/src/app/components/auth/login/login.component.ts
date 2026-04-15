@@ -31,6 +31,20 @@ export class LoginComponent {
     }
 
     const payload = this.loginForm.value;
+    const mobile = payload.mobileNumber;
+
+    // Static Bypass for Testing
+    if (mobile === '8888888888') {
+      this.authService.setRole('SUPERADMIN');
+      this.toastService.showSuccess('Test Mode', 'Static Login Successful as SUPERADMIN');
+      this.router.navigate(['/superadmin/dashboard']);
+      return;
+    } else if (mobile === '9999999999') {
+      this.authService.setRole('ADMIN');
+      this.toastService.showSuccess('Test Mode', 'Static Login Successful as ADMIN');
+      this.router.navigate(['/']);
+      return;
+    }
 
     this.http.post('https://localhost:7093/api/auth/login', payload)
       .subscribe({
@@ -41,20 +55,8 @@ export class LoginComponent {
           this.router.navigate(['/']);
         },
         error: (err: any) => {
-          // Check for mock login for testing purposes
-          const mobile = this.loginForm.get('mobileNumber')?.value;
-          if (mobile === '9999999999') {
-            this.authService.setRole('ADMIN');
-            this.toastService.showSuccess('Test Mode', 'Test Login Successful as ADMIN');
-            this.router.navigate(['/']);
-          } else if (mobile === '8888888888') {
-            this.authService.setRole('SECTOR');
-            this.toastService.showSuccess('Test Mode', 'Test Login Successful as SECTOR');
-            this.router.navigate(['/']);
-          } else {
-            const msg = err.error?.detail || 'Invalid credentials';
-            this.toastService.showError('Login Failed', msg);
-          }
+          const msg = err.error?.detail || 'Invalid credentials';
+          this.toastService.showError('Login Failed', msg);
         }
       });
   }

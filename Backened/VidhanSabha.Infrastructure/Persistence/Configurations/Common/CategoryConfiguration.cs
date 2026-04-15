@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using VidhanSabha.Domain.Entities.Common;
 
-namespace VidhanSabha.Infrastructure.Persistence.Configurations
+namespace VidhanSabha.Infrastructure.Persistence.Configurations.Common
 {
     public class CategoryConfiguration : IEntityTypeConfiguration<Tbl_Category>
     {

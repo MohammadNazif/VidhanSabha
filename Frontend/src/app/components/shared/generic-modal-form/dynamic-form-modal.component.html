@@ -20,8 +20,8 @@
           <div class="px-6 py-4">
             <form [formGroup]="form" class="grid grid-cols-1 md:grid-cols-12 gap-x-4 gap-y-2.5">
               <ng-container *ngFor="let field of config.fields">
-                <div [ngClass]="getFieldColumnClass(field)" *ngIf="fieldVisibility[field.id]"
-                  class="flex flex-col gap-0.5 transition-all duration-300 animate-fade-in">
+                <div [ngClass]="getFieldColumnClass(field)" *ngIf="fieldVisibility[field.id] && field.type !== 'hidden'"
+                  class="flex flex-col gap-0.5 transition-all duration-300 animate-fade-in text-gray-800">
                   <label [for]="field.id" class="text-[10px] font-bold text-gray-500 tracking-wider ml-1">
                     {{ field.label }}
                     <span *ngIf="field.validations?.length" class="text-red-500 ml-0.5">*</span>

@@ -3,6 +3,35 @@ import { provideRouter } from '@angular/router';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { ReactiveFormsModule } from '@angular/forms';
 import { provideAnimations } from '@angular/platform-browser/animations';
+import { 
+  LucideAngularModule, 
+  LayoutDashboard, 
+  Users, 
+  Database, 
+  Building, 
+  Map, 
+  Vote, 
+  BookOpen, 
+  BarChart3, 
+  ShieldCheck, 
+  ClipboardList, 
+  Share2, 
+  Calendar, 
+  ShieldAlert, 
+  Landmark, 
+  MapPin, 
+  Locate, 
+  Navigation, 
+  UserCog, 
+  Search,
+  ChevronLeft,
+  ChevronRight,
+  ChevronDown,
+  LogOut,
+  Bell,
+  Settings,
+  Plus
+} from 'lucide-angular';
 
 import { routes } from './app.routes';
 import { loaderInterceptor } from './interceptors/loader/loader.interceptor';
@@ -13,6 +42,36 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     provideHttpClient(withInterceptors([loaderInterceptor])),
     provideAnimations(),
-    importProvidersFrom(ReactiveFormsModule)
+    importProvidersFrom(
+      ReactiveFormsModule,
+      LucideAngularModule.pick({ 
+        LayoutDashboard, 
+        Users, 
+        Database, 
+        Building, 
+        Map, 
+        Vote, 
+        BookOpen, 
+        BarChart3, 
+        ShieldCheck, 
+        ClipboardList, 
+        Share2, 
+        Calendar, 
+        ShieldAlert, 
+        Landmark, 
+        MapPin, 
+        Locate, 
+        Navigation, 
+        UserCog, 
+        Search,
+        ChevronLeft,
+        ChevronRight,
+        ChevronDown,
+        LogOut,
+        Bell,
+        Settings,
+        Plus
+      })
+    )
   ]
 };

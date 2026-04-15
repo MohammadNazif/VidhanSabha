@@ -1,0 +1,15 @@
+<div class="p-4 lg:p-6 min-h-screen bg-slate-50/50">
+  <app-page-header title="Pravasi Voters" subtitle="Manage migrant voters across booths and villages">
+    <div class="flex items-center gap-3">
+      <app-generic-modal-button #voterModal [config]="addVoterConfig" (formSubmit)="handleFormSubmit($event)"
+        label="Add Pravasi Voter" icon="+">
+      </app-generic-modal-button>
+    </div>
+  </app-page-header>
+
+  <div class="mt-6">
+    <app-generic-table [columns]="columns" [data]="voterList" [config]="config" [actions]="actions"
+      (actionClick)="handleAction($event)">
+    </app-generic-table>
+  </div>
+</div>

@@ -12,7 +12,8 @@ export type FieldType =
   | 'textarea'
   | 'checkbox'
   | 'radio'
-  | 'selection-table';
+  | 'selection-table'
+  | 'hidden';
 
 export interface DropdownOption {
   value: any;

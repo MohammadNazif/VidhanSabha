@@ -4,10 +4,18 @@ import { RouterModule, Router } from '@angular/router';
 import { NavItem } from './sidebar.types';
 import { AuthServiceService } from '../../Services/Auth/auth.service';
 
+import { 
+  LucideAngularModule
+} from 'lucide-angular';
+
 @Component({
   selector: 'app-sidebar',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [
+    CommonModule, 
+    RouterModule, 
+    LucideAngularModule
+  ],
   templateUrl: './sidebar.component.html',
   styleUrl: './sidebar.component.css'
 })
@@ -34,12 +42,12 @@ export class SidebarComponent implements OnInit {
   }
 
   navItems: NavItem[] = [
-    { icon: '📊', label: 'Dashboard', route: '/' },
+    { icon: 'layout-dashboard', label: 'Dashboard', route: '/', roles: ['ADMIN'] },
     {
-      icon: '👥', label: 'Master Data',
+      icon: 'database', label: 'Master Data',
       badge: 543,
       expanded: false,
-
+      roles: ['ADMIN'],
       children: [
         { label: 'Mandal', route: '/mandal' },
         { label: 'Sector', route: '/sector' },
@@ -57,14 +65,13 @@ export class SidebarComponent implements OnInit {
         { label: 'Block', route: '/block' },
         { label: 'BDC', route: '/bdc' },
         { label: 'Pradhan', route: '/pradhan' }
-
       ]
     },
     {
-      icon: '📋', label: 'Reports',
+      icon: 'bar-chart-3', label: 'Reports',
       badge: 0,
       expanded: false,
-      // roles: ['ADMIN'],
+      roles: ['ADMIN'],
       children: [
         { label: 'Combined Report', route: '/combined-report' },
         { label: 'SectorWithBooth Report', route: '/sector-with-booth-report' },
@@ -74,24 +81,28 @@ export class SidebarComponent implements OnInit {
       ]
     },
     {
-      icon: '📋', label: 'Access',
+      icon: 'shield-check', label: 'Access',
       badge: 28,
       expanded: false,
-      // roles: ['ADMIN'],
+      roles: ['ADMIN'],
       children: [
         { label: 'Allow Access', route: '/allow-access' },
         { label: 'Allow Access List', route: '/allow-access-list' },
-
       ]
     },
+    { icon: 'layout-dashboard', label: 'Dashboard', route: '/superadmin/dashboard', roles: ['SUPERADMIN'] },
+    { icon: 'user-cog', label: 'Designation', route: '/superadmin/designation', roles: ['SUPERADMIN'] },
+    { icon: 'map', label: 'State', route: '/superadmin/state', roles: ['SUPERADMIN'] },
+    { icon: 'navigation', label: 'District', route: '/superadmin/district', roles: ['SUPERADMIN'] },
+    { icon: 'landmark', label: 'Vidhan Sabha', route: '/superadmin/vidhansabha', roles: ['SUPERADMIN'] },
     {
-      icon: '📋', label: 'Lists',
+      icon: 'clipboard-list', label: 'Lists',
       badge: 0,
       expanded: false,
-      // roles: ['ADMIN'],
+      roles: ['ADMIN'],
       children: [
         { label: 'Booth List', route: '/booth-list' },
-        { label: 'Pravasi Voter List', route: '/pravasi-voter-list' },
+        { label: 'Pravasi Voter List', route: '/pravasi-voter' },
         { label: 'Double Voter List', route: '/double-voter-list' },
         { label: 'New Voter List', route: '/new-voter-list' },
         { label: 'Sahmat List', route: '/sahmat-list' },
@@ -107,8 +118,8 @@ export class SidebarComponent implements OnInit {
         { label: 'Influencer Person List', route: '/influencer-person-list' },
       ]
     },
-    { icon: '🗳️', label: 'Socail Media', route: '/socail-media' },
-    { icon: '📅', label: 'Activity', route: '/activity' }
+    { icon: 'share-2', label: 'Socail Media', route: '/socail-media', roles: ['ADMIN'] },
+    { icon: 'calendar', label: 'Activity', route: '/activity', roles: ['ADMIN'] }
   ];
 
   renderedNavItems: NavItem[] = [];
@@ -130,18 +141,15 @@ export class SidebarComponent implements OnInit {
 
     // First filter by role
     let filteredItems = this.navItems.filter(item => {
-      // If item has no roles defined, it's visible to everyone
       if (!item.roles || item.roles.length === 0) return true;
-      // Check if current role is allowed
-      return currentRole && item.roles.includes(currentRole);
+      return currentRole && item.roles.some(role => role.toUpperCase() === currentRole.toUpperCase());
     }).map(item => {
-      // Filter children by role as well
       if (item.children) {
         return {
           ...item,
           children: item.children.filter(child => {
             if (!child.roles || child.roles.length === 0) return true;
-            return currentRole && child.roles.includes(currentRole);
+            return currentRole && child.roles.some(role => role.toUpperCase() === currentRole.toUpperCase());
           })
         };
       }

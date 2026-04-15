@@ -479,8 +479,9 @@
 
 /* ─── Actions Premium Design ─── */
 .actions-cell {
-  width: auto;
-  text-align: right !important;
+  width: 1%;
+  white-space: nowrap;
+  text-align: center !important;
 }
 
 .actions-container {
@@ -506,7 +507,15 @@
 }
 
 .action-icon {
-  font-size: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.action-icon svg {
+  display: block;
+  pointer-events: none;
 }
 
 .action-label {

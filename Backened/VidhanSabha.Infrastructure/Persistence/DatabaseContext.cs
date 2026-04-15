@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using VidhanSabha.Domain.Entities.Admin;
 using VidhanSabha.Domain.Entities.Auth;
 using VidhanSabha.Domain.Entities.Common;
+using VidhanSabha.Domain.Entities.SuperAdmin;
 
 namespace VidhanSabha.Infrastructure.Persistence
 {
@@ -30,7 +31,15 @@ namespace VidhanSabha.Infrastructure.Persistence
             public DbSet<Tbl_PannaPramukh> Tbl_PannaPramukh => Set<Tbl_PannaPramukh>();
             public DbSet<Tbl_PannaPramukhVillage> Tbl_PannaPramukhVillage => Set<Tbl_PannaPramukhVillage>();
 
-            protected override void OnModelCreating(ModelBuilder modelBuilder)
+           public DbSet<Tbl_DesignationType> Tbl_DesignationType => Set<Tbl_DesignationType>();
+
+         public DbSet<Tbl_Designation> Tbl_Designation => Set<Tbl_Designation>();
+
+        public DbSet<Tbl_State> Tbl_State => Set<Tbl_State>();
+
+        public DbSet<Tbl_VidhansabhaStatewiseCount> Tbl_VidhansabhaStatewiseCount => Set<Tbl_VidhansabhaStatewiseCount>();
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
             {
                 // ✅ Ek line — is assembly ki saari Configuration classes auto-pick ho jayengi
                 modelBuilder.ApplyConfigurationsFromAssembly(typeof(DatabaseContext).Assembly);

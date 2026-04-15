@@ -185,13 +185,21 @@ public static class AdminEndpoints
                 })
                 .WithName("CreatePannaPramukh")
                 .Produces<int>(200);
-                //pannapramukh.MapPost("/update", async (PannaPramukhRequestDto dto, IMediator mediator) =>
-                //    {
-                //        var result = await mediator.Send(new UpdatePannaPramukhCommand(dto));
-                //        return Results.Ok(ApiResponse<int>.Ok(result, "Panna Pramukh Updated Successfully"));
-                //    })
-                //    .WithName("UpdatePannaPramukh")
-                //    .Produces<int>(200);
+
+        pannapramukh.MapPost("/delete", async (int id, IMediator mediator) =>
+        {
+            var res = await mediator.Send(new DeletePannaCommand(id));
+            return Results.Ok( "Panna Pramukh Deleted Successfully");
+        })
+            .WithName("DeletePannaPramukh")
+            .Produces(200);
+        pannapramukh.MapPost("/update", async (UpdatePannaPramukhRequestDto dto, IMediator mediator) =>
+            {
+                int result = await mediator.Send(new UpdatePannaCommand(dto));
+                return Results.Ok(ApiResponse<int>.Ok(result, "Panna Pramukh Updated Successfully"));
+            })
+            .WithName("UpdatePannaPramukh")
+            .Produces<int>(200);
         #endregion
     }
 
