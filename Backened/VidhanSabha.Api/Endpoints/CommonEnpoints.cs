@@ -10,6 +10,10 @@ using VidhanSabha.Application.Common.Category.DTOs;
 using VidhanSabha.Application.Common.Category.Queries;
 using VidhanSabha.Application.Common.DesignatinType.Dto;
 using VidhanSabha.Application.Common.DesignatinType.Query;
+using VidhanSabha.Application.Common.District.DTOs;
+using VidhanSabha.Application.Common.District.Queries;
+using VidhanSabha.Application.Common.Occupation.DTOs;
+using VidhanSabha.Application.Common.Occupation.Queries;
 using VidhanSabha.Application.Common.State.Dto;
 using VidhanSabha.Application.Common.State.Query;
 using VidhanSabha.Application.Common.Village.DTOs;
@@ -83,6 +87,23 @@ namespace VidhanSabha.Api.Endpoints
              })
              .WithName("getstates")
              .Produces<List<StateResponseDto>>(200);
+
+            common.MapGet("/getdistrict", async (IMediator mediator, int id) =>
+            {
+                var result = await mediator.Send(new GetAllDistrictQuery(id));
+                return Results.Ok(ApiResponse<List<DistrictResponseDto>>.Ok(result));
+
+            })
+             .WithName("GetDistrict")
+             .Produces<ApiResponse<List<DistrictResponseDto>>>(200);
+
+            common.MapGet("/getoccupation", async (IMediator mediator) =>
+            {
+                var result = await mediator.Send(new GetAllOccupationQuery());
+                return Results.Ok(ApiResponse<IReadOnlyList<OccupationResponseDto>>.Ok(result));
+            })
+                .WithName("getoccupation")
+                .Produces<List<OccupationResponseDto>>(200);
 
         }
     }

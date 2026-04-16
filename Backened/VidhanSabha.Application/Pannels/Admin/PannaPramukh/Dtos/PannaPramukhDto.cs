@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using VidhanSabha.Application.Pannels.Admin.PannaPramukh.Command;
+using VidhanSabha.Domain.Entities.Admin;
 
 namespace VidhanSabha.Application.Pannels.Admin.PannaPramukh.Dtos
 {
@@ -48,6 +49,11 @@ namespace VidhanSabha.Application.Pannels.Admin.PannaPramukh.Dtos
     {
         public int VillageId { get; set; }
         public string VillageName { get; set; } = string.Empty;
+    }
+
+    public class VillageReqDto
+    {
+        public int VillageId { get; set; }
     }
     // ── Update Request ────────────────────────────────────────────
     public class UpdatePannaPramukhRequestDto : CreatePannaPramukhRequestDto
