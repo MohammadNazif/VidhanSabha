@@ -27,7 +27,8 @@ namespace VidhanSabha.Application.Pannels.Admin.PannaPramukh.Command
                 throw new NotFoundException("Panna Pramukh Not Found");
             }
 
-            panna.Update(dto.BoothId, dto.PannaNumber, dto.PannaPramukhName, dto.CategoryId, dto.CastId, dto.VoterId, dto.PhoneNumber, dto.Address, dto.VillageId);
+            panna.Update
+                (dto.BoothId, dto.PannaNumber, dto.PannaPramukhName, dto.CategoryId, dto.CastId, dto.VoterId, dto.PhoneNumber, dto.Address, dto.VillageId);
 
              return _repo.Update(panna);
 

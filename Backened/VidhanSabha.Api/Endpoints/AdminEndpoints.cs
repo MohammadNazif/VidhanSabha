@@ -8,9 +8,14 @@ using VidhanSabha.Application.Pannels.Admin.Booth.Queries;
 using VidhanSabha.Application.Pannels.Admin.Mandal.Commands;
 using VidhanSabha.Application.Pannels.Admin.Mandal.DTOs.Create;
 using VidhanSabha.Application.Pannels.Admin.Mandal.Queries;
+using VidhanSabha.Application.Pannels.Admin.NewVoter.Command;
+using VidhanSabha.Application.Pannels.Admin.NewVoter.DTOs;
 using VidhanSabha.Application.Pannels.Admin.PannaPramukh.Command;
 using VidhanSabha.Application.Pannels.Admin.PannaPramukh.Dtos;
 using VidhanSabha.Application.Pannels.Admin.PannaPramukh.Queries;
+using VidhanSabha.Application.Pannels.Admin.PravasiVoters.Command;
+using VidhanSabha.Application.Pannels.Admin.PravasiVoters.DTOs;
+using VidhanSabha.Application.Pannels.Admin.PravasiVoters.Queries;
 using VidhanSabha.Application.Pannels.Admin.Sector.Commands;
 using VidhanSabha.Application.Pannels.Admin.Sector.DTOs;
 using VidhanSabha.Application.Pannels.Admin.Sector.Queries;
@@ -33,6 +38,11 @@ public static class AdminEndpoints
 
         var pannapramukh = app.MapGroup("/api/pannapramukh")
                         .WithTags("PannaPramukh");
+        var pravasivoter = app.MapGroup("/api/pravasivoter")
+                        .WithTags("PravasiVoter");
+        var newvoter = app.MapGroup("/api/newvoter")
+                        .WithTags("NewVoter");
+
         #region Mandal
         mandal.MapGet("/getAll", async (IMediator mediator) =>
         {
@@ -126,7 +136,7 @@ public static class AdminEndpoints
         })
             .WithName("GetSectorByMandal")
             .Produces<List<SectorByMAndalResponseDto>>(200);
-
+        #endregion
 
         #region Booth
         booth.MapPost("/create", async (BoothRequestDto dto, IMediator mediator, HttpContext http) =>
@@ -201,8 +211,54 @@ public static class AdminEndpoints
             .WithName("UpdatePannaPramukh")
             .Produces<int>(200);
         #endregion
+
+        #region PravasiVoter
+
+        pravasivoter.MapPost("/create", async (CreatePravasiVoterRequestDto dto, IMediator mediator) =>
+        {
+            var result = await mediator.Send(new CreatePravasiCommand(dto));
+            return Results.Ok(ApiResponse<int>.Ok(result, "Pravasi Voter Created Successfully"));
+        })
+                .WithName("CreatePravasiVoter")
+                .Produces<int>(200);
+
+        pravasivoter.MapPost("/update", async (UpdatePravasiVoterRequestDto dto, IMediator mediator) =>
+        {
+            var result = await mediator.Send(new UpdatePravasiCommand(dto));
+            return Results.Ok(ApiResponse<int>.Ok(result, "Pravasi Voter Updated Successfully"));
+        })
+                .WithName("UpdatePravasiVoter")
+                .Produces<int>(200);
+
+        pravasivoter.MapPost("/delete", async (int id, IMediator mediator) =>
+        {
+            var result = await mediator.Send(new DeletePravasiCommand(id));
+            return Results.Ok(ApiResponse<int>.Ok(result, "Pravasi Voter Deleted Successfully"));
+        })
+                .WithName("DeletePravasiVoter")
+                .Produces<int>(200);
+
+        pravasivoter.MapGet("/getAll", async (IMediator mediator) =>
+        {
+            var result = await mediator.Send(new GetAllPravasiQuery());
+            return Results.Ok(ApiResponse<List<PravasiVoterResponseDto>>.Ok(result));
+        });
+
+        #endregion
+
+        #region New Voter
+
+        newvoter.MapPost("/create", async (CreateNewVoterRequestDto dto, IMediator mediator) =>
+        {
+            var result = await mediator.Send(new CreateNewVoterCommand(dto));
+            return Results.Ok(ApiResponse<int>.Ok(result, "New Voter Created Successfully"));
+        })
+                .WithName("CreateNewVoter")
+                .Produces<int>(200);
+
+        #endregion
     }
 
 
-    #endregion
+
 }

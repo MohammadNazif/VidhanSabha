@@ -20,7 +20,12 @@ namespace VidhanSabha.Application.Pannels.Admin.PannaPramukh.Command
         public Task<int> Handle(CreatePannaCommand request, CancellationToken cancellationToken)
         {
 
-          var pannapramukh =  Tbl_PannaPramukh.Create(request.Dto.BoothId, request.Dto.PannaNumber, request.Dto.PannaPramukhName, request.Dto.CategoryId, request.Dto.CastId, request.Dto.VoterId, request.Dto.PhoneNumber, request.Dto.Address, request.Dto.VillageId);
+          var pannapramukh =  Tbl_PannaPramukh.Create(
+              request.Dto.BoothId, request.Dto.PannaNumber, 
+              request.Dto.PannaPramukhName, request.Dto.CategoryId, 
+              request.Dto.CastId, request.Dto.VoterId, 
+              request.Dto.PhoneNumber, request.Dto.Address, 
+              request.Dto.VillageId);
 
             _repo.AddAsync(pannapramukh,cancellationToken);
    
