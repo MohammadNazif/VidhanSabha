@@ -28,17 +28,17 @@ namespace VidhanSabha.Infrastructure.Repositories.SuperAdmin
             throw new NotImplementedException();
         }
 
-        public async Task<IReadOnlyList<DesignationResponseDto>> GetAllAsync(CancellationToken ct = default)
+        public async Task<IReadOnlyList<DesignationResponseDto>> GetAllAsync(string userId,CancellationToken ct = default)
         {
-            var data = await _context.Tbl_Designation
+            var data = await _context.Tbl_Designation.Where(x=>x.UserId == userId)
                 .Select(b => new DesignationResponseDto
                 {
                     Id = b.Id,
                     DesignationName = b.DesignationName,
-                    DesignationTypeId = b.DesignationTypeId,
-                    DesignationTypeName = b.DesignationType != null
-                     ? b.DesignationType.DesignationName
-                     : null
+                    //DesignationTypeId = b.DesignationTypeId,
+                    //DesignationTypeName = b.DesignationType != null
+                     //? b.DesignationType.DesignationName
+                     //: null
                 })
                 .ToListAsync(ct);
 

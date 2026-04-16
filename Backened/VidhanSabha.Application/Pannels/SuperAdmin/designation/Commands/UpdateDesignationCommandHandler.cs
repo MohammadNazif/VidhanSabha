@@ -20,7 +20,7 @@ namespace VidhanSabha.Application.Pannels.SuperAdmin.designation.Commands
         {
               var req = request.Dto;
               var designation =  await _repo.GetByIdAsync(req.Id);
-              designation.Update(req.DesignationName, req.DesignationTypeId);
+              designation.Update(req.DesignationName);
                return await _repo.UpdateAsync(designation, cancellationToken);
            
         }

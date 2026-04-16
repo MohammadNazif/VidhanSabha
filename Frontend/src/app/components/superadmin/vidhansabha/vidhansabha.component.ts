@@ -11,6 +11,7 @@ import { VidhanSabhaService } from '../../../Services/Admin/vidhansabha/vidhansa
 import { DistrictService } from '../../../Services/Admin/district/district.service';
 import { ToastService } from '../../../Services/common/toast/toast.service';
 import { CrudHandlerService } from '../../../Services/common/crud-handler.service';
+import { VidhanSabhaPrabhariService } from '../../../Services/Admin/vidhansabha-prabhari/vidhansabha-prabhari.service';
 
 @Component({
   selector: 'app-vidhansabha',
@@ -21,6 +22,7 @@ import { CrudHandlerService } from '../../../Services/common/crud-handler.servic
 })
 export class VidhanSabhaComponent implements OnInit {
   @ViewChild('vidhanModal') vidhanModal!: GenericModalButtonComponent;
+  @ViewChild('prabhariModal') prabhariModal!: GenericModalButtonComponent;
 
   vidhanList: any[] = [];
 
@@ -45,6 +47,7 @@ export class VidhanSabhaComponent implements OnInit {
   };
 
   actions: TableAction[] = [
+    { id: 'add_prabhari', label: 'Prabhari', variant: 'primary', icon: 'user' },
     { id: 'edit', label: '', variant: 'default', icon: 'edit' },
     { id: 'delete', label: '', variant: 'danger', icon: 'delete' }
   ];
@@ -75,8 +78,125 @@ export class VidhanSabhaComponent implements OnInit {
     ]
   };
 
+  addPrabhariConfig: FormConfig = {
+    title: 'Register Prabhari',
+    submitLabel: 'Assign Prabhari',
+    fields: [
+      {
+        id: 'prabhariName',
+        name: 'prabhariName',
+        label: 'Prabhari Name',
+        type: 'text',
+        placeholder: 'Enter full name',
+        validations: [Validators.required],
+        gridColSpan: 6
+      },
+      {
+        id: 'prabhariEmail',
+        name: 'prabhariEmail',
+        label: 'Prabhari Email',
+        type: 'email',
+        placeholder: 'Enter email',
+        validations: [Validators.required],
+        gridColSpan: 6
+      },
+      {
+        id: 'gender',
+        name: 'gender',
+        label: 'Gender',
+        type: 'select',
+        options: [
+          { label: 'Male', value: 'Male' },
+          { label: 'Female', value: 'Female' },
+          { label: 'Other', value: 'Other' }
+        ],
+        validations: [Validators.required],
+        gridColSpan: 6
+      },
+      {
+        id: 'contactNumber',
+        name: 'contactNumber',
+        label: 'Contact Number',
+        type: 'text',
+        placeholder: 'Enter phone number',
+        validations: [Validators.required, Validators.pattern('^[0-9]{10}$')],
+        gridColSpan: 6
+      },
+      {
+        id: 'categoryId',
+        name: 'categoryId',
+        label: 'Category',
+        type: 'select',
+        placeholder: '-- Select Category --',
+        apiUrl: 'common/category',
+        apiMapper: (data: any) => {
+          const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
+          return list.map((item: any) => ({
+            value: String(item.id),
+            label: item.name
+          }));
+        },
+        validations: [Validators.required],
+        gridColSpan: 6
+      },
+      {
+        id: 'castId',
+        name: 'castId',
+        label: 'Caste',
+        type: 'select',
+        placeholder: '-- Select Caste --',
+        dependsOn: 'categoryId',
+        apiUrl: (catId: any) => `common/cast?id=${catId}`,
+        apiMapper: (data: any) => {
+          const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
+          return list.map((item: any) => ({
+            value: String(item.id),
+            label: item.name
+          }));
+        },
+        validations: [Validators.required],
+        gridColSpan: 6
+      },
+      {
+        id: 'education',
+        name: 'education',
+        label: 'Education',
+        type: 'text',
+        placeholder: 'Enter education',
+        validations: [Validators.required],
+        gridColSpan: 6
+      },
+      {
+        id: 'profession',
+        name: 'profession',
+        label: 'Profession',
+        type: 'text',
+        placeholder: 'Enter profession',
+        validations: [Validators.required],
+        gridColSpan: 6
+      },
+      {
+        id: 'currentAddress',
+        name: 'currentAddress',
+        label: 'Current Address',
+        type: 'textarea',
+        placeholder: 'Enter full address',
+        gridColSpan: 12
+      },
+      {
+        id: 'profile',
+        name: 'profile',
+        label: 'Profile Photo',
+        type: 'file',
+        gridColSpan: 12
+      }
+    ]
+  };
+
+
   constructor(
     private vidhanService: VidhanSabhaService,
+    private vidhanPrabhariService: VidhanSabhaPrabhariService,
     private districtService: DistrictService,
     private toastService: ToastService,
     private crudHandler: CrudHandlerService
@@ -115,6 +235,15 @@ export class VidhanSabhaComponent implements OnInit {
         ...row,
         districtId: String(row.districtId)
       });
+    } else if (action.id === 'add_prabhari') {
+      // Prepare data for prabhari modal
+      const prabhariData = {
+        vidhanSabhaId: row.id,
+        // If row hasExistingPrabhari, map it here for edit mode
+        ...(row.prabhari || {})
+      };
+      
+      this.prabhariModal.openModal(prabhariData);
     }
   }
 
@@ -137,6 +266,37 @@ export class VidhanSabhaComponent implements OnInit {
       request,
       isUpdate ? 'Updated' : 'Success',
       `Vidhan Sabha ${isUpdate ? 'updated' : 'created'} successfully!`,
+      () => this.loadVidhanSabhas()
+    );
+  }
+
+  handlePrabhariSubmit(result: FormResult) {
+    if (!result.status) return;
+
+    const raw = result.data;
+    const vidhanSabhaId = this.prabhariModal.initialData?.vidhanSabhaId;
+
+    if (!vidhanSabhaId) {
+      this.toastService.showError('Error', 'Constituency ID missing');
+      return;
+    }
+
+    const isUpdate = !!(raw.id || this.prabhariModal.initialData?.id);
+    const submitData = {
+      ...raw,
+      vidhanSabhaId: Number(vidhanSabhaId),
+      castId: Number(raw.castId),
+      categoryId: Number(raw.categoryId)
+    };
+
+    const request = isUpdate
+      ? this.vidhanPrabhariService.updatePrabhari(submitData)
+      : this.vidhanPrabhariService.createPrabhari(submitData);
+
+    this.crudHandler.handleRequest(
+      request,
+      isUpdate ? 'Updated' : 'Created',
+      `Prabhari successfully ${isUpdate ? 'updated' : 'assigned'} to the constituency!`,
       () => this.loadVidhanSabhas()
     );
   }

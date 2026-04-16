@@ -20,7 +20,7 @@ namespace VidhanSabha.Application.Pannels.SuperAdmin.designation.Queries
       
         Task<IReadOnlyList<DesignationResponseDto>> IRequestHandler<getAllDesignationQuery, IReadOnlyList<DesignationResponseDto>>.Handle(getAllDesignationQuery request, CancellationToken cancellationToken)
         {
-            return _repo.GetAllAsync();
+            return _repo.GetAllAsync(request.UserId);
         }
     }
 }

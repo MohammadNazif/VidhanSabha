@@ -17,7 +17,7 @@ namespace VidhanSabha.Infrastructure.Persistence
             public DatabaseContext(DbContextOptions<DatabaseContext> options)
                 : base(options) { }
 
-            public DbSet<Tbl_Login> Tbl_Login => Set<Tbl_Login>();
+            //public DbSet<Tbl_Login> Tbl_Login => Set<Tbl_Login>();
             public DbSet<Tbl_Category> Tbl_Category => Set<Tbl_Category>();
             public DbSet<Tbl_Mandal> Tbl_Mandal => Set<Tbl_Mandal>();
             public DbSet<Tbl_Cast> Tbl_Cast => Set<Tbl_Cast>();
@@ -49,6 +49,9 @@ namespace VidhanSabha.Infrastructure.Persistence
         public DbSet<Tbl_SahmatAsahmat> Tbl_SahmatAsahmat => Set<Tbl_SahmatAsahmat>();
         public DbSet<Tbl_SahmatAsahmatVillage> Tbl_SahmatAsahmatVillage => Set<Tbl_SahmatAsahmatVillage>();
 
+        public DbSet<Tbl_StatePrabhari> Tbl_StatePrabhari => Set<Tbl_StatePrabhari>();
+
+        public DbSet<Tbl_LoginCredential> Tbl_LoginCredential => Set<Tbl_LoginCredential>();
         protected override void OnModelCreating(ModelBuilder modelBuilder)
             {
                 // ✅ Ek line — is assembly ki saari Configuration classes auto-pick ho jayengi

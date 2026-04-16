@@ -4,7 +4,7 @@ import { RouterModule, Router } from '@angular/router';
 import { NavItem } from './sidebar.types';
 import { AuthServiceService } from '../../Services/Auth/auth.service';
 
-import { 
+import {
   LucideAngularModule
 } from 'lucide-angular';
 
@@ -12,8 +12,8 @@ import {
   selector: 'app-sidebar',
   standalone: true,
   imports: [
-    CommonModule, 
-    RouterModule, 
+    CommonModule,
+    RouterModule,
     LucideAngularModule
   ],
   templateUrl: './sidebar.component.html',
@@ -91,10 +91,12 @@ export class SidebarComponent implements OnInit {
       ]
     },
     { icon: 'layout-dashboard', label: 'Dashboard', route: '/superadmin/dashboard', roles: ['SUPERADMIN'] },
-    { icon: 'user-cog', label: 'Designation', route: '/superadmin/designation', roles: ['SUPERADMIN'] },
-    { icon: 'map', label: 'State', route: '/superadmin/state', roles: ['SUPERADMIN'] },
-    { icon: 'navigation', label: 'District', route: '/superadmin/district', roles: ['SUPERADMIN'] },
-    { icon: 'landmark', label: 'Vidhan Sabha', route: '/superadmin/vidhansabha', roles: ['SUPERADMIN'] },
+    { icon: 'layout-dashboard', label: 'Dashboard', route: '/state-prabhari/dashboard', roles: ['StatePrabhari'] },
+    { icon: 'user-cog', label: 'Designation', route: '/superadmin/designation', roles: ['Adhyaksh', 'StatePrabhari'] },
+    { icon: 'map', label: 'State', route: '/superadmin/state', roles: ['SUPERADMIN', 'StatePrabhari'] },
+    { icon: 'clipboard-list', label: 'State Prabhari', route: '/superadmin/state-prabhari', roles: ['SUPERADMIN'] },
+    { icon: 'navigation', label: 'District', route: '/superadmin/district', roles: ['Adhyaksh', 'StatePrabhari'] },
+    { icon: 'landmark', label: 'Vidhan Sabha', route: '/superadmin/vidhansabha', roles: ['Adhyaksh', 'StatePrabhari'] },
     {
       icon: 'clipboard-list', label: 'Lists',
       badge: 0,

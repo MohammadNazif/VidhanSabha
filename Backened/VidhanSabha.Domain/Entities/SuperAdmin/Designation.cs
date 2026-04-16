@@ -12,42 +12,40 @@ namespace VidhanSabha.Domain.Entities.SuperAdmin
         {
             public int Id { get; private set; }
             public string DesignationName { get; private set; } = string.Empty;
-            public int DesignationTypeId { get; private set; }
+            public string UserId { get; private set; }
             public bool Status { get; private set; } = true;
 
             // Navigation
-            public Tbl_DesignationType DesignationType { get; set; } = null!;
 
             private Tbl_Designation() { }
 
             // ── Create ───────────────────────────────────────────────
             public static Tbl_Designation Create(
                 string designationName,
-                int designationTypeId)
+                string userId
+                )
             {
                 if (string.IsNullOrWhiteSpace(designationName))
                     throw new ArgumentException("Designation name required.");
-                if (designationTypeId <= 0)
-                    throw new ArgumentException("DesignationType invalid.");
+              
 
                 return new Tbl_Designation
                 {
                     DesignationName = designationName.Trim(),
-                    DesignationTypeId = designationTypeId,
+                    UserId = userId,
                     Status = true
                 };
             }
 
             // ── Update ───────────────────────────────────────────────
-            public void Update(string designationName, int designationTypeId)
+            public void Update(string designationName)
             {
                 if (string.IsNullOrWhiteSpace(designationName))
                     throw new ArgumentException("Designation name required.");
-                if (designationTypeId <= 0)
-                    throw new ArgumentException("DesignationType invalid.");
+                
 
                 DesignationName = designationName.Trim();
-                DesignationTypeId = designationTypeId;
+               
             }
 
             // ── Soft Delete ──────────────────────────────────────────

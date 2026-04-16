@@ -19,7 +19,7 @@ namespace VidhanSabha.Application.Pannels.SuperAdmin.designation.Commands
         }
         public async Task<int> Handle(CreateDesignationCommand request, CancellationToken cancellationToken)
         {
-            var data = Tbl_Designation.Create(request.Dto.DesignationName, request.Dto.DesignationTypeId);
+            var data = Tbl_Designation.Create(request.Dto.DesignationName,request.Dto.UserId);
 
             return  await _repo.CreateAsync(data, cancellationToken);
         }

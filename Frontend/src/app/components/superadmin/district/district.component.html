@@ -5,6 +5,9 @@
       <app-generic-modal-button #districtModal [config]="addDistrictConfig" label="Add District" icon="+"
         (formSubmit)="handleFormSubmit($event)">
       </app-generic-modal-button>
+      <app-generic-modal-button #prabhariModal [config]="addPrabhariConfig" label="Assign District Prabhari" icon="user"
+        [hideButton]="true" (formSubmit)="handlePrabhariSubmit($event)">
+      </app-generic-modal-button>
     </div>
   </app-page-header>
 

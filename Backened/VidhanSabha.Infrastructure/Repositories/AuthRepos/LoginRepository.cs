@@ -4,7 +4,7 @@ using VidhanSabha.Application.Pannels.Auth.Interfaces;
 using VidhanSabha.Domain.Entities.Auth;
 using VidhanSabha.Infrastructure.Persistence;
 
-public class LoginRepository  : ILoginRepository
+public class LoginRepository : ILoginRepository
 {
     private readonly DatabaseContext _context;
 
@@ -13,23 +13,24 @@ public class LoginRepository  : ILoginRepository
         _context = context;
     }
 
-    public async Task<Tbl_Login?> GetByMobileAsync(string mobileNumber)
-          => await _context.Set<Tbl_Login>()
-                           .FirstOrDefaultAsync(u => u.MobileNumber == mobileNumber);
-
-    public async Task<Tbl_Login?> GetByUserIdAsync(int userId)
-        => await _context.Set<Tbl_Login>()
-                         .FirstOrDefaultAsync(u => u.UserId == userId);
-
-    public async Task AddAsync(Tbl_Login login)
+    public Task AddAsync(Tbl_LoginCredential login)
     {
-        await _context.Set<Tbl_Login>().AddAsync(login);
-        await _context.SaveChangesAsync();
+        throw new NotImplementedException();
     }
 
-    public async Task UpdateAsync(Tbl_Login login)
+    public Task<Tbl_LoginCredential?> GetByMobileAsync(string mobileNumber)
     {
-        _context.Set<Tbl_Login>().Update(login);
-        await _context.SaveChangesAsync();
+        return _context.Tbl_LoginCredential.FirstOrDefaultAsync( x => x.Mobile == mobileNumber);
+         
+    }
+
+    public Task<Tbl_LoginCredential?> GetByUserIdAsync(int userId)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task UpdateAsync(Tbl_LoginCredential login)
+    {
+        throw new NotImplementedException();
     }
 }

@@ -23,19 +23,13 @@ namespace VidhanSabha.Application.Pannels.Auth.Commands.Login
             if (user == null)
                 throw new UnauthorizedAccessException("Mobile number not found.");
 
-            // Step 2: Ask domain entity if it can login (Status check)
-            if (!user.CanLogin())
-                throw new UnauthorizedAccessException("Account is inactive. Contact admin.");
+            if(user.Password != command.Password)
+                throw new UnauthorizedAccessException("Invalid password."); 
 
-            // Step 3: Ask domain entity to verify password (BCrypt inside entity)
-            if (!user.VerifyPassword(command.Password))
-                throw new UnauthorizedAccessException("Incorrect password.");
-
-            // Step 4: Return role from entity
             return new LoginResponseDto
             {
                 UserId = user.UserId,
-                MobileNumber = user.MobileNumber,
+                MobileNumber = user.Mobile,
                 Role = user.Role,
                 Status = user.Status
             };

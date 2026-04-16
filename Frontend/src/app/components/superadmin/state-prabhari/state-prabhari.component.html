@@ -1,0 +1,27 @@
+<div class="h-screen p-6 flex flex-col overflow-hidden bg-slate-50">
+  <app-page-header title="State Prabhari Management" subtitle="Manage in-charges for state level administration"
+    icon="📋">
+    <div class="flex gap-3">
+      <app-generic-modal-button #prabhariModal [config]="addPrabhariConfig" label="Add State Prabhari" icon="+"
+        (formSubmit)="handleFormSubmit($event)">
+      </app-generic-modal-button>
+    </div>
+  </app-page-header>
+
+  <div class="flex-1 min-h-0 mt-6 bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
+    <app-generic-table class="flex-1 min-h-0" [data]="prabhariList" [columns]="columns" [config]="config" [actions]="actions"
+      (actionClick)="handleAction($event)" *ngIf="prabhariList.length > 0">
+    </app-generic-table>
+
+    <!-- Empty State -->
+    <div *ngIf="prabhariList.length === 0" class="flex-1 flex flex-col items-center justify-center p-12 text-center">
+      <div class="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mb-4">
+        <span class="text-3xl">📋</span>
+      </div>
+      <h3 class="text-lg font-semibold text-slate-900">No Prabharis Found</h3>
+      <p class="text-slate-500 max-w-xs mt-1">
+        Start by adding a new prabhari to the system using the button above.
+      </p>
+    </div>
+  </div>
+</div>

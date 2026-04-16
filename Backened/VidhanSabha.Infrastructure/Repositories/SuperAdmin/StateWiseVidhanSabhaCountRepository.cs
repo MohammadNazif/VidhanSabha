@@ -44,16 +44,30 @@ namespace VidhanSabha.Infrastructure.Repositories.SuperAdmin
             throw new NotImplementedException();
         }
 
-        public  async Task<IReadOnlyList<VidhansabhaResponseDto>> GetAllAsync(CancellationToken ct = default)
+        public async Task<IReadOnlyList<VidhansabhaResponseDto>> GetAllAsync(string? userId, CancellationToken ct = default)
         {
-             var res = await _context.Tbl_VidhansabhaStatewiseCount.Select(b => new VidhansabhaResponseDto
+            var stateId = await _context.Tbl_StatePrabhari
+        .Where(x => x.userId == userId)
+        .Select(x => x.StateId)
+        .FirstOrDefaultAsync(ct);
+            var query = _context.Tbl_VidhansabhaStatewiseCount.AsQueryable();
+
+            if (userId !=null)
             {
-                Id = b.Id,
-                StateId = b.StateId,
-                StateName = b.State.StateName,
-                VidhanSabhaCount = b.VidhansabhaCount,
-                RemainingCount = b.Remainingcount
-            }).ToListAsync();
+                query = query.Where(b => b.StateId == stateId);
+            }
+
+            var res = await query
+                .Select(b => new VidhansabhaResponseDto
+                {
+                    Id = b.Id,
+                    StateId = b.StateId,
+                    StateName = b.State.StateName,
+                    VidhanSabhaCount = b.VidhansabhaCount,
+                    RemainingCount = b.Remainingcount
+                })
+                .ToListAsync(ct);
+
             return res;
         }
 

@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { HttpParams } from '@angular/common/http';
 import { BaseApiService } from '../../common/base-api.service';
 
 @Injectable({
@@ -13,7 +14,9 @@ export class StateService extends BaseApiService {
   }
 
   getAllStates(): Observable<any> {
-    return this.getAll(this.entity);
+    const userId = localStorage.getItem('userId');
+    const params = userId ? new HttpParams().set('userId', userId) : undefined;
+    return this.http.get<any>(`${this.apiUrl}/${this.entity}/getAll`, { params });
   }
 
   deleteState(id: number): Observable<any> {

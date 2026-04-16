@@ -28,7 +28,7 @@ namespace VidhanSabha.Application.Pannels.Auth.Queries.GetMobileNumber
             return new LoginResponseDto
             {
                 UserId = user.UserId,
-                MobileNumber = user.MobileNumber,
+                MobileNumber = user.Mobile,
                 Role = user.Role,
                 Status = user.Status
             };

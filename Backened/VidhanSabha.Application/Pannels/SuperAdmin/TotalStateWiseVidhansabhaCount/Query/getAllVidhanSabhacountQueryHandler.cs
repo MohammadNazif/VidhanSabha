@@ -19,7 +19,7 @@ namespace VidhanSabha.Application.Pannels.SuperAdmin.TotalStateWiseVidhansabhaCo
         }
         public async Task<IReadOnlyList<VidhansabhaResponseDto>> Handle(getAllvidhanSabhaCountQuery request, CancellationToken cancellationToken)
         {
-            var res = await _repo.GetAllAsync();
+            var res = await _repo.GetAllAsync(request.UserId);
             return res;
         }
     }

@@ -20,12 +20,11 @@ import { CrudHandlerService } from '../../../Services/common/crud-handler.servic
 })
 export class DesignationComponent implements OnInit {
   @ViewChild('designationModal') designationModal!: GenericModalButtonComponent;
-
+  userId: string = localStorage.getItem('userId') || '';
   designationList: any[] = [];
 
   columns: TableColumn[] = [
     { key: 'designationName', label: 'Designation Name', type: 'avatar', sortable: true, avatarFallbackKey: 'name' },
-    { key: 'designationTypeName', label: 'Designation Type', sortable: true }
   ];
 
   config: TableConfig = {
@@ -57,24 +56,7 @@ export class DesignationComponent implements OnInit {
         type: 'text',
         placeholder: 'Enter designation name',
         validations: [Validators.required],
-        gridColSpan: 6
-      },
-      {
-        id: 'designationTypeId',
-        name: 'designationTypeId',
-        label: 'Designation Type',
-        type: 'select',
-        placeholder: 'Select designation type',
-        apiUrl: 'common/designationType',
-        apiMapper: (data: any) => {
-          const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
-          return list.map((item: any) => ({
-            value: String(item.id),
-            label: item.designationName
-          }));
-        },
-        validations: [Validators.required],
-        gridColSpan: 6
+        gridColSpan: 12
       }
     ]
   };
@@ -90,7 +72,8 @@ export class DesignationComponent implements OnInit {
   }
 
   loadDesignations() {
-    this.designationService.getAllDesignations().subscribe({
+    console.log(this.userId);
+    this.designationService.getAllDesignations({ userId: this.userId }).subscribe({
       next: (response) => {
         if (response && response.isSuccess) {
           this.designationList = response.data;
@@ -126,8 +109,9 @@ export class DesignationComponent implements OnInit {
   }
 
   handleFormSubmit(result: FormResult) {
-    if (!result.status) return;
 
+    if (!result.status) return;
+    result.data.userId = this.userId;
     const isUpdate = result.data.id || (this.designationModal.initialData && this.designationModal.initialData.id);
     if (isUpdate && !result.data.id) {
       result.data.id = this.designationModal.initialData.id;

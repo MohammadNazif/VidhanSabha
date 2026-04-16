@@ -3,6 +3,9 @@ using VidhanSabha.Api.Responses;
 using VidhanSabha.Application.Pannels.SuperAdmin.designation.Commands;
 using VidhanSabha.Application.Pannels.SuperAdmin.designation.DTOs;
 using VidhanSabha.Application.Pannels.SuperAdmin.designation.Queries;
+using VidhanSabha.Application.Pannels.SuperAdmin.StatePrabhari.Command;
+using VidhanSabha.Application.Pannels.SuperAdmin.StatePrabhari.Dtos;
+using VidhanSabha.Application.Pannels.SuperAdmin.StatePrabhari.Query;
 using VidhanSabha.Application.Pannels.SuperAdmin.TotalStateWiseVidhansabhaCount.Command;
 using VidhanSabha.Application.Pannels.SuperAdmin.TotalStateWiseVidhansabhaCount.Query;
 using static VidhanSabha.Application.Pannels.SuperAdmin.TotalStateWiseVidhansabhaCount.Dtos.VidhanshabhaStateWiseCount;
@@ -16,7 +19,10 @@ namespace VidhanSabha.Api.Endpoints
                 var designation = app.MapGroup("/api/designation")
                                     .WithTags("Designation");
                 var vidhansabhacount = app.MapGroup("/api/vidhansabhacount")
-                                    .WithTags("vidhansabhacount");
+                                    .WithTags("Vidhansabhacount");
+
+            var stateprabhaari = app.MapGroup("/api/stateprabhari")
+                                    .WithTags("Stateprabhari");
             designation.MapPost
                ("/create", async (
                CreateDesignationDto request,
@@ -28,9 +34,9 @@ namespace VidhanSabha.Api.Endpoints
                }).WithName("CreateDesignation")
                .Produces(StatusCodes.Status200OK);
 
-            designation.MapGet("/getAll", async (IMediator mediator) =>
+            designation.MapGet("/getAll", async (string userId,IMediator mediator) =>
             {
-                var data = await mediator.Send(new getAllDesignationQuery());
+                var data = await mediator.Send(new getAllDesignationQuery(userId));
                 return Results.Ok(ApiResponse<IReadOnlyList<DesignationResponseDto>>.Ok(data, "Designation fetched Successfully"));
             }).WithName("GetAllDesignation")
             .Produces(StatusCodes.Status200OK);
@@ -56,12 +62,38 @@ namespace VidhanSabha.Api.Endpoints
                return Results.Ok(ApiResponse<int>.Ok(data, "VidhanSabha Count inserted SuccessFully"));
             });
 
-            vidhansabhacount.MapGet("/getAll", async (IMediator mediator) =>
+            vidhansabhacount.MapGet("/getAll", async (string? userId,IMediator mediator) =>
             {
-                var data = await mediator.Send(new getAllvidhanSabhaCountQuery());
+                var data = await mediator.Send(new getAllvidhanSabhaCountQuery(userId));
                 return Results.Ok(ApiResponse<IReadOnlyList<VidhansabhaResponseDto>>.Ok(data, "Vidhansabha Count Fetched Successfully"));
             }).WithName("GetAllVidhanSabhaCount")
             .Produces<ApiResponse<IReadOnlyList<VidhansabhaResponseDto>>>(200);
+
+            stateprabhaari.MapPost("/create", async (IMediator mediator, CreatePrabhariRequestDto requestDto) =>
+            {
+                var data = await mediator.Send(new CreatePrabhariCommand(requestDto));
+                return Results.Ok(ApiResponse<int>.Ok(data, "State Prabhari inserted SuccessFully"));
+             });
+
+            stateprabhaari.MapGet("/getAll",async (IMediator mediator) =>
+            {
+                var data = await mediator.Send(new getAllStatePrabhariQuery());
+                return Results.Ok(ApiResponse<IReadOnlyList<StatePrabhariResponseDto>>.Ok(data, "State Prabhari Fetched Successfully"));
+            }).WithName("GetAllStatePrabhari")
+            .Produces<ApiResponse<IReadOnlyList<StatePrabhariResponseDto>>>(200);
+
+            stateprabhaari.MapPost("/update", async (IMediator mediator, UpdatePrabhariRequestDto requestDto) =>
+            {
+                var data = await mediator.Send(new UpdatePrabhariCommand(requestDto));
+                return Results.Ok(ApiResponse<int>.Ok(data, "State Prabhari Updated Successfully"));
+            }).WithName("updateStatePrabhari")
+             .Produces(200);
+
+            stateprabhaari.MapPost("/delete", async (int id,string userId, IMediator mediator) =>
+            {
+                var data = await mediator.Send(new DeletePrabhariCommand(id,userId));
+                return Results.Ok(ApiResponse<int>.Ok(data, " State Prabhari deleted successfully"));
+            }).Produces(200);
         }
     }
 }

@@ -16,6 +16,7 @@ import {
 } from 'lucide-angular';
 
 import { Router } from '@angular/router';
+import { AuthServiceService } from '../../../Services/Auth/auth.service';
 
 Chart.register(...registerables);
 
@@ -72,7 +73,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     { title: 'Influencer Person', value: 0, icon: 'users', gradient: 'linear-gradient(135deg, #ec4899, #db2777)', change: '+0%', changeType: 'up', route: '/influencer-person' }
   ];
 
-  constructor(private router: Router) { }
+  constructor(private router: Router, private authService: AuthServiceService) { }
 
   navigateTo(route?: string) {
     if (route) {
@@ -126,7 +127,17 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     { name: 'Vikram Singh', party: 'BJP', attendance: 89, bills: 7, avatar: 'V' },
   ];
 
-  ngOnInit() { }
+  ngOnInit() {
+    this.authService.userRole$.subscribe(role => {
+      const r = (role || '').toUpperCase().trim();
+      console.log('Dashboard detected role:', r);
+      if (r === 'SUPERADMIN') {
+        this.router.navigate(['/superadmin/dashboard']);
+      } else if (r === 'STATEPRABHARI') {
+        this.router.navigate(['/state-prabhari/dashboard']);
+      }
+    });
+  }
 
   ngAfterViewInit() {
     this.createRevenueChart();
