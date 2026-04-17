@@ -2,11 +2,12 @@
   <app-page-header title="District Management" subtitle="Manage districts within states"
     icon="📍">
     <div class="flex gap-3">
-      <app-generic-modal-button #districtModal [config]="addDistrictConfig" label="Add District" icon="+"
+      <app-generic-modal-button #districtModal [config]="addDistrictConfig" 
+        [initialData]="{ stateId: defaultStateId }" label="Add District" icon="+"
         (formSubmit)="handleFormSubmit($event)">
       </app-generic-modal-button>
-      <app-generic-modal-button #prabhariModal [config]="addPrabhariConfig" label="Assign District Prabhari" icon="user"
-        [hideButton]="true" (formSubmit)="handlePrabhariSubmit($event)">
+      <app-generic-modal-button #vidhanSabhaModal [config]="addVidhanSabhaConfig" label="Add Vidhan Sabha" icon="layout"
+        [hideButton]="true" (formSubmit)="handleVidhanSabhaSubmit($event)">
       </app-generic-modal-button>
     </div>
   </app-page-header>

@@ -8,6 +8,7 @@ import { FormConfig, FormResult } from '../../shared/generic-modal-form/generic-
 
 import { PageHeaderComponent } from '../../shared/page-header/page-header.component';
 import { DesignationService } from '../../../Services/Admin/designation/designation.service';
+import { AuthServiceService } from '../../../Services/Auth/auth.service';
 import { ToastService } from '../../../Services/common/toast/toast.service';
 import { CrudHandlerService } from '../../../Services/common/crud-handler.service';
 
@@ -20,7 +21,6 @@ import { CrudHandlerService } from '../../../Services/common/crud-handler.servic
 })
 export class DesignationComponent implements OnInit {
   @ViewChild('designationModal') designationModal!: GenericModalButtonComponent;
-  userId: string = localStorage.getItem('userId') || '';
   designationList: any[] = [];
 
   columns: TableColumn[] = [
@@ -63,6 +63,7 @@ export class DesignationComponent implements OnInit {
 
   constructor(
     private designationService: DesignationService,
+    private authService: AuthServiceService,
     private toastService: ToastService,
     private crudHandler: CrudHandlerService
   ) { }
@@ -72,8 +73,8 @@ export class DesignationComponent implements OnInit {
   }
 
   loadDesignations() {
-    console.log(this.userId);
-    this.designationService.getAllDesignations({ userId: this.userId }).subscribe({
+    const userId = this.authService.getUserId();
+    this.designationService.getAllDesignations({ userId: userId }).subscribe({
       next: (response) => {
         if (response && response.isSuccess) {
           this.designationList = response.data;
@@ -109,9 +110,11 @@ export class DesignationComponent implements OnInit {
   }
 
   handleFormSubmit(result: FormResult) {
-
     if (!result.status) return;
-    result.data.userId = this.userId;
+    const userId = this.authService.getUserId();
+    if (userId) {
+      result.data.userId = String(userId);
+    }
     const isUpdate = result.data.id || (this.designationModal.initialData && this.designationModal.initialData.id);
     if (isUpdate && !result.data.id) {
       result.data.id = this.designationModal.initialData.id;

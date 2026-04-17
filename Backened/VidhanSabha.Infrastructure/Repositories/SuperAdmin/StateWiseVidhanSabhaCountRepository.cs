@@ -46,10 +46,11 @@ namespace VidhanSabha.Infrastructure.Repositories.SuperAdmin
 
         public async Task<IReadOnlyList<VidhansabhaResponseDto>> GetAllAsync(string? userId, CancellationToken ct = default)
         {
+            
             var stateId = await _context.Tbl_StatePrabhari
-        .Where(x => x.userId == userId)
-        .Select(x => x.StateId)
-        .FirstOrDefaultAsync(ct);
+          .Where(x => x.userId == userId)
+          .Select(x => x.StateId)
+          .FirstOrDefaultAsync(ct);
             var query = _context.Tbl_VidhansabhaStatewiseCount.AsQueryable();
 
             if (userId !=null)
@@ -71,9 +72,10 @@ namespace VidhanSabha.Infrastructure.Repositories.SuperAdmin
             return res;
         }
 
-        public Task<Tbl_VidhansabhaStatewiseCount?> GetByIdAsync(int id, CancellationToken ct = default)
+        public Task<Tbl_VidhansabhaStatewiseCount?> GetByIdAsync(int stateId, CancellationToken ct = default)
         {
-            throw new NotImplementedException();
+             var res =  _context.Tbl_VidhansabhaStatewiseCount.Where(x => x.StateId == stateId).FirstOrDefaultAsync(ct);
+            return res;
         }
 
         public Task<int> SaveChangesAsync(CancellationToken ct = default)
@@ -81,9 +83,10 @@ namespace VidhanSabha.Infrastructure.Repositories.SuperAdmin
             throw new NotImplementedException();
         }
 
-        public void Update(Tbl_VidhansabhaStatewiseCount state)
+        public async void Update(Tbl_VidhansabhaStatewiseCount state)
         {
-            throw new NotImplementedException();
+            _context.Tbl_VidhansabhaStatewiseCount.Update(state);
+             await _context.SaveChangesAsync();
         }
     }
 }

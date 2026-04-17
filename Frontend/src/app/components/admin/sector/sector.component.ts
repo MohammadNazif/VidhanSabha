@@ -9,6 +9,8 @@ import { GenericModalButtonComponent } from '../../shared/generic-modal-form/gen
 import { PageHeaderComponent } from '../../shared/page-header/page-header.component';
 import { ToastService } from '../../../Services/common/toast/toast.service';
 import { SectorService } from '../../../Services/Admin/sector/sector.service';
+import { StateService } from '../../../Services/Admin/state/state.service';
+import { AuthServiceService } from '../../../Services/Auth/auth.service';
 import { CrudHandlerService } from '../../../Services/common/crud-handler.service';
 import { ViewChild, OnInit } from '@angular/core';
 
@@ -23,6 +25,11 @@ export class SectorComponent implements OnInit {
   @ViewChild('sectorModal') sectorModal!: GenericModalButtonComponent;
 
   membersData: any[] = [];
+  defaultStateId: string | null = null;
+
+  isStatePrabhari(): boolean {
+    return (this.authService.getRole() || '').toUpperCase().trim() === 'STATEPRABHARI';
+  }
 
   columns: TableColumn[] = [
     { key: 'mandalName', label: 'Mandal', type: 'avatar', sortable: true, avatarFallbackKey: 'name' },
@@ -56,12 +63,48 @@ export class SectorComponent implements OnInit {
     submitLabel: 'Register Sector',
     fields: [
       {
+        id: 'districtId',
+        name: 'districtId',
+        label: 'Select District',
+        type: 'select',
+        placeholder: '--Select District--',
+        apiUrl: () => `district/getAll?stateId=${this.defaultStateId || ''}`,
+        apiMapper: (data: any) => {
+          const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
+          return list.map((item: any) => ({
+            value: String(item.id),
+            label: item.name
+          }));
+        },
+        validations: [Validators.required],
+        gridColSpan: 6
+      },
+      {
+        id: 'vidhanId',
+        name: 'vidhanId',
+        label: 'Select Vidhan Sabha',
+        type: 'select',
+        placeholder: '--Select Vidhan Sabha--',
+        dependsOn: 'districtId',
+        apiUrl: (districtId: any) => `vidhansabha/getAll?districtId=${districtId}`,
+        apiMapper: (data: any) => {
+          const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
+          return list.map((item: any) => ({
+            value: String(item.id),
+            label: item.name
+          }));
+        },
+        validations: [Validators.required],
+        gridColSpan: 6
+      },
+      {
         id: 'mandalId',
-        name: 'Mandal',
+        name: 'mandalId',
         label: 'Mandal',
         type: 'select',
         placeholder: '--Select Mandal--',
-        apiUrl: 'mandal/getall',
+        dependsOn: 'vidhanId',
+        apiUrl: (vidhanId: any) => `mandal/getall?vidhanId=${vidhanId}`,
         apiMapper: (data: any) => {
           const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
           return list.map((item: any) => ({
@@ -221,11 +264,31 @@ export class SectorComponent implements OnInit {
 
   constructor(
     private sectorService: SectorService,
+    private stateService: StateService,
+    private authService: AuthServiceService,
     private crudHandler: CrudHandlerService,
     private toastService: ToastService
   ) { }
 
   ngOnInit() {
+    if (this.isStatePrabhari()) {
+      // Fetch the assigned state ID
+      this.stateService.getAllStates().subscribe({
+        next: (response) => {
+          const list = response?.data || response || [];
+          if (list.length > 0) {
+            this.defaultStateId = String(list[0].stateId || list[0].id);
+
+            // Simplify fields for State Prabhari
+            const districtField = this.addSectorConfig.fields.find(f => f.id === 'districtId');
+            if (districtField) {
+              delete districtField.dependsOn;
+              districtField.apiUrl = () => `district/getAll?stateId=${this.defaultStateId}`;
+            }
+          }
+        }
+      });
+    }
     this.loadSectors();
   }
 
@@ -242,13 +305,18 @@ export class SectorComponent implements OnInit {
     if (!result.status) return;
     console.log(result.data);
     const raw = { ...result.data };
+    const userId = this.authService.getUserId();
+    const isUpdate = !!(raw.id || (this.sectorModal.initialData && this.sectorModal.initialData.id));
 
     const submitData: any = {
-      id: raw.id || (this.sectorModal.initialData && this.sectorModal.initialData.id),
+      ...raw,
+      id: isUpdate ? (raw.id || this.sectorModal.initialData.id) : null,
       mandalId: Number(raw.mandalId),
+      stateId: Number(raw.stateId || this.defaultStateId),
       villageId: Array.isArray(raw.villageId) ? raw.villageId.map((v: any) => Number(v)) : Number(raw.villageId),
       sectorName: raw.sectorName,
-      isSectorSanyojak: raw.isSectorSanyojak === 'Yes'
+      isSectorSanyojak: raw.isSectorSanyojak === 'Yes',
+      userId: userId ? String(userId) : null
     };
 
     if (submitData.isSectorSanyojak) {
@@ -263,7 +331,6 @@ export class SectorComponent implements OnInit {
       submitData.profileImage = raw.profileImage || null;
     }
 
-    const isUpdate = !!(submitData.id || (this.sectorModal.initialData && this.sectorModal.initialData.id));
     if (isUpdate && !submitData.id) {
       submitData.id = this.sectorModal.initialData.id;
     }

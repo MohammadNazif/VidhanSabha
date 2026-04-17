@@ -8,6 +8,8 @@ import { FormConfig, FormResult } from '../../shared/generic-modal-form/generic-
 
 import { PageHeaderComponent } from '../../shared/page-header/page-header.component';
 import { BoothService } from '../../../Services/Admin/booth/booth.service';
+import { StateService } from '../../../Services/Admin/state/state.service';
+import { AuthServiceService } from '../../../Services/Auth/auth.service';
 import { ToastService } from '../../../Services/common/toast/toast.service';
 import { CrudHandlerService } from '../../../Services/common/crud-handler.service';
 
@@ -24,11 +26,37 @@ export class BoothComponent implements OnInit {
 
   constructor(
     private boothService: BoothService,
+    private stateService: StateService,
+    private authService: AuthServiceService,
     private toastService: ToastService,
     private crudHandler: CrudHandlerService
   ) { }
 
+  isStatePrabhari(): boolean {
+    return (this.authService.getRole() || '').toUpperCase().trim() === 'STATEPRABHARI';
+  }
+
+  defaultStateId: string | null = null;
+
   ngOnInit() {
+    if (this.isStatePrabhari()) {
+      // Fetch the assigned state ID
+      this.stateService.getAllStates().subscribe({
+        next: (response) => {
+          const list = response?.data || response || [];
+          if (list.length > 0) {
+            this.defaultStateId = String(list[0].stateId || list[0].id);
+
+            // Simplify fields for State Prabhari
+            const districtField = this.addBoothConfig.fields.find(f => f.id === 'districtId');
+            if (districtField) {
+              delete districtField.dependsOn;
+              districtField.apiUrl = () => `district/getAll?stateId=${this.defaultStateId}`;
+            }
+          }
+        }
+      });
+    }
     this.loadBooths();
   }
 
@@ -48,12 +76,48 @@ export class BoothComponent implements OnInit {
     submitLabel: 'Create Booth',
     fields: [
       {
+        id: 'districtId',
+        name: 'districtId',
+        label: 'Select District',
+        type: 'select',
+        placeholder: '--Select District--',
+        apiUrl: () => `district/getAll?stateId=${this.defaultStateId || ''}`,
+        apiMapper: (data: any) => {
+          const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
+          return list.map((item: any) => ({
+            value: String(item.id),
+            label: item.name
+          }));
+        },
+        validations: [Validators.required],
+        gridColSpan: 6
+      },
+      {
+        id: 'vidhanId',
+        name: 'vidhanId',
+        label: 'Select Vidhan Sabha',
+        type: 'select',
+        placeholder: '--Select Vidhan Sabha--',
+        dependsOn: 'districtId',
+        apiUrl: (districtId: any) => `vidhansabha/getAll?districtId=${districtId}`,
+        apiMapper: (data: any) => {
+          const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
+          return list.map((item: any) => ({
+            value: String(item.id),
+            label: item.name
+          }));
+        },
+        validations: [Validators.required],
+        gridColSpan: 6
+      },
+      {
         id: 'mandalId',
         name: 'mandalId',
         label: 'Mandal',
         type: 'select',
         placeholder: '--Select Mandal--',
-        apiUrl: 'mandal/getall',
+        dependsOn: 'vidhanId',
+        apiUrl: (vidhanId: any) => `mandal/getall?vidhanId=${vidhanId}`,
         apiMapper: (data: any) => {
           const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
           return list.map((item: any) => ({
@@ -360,17 +424,22 @@ export class BoothComponent implements OnInit {
     if (!result.status) return;
 
     const raw = result.data;
+    const userId = this.authService.getUserId();
     const isSanyojak = raw.isBoothSanyojak === 'Yes';
+    const isUpdate = !!(raw.id || (this.boothModal.initialData && this.boothModal.initialData.id));
 
     const submitData: any = {
-      id: raw.id || (this.boothModal.initialData && this.boothModal.initialData.id),
+      ...raw,
+      id: isUpdate ? (raw.id || this.boothModal.initialData.id) : null,
       mandalId: Number(raw.mandalId),
       sectorId: Number(raw.sectorId),
+      stateId: Number(raw.stateId || this.defaultStateId),
       boothNumber: Number(raw.boothNumber),
       pollingStationName: raw.pollingStationName,
       pollingStationLocation: raw.pollingStationLocation,
       isBoothSanyojak: isSanyojak,
-      villages: []
+      villages: [],
+      userId: userId ? String(userId) : null
     };
 
     // Transform anshikData to villages array
@@ -401,7 +470,6 @@ export class BoothComponent implements OnInit {
       };
     }
 
-    const isUpdate = !!submitData.id;
 
     const request = isUpdate
       ? this.boothService.updateBooth(submitData)

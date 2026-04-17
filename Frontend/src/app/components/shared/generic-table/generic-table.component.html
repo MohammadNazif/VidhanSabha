@@ -63,7 +63,7 @@
         </th>
 
         <!-- Actions Header -->
-        <th *ngIf="actions.length > 0" class="actions-cell">Actions</th>
+        <th *ngIf="hasVisibleActions" class="actions-cell">Actions</th>
       </tr>
     </thead>
 
@@ -156,7 +156,7 @@
           </td>
 
           <!-- Actions -->
-          <td *ngIf="actions.length > 0" class="actions-cell">
+          <td *ngIf="hasVisibleActions" class="actions-cell">
             <div class="actions-container">
               <ng-container *ngFor="let action of actions">
                 <button [class]="'action-btn action-' + (action.variant || 'default')"

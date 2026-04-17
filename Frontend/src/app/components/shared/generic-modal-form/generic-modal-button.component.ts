@@ -37,13 +37,13 @@ export class GenericModalButtonComponent {
   @Input() icon?: string;
   @Input() variant: 'primary' | 'secondary' | 'danger' | 'success' | 'outline' = 'primary';
   @Input() hideButton = false;
-  
-  @Output() formSubmit = new EventEmitter<FormResult>();
-  
-  isModalOpen = false;
-  initialData: any;
 
-  constructor(private cdr: ChangeDetectorRef) {}
+  @Output() formSubmit = new EventEmitter<FormResult>();
+
+  isModalOpen = false;
+  @Input() initialData: any;
+
+  constructor(private cdr: ChangeDetectorRef) { }
 
   get buttonClass(): string {
     const base = '';
@@ -58,7 +58,10 @@ export class GenericModalButtonComponent {
   }
 
   openModal(data?: any): void {
-    this.initialData = data;
+    if (data !== undefined) {
+      this.initialData = data;
+    }
+    console.log('Modal Opening Data:', this.initialData);
     this.isModalOpen = true;
     this.cdr.detectChanges();
     // Prevent body scrolling when modal is open

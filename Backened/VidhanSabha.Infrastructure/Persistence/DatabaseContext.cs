@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using VidhanSabha.Domain.Entities.Admin;
 using VidhanSabha.Domain.Entities.Auth;
 using VidhanSabha.Domain.Entities.Common;
+using VidhanSabha.Domain.Entities.StatePrabhari;
 using VidhanSabha.Domain.Entities.SuperAdmin;
 
 namespace VidhanSabha.Infrastructure.Persistence
@@ -52,6 +53,8 @@ namespace VidhanSabha.Infrastructure.Persistence
         public DbSet<Tbl_StatePrabhari> Tbl_StatePrabhari => Set<Tbl_StatePrabhari>();
 
         public DbSet<Tbl_LoginCredential> Tbl_LoginCredential => Set<Tbl_LoginCredential>();
+
+        public DbSet<Tbl_DistrictWiseCount> Tbl_DistrictWiseCount => Set<Tbl_DistrictWiseCount>();
         protected override void OnModelCreating(ModelBuilder modelBuilder)
             {
                 // ✅ Ek line — is assembly ki saari Configuration classes auto-pick ho jayengi

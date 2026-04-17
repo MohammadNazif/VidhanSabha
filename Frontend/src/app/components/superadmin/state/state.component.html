@@ -2,15 +2,9 @@
   <app-page-header title="State Management" subtitle="Manage high-level state divisions"
     icon="🗺️">
     <div class="flex gap-3">
-      <app-generic-modal-button *ngIf="!isStatePrabhari()" #stateModal [config]="addStateConfig" label="Add State" icon="+"
-        (formSubmit)="handleFormSubmit($event)">
+      <app-generic-modal-button #stateModal [config]="addStateConfig" label="Add State" icon="+"
+        [hideButton]="isStatePrabhari()" (formSubmit)="handleFormSubmit($event)">
       </app-generic-modal-button>
-
-      <button type="button" *ngIf="isStatePrabhari()" class="flex items-center gap-2 px-3.5 py-1.5 bg-blue-600 text-white rounded-lg font-medium text-sm transition-all duration-200 active:scale-95 shadow-sm hover:shadow-md hover:bg-blue-700" (click)="openAssignDistrictModalTop()">
-        <span class="text-base">+</span>
-        <span>Add District</span>
-      </button>
-
     </div>
   </app-page-header>
 
@@ -18,7 +12,8 @@
   <app-generic-modal-button #prabhariModal [config]="addPrabhariConfig" label="Assign State Prabhari" icon="user"
     [hideButton]="true" (formSubmit)="handlePrabhariSubmit($event)">
   </app-generic-modal-button>
-  <app-generic-modal-button #districtModal [config]="assignDistrictConfig" label="Assign District" icon="map"
+
+  <app-generic-modal-button #districtModal [config]="addDistrictConfig" label="Assign District" icon="layout"
     [hideButton]="true" (formSubmit)="handleDistrictSubmit($event)">
   </app-generic-modal-button>
 

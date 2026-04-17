@@ -60,13 +60,12 @@ namespace VidhanSabha.Domain.Entities.SuperAdmin
         }
 
         // ── Called when a Vidhansabha is added ───────────────────
-        public void DecrementRemaining()
+        public void DecrementRemaining(int remainingcount,int vidhansabhaCount)
         {
-            if (Remainingcount <= 0)
+            Remainingcount = remainingcount - vidhansabhaCount;
+             if (Remainingcount < 0)
                 throw new InvalidOperationException(
-                    "Is State mein koi seat remaining nahi hai.");
-
-            Remainingcount--;
+                    "Vidhansabha Cont Could not be greater than Total Vidhansabha.");
         }
 
         // ── Called when a Vidhansabha is deleted/soft-deleted ────

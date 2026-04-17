@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using VidhanSabha.Api.Responses;
+using VidhanSabha.Application.Common.District.Queries;
 using VidhanSabha.Application.Pannels.SuperAdmin.designation.Commands;
 using VidhanSabha.Application.Pannels.SuperAdmin.designation.DTOs;
 using VidhanSabha.Application.Pannels.SuperAdmin.designation.Queries;
@@ -8,6 +9,9 @@ using VidhanSabha.Application.Pannels.SuperAdmin.StatePrabhari.Dtos;
 using VidhanSabha.Application.Pannels.SuperAdmin.StatePrabhari.Query;
 using VidhanSabha.Application.Pannels.SuperAdmin.TotalStateWiseVidhansabhaCount.Command;
 using VidhanSabha.Application.Pannels.SuperAdmin.TotalStateWiseVidhansabhaCount.Query;
+using VidhanSabha.Domain.Entities.StatePrabhari.DistrictWiseCount.Command;
+using VidhanSabha.Domain.Entities.StatePrabhari.DistrictWiseCount.Query;
+using static VidhanSabha.Application.Pannels.StatePrabhari.DistrictWiseCount.Dtos.DistrictWiseCount;
 using static VidhanSabha.Application.Pannels.SuperAdmin.TotalStateWiseVidhansabhaCount.Dtos.VidhanshabhaStateWiseCount;
 
 namespace VidhanSabha.Api.Endpoints
@@ -89,11 +93,25 @@ namespace VidhanSabha.Api.Endpoints
             }).WithName("updateStatePrabhari")
              .Produces(200);
 
-            stateprabhaari.MapPost("/delete", async (int id,string userId, IMediator mediator) =>
+            //vidhansabhacount.MapPost("/create/", async (int id,string userId, IMediator mediator) =>
+            //{
+            //    var data = await mediator.Send(new DeletePrabhariCommand(id,userId));
+            //    return Results.Ok(ApiResponse<int>.Ok(data, " State Prabhari deleted successfully"));
+            //}).Produces(200);
+
+            vidhansabhacount.MapPost("districtwise/create", async (IMediator mediator, VidhansabhaDistrictRequestDto request) =>
             {
-                var data = await mediator.Send(new DeletePrabhariCommand(id,userId));
-                return Results.Ok(ApiResponse<int>.Ok(data, " State Prabhari deleted successfully"));
-            }).Produces(200);
+                var data = await mediator.Send(new CreateDistrictWiseCount(request));
+                return Results.Ok(ApiResponse<int>.Ok(data, " VidhanSabha Count inserted successfully"));
+            }).WithName("CountistrictWise")
+            .Produces(200);
+
+            vidhansabhacount.MapGet("districtwise/getAll", async (IMediator mediator, string userId) =>
+            {
+                var data = await mediator.Send(new getAllDitrictWiseCountQuery(userId));
+                return Results.Ok(ApiResponse<IReadOnlyList<VidhansabhaDistrictResponseDto>>.Ok(data, "Count fetched Successfully"));
+            }).WithName("getallDistrictwisecount")
+            .Produces(200);
         }
     }
 }

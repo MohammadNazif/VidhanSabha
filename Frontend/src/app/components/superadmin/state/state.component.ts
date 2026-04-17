@@ -13,6 +13,7 @@ import { CrudHandlerService } from '../../../Services/common/crud-handler.servic
 import { StatePrabhariService } from '../../../Services/Admin/state-prabhari/state-prabhari.service';
 import { AuthServiceService } from '../../../Services/Auth/auth.service';
 import { DistrictService } from '../../../Services/Admin/district/district.service';
+import { VidhanSabhaCountService } from '../../../Services/Admin/vidhansabha-count/vidhansabha-count.service';
 
 @Component({
   selector: 'app-state',
@@ -48,14 +49,15 @@ export class StateComponent implements OnInit {
 
   actions: TableAction[] = [
     { id: 'add_prabhari', label: 'Prabhari', variant: 'primary', icon: 'user', show: () => !this.isStatePrabhari() },
-    { id: 'assign_district', label: 'Assign District', variant: 'primary', icon: 'map', show: () => this.isStatePrabhari() },
-    { id: 'edit', label: '', variant: 'default', icon: 'edit' },
-    { id: 'delete', label: '', variant: 'danger', icon: 'delete' }
+    { id: 'edit', label: '', variant: 'default', icon: 'edit', show: () => !this.isStatePrabhari() },
+    { id: 'delete', label: '', variant: 'danger', icon: 'delete', show: () => !this.isStatePrabhari() }
   ];
 
   isStatePrabhari(): boolean {
     return (this.authService.getRole() || '').toUpperCase().trim() === 'STATEPRABHARI';
   }
+
+  defaultStateId: string | null = null;
 
   addStateConfig: FormConfig = {
     title: 'Add New State',
@@ -205,15 +207,19 @@ export class StateComponent implements OnInit {
     ]
   };
 
-  assignDistrictConfig: FormConfig = {
+  addDistrictConfig: FormConfig = {
     title: 'Assign District Count',
     submitLabel: 'Assign',
     fields: [
       {
         id: 'stateId',
         name: 'stateId',
-        label: '',
-        type: 'hidden'
+        label: 'Select State',
+        type: 'select',
+        apiUrl: () => `state/getAll`,
+        apiMapper: (list: any[]) => list.map(item => ({ value: String(item.id), label: item.name })),
+        validations: [Validators.required],
+        gridColSpan: 6
       },
       {
         id: 'districtId',
@@ -222,12 +228,12 @@ export class StateComponent implements OnInit {
         type: 'select',
         placeholder: 'Select District',
         dependsOn: 'stateId',
-        apiUrl: (stateId: any) => `district/getAll?stateId=${stateId}`,
+        apiUrl: (stateId: any) => `common/getdistrict?id=${stateId}`,
         apiMapper: (data: any) => {
           const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
           return list.map((item: any) => ({
             value: String(item.id),
-            label: item.name
+            label: item.districtName
           }));
         },
         validations: [Validators.required],
@@ -236,28 +242,21 @@ export class StateComponent implements OnInit {
       {
         id: 'vidhanSabhaCount',
         name: 'vidhanSabhaCount',
-        label: 'Vidhansabha Count',
+        label: 'Vidhan Sabha Count',
         type: 'number',
-        placeholder: 'Enter vidhansabha count',
-        validations: [Validators.required],
+        placeholder: 'Enter count',
+        validations: [Validators.required, Validators.min(0)],
         gridColSpan: 6
       }
     ]
   };
 
-  openAssignDistrictModalTop() {
-    const stateId = this.stateList && this.stateList.length > 0 ? (this.stateList[0].stateId || this.stateList[0].id) : null;
-    if (stateId) {
-      this.districtModal.openModal({ stateId });
-    } else {
-      this.toastService.showError('Error', 'State context missing. Please wait for load or refresh.');
-    }
-  }
 
   constructor(
     private stateService: StateService,
     private statePrabhariService: StatePrabhariService,
     private districtService: DistrictService,
+    private vidhanSabhaCountService: VidhanSabhaCountService,
     private toastService: ToastService,
     private crudHandler: CrudHandlerService,
     private authService: AuthServiceService
@@ -271,12 +270,20 @@ export class StateComponent implements OnInit {
         { key: 'vidhanSabhaCount', label: 'Vidhansabha Count', sortable: true },
         { key: 'remainingCount', label: 'Remaining Count', sortable: true }
       ];
+
     }
     this.loadStates();
   }
 
   loadStates() {
-    this.stateService.getAllStates().subscribe({
+    const userId = this.authService.getUserId();
+    const isPrabhari = this.isStatePrabhari();
+
+    const request = (isPrabhari && userId)
+      ? this.vidhanSabhaCountService.getAllByUserId(userId)
+      : this.stateService.getAllStates();
+
+    request.subscribe({
       next: (response) => {
         if (response && response.isSuccess) {
           this.stateList = response.data;
@@ -287,6 +294,27 @@ export class StateComponent implements OnInit {
         } else {
           this.stateList = [];
         }
+
+        // Set default state ID and simplify fields for State Prabhari
+        if (isPrabhari && this.stateList.length > 0) {
+          const stateRecord = this.stateList[0];
+          this.defaultStateId = String(stateRecord.stateId || stateRecord.id);
+
+          this.addDistrictConfig.fields = this.addDistrictConfig.fields.filter(f => f.id !== 'stateId');
+          const districtField = this.addDistrictConfig.fields.find(f => f.id === 'districtId');
+          if (districtField) {
+            delete districtField.dependsOn;
+            districtField.apiUrl = () => `common/getdistrict?id=${this.defaultStateId}`;
+            districtField.apiMapper = (data: any) => {
+              const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
+              return list.map((item: any) => ({
+                value: String(item.id),
+                label: item.districtName,
+                disabled: this.stateList.some(d => d.districtId === item.id)
+              }));
+            };
+          }
+        }
       },
       error: (err) => {
         console.error('Error fetching states:', err);
@@ -296,7 +324,7 @@ export class StateComponent implements OnInit {
 
   handleAction(event: any) {
     const { action, row } = event;
-
+    console.log(row, "sasdd");
     if (action.id === 'delete') {
       this.crudHandler.handleRequest(
         this.stateService.deleteState(row.id),
@@ -305,15 +333,21 @@ export class StateComponent implements OnInit {
         () => this.loadStates()
       );
     } else if (action.id === 'edit') {
-      this.stateModal.openModal(row);
+      this.stateModal.openModal({
+        ...row,
+        stateId: row.stateId || row.id ? String(row.stateId || row.id) : null
+      });
     } else if (action.id === 'add_prabhari') {
+      console.log(row, "sd");
       this.prabhariModal.openModal({
-        stateId: row.stateId,
+        stateId: row.stateId || row.id,
         ...(row.prabhari || {})
       });
     } else if (action.id === 'assign_district') {
+      console.log(row, "sd");
       this.districtModal.openModal({
-        stateId: row.stateId || row.id
+        stateId: row.stateId || row.id,
+
       });
     }
   }
@@ -343,6 +377,7 @@ export class StateComponent implements OnInit {
 
     const raw = result.data;
     const stateId = this.prabhariModal.initialData?.stateId;
+
 
     if (!stateId) {
       this.toastService.showError('Error', 'State ID missing');
@@ -379,24 +414,24 @@ export class StateComponent implements OnInit {
     if (!result.status) return;
 
     const raw = result.data;
-    const stateId = this.districtModal.initialData?.stateId;
+    const userId = this.authService.getUserId();
 
-    if (!stateId) {
-      this.toastService.showError('Error', 'State ID missing');
+    if (!userId) {
+      this.toastService.showError('Error', 'User ID missing');
       return;
     }
 
-    const submitData = {
-      id: Number(raw.districtId),
-      stateId: Number(stateId),
+    const countData = {
+      userId: String(userId),
+      stateId: Number(raw.stateId || this.defaultStateId),
+      districtId: Number(raw.districtId),
       vidhanSabhaCount: Number(raw.vidhanSabhaCount)
     };
 
-    // Doing partial update via District Service if an update is meant
     this.crudHandler.handleRequest(
-      this.districtService.updateDistrict(submitData),
+      this.vidhanSabhaCountService.createVidhanSabhaCount(countData),
       'Assigned',
-      `District assigned successfully with count ${submitData.vidhanSabhaCount}!`,
+      'District Vidhan Sabha count assigned successfully!',
       () => this.loadStates()
     );
   }

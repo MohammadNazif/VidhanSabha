@@ -24,6 +24,7 @@ using VidhanSabha.Application.Pannels.Admin.Sector.Interface;
 using VidhanSabha.Application.Pannels.Auth.Commands.Login;
 using VidhanSabha.Application.Pannels.Auth.Interfaces;
 using VidhanSabha.Application.Pannels.Auth.Queries.GetMobileNumber;
+using VidhanSabha.Application.Pannels.StatePrabhari.DistrictWiseCount.Interface;
 using VidhanSabha.Application.Pannels.SuperAdmin.designation.Interfaces;
 using VidhanSabha.Application.Pannels.SuperAdmin.StatePrabhari.Interfaces;
 using VidhanSabha.Application.Pannels.SuperAdmin.TotalStateWiseVidhansabhaCount.Interfaces;
@@ -31,6 +32,7 @@ using VidhanSabha.Infrastructure.Persistence;
 using VidhanSabha.Infrastructure.Repositories.Admin;
 using VidhanSabha.Infrastructure.Repositories.AuthRepos;
 using VidhanSabha.Infrastructure.Repositories.Common;
+using VidhanSabha.Infrastructure.Repositories.StatePrabhari;
 using VidhanSabha.Infrastructure.Repositories.SuperAdmin;
 
 
@@ -67,6 +69,7 @@ namespace VidhanSabha.Infrastructure.DependencyInjection
             services.AddScoped<IPravasiVoterRepository,PravasiVoterRepository>();
             services.AddScoped<IDistrictRepository, DistrictRepository>();
             services.AddScoped<INewVoterRepository, NewVoterRepository>();
+            services.AddScoped<IDistrictWiseCount, DistrictWiseCountRepositroy>();
             services.AddScoped<IPartyRepository, PartyRepository>();
             services.AddScoped<ISahmatTypeRepository, SahmatTypeRepository>();
             services.AddScoped<ISahmatAsahmatRepository, SahmatAsahmatRepository>();
