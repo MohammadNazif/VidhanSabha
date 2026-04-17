@@ -68,6 +68,7 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
                     CastId = m.CastId,
                     CastName=m.Cast.CastName,
                     OccupationId = m.OccupationId,
+                    Occupation=m.Occupation.Occupation,
                     VoterId = m.VoterId,
                     CurrentAddress = m.CurrentAddress,
                     Villages = m.Villages.Select(v => new VillageResponseDto

@@ -33,6 +33,7 @@ namespace VidhanSabha.Application.Pannels.Admin.PravasiVoters.DTOs
         public int CastId { get; set; }
         public string CastName { get; set; } = string.Empty;
         public int OccupationId { get; set; }
+        public string Occupation { get; set; }
         public string VoterId { get; set; }
         public string CurrentAddress { get; set; }
         
