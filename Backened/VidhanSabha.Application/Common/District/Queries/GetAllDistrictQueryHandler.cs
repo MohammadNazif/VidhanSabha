@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using VidhanSabha.Application.Common.District.DTOs;
 using VidhanSabha.Application.Common.District.Interfaces;
+using VidhanSabha.Application.Exceptions;
 
 namespace VidhanSabha.Application.Common.District.Queries
 {
@@ -20,7 +21,10 @@ namespace VidhanSabha.Application.Common.District.Queries
         public async Task<List<DistrictResponseDto>> Handle(GetAllDistrictQuery query,CancellationToken cancellationtoken)
         {
             var res = await _repo.GetDistrictsByIdAsync(query.Id);
-
+            if(res==null)
+            {
+                throw new NotFoundException("District Not Found");
+            }
             var DistrictResponse =  res.Select(x => new DistrictResponseDto
             {
                 Id = x.Id,

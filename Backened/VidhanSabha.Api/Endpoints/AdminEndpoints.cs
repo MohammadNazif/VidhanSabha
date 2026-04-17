@@ -10,12 +10,16 @@ using VidhanSabha.Application.Pannels.Admin.Mandal.DTOs.Create;
 using VidhanSabha.Application.Pannels.Admin.Mandal.Queries;
 using VidhanSabha.Application.Pannels.Admin.NewVoter.Command;
 using VidhanSabha.Application.Pannels.Admin.NewVoter.DTOs;
+using VidhanSabha.Application.Pannels.Admin.NewVoter.Queries;
 using VidhanSabha.Application.Pannels.Admin.PannaPramukh.Command;
 using VidhanSabha.Application.Pannels.Admin.PannaPramukh.Dtos;
 using VidhanSabha.Application.Pannels.Admin.PannaPramukh.Queries;
 using VidhanSabha.Application.Pannels.Admin.PravasiVoters.Command;
 using VidhanSabha.Application.Pannels.Admin.PravasiVoters.DTOs;
 using VidhanSabha.Application.Pannels.Admin.PravasiVoters.Queries;
+using VidhanSabha.Application.Pannels.Admin.SahmatAsahmat.Command;
+using VidhanSabha.Application.Pannels.Admin.SahmatAsahmat.DTOs;
+using VidhanSabha.Application.Pannels.Admin.SahmatAsahmat.Queries;
 using VidhanSabha.Application.Pannels.Admin.Sector.Commands;
 using VidhanSabha.Application.Pannels.Admin.Sector.DTOs;
 using VidhanSabha.Application.Pannels.Admin.Sector.Queries;
@@ -42,6 +46,8 @@ public static class AdminEndpoints
                         .WithTags("PravasiVoter");
         var newvoter = app.MapGroup("/api/newvoter")
                         .WithTags("NewVoter");
+        var sahmatasahmat = app.MapGroup("/api/sahmatasahmat")
+                        .WithTags("SahmatAsahmat");
 
         #region Mandal
         mandal.MapGet("/getAll", async (IMediator mediator) =>
@@ -255,6 +261,60 @@ public static class AdminEndpoints
         })
                 .WithName("CreateNewVoter")
                 .Produces<int>(200);
+
+        newvoter.MapPost("/update", async (UpdateNewVoterRequestDto dto, IMediator mediator) =>
+        {
+            var result = await mediator.Send(new UpdateNewVoterCommand(dto));
+            return Results.Ok(ApiResponse<int>.Ok(result, "New Voter Updated Successfully"));
+        })
+                .WithName("UpdateNewVoter")
+                .Produces<int>(200);
+
+        newvoter.MapPost("/delete", async (int id, IMediator mediator) =>
+        {
+            var result = await mediator.Send(new DeleteNewVoterCommand(id));
+            return Results.Ok(ApiResponse<int>.Ok(result, "NewVoter Deleted Successfully"));
+        })
+                .WithName("DeleteNewVoter")
+                .Produces<int>(200);
+        newvoter.MapGet("/getAll", async (IMediator mediator) =>
+        {
+            var result = await mediator.Send(new GetAllNewVoterQuery());
+            return Results.Ok(ApiResponse<List<NewVoterResponseDto>>.Ok(result));
+        });
+
+        #endregion
+        #region Sahmat Asahmat
+
+        sahmatasahmat.MapPost("/create", async (CreateSahmatAsahmatReqDto dto, IMediator mediator) =>
+        {
+            var result = await mediator.Send(new CreateSahmatAsahmatCommand(dto));
+            return Results.Ok(ApiResponse<int>.Ok(result, "Sahmat/Asahmat Voter Created Successfully"));
+        })
+                .WithName("Sahmat/AsahmatNewVoter")
+                .Produces<int>(200);
+
+        sahmatasahmat.MapPost("/update", async (UpdateSahmatAsahmatReqDto dto, IMediator mediator) =>
+        {
+            var result = await mediator.Send(new UpdateSahmatAsahmatCommand(dto));
+            return Results.Ok(ApiResponse<int>.Ok(result, "Sahmat/Asahmat Updated Successfully"));
+        })
+                .WithName("UpdateSahmatAsahmatVoter")
+                .Produces<int>(200);
+
+        sahmatasahmat.MapPost("/delete", async (int id, IMediator mediator) =>
+        {
+            var result = await mediator.Send(new DeleteSahmatAsahmatCommand(id));
+            return Results.Ok(ApiResponse<int>.Ok(result, "Sahmat/Asahmat Deleted Successfully"));
+        })
+                .WithName("DeleteSahmat/Asahmat")
+                .Produces<int>(200);
+
+        sahmatasahmat.MapGet("/getAll", async (IMediator mediator) =>
+        {
+            var result = await mediator.Send(new GetAllSahmatAsahmatQuery());
+            return Results.Ok(ApiResponse<List<SahmatAsahmatResponseDto>>.Ok(result));
+        });
 
         #endregion
     }

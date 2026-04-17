@@ -1,0 +1,99 @@
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using VidhanSabha.Application.Pannels.Admin.PravasiVoters.DTOs;
+using VidhanSabha.Application.Pannels.Admin.SahmatAsahmat.DTOs;
+using VidhanSabha.Application.Pannels.Admin.SahmatAsahmat.Interfaces;
+using VidhanSabha.Domain.Entities.Admin;
+using VidhanSabha.Infrastructure.Persistence;
+using VidhanSabha.Infrastructure.Repositories.Common;
+
+namespace VidhanSabha.Infrastructure.Repositories.Admin
+{
+    public class SahmatAsahmatRepository:BaseRepository<Tbl_SahmatAsahmat>,ISahmatAsahmatRepository
+    {
+        public SahmatAsahmatRepository(DatabaseContext context) : base(context) 
+        {
+
+        }
+        public async Task<int> AddAsync(Tbl_SahmatAsahmat sahmatasahmat, CancellationToken ct = default)
+        {
+            try
+            {
+                await _context.Tbl_SahmatAsahmat.AddAsync(sahmatasahmat);
+                return await _context.SaveChangesAsync();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public int Update(Tbl_SahmatAsahmat sahmatasahmat)
+        {
+            try
+            {
+                _context.Tbl_SahmatAsahmat.Update(sahmatasahmat);
+                return _context.SaveChanges();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+        }
+        public void Delete(Tbl_SahmatAsahmat sahmatasahmat)
+        {
+            throw new NotImplementedException();
+        }
+
+
+        public async Task<Tbl_SahmatAsahmat?> GetByIdAsync(int id)
+        {
+            try
+            {
+                return await _context.Tbl_SahmatAsahmat
+                 .Include(p => p.Villages)
+                 .FirstOrDefaultAsync(e => e.Id == id);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<SahmatAsahmatResponseDto>> GetAllAsync(int? boothId = null, CancellationToken ct = default)
+        {
+            var result = await _context.Tbl_SahmatAsahmat
+                .Select(m => new SahmatAsahmatResponseDto
+                {
+                    Id = m.Id,
+                    BoothId = m.BoothId,
+                    BoothNumber = m.Booth.BoothNumber,
+                    TypeId=m.TypeId,
+                    Type=m.Type.Type,
+                    IsAsahmat=m.IsAsahmat,
+                    Name = m.Name,
+                    Age =m.Age,
+                    Mobile = m.Mobile,
+                    PartyId=m.PartyId,
+                    Party=m.Party.Party,
+                    OccupationId = m.OccupationId,
+                    Occupation=m.Occupation.Occupation,
+                    Reason=m.Reason,
+                    VoterId = m.VoterId,
+                    Villages = m.Villages.Select(v => new VillageResponseDtos
+                    {
+                        VillageId = v.VillageId,
+                        VillageName = v.Village.VillageName
+                    }).ToList(),
+                }).ToListAsync();
+            return result;
+        }
+
+    }
+}

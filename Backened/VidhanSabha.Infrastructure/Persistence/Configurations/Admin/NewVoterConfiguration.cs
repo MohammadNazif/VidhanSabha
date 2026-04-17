@@ -17,6 +17,7 @@ namespace VidhanSabha.Infrastructure.Persistence.Configurations.Admin
             builder.ToTable("Tbl_NewVoter");
 
             builder.HasKey(x => x.Id);
+            builder.HasQueryFilter(e => e.Status);
 
             builder.Property(x => x.Name)
                    .HasMaxLength(200);

@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using VidhanSabha.Application.Common.Occupation.DTOs;
 using VidhanSabha.Application.Common.Occupation.Interface;
+using VidhanSabha.Application.Exceptions;
 
 namespace VidhanSabha.Application.Common.Occupation.Queries
 {
@@ -20,6 +21,10 @@ namespace VidhanSabha.Application.Common.Occupation.Queries
         public async Task<IReadOnlyList<OccupationResponseDto>> Handle(GetAllOccupationQuery request,CancellationToken cancellationToken)
         {
             var res = await _repo.GetAllAsync();
+            if(res== null)
+            {
+                throw new NotFoundException("Occupation NOt Found");
+            }
             return res.Select(x => new OccupationResponseDto
             {
                 Id = x.Id,
