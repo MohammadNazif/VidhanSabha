@@ -14,6 +14,10 @@ using VidhanSabha.Application.Common.District.DTOs;
 using VidhanSabha.Application.Common.District.Queries;
 using VidhanSabha.Application.Common.Occupation.DTOs;
 using VidhanSabha.Application.Common.Occupation.Queries;
+using VidhanSabha.Application.Common.Party.DTOs;
+using VidhanSabha.Application.Common.Party.Queries;
+using VidhanSabha.Application.Common.SahmatAsahmatType.DTOs;
+using VidhanSabha.Application.Common.SahmatAsahmatType.Queries;
 using VidhanSabha.Application.Common.State.Dto;
 using VidhanSabha.Application.Common.State.Query;
 using VidhanSabha.Application.Common.Village.DTOs;
@@ -105,6 +109,21 @@ namespace VidhanSabha.Api.Endpoints
                 .WithName("getoccupation")
                 .Produces<List<OccupationResponseDto>>(200);
 
+            common.MapGet("/getparty", async (IMediator mediator) =>
+            {
+                var result = await mediator.Send(new GetAllPartyQuery());
+                return Results.Ok(ApiResponse<List<PartyResponseDto>>.Ok(result));
+            })
+                .WithName("getparty")
+                .Produces<List<PartyResponseDto>>(200);
+
+            common.MapGet("/getsahmattype", async (IMediator mediator) =>
+            {
+                var result = await mediator.Send(new GetAllSahmatTypeQuery());
+                return Results.Ok(ApiResponse<List<SahmatTypeResponseDto>>.Ok(result));
+            })
+                .WithName("getsahmattype")
+                .Produces<List<SahmatTypeResponseDto>>(200);
         }
     }
 }

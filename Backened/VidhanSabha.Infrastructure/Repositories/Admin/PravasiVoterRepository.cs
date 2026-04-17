@@ -60,10 +60,13 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
                 {
                     Id = m.Id,
                     BoothId = m.BoothId,
+                    BoothNumber=m.Booth.BoothNumber,
                     Name = m.Name,
                     Mobile = m.Mobile,
                     CategoryId = m.CategoryId,
+                    CategoryName=m.Category.Name,
                     CastId = m.CastId,
+                    CastName=m.Cast.CastName,
                     OccupationId = m.OccupationId,
                     VoterId = m.VoterId,
                     CurrentAddress = m.CurrentAddress,

@@ -21,7 +21,10 @@ namespace VidhanSabha.Application.Pannels.Admin.PravasiVoters.Command
             {
                 throw new NotFoundException("Pravasi Voter Not Found");
             }
-              pravasi.Update(dto.BoothId, dto.Name, dto.Mobile, dto.CategoryId, dto.CastId, dto.OccupationId, dto.VoterId, dto.CurrentAddress, dto.VillageId);
+              pravasi.Update(dto.BoothId, 
+                  dto.Name, dto.Mobile, dto.CategoryId, 
+                  dto.CastId, dto.OccupationId, dto.VoterId, 
+                  dto.CurrentAddress, dto.VillageId);
             return _repo.Update(pravasi);
         }
     }

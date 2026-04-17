@@ -44,6 +44,10 @@ namespace VidhanSabha.Infrastructure.Persistence
         public DbSet<Tbl_PravasiVillage> Tbl_PravasiVillage => Set<Tbl_PravasiVillage>();
         public DbSet<Tbl_NewVoter> Tbl_NewVoter => Set<Tbl_NewVoter>();
         public DbSet<Tbl_NewVoterVillage> Tbl_NewVoterVillage => Set<Tbl_NewVoterVillage>();
+        public DbSet<Tbl_Party> Tbl_Party => Set<Tbl_Party>();
+        public DbSet<Tbl_SahmatType> Tbl_SahmatType =>Set<Tbl_SahmatType>();
+        public DbSet<Tbl_SahmatAsahmat> Tbl_SahmatAsahmat => Set<Tbl_SahmatAsahmat>();
+        public DbSet<Tbl_SahmatAsahmatVillage> Tbl_SahmatAsahmatVillage => Set<Tbl_SahmatAsahmatVillage>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
             {

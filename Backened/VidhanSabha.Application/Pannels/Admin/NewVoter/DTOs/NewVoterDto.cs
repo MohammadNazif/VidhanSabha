@@ -25,7 +25,7 @@ namespace VidhanSabha.Application.Pannels.Admin.NewVoter.DTOs
             public int Id { get; set; }
             public int BoothId { get; set; }
             public int BoothNumber { get; set; }
-            public List<VillageResponseDto> Villages { get; set; } = new();
+            public List<VillageResponseDtos> Villages { get; set; } = new();
             public string Name { get; set; } = string.Empty;
             public string FatherName { get; set; }
             public string Mobile { get; set; }
@@ -38,7 +38,7 @@ namespace VidhanSabha.Application.Pannels.Admin.NewVoter.DTOs
             public string VoterId { get; set; }
 
         }
-        public class VillageResponseDto
+        public class VillageResponseDtos
         {
             public int VillageId { get; set; }
             public string VillageName { get; set; } = string.Empty;
