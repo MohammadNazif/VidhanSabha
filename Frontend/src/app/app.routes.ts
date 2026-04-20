@@ -12,6 +12,8 @@ import { StateComponent } from './components/superadmin/state/state.component';
 import { DistrictComponent } from './components/superadmin/district/district.component';
 import { VidhanSabhaComponent } from './components/superadmin/vidhansabha/vidhansabha.component';
 import { PravasiVoterComponent } from './components/admin/pravasi-voter/pravasi-voter.component';
+import { StatePrabhariListComponent } from './components/state-prabhari/list/state-prabhari-list.component';
+import { StatePrabhariDashboardComponent } from './components/state-prabhari/dashboard/state-prabhari-dashboard.component';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -25,7 +27,9 @@ export const routes: Routes = [
   { path: 'superadmin/dashboard', component: SuperDashboardComponent },
   { path: 'superadmin/designation', component: DesignationComponent },
   { path: 'superadmin/state', component: StateComponent },
+  { path: 'superadmin/state-prabhari', component: StatePrabhariListComponent },
   { path: 'superadmin/district', component: DistrictComponent },
   { path: 'superadmin/vidhansabha', component: VidhanSabhaComponent },
+  { path: 'state-prabhari/dashboard', component: StatePrabhariDashboardComponent },
   { path: '**', redirectTo: '' }
 ];

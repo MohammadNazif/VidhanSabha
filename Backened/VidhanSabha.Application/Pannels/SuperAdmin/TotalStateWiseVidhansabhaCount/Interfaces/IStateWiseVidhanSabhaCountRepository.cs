@@ -12,7 +12,7 @@ namespace VidhanSabha.Application.Pannels.SuperAdmin.TotalStateWiseVidhansabhaCo
     public interface IStateWiseVidhanSabhaCountRepository
     {
         Task<Tbl_VidhansabhaStatewiseCount?> GetByIdAsync(int id, CancellationToken ct = default);
-        Task<IReadOnlyList<VidhansabhaResponseDto>> GetAllAsync(CancellationToken ct = default);
+        Task<IReadOnlyList<VidhansabhaResponseDto>> GetAllAsync(string? userId,CancellationToken ct = default);
         Task<IReadOnlyList<Tbl_VidhansabhaStatewiseCount>> GetAllActiveAsync(CancellationToken ct = default);
         Task<bool> ExistsAsync(int stateId, int? excludeId, CancellationToken ct = default);
         Task<int> AddAsync(Tbl_VidhansabhaStatewiseCount state, CancellationToken ct = default);

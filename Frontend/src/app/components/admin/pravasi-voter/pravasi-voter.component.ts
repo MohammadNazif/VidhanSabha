@@ -26,7 +26,7 @@ export class PravasiVoterComponent implements OnInit {
     { key: 'boothNumber', label: 'Booth No.', sortable: true },
     { key: 'villageName', label: 'Village', sortable: true },
     { key: 'name', label: 'Name', sortable: true },
-    { key: 'mobileNo', label: 'Mobile No.', sortable: true },
+    { key: 'mobile', label: 'Mobile No.', sortable: true },
     { key: 'categoryName', label: 'Category', sortable: true },
     { key: 'castName', label: 'Caste', sortable: true },
     { key: 'occupationName', label: 'Occupation', sortable: true },
@@ -50,7 +50,6 @@ export class PravasiVoterComponent implements OnInit {
     title: 'Add Pravasi Voter',
     submitLabel: 'Save',
     fields: [
-      { id: 'id', name: 'id', label: 'ID', type: 'hidden' },
       {
         id: 'boothId',
         name: 'boothId',
@@ -97,8 +96,8 @@ export class PravasiVoterComponent implements OnInit {
         gridColSpan: 6
       },
       {
-        id: 'mobileNo',
-        name: 'mobileNo',
+        id: 'mobile',
+        name: 'mobile',
         label: 'Mobile No',
         type: 'text',
         placeholder: 'Enter Mobile No',
@@ -146,12 +145,12 @@ export class PravasiVoterComponent implements OnInit {
         label: 'Occupation',
         type: 'select',
         placeholder: '-- Select Occupation --',
-        apiUrl: 'common/occupation',
+        apiUrl: 'common/getoccupation',
         apiMapper: (data: any) => {
           const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
           return list.map((item: any) => ({
             value: String(item.id),
-            label: item.name
+            label: item.occupation
           }));
         },
         validations: [Validators.required],
@@ -191,7 +190,12 @@ export class PravasiVoterComponent implements OnInit {
   loadVoters() {
     this.voterService.getAllPravasivoters().subscribe({
       next: (response) => {
-        this.voterList = response.data || (Array.isArray(response) ? response : []);
+        const rawList = response.data || (Array.isArray(response) ? response : []);
+        this.voterList = rawList.map((item: any) => ({
+          ...item,
+          villageName: Array.isArray(item.villages) ? item.villages.map((v: any) => v.villageName).join(', ') : '',
+          villageId: Array.isArray(item.villages) ? item.villages.map((v: any) => v.villageId) : []
+        }));
       },
       error: (err) => {
         console.error('Error fetching pravasi voters:', err);
@@ -210,9 +214,12 @@ export class PravasiVoterComponent implements OnInit {
       );
     } else if (action.id === 'edit') {
       const editData = { ...row };
-      ['id', 'boothId', 'villageId', 'categoryId', 'castId', 'occupationId'].forEach(key => {
-        if (editData[key]) editData[key] = String(editData[key]);
+      ['id', 'boothId', 'categoryId', 'castId', 'occupationId'].forEach(key => {
+        if (editData[key] !== null && editData[key] !== undefined) editData[key] = String(editData[key]);
       });
+      if (editData.villageId !== null && editData.villageId !== undefined) {
+        editData.villageId = Array.isArray(editData.villageId) ? editData.villageId.map(String) : [String(editData.villageId)];
+      }
       this.voterModal.openModal(editData);
     }
   }
@@ -221,14 +228,19 @@ export class PravasiVoterComponent implements OnInit {
     if (!result.status) return;
 
     const raw = result.data;
+    const rowId = raw.id || (this.voterModal.initialData && this.voterModal.initialData.id);
+
     const submitData: any = {
-      ...raw,
-      id: raw.id ? Number(raw.id) : null,
+      id: rowId ? Number(rowId) : null,
       boothId: Number(raw.boothId),
-      villageId: Number(raw.villageId),
+      villageId: Array.isArray(raw.villageId) ? raw.villageId.map((v: any) => Number(v)) : (raw.villageId ? [Number(raw.villageId)] : []),
+      name: raw.name,
+      mobile: raw.mobile,
       categoryId: Number(raw.categoryId),
       castId: Number(raw.castId),
-      occupationId: Number(raw.occupationId)
+      occupationId: Number(raw.occupationId),
+      voterId: raw.voterId,
+      currentAddress: raw.currentAddress
     };
 
     const isUpdate = !!submitData.id;

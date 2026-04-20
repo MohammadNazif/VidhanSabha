@@ -1,0 +1,19 @@
+:host {
+  display: block;
+  height: 100vh;
+}
+
+.h-screen {
+  height: 100vh;
+}
+
+/* Ensure the table container takes up remaining space and handles scroll internally */
+.flex-1 {
+  flex: 1 1 0%;
+}
+
+:host ::ng-deep app-generic-table {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}

@@ -1,0 +1,51 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using VidhanSabha.Application.Pannels.SuperAdmin.StatePrabhari.Command;
+
+namespace VidhanSabha.Application.Pannels.SuperAdmin.StatePrabhari.Dtos
+{
+    public class StatePrabhariResponseDto
+    {
+        public int Id { get; set; }
+
+        public string userId { get; set; }
+        public int StateId { get; set; }
+
+        public string StateName { get; set; }
+        public string PrabhariName { get; set; } = string.Empty;
+        public string PrabhariEmail { get; set; } = string.Empty;
+        public string Gender { get; set; } = string.Empty;
+        public string ContactNumber { get; set; } = string.Empty;
+        public int CategoryId { get; set; }
+        public string CategoryName { get; set; } = string.Empty;
+        public int CastId { get; set; }
+        public string CastName { get; set; } = string.Empty;
+        public string Education { get; set; } = string.Empty;
+        public string Profession { get; set; } = string.Empty;
+        public string? CurrentAddress { get; set; }
+    }
+
+    public class CreatePrabhariRequestDto
+    {
+        public int stateId { get; set; }
+        public string PrabhariName { get; set; } = string.Empty;
+        public string PrabhariEmail { get; set; } = string.Empty;
+        public string Gender { get; set; } = string.Empty;
+        public string ContactNumber { get; set; } = string.Empty;
+        public int CategoryId { get; set; }
+        public int CastId { get; set; }
+        public string Education { get; set; } = string.Empty;
+        public string Profession { get; set; } = string.Empty;
+        public string? CurrentAddress { get; set; }
+
+
+    }
+
+    public class UpdatePrabhariRequestDto : CreatePrabhariRequestDto
+    {
+        public int Id { get; set; }
+    }
+}

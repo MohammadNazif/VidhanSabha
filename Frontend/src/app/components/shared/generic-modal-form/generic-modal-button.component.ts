@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormConfig, FormResult } from './generic-form.types';
 import { DynamicFormModalComponent } from './dynamic-form-modal.component';
@@ -8,7 +8,8 @@ import { DynamicFormModalComponent } from './dynamic-form-modal.component';
   standalone: true,
   imports: [CommonModule, DynamicFormModalComponent],
   template: `
-    <button (click)="openModal()" 
+    <button *ngIf="!hideButton"
+            (click)="openModal()" 
             [class]="buttonClass"
             class="flex items-center gap-2 px-3.5 py-1.5 rounded-lg font-medium text-sm transition-all duration-200 active:scale-95 shadow-sm hover:shadow-md"
     >
@@ -35,11 +36,14 @@ export class GenericModalButtonComponent {
   @Input() label: string = 'Open Form';
   @Input() icon?: string;
   @Input() variant: 'primary' | 'secondary' | 'danger' | 'success' | 'outline' = 'primary';
-  
+  @Input() hideButton = false;
+
   @Output() formSubmit = new EventEmitter<FormResult>();
-  
+
   isModalOpen = false;
-  initialData: any;
+  @Input() initialData: any;
+
+  constructor(private cdr: ChangeDetectorRef) { }
 
   get buttonClass(): string {
     const base = '';
@@ -54,8 +58,12 @@ export class GenericModalButtonComponent {
   }
 
   openModal(data?: any): void {
-    this.initialData = data;
+    if (data !== undefined) {
+      this.initialData = data;
+    }
+    console.log('Modal Opening Data:', this.initialData);
     this.isModalOpen = true;
+    this.cdr.detectChanges();
     // Prevent body scrolling when modal is open
     document.body.style.overflow = 'hidden';
   }

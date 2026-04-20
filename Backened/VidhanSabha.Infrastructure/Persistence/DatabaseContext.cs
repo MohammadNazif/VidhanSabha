@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using VidhanSabha.Domain.Entities.Admin;
 using VidhanSabha.Domain.Entities.Auth;
 using VidhanSabha.Domain.Entities.Common;
+using VidhanSabha.Domain.Entities.StatePrabhari;
 using VidhanSabha.Domain.Entities.SuperAdmin;
 
 namespace VidhanSabha.Infrastructure.Persistence
@@ -17,7 +18,7 @@ namespace VidhanSabha.Infrastructure.Persistence
             public DatabaseContext(DbContextOptions<DatabaseContext> options)
                 : base(options) { }
 
-            public DbSet<Tbl_Login> Tbl_Login => Set<Tbl_Login>();
+            //public DbSet<Tbl_Login> Tbl_Login => Set<Tbl_Login>();
             public DbSet<Tbl_Category> Tbl_Category => Set<Tbl_Category>();
             public DbSet<Tbl_Mandal> Tbl_Mandal => Set<Tbl_Mandal>();
             public DbSet<Tbl_Cast> Tbl_Cast => Set<Tbl_Cast>();
@@ -54,6 +55,11 @@ namespace VidhanSabha.Infrastructure.Persistence
         public DbSet<Tbl_PrabhavshaliVillage> Tbl_PrabhavshaliVillage => Set<Tbl_PrabhavshaliVillage>();
         public DbSet<Tbl_Block> Tbl_Block => Set<Tbl_Block>();
 
+        public DbSet<Tbl_StatePrabhari> Tbl_StatePrabhari => Set<Tbl_StatePrabhari>();
+
+        public DbSet<Tbl_LoginCredential> Tbl_LoginCredential => Set<Tbl_LoginCredential>();
+
+        public DbSet<Tbl_DistrictWiseCount> Tbl_DistrictWiseCount => Set<Tbl_DistrictWiseCount>();
         protected override void OnModelCreating(ModelBuilder modelBuilder)
             {
                 // ✅ Ek line — is assembly ki saari Configuration classes auto-pick ho jayengi

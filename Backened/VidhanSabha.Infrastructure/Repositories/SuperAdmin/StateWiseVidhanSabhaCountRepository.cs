@@ -44,22 +44,38 @@ namespace VidhanSabha.Infrastructure.Repositories.SuperAdmin
             throw new NotImplementedException();
         }
 
-        public  async Task<IReadOnlyList<VidhansabhaResponseDto>> GetAllAsync(CancellationToken ct = default)
+        public async Task<IReadOnlyList<VidhansabhaResponseDto>> GetAllAsync(string? userId, CancellationToken ct = default)
         {
-             var res = await _context.Tbl_VidhansabhaStatewiseCount.Select(b => new VidhansabhaResponseDto
+            
+            var stateId = await _context.Tbl_StatePrabhari
+          .Where(x => x.userId == userId)
+          .Select(x => x.StateId)
+          .FirstOrDefaultAsync(ct);
+            var query = _context.Tbl_VidhansabhaStatewiseCount.AsQueryable();
+
+            if (userId !=null)
             {
-                Id = b.Id,
-                StateId = b.StateId,
-                StateName = b.State.StateName,
-                VidhanSabhaCount = b.VidhansabhaCount,
-                RemainingCount = b.Remainingcount
-            }).ToListAsync();
+                query = query.Where(b => b.StateId == stateId);
+            }
+
+            var res = await query
+                .Select(b => new VidhansabhaResponseDto
+                {
+                    Id = b.Id,
+                    StateId = b.StateId,
+                    StateName = b.State.StateName,
+                    VidhanSabhaCount = b.VidhansabhaCount,
+                    RemainingCount = b.Remainingcount
+                })
+                .ToListAsync(ct);
+
             return res;
         }
 
-        public Task<Tbl_VidhansabhaStatewiseCount?> GetByIdAsync(int id, CancellationToken ct = default)
+        public Task<Tbl_VidhansabhaStatewiseCount?> GetByIdAsync(int stateId, CancellationToken ct = default)
         {
-            throw new NotImplementedException();
+             var res =  _context.Tbl_VidhansabhaStatewiseCount.Where(x => x.StateId == stateId).FirstOrDefaultAsync(ct);
+            return res;
         }
 
         public Task<int> SaveChangesAsync(CancellationToken ct = default)
@@ -67,9 +83,10 @@ namespace VidhanSabha.Infrastructure.Repositories.SuperAdmin
             throw new NotImplementedException();
         }
 
-        public void Update(Tbl_VidhansabhaStatewiseCount state)
+        public async void Update(Tbl_VidhansabhaStatewiseCount state)
         {
-            throw new NotImplementedException();
+            _context.Tbl_VidhansabhaStatewiseCount.Update(state);
+             await _context.SaveChangesAsync();
         }
     }
 }

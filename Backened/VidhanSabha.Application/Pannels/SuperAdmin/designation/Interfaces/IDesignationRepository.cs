@@ -11,7 +11,7 @@ namespace VidhanSabha.Application.Pannels.SuperAdmin.designation.Interfaces
     public interface IDesignationRepository
     {
         Task<Tbl_Designation> GetByIdAsync(int id, CancellationToken ct = default);
-        Task<IReadOnlyList<DesignationResponseDto>> GetAllAsync(CancellationToken ct = default);
+        Task<IReadOnlyList<DesignationResponseDto>> GetAllAsync(string userId,CancellationToken ct = default);
         Task<IReadOnlyList<DesignationResponseDto>> GetByDesignationTypeIdAsync(int designationTypeId, CancellationToken ct = default);
         Task<int> CreateAsync(Tbl_Designation dto, CancellationToken ct = default);
         Task<int> UpdateAsync(Tbl_Designation dto, CancellationToken ct = default);

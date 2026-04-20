@@ -8,6 +8,8 @@ import { FormConfig, FormResult } from '../../shared/generic-modal-form/generic-
 
 import { PageHeaderComponent } from '../../shared/page-header/page-header.component';
 import { MandalService } from '../../../Services/Admin/mandal/mandal.service';
+import { StateService } from '../../../Services/Admin/state/state.service';
+import { AuthServiceService } from '../../../Services/Auth/auth.service';
 import { ToastService } from '../../../Services/common/toast/toast.service';
 import { CrudHandlerService } from '../../../Services/common/crud-handler.service';
 
@@ -24,11 +26,37 @@ export class MandalComponent implements OnInit {
 
   constructor(
     private mandalService: MandalService,
+    private stateService: StateService,
+    private authService: AuthServiceService,
     private toastService: ToastService,
     private crudHandler: CrudHandlerService
   ) { }
 
+  isStatePrabhari(): boolean {
+    return (this.authService.getRole() || '').toUpperCase().trim() === 'STATEPRABHARI';
+  }
+
+  defaultStateId: string | null = null;
+
   ngOnInit() {
+    if (this.isStatePrabhari()) {
+      // Fetch the assigned state ID
+      this.stateService.getAllStates().subscribe({
+        next: (response) => {
+          const list = response?.data || response || [];
+          if (list.length > 0) {
+            this.defaultStateId = String(list[0].stateId || list[0].id);
+
+            // Simplify fields for State Prabhari
+            const districtField = this.addMandalConfig.fields.find(f => f.id === 'districtId');
+            if (districtField) {
+              delete districtField.dependsOn;
+              districtField.apiUrl = () => `district/getAll?stateId=${this.defaultStateId}`;
+            }
+          }
+        }
+      });
+    }
     this.loadMandals();
   }
 
@@ -56,6 +84,41 @@ export class MandalComponent implements OnInit {
     title: 'Add New Mandal',
     submitLabel: 'Create Mandal',
     fields: [
+      {
+        id: 'districtId',
+        name: 'districtId',
+        label: 'Select District',
+        type: 'select',
+        placeholder: '--Select District--',
+        apiUrl: () => `district/getAll?stateId=${this.defaultStateId || ''}`,
+        apiMapper: (data: any) => {
+          const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
+          return list.map((item: any) => ({
+            value: String(item.id),
+            label: item.name
+          }));
+        },
+        validations: [Validators.required],
+        gridColSpan: 6
+      },
+      {
+        id: 'vidhanId',
+        name: 'vidhanId',
+        label: 'Select Vidhan Sabha',
+        type: 'select',
+        placeholder: '--Select Vidhan Sabha--',
+        dependsOn: 'districtId',
+        apiUrl: (districtId: any) => `vidhansabha/getAll?districtId=${districtId}`,
+        apiMapper: (data: any) => {
+          const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
+          return list.map((item: any) => ({
+            value: String(item.id),
+            label: item.name
+          }));
+        },
+        validations: [Validators.required],
+        gridColSpan: 6
+      },
       {
         id: 'name',
         name: 'name',
@@ -117,14 +180,21 @@ export class MandalComponent implements OnInit {
   handleFormSubmit(result: FormResult) {
     if (!result.status) return;
 
-    const isUpdate = result.data.id || (this.mandalModal.initialData && this.mandalModal.initialData.id);
-    if (isUpdate && !result.data.id) {
-      result.data.id = this.mandalModal.initialData.id;
-    }
+    const raw = result.data;
+    const userId = this.authService.getUserId();
+    const isUpdate = !!(raw.id || (this.mandalModal.initialData && this.mandalModal.initialData.id));
+
+    const submitData: any = {
+      ...raw,
+      id: isUpdate ? (raw.id || this.mandalModal.initialData.id) : null,
+      vidhanId: Number(raw.vidhanId),
+      stateId: Number(raw.stateId || this.defaultStateId),
+      userId: userId ? String(userId) : null
+    };
 
     const request = isUpdate
-      ? this.mandalService.updateMandal(result.data)
-      : this.mandalService.createMandal(result.data);
+      ? this.mandalService.updateMandal(submitData)
+      : this.mandalService.createMandal(submitData);
 
     this.crudHandler.handleRequest(
       request,

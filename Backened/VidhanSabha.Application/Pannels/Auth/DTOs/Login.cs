@@ -15,7 +15,7 @@ namespace VidhanSabha.Application.Pannels.Auth.DTOs
     // Response
     public class LoginResponseDto
     {
-        public int UserId { get; set; }
+        public string UserId { get; set; }
         public string MobileNumber { get; set; }
         public string Role { get; set; }
         public bool Status { get; set; }

@@ -20,9 +20,10 @@ export class DesignationService extends BaseApiService {
   /**
    * Fetches all Designations from the API.
    */
-  getAllDesignations(): Observable<any> {
+  getAllDesignations(params?: any): Observable<any> {
     // Attempting to fetch from API, default to empty if not exists for now
-    return this.getAll(this.entity);
+    console.log(params, "ads");
+    return this.getAllByParams(this.entity, params);
   }
 
   /**

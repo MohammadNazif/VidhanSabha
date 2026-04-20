@@ -8,6 +8,7 @@ import { FormConfig, FormResult } from '../../shared/generic-modal-form/generic-
 
 import { PageHeaderComponent } from '../../shared/page-header/page-header.component';
 import { DesignationService } from '../../../Services/Admin/designation/designation.service';
+import { AuthServiceService } from '../../../Services/Auth/auth.service';
 import { ToastService } from '../../../Services/common/toast/toast.service';
 import { CrudHandlerService } from '../../../Services/common/crud-handler.service';
 
@@ -20,12 +21,10 @@ import { CrudHandlerService } from '../../../Services/common/crud-handler.servic
 })
 export class DesignationComponent implements OnInit {
   @ViewChild('designationModal') designationModal!: GenericModalButtonComponent;
-
   designationList: any[] = [];
 
   columns: TableColumn[] = [
     { key: 'designationName', label: 'Designation Name', type: 'avatar', sortable: true, avatarFallbackKey: 'name' },
-    { key: 'designationTypeName', label: 'Designation Type', sortable: true }
   ];
 
   config: TableConfig = {
@@ -57,30 +56,14 @@ export class DesignationComponent implements OnInit {
         type: 'text',
         placeholder: 'Enter designation name',
         validations: [Validators.required],
-        gridColSpan: 6
-      },
-      {
-        id: 'designationTypeId',
-        name: 'designationTypeId',
-        label: 'Designation Type',
-        type: 'select',
-        placeholder: 'Select designation type',
-        apiUrl: 'common/designationType',
-        apiMapper: (data: any) => {
-          const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
-          return list.map((item: any) => ({
-            value: String(item.id),
-            label: item.designationName
-          }));
-        },
-        validations: [Validators.required],
-        gridColSpan: 6
+        gridColSpan: 12
       }
     ]
   };
 
   constructor(
     private designationService: DesignationService,
+    private authService: AuthServiceService,
     private toastService: ToastService,
     private crudHandler: CrudHandlerService
   ) { }
@@ -90,7 +73,8 @@ export class DesignationComponent implements OnInit {
   }
 
   loadDesignations() {
-    this.designationService.getAllDesignations().subscribe({
+    const userId = this.authService.getUserId();
+    this.designationService.getAllDesignations({ userId: userId }).subscribe({
       next: (response) => {
         if (response && response.isSuccess) {
           this.designationList = response.data;
@@ -127,7 +111,10 @@ export class DesignationComponent implements OnInit {
 
   handleFormSubmit(result: FormResult) {
     if (!result.status) return;
-
+    const userId = this.authService.getUserId();
+    if (userId) {
+      result.data.userId = String(userId);
+    }
     const isUpdate = result.data.id || (this.designationModal.initialData && this.designationModal.initialData.id);
     if (isUpdate && !result.data.id) {
       result.data.id = this.designationModal.initialData.id;

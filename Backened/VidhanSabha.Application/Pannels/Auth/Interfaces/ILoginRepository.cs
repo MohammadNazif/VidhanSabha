@@ -9,9 +9,9 @@ namespace VidhanSabha.Application.Pannels.Auth.Interfaces
 {
     public interface ILoginRepository
     {
-        Task<Tbl_Login?> GetByMobileAsync(string mobileNumber);
-        Task<Tbl_Login?> GetByUserIdAsync(int userId);
-        Task AddAsync(Tbl_Login login);
-        Task UpdateAsync(Tbl_Login login);
+        Task<Tbl_LoginCredential?> GetByMobileAsync(string mobileNumber);
+        Task<Tbl_LoginCredential?> GetByUserIdAsync(int userId);
+        Task AddAsync(Tbl_LoginCredential login);
+        Task UpdateAsync(Tbl_LoginCredential login);
     }
 }

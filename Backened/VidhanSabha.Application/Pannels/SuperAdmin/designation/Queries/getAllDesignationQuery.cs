@@ -10,5 +10,10 @@ namespace VidhanSabha.Application.Pannels.SuperAdmin.designation.Queries
 {
     public class getAllDesignationQuery : IRequest<IReadOnlyList<DesignationResponseDto>>
     {
+        public string UserId { get; set; }
+        public getAllDesignationQuery(string userId)
+        {
+            UserId = userId;   
+        }
     }
 }

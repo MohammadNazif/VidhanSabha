@@ -3,10 +3,19 @@
     icon="🗺️">
     <div class="flex gap-3">
       <app-generic-modal-button #stateModal [config]="addStateConfig" label="Add State" icon="+"
-        (formSubmit)="handleFormSubmit($event)">
+        [hideButton]="isStatePrabhari()" (formSubmit)="handleFormSubmit($event)">
       </app-generic-modal-button>
     </div>
   </app-page-header>
+
+  <!-- Modal Placeholders -->
+  <app-generic-modal-button #prabhariModal [config]="addPrabhariConfig" label="Assign State Prabhari" icon="user"
+    [hideButton]="true" (formSubmit)="handlePrabhariSubmit($event)">
+  </app-generic-modal-button>
+
+  <app-generic-modal-button #districtModal [config]="addDistrictConfig" label="Assign District" icon="layout"
+    [hideButton]="true" (formSubmit)="handleDistrictSubmit($event)">
+  </app-generic-modal-button>
 
   <div class="flex-1 min-h-0 mt-6 bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
     <app-generic-table class="flex-1 min-h-0" [data]="stateList" [columns]="columns" [config]="config" [actions]="actions"

@@ -21,11 +21,8 @@ namespace VidhanSabha.Infrastructure.Persistence.Configurations.Admin
             entity.Property(e => e.DesignationName)
               .IsRequired()
                 .HasMaxLength(100);
-            entity.Property(e => e.DesignationTypeId);
-            entity.HasOne(e => e.DesignationType)
-         .WithMany()
-         .HasForeignKey(e => e.DesignationTypeId)
-         .OnDelete(DeleteBehavior.Restrict);
+           
+         
 
         }
     }

@@ -10,9 +10,9 @@ namespace VidhanSabha.Application.Pannels.SuperAdmin.designation.DTOs
     public sealed  class CreateDesignationDto
     {
         public string DesignationName { get; set; } = string.Empty;
-        public int DesignationTypeId { get; set; }
 
-        //public string DesignationType { get; set; }
+        public string UserId { get; set; } = string.Empty;
+
     }
 
     public sealed class DesignationResponseDto
@@ -28,6 +28,5 @@ namespace VidhanSabha.Application.Pannels.SuperAdmin.designation.DTOs
     {
         public int Id { get; set; }
         public string DesignationName { get; init; } = string.Empty;
-        public int DesignationTypeId { get; init; }
     }
 }
