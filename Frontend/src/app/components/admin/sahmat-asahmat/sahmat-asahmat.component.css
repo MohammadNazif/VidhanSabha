@@ -1,4 +1,6 @@
-/* Custom styles for Sahmat/Asahmat component */
 :host {
-    display: block;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
 }
