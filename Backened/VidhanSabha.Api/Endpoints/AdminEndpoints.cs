@@ -14,6 +14,9 @@ using VidhanSabha.Application.Pannels.Admin.NewVoter.Queries;
 using VidhanSabha.Application.Pannels.Admin.PannaPramukh.Command;
 using VidhanSabha.Application.Pannels.Admin.PannaPramukh.Dtos;
 using VidhanSabha.Application.Pannels.Admin.PannaPramukh.Queries;
+using VidhanSabha.Application.Pannels.Admin.Pradhan.Command;
+using VidhanSabha.Application.Pannels.Admin.Pradhan.DTOs;
+using VidhanSabha.Application.Pannels.Admin.Pradhan.Queries;
 using VidhanSabha.Application.Pannels.Admin.PravasiVoters.Command;
 using VidhanSabha.Application.Pannels.Admin.PravasiVoters.DTOs;
 using VidhanSabha.Application.Pannels.Admin.PravasiVoters.Queries;
@@ -48,6 +51,8 @@ public static class AdminEndpoints
                         .WithTags("NewVoter");
         var sahmatasahmat = app.MapGroup("/api/sahmatasahmat")
                         .WithTags("SahmatAsahmat");
+        var pradhan = app.MapGroup("/api/pradhan")
+                        .WithTags("Pradhan");
 
         #region Mandal
         mandal.MapGet("/getAll", async (IMediator mediator) =>
@@ -317,8 +322,39 @@ public static class AdminEndpoints
         });
 
         #endregion
+
+        #region Pradhan
+
+        pradhan.MapPost("/create", async (CreatePradhanRequestDto dto, IMediator mediator) =>
+        {
+            var result = await mediator.Send(new CreatePradhanCommand(dto));
+            return Results.Ok(ApiResponse<int>.Ok(result, "Pradhan Created Successfully"));
+        })
+                .WithName("CreatePradhan")
+                .Produces<int>(200);
+
+        pradhan.MapPost("/update", async (UpdatePradhanRequestDto dto, IMediator mediator) =>
+        {
+            var result = await mediator.Send(new UpdatePradhanCommand(dto));
+            return Results.Ok(ApiResponse<int>.Ok(result, "Pradhan Updated Successfully"));
+        })
+                .WithName("UpdatePradhan")
+                .Produces<int>(200);
+
+        pradhan.MapPost("/delete", async (int id, IMediator mediator) =>
+        {
+            var result = await mediator.Send(new DeletePradhanCommand(id));
+            return Results.Ok(ApiResponse<int>.Ok(result, "Pradhan Deleted Successfully"));
+        })
+                .WithName("DeletePradhan")
+                .Produces<int>(200);
+        pradhan.MapGet("/getAll", async (IMediator mediator) =>
+        {
+            var result = await mediator.Send(new GetAllPradhanQuery());
+            return Results.Ok(ApiResponse<List<PradhanResponseDto>>.Ok(result));
+        });
+
+
+        #endregion
     }
-
-
-
 }

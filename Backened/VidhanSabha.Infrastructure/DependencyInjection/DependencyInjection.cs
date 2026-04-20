@@ -18,6 +18,7 @@ using VidhanSabha.Application.Pannels.Admin.Booth.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.Mandal.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.NewVoter.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.PannaPramukh.Interfaces;
+using VidhanSabha.Application.Pannels.Admin.Pradhan.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.PravasiVoters.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.SahmatAsahmat.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.Sector.Interface;
@@ -73,7 +74,8 @@ namespace VidhanSabha.Infrastructure.DependencyInjection
             services.AddScoped<IPartyRepository, PartyRepository>();
             services.AddScoped<ISahmatTypeRepository, SahmatTypeRepository>();
             services.AddScoped<ISahmatAsahmatRepository, SahmatAsahmatRepository>();
-            
+            services.AddScoped<IPradhanRepository, PradhanRepository>();
+
             return services;
         }
     }
