@@ -21,7 +21,11 @@ using VidhanSabha.Application.Pannels.Admin.DoubleVoter.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.Mandal.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.NewVoter.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.PannaPramukh.Interfaces;
+<<<<<<< HEAD
+using VidhanSabha.Application.Pannels.Admin.Pradhan.Interfaces;
+=======
 using VidhanSabha.Application.Pannels.Admin.PrabhavshaliVyakti.Interfaces;
+>>>>>>> 591ba8c66ea7b863e762236760e8dfc4acdf6a92
 using VidhanSabha.Application.Pannels.Admin.PravasiVoters.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.SahmatAsahmat.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.Sector.Interface;
@@ -78,12 +82,17 @@ namespace VidhanSabha.Infrastructure.DependencyInjection
             services.AddScoped<IPartyRepository, PartyRepository>();
             services.AddScoped<ISahmatTypeRepository, SahmatTypeRepository>();
             services.AddScoped<ISahmatAsahmatRepository, SahmatAsahmatRepository>();
+<<<<<<< HEAD
+            services.AddScoped<IPradhanRepository, PradhanRepository>();
+
+=======
             services.AddScoped<IVidhanSabhaRepository, VidhanSabhaRepository>();
             
             services.AddScoped<IDoubleVoterRepository, DoubleVoterRepository>();
             services.AddScoped<IAdminDesignationRepository,AdminDesignationRepository>();
             services.AddScoped<IPrabhavshaliRepository, PrabhavshaliRepository>();
             services.AddScoped<IBlockRepository, BlockRepository>();
+>>>>>>> 591ba8c66ea7b863e762236760e8dfc4acdf6a92
             return services;
         }
     }
