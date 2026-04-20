@@ -2,12 +2,16 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
+using VidhanSabha.Application.Common.Dtos;
+using VidhanSabha.Application.Pannels.Admin.Booth.Dtos;
 using VidhanSabha.Application.Pannels.Admin.NewVoter.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.Pradhan.DTOs;
 using VidhanSabha.Application.Pannels.Admin.Pradhan.Interfaces;
 using VidhanSabha.Domain.Entities.Admin;
+using VidhanSabha.Infrastructure.Extensions;
 using VidhanSabha.Infrastructure.Persistence;
 using VidhanSabha.Infrastructure.Repositories.Common;
 
@@ -77,7 +81,7 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
             }
         }
 
-        public Task<List<PradhanResponseDto>> GetAllAsync(int? id, CancellationToken ct=default)
+        public Task<List<PradhanResponseDto>> GetAllAsync(int? id, CancellationToken ct = default)
         {
             try
             {
@@ -88,9 +92,14 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
                         Id = p.Id,
                         Name = p.Name,
                         DesignationId = p.DesignationId,
+                        DesignationName= p.Designation.DesignationName,
                         Contact = p.Contact,
                         Gender = p.Gender,
-                        VillageId = p.Villages.Select(v => v.Id).ToList()
+                        Villages = p.Villages.Select(v => new VillageResponseDtos
+                        {
+                            VillageId = v.VillageId,
+                            VillageName = v.Village.VillageName
+                        }).ToList(),
                     }).ToListAsync();
             }
             catch (Exception ex)

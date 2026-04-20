@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading.Tasks;
@@ -20,7 +21,7 @@ namespace VidhanSabha.Domain.Entities.Admin
         public IReadOnlyCollection<Tbl_PradhanVillage> Villages => _villages.AsReadOnly();
 
         //Navigations
-        //public Tbl_AdminDesignation Designation { get; private set; } = null!;
+        public Tbl_AdminDesignation Designation { get; private set; } = null!;
         public Tbl_Pradhan() { }
 
         public static Tbl_Pradhan Create(
@@ -52,6 +53,7 @@ namespace VidhanSabha.Domain.Entities.Admin
             foreach (var vid in VillageId.Where(id => !existingIds.Contains(id)))
                 _villages.Add(Tbl_PradhanVillage.Create(vid)); // ✅ EF sees this as INSERT
         }
+
 
         public void Update(string Name, int DesignationId, string Contact, string Gender, List<int> VillageId)
         {
