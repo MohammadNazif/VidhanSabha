@@ -58,6 +58,7 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
             {
                 return await _context.Tbl_SahmatAsahmat
                  .Include(p => p.Villages)
+
                  .FirstOrDefaultAsync(e => e.Id == id);
             }
             catch (Exception)
@@ -76,7 +77,6 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
                     BoothNumber = m.Booth.BoothNumber,
                     TypeId=m.TypeId,
                     Type=m.Type.Type,
-                    IsAsahmat=m.IsAsahmat,
                     Name = m.Name,
                     Age =m.Age,
                     Mobile = m.Mobile,
@@ -84,7 +84,7 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
                     Party=m.Party.Party,
                     OccupationId = m.OccupationId,
                     Occupation=m.Occupation.Occupation,
-                    Reason=m.Reason,
+                    Reason=m.Reason  ?? "NA",
                     VoterId = m.VoterId,
                     Villages = m.Villages.Select(v => new VillageResponseDtos
                     {

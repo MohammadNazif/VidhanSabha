@@ -6,14 +6,15 @@ import { BaseApiService } from '../../common/base-api.service';
   providedIn: 'root'
 })
 export class VidhanSabhaPrabhariService extends BaseApiService {
-  private entity = 'vidhansabhaprabhari';
+  private entity = 'stateprabhari/vidhansabhaPrabhari';
 
   createPrabhari(data: any): Observable<any> {
-    return this.create(this.entity, data);
+    return this.create('stateprabhari/vidhansabha', data);
   }
 
-  getAllPrabharis(): Observable<any> {
-    return this.getAll(this.entity);
+  getAllPrabharis(stateId?: number | string | null): Observable<any> {
+    const params = stateId ? { stateId } : {};
+    return this.getAllByParams(this.entity, params);
   }
 
   deletePrabhari(id: number): Observable<any> {
@@ -21,6 +22,6 @@ export class VidhanSabhaPrabhariService extends BaseApiService {
   }
 
   updatePrabhari(data: any): Observable<any> {
-    return this.update(this.entity, data);
+    return this.update('stateprabhari', data);
   }
 }

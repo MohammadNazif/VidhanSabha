@@ -19,8 +19,16 @@ namespace VidhanSabha.Infrastructure.Repositories.SuperAdmin
         }
         public async Task<int> AddAsync(Tbl_StatePrabhari prabhari, CancellationToken ct = default)
         {
-             _context.Tbl_StatePrabhari.Add(prabhari);
-            return await _context.SaveChangesAsync(ct);
+            try
+            {
+                _context.Tbl_StatePrabhari.Add(prabhari);
+                return await _context.SaveChangesAsync(ct);
+            }
+            catch(Exception)
+            {
+
+                throw;
+            }
         }
 
         public Task<bool> EmailExistsAsync(string email, int? excludeId, CancellationToken ct = default)
@@ -53,6 +61,42 @@ namespace VidhanSabha.Infrastructure.Repositories.SuperAdmin
         public  async Task<Tbl_StatePrabhari?> GetByIdAsync(int id, CancellationToken ct = default)
         {
             return await _context.Tbl_StatePrabhari.Where(m => m.Id == id).FirstOrDefaultAsync();
+        }
+
+        public async Task<IReadOnlyList<StatePrabhariResponseDto>> GetByStateIdAsync(int stateId, CancellationToken ct = default)
+        {
+            try
+            {
+                return await _context.Tbl_StatePrabhari
+                    .Where(m => m.StateId == stateId
+                        && m.PrabhariRole == Domain.Enums.PrabhariRole.VidhanSabha)
+                    .Select(x => new StatePrabhariResponseDto
+                    {
+                        Id = x.Id,
+                        StateId = x.StateId,
+                        VidhanSabhaId = x.VidhansabhaId,
+                        DistrictId = x.Vidhansabha.DistrictId,
+                        DistrictName = x.Vidhansabha.district.DistrictName,
+                        VidhanSabhaName = x.Vidhansabha.VidhanSabhaName,
+                        StateName = x.State != null ? x.State.StateName : string.Empty,
+                        PrabhariName = x.PrabhariName,
+                        PrabhariEmail = x.PrabhariEmail,
+                        Gender = x.Gender,
+                        ContactNumber = x.ContactNumber,
+                        CategoryId = x.CategoryId,
+                        CategoryName = x.Category != null ? x.Category.Name : string.Empty,
+                        CastId = x.CastId,
+                        CastName = x.Cast != null ? x.Cast.CastName : string.Empty,
+                        Education = x.Education,
+                        Profession = x.Profession,
+                        CurrentAddress = x.CurrentAddress
+                    }).ToListAsync();
+                    
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
         public Task SaveAsync(CancellationToken ct = default)

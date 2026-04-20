@@ -42,6 +42,18 @@ namespace VidhanSabha.Domain.Entities.StatePrabhari
                 Status = true
             };
         }
+        public void  Update(int districtId, int vidhansabhaCount)
+        {
+            if (districtId <= 0)
+                throw new ArgumentException("Select Valid State.");
+            if (vidhansabhaCount <= 0)
+                throw new ArgumentException("VidhansabhaCount atleast 1.");
+            DistrictId = districtId;
+            VidhansabhaCount = vidhansabhaCount;
+            RemainingCount = vidhansabhaCount;
+            Status = true;
+
+        }
 
         // ── Update total count ───────────────────────────────────
         // Recalculates remaining = new total - already used seats

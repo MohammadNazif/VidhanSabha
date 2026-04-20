@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using VidhanSabha.Application.Pannels.SuperAdmin.StatePrabhari.Command;
+using VidhanSabha.Domain.Enums;
 
 namespace VidhanSabha.Application.Pannels.SuperAdmin.StatePrabhari.Dtos
 {
@@ -12,9 +13,16 @@ namespace VidhanSabha.Application.Pannels.SuperAdmin.StatePrabhari.Dtos
         public int Id { get; set; }
 
         public string userId { get; set; }
-        public int StateId { get; set; }
+        public int? StateId { get; set; }
 
-        public string StateName { get; set; }
+        public int? DistrictId { get; set; }
+
+        public string? DistrictName { get; set; }
+
+        public int? VidhanSabhaId { get; set; }
+
+        public string? VidhanSabhaName { get; set; }
+        public string? StateName { get; set; }
         public string PrabhariName { get; set; } = string.Empty;
         public string PrabhariEmail { get; set; } = string.Empty;
         public string Gender { get; set; } = string.Empty;
@@ -30,7 +38,11 @@ namespace VidhanSabha.Application.Pannels.SuperAdmin.StatePrabhari.Dtos
 
     public class CreatePrabhariRequestDto
     {
-        public int stateId { get; set; }
+        public int? stateId { get; set; }
+
+        public int? vidhanSanhaId { get; set; }
+
+        public PrabhariRole PrabhariRole { get; set; }
         public string PrabhariName { get; set; } = string.Empty;
         public string PrabhariEmail { get; set; } = string.Empty;
         public string Gender { get; set; } = string.Empty;

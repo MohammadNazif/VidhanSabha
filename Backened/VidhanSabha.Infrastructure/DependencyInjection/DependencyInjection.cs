@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Reflection;
+using VidhanSabha.Application.Common.AdminDesignation.Interfaces;
 using VidhanSabha.Application.Common.Cast.Interfaces;
 using VidhanSabha.Application.Common.Category.Interfaces;
 using VidhanSabha.Application.Common.CredentialMananger;
@@ -14,11 +15,17 @@ using VidhanSabha.Application.Common.Party.Interfaces;
 using VidhanSabha.Application.Common.SahmatAsahmatType.Interfaces;
 using VidhanSabha.Application.Common.State.Interface;
 using VidhanSabha.Application.Common.UnitOfWork;
+using VidhanSabha.Application.Pannels.Admin.Block.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.Booth.Interfaces;
+using VidhanSabha.Application.Pannels.Admin.DoubleVoter.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.Mandal.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.NewVoter.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.PannaPramukh.Interfaces;
+<<<<<<< HEAD
 using VidhanSabha.Application.Pannels.Admin.Pradhan.Interfaces;
+=======
+using VidhanSabha.Application.Pannels.Admin.PrabhavshaliVyakti.Interfaces;
+>>>>>>> 591ba8c66ea7b863e762236760e8dfc4acdf6a92
 using VidhanSabha.Application.Pannels.Admin.PravasiVoters.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.SahmatAsahmat.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.Sector.Interface;
@@ -26,6 +33,7 @@ using VidhanSabha.Application.Pannels.Auth.Commands.Login;
 using VidhanSabha.Application.Pannels.Auth.Interfaces;
 using VidhanSabha.Application.Pannels.Auth.Queries.GetMobileNumber;
 using VidhanSabha.Application.Pannels.StatePrabhari.DistrictWiseCount.Interface;
+using VidhanSabha.Application.Pannels.StatePrabhari.VidhanSabha.Interface;
 using VidhanSabha.Application.Pannels.SuperAdmin.designation.Interfaces;
 using VidhanSabha.Application.Pannels.SuperAdmin.StatePrabhari.Interfaces;
 using VidhanSabha.Application.Pannels.SuperAdmin.TotalStateWiseVidhansabhaCount.Interfaces;
@@ -74,8 +82,17 @@ namespace VidhanSabha.Infrastructure.DependencyInjection
             services.AddScoped<IPartyRepository, PartyRepository>();
             services.AddScoped<ISahmatTypeRepository, SahmatTypeRepository>();
             services.AddScoped<ISahmatAsahmatRepository, SahmatAsahmatRepository>();
+<<<<<<< HEAD
             services.AddScoped<IPradhanRepository, PradhanRepository>();
 
+=======
+            services.AddScoped<IVidhanSabhaRepository, VidhanSabhaRepository>();
+            
+            services.AddScoped<IDoubleVoterRepository, DoubleVoterRepository>();
+            services.AddScoped<IAdminDesignationRepository,AdminDesignationRepository>();
+            services.AddScoped<IPrabhavshaliRepository, PrabhavshaliRepository>();
+            services.AddScoped<IBlockRepository, BlockRepository>();
+>>>>>>> 591ba8c66ea7b863e762236760e8dfc4acdf6a92
             return services;
         }
     }

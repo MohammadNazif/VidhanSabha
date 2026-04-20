@@ -78,6 +78,20 @@ namespace VidhanSabha.Domain.Entities.SuperAdmin
             Remainingcount++;
         }
 
+        public void UpdateCount(int districtwisecount,int districtvidhancount,int remainingVidhansbhaCount)
+        {
+            var count = districtwisecount - districtvidhancount;
+            if (count > 0)
+            {
+               Remainingcount = remainingVidhansbhaCount + count;
+            }
+            else
+            {
+                Remainingcount = remainingVidhansbhaCount - (-count);
+            }
+
+        }
+
         // ── Soft Delete / Restore ────────────────────────────────
         public void Delete() => Status = false;
         public void Restore() => Status = true;

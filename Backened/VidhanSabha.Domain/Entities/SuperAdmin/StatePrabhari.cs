@@ -5,15 +5,18 @@ using System.Text;
 using System.Threading.Tasks;
 using VidhanSabha.Domain.Entities.Auth;
 using VidhanSabha.Domain.Entities.Common;
+using VidhanSabha.Domain.Entities.StatePrabhari;
+using VidhanSabha.Domain.Enums;
 
 namespace VidhanSabha.Domain.Entities.SuperAdmin
 {
     public class Tbl_StatePrabhari
     {
         public int Id { get; private set; }
-
         public string userId { get; set; }
-        public int StateId { get; set; }
+        public int? StateId { get; set; }
+        public int? VidhansabhaId { get; set; }
+        public PrabhariRole PrabhariRole { get; private set; }
         public string PrabhariName { get; private set; } = string.Empty;
         public string PrabhariEmail { get; private set; } = string.Empty;
         public string Gender { get; private set; } = string.Empty;
@@ -29,7 +32,7 @@ namespace VidhanSabha.Domain.Entities.SuperAdmin
         // Navigation
         public Tbl_Category Category { get; set; } = null!;
         public Tbl_Cast Cast { get; set; } = null!;
- 
+        public Tbl_VidhanSabha Vidhansabha { get; set; }
         public Tbl_State State { get; set; } = null!;
 
         private Tbl_StatePrabhari() { }
@@ -37,7 +40,9 @@ namespace VidhanSabha.Domain.Entities.SuperAdmin
         // ── Create ───────────────────────────────────────────────
         public static Tbl_StatePrabhari Create(
             string userId,
-            int stateId,
+            int? stateId,
+            int? vidhanSanhaId,
+            PrabhariRole prabhariRole,
             string prabhariName,
             string prabhariEmail,
             string gender,
@@ -55,6 +60,8 @@ namespace VidhanSabha.Domain.Entities.SuperAdmin
             {
                 userId = userId,
                 StateId = stateId,
+                VidhansabhaId = vidhanSanhaId,
+                PrabhariRole = prabhariRole,
                 PrabhariName = prabhariName.Trim(),
                 PrabhariEmail = prabhariEmail.Trim().ToLower(),
                 Gender = gender.Trim(),

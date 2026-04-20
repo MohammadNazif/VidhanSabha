@@ -26,7 +26,7 @@ namespace VidhanSabha.Application.Pannels.Admin.SahmatAsahmat.Command
                 throw new NotFoundException("Sahmat/Asahmat Voter Not Found");
             }
             res.Update(
-                dto.BoothId, dto.TypeId, dto.IsAsahmat,
+                dto.BoothId, dto.TypeId,
                 dto.Name, dto.Age, dto.Mobile, dto.PartyId,
                 dto.OccupationId, dto.Reason, dto.VoterId, dto.VillageId
                 );

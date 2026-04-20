@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Mvc;
 using VidhanSabha.Api.Responses;
+using VidhanSabha.Application.Common.AdminDesignation.DTOs;
+using VidhanSabha.Application.Common.AdminDesignation.Query;
 using VidhanSabha.Application.Common.Booth.Dtos;
 using VidhanSabha.Application.Common.Booth.Queries;
 using VidhanSabha.Application.Common.Cast.DTOs;
@@ -123,6 +125,14 @@ namespace VidhanSabha.Api.Endpoints
                 return Results.Ok(ApiResponse<List<SahmatTypeResponseDto>>.Ok(result));
             })
                 .WithName("getsahmattype")
+                .Produces<List<SahmatTypeResponseDto>>(200);
+
+            common.MapGet("/getadmindesignation", async (IMediator mediator) =>
+            {
+                var result = await mediator.Send(new GetAllAdminDesignationQuery());
+                return Results.Ok(ApiResponse<List<AdminDesignationResponseDto>>.Ok(result));
+            })
+                .WithName("getadmindesignation")
                 .Produces<List<SahmatTypeResponseDto>>(200);
         }
     }

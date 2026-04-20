@@ -31,8 +31,6 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
             {
                 throw;
             }
-            
-            
         }
 
         public int Update(Tbl_PravasiVoter pravasi)

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore.Storage;
+﻿using Microsoft.EntityFrameworkCore.Storage;
 using VidhanSabha.Application.Common.UnitOfWork;
 using VidhanSabha.Infrastructure.Persistence;
 
@@ -13,6 +8,7 @@ namespace VidhanSabha.Infrastructure.Repositories.Common
     {
         private readonly DatabaseContext _db;
         private IDbContextTransaction? _transaction;
+        private int _transactionDepth = 0;              // ✅ Added
 
         public UnitOfWork(DatabaseContext db)
         {
@@ -21,23 +17,43 @@ namespace VidhanSabha.Infrastructure.Repositories.Common
 
         public async Task BeginTransactionAsync()
         {
-            _transaction = await _db.Database.BeginTransactionAsync();
+            if (_transaction == null)
+            {
+                _transaction = await _db.Database.BeginTransactionAsync();
+            }
+            _transactionDepth++;                        // ✅ Always increment
         }
 
         public async Task CommitAsync()
         {
-            await _transaction!.CommitAsync();
+            _transactionDepth--;                        // ✅ Decrement first
+
+            if (_transactionDepth == 0 && _transaction != null)
+            {
+                await _transaction.CommitAsync();       // ✅ Only outermost commits
+                await _transaction.DisposeAsync();
+                _transaction = null;
+            }
         }
 
         public async Task RollbackAsync()
         {
-            await _transaction!.RollbackAsync();
+            if (_transaction != null)
+            {
+                await _transaction.RollbackAsync();
+                await _transaction.DisposeAsync();
+                _transaction = null;
+                _transactionDepth = 0;                  // ✅ Reset on rollback
+            }
         }
 
         public async ValueTask DisposeAsync()
         {
             if (_transaction != null)
+            {
                 await _transaction.DisposeAsync();
+                _transaction = null;
+            }
         }
     }
 }

@@ -12,8 +12,14 @@ import { StateComponent } from './components/superadmin/state/state.component';
 import { DistrictComponent } from './components/superadmin/district/district.component';
 import { VidhanSabhaComponent } from './components/superadmin/vidhansabha/vidhansabha.component';
 import { PravasiVoterComponent } from './components/admin/pravasi-voter/pravasi-voter.component';
+import { NewVoterComponent } from './components/admin/new-voter/new-voter.component';
 import { StatePrabhariListComponent } from './components/state-prabhari/list/state-prabhari-list.component';
 import { StatePrabhariDashboardComponent } from './components/state-prabhari/dashboard/state-prabhari-dashboard.component';
+import { SahmatAsahmatComponent } from './components/admin/sahmat-asahmat/sahmat-asahmat.component';
+import { VidhanSabhaPrabhariListComponent } from './components/state-prabhari/vidhansabha-prabhari/vidhansabha-prabhari-list.component';
+import { DoubleVoterComponent } from './components/admin/double-voter/double-voter.component';
+import { PrabhavshaliComponent } from './components/admin/prabhavshali/prabhavshali.component';
+import { BlockComponent } from './components/admin/block/block.component';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -22,8 +28,22 @@ export const routes: Routes = [
   { path: 'mandal', component: MandalComponent },
   { path: 'sector', component: SectorComponent },
   { path: 'booth', component: BoothComponent },
+  { path: 'booth-list', component: BoothComponent },
   { path: 'panna-pramukh', component: PannapramukhComponent },
+  { path: 'panna-pramukh-list', component: PannapramukhComponent },
   { path: 'pravasi-voter', component: PravasiVoterComponent },
+  { path: 'pravasi-voter-list', component: PravasiVoterComponent },
+  { path: 'new-voter', component: NewVoterComponent },
+  { path: 'new-voter-list', component: NewVoterComponent },
+  { path: 'sahmat-asahmat', component: SahmatAsahmatComponent },
+  { path: 'sahmat-list', component: SahmatAsahmatComponent },
+  { path: 'asahmat-list', component: SahmatAsahmatComponent },
+  { path: 'double-voter', component: DoubleVoterComponent },
+  { path: 'double-voter-list', component: DoubleVoterComponent },
+  { path: 'prabhavshali-vyakt', component: PrabhavshaliComponent },
+  { path: 'influencer-person-list', component: PrabhavshaliComponent },
+  { path: 'block', component: BlockComponent },
+  { path: 'block-pramukh-list', component: BlockComponent },
   { path: 'superadmin/dashboard', component: SuperDashboardComponent },
   { path: 'superadmin/designation', component: DesignationComponent },
   { path: 'superadmin/state', component: StateComponent },
@@ -31,5 +51,6 @@ export const routes: Routes = [
   { path: 'superadmin/district', component: DistrictComponent },
   { path: 'superadmin/vidhansabha', component: VidhanSabhaComponent },
   { path: 'state-prabhari/dashboard', component: StatePrabhariDashboardComponent },
+  { path: 'state-prabhari/vidhansabha-prabhari', component: VidhanSabhaPrabhariListComponent },
   { path: '**', redirectTo: '' }
 ];

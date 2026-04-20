@@ -9,6 +9,8 @@ import { PageHeaderComponent } from '../../shared/page-header/page-header.compon
 import { PannapramukhService } from '../../../Services/Admin/pannapramukh/pannapramukh.service';
 import { ToastService } from '../../../Services/common/toast/toast.service';
 import { CrudHandlerService } from '../../../Services/common/crud-handler.service';
+import { AuthServiceService } from '../../../Services/Auth/auth.service';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-pannapramukh',
@@ -21,6 +23,7 @@ export class PannapramukhComponent implements OnInit {
   @ViewChild('pannaModal') pannaModal!: GenericModalButtonComponent;
 
   pannaList: any[] = [];
+  isListView = false;
 
   columns: TableColumn[] = [
     { key: 'boothNumber', label: 'Booth No.', sortable: true },
@@ -51,9 +54,15 @@ export class PannapramukhComponent implements OnInit {
   };
 
   actions: TableAction[] = [
-    { id: 'edit', label: '', variant: 'default', icon: 'edit' },
-    { id: 'delete', label: '', variant: 'danger', icon: 'delete' }
+    { id: 'edit', label: '', variant: 'default', icon: 'edit', show: () => this.canManageVoters() },
+    { id: 'delete', label: '', variant: 'danger', icon: 'delete', show: () => this.canManageVoters() }
   ];
+
+  canManageVoters(): boolean {
+    if (this.isListView) return false;
+    const role = (this.authService.getRole() || '').toUpperCase().trim();
+    return role !== 'STATEPRABHARI' && role !== 'ADHYAKSH';
+  }
 
   addPannaConfig: FormConfig = {
     title: 'Add Panna Pramukh',
@@ -197,11 +206,17 @@ export class PannapramukhComponent implements OnInit {
   constructor(
     private pannaService: PannapramukhService,
     private toastService: ToastService,
-    private crudHandler: CrudHandlerService
+    private crudHandler: CrudHandlerService,
+    private authService: AuthServiceService,
+    private route: ActivatedRoute
   ) { }
 
   ngOnInit() {
-    this.loadPannas();
+    this.route.url.subscribe(url => {
+      const path = url[0]?.path || '';
+      this.isListView = path.includes('-list');
+      this.loadPannas();
+    });
   }
 
   loadPannas() {

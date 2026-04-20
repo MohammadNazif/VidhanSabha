@@ -4,16 +4,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MediatR;
+using static VidhanSabha.Application.Pannels.StatePrabhari.DistrictWiseCount.Dtos.DistrictWiseCount;
 
 namespace VidhanSabha.Domain.Entities.StatePrabhari.DistrictWiseCount.Command
 {
-    internal class UpdateDistrictWiseCount : IRequest<int>
+    public class UpdateDistrictWiseCount : IRequest<int>
     {
 
-        public UpdateDistrictWiseCount Dto;
-        public UpdateDistrictWiseCount()
+        public UpdateVidhansabhaDistrictReqDto Dto;
+        public UpdateDistrictWiseCount(UpdateVidhansabhaDistrictReqDto dto)
         {
-            
+            Dto = dto;
         }
     }
 }

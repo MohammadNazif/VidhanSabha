@@ -1,0 +1,14 @@
+<app-page-header title="Vidhan Sabha Prabhari Management" subtitle="Manage and track constituency-level leaders">
+    <div class="actions">
+        <app-generic-modal-button #prabhariModal [config]="addPrabhariConfig" variant="primary" icon="+"
+            label="Add Vidhansabha Prabhari" (formSubmit)="handleFormSubmit($event)">
+
+        </app-generic-modal-button>
+    </div>
+</app-page-header>
+
+<div class="list-content p-4">
+    <app-generic-table [data]="prabhariList" [columns]="columns" [actions]="actions" [config]="config" [loading]="false"
+        (actionClick)="handleAction($event)">
+    </app-generic-table>
+</div>

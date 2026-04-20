@@ -2,9 +2,16 @@
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Mvc;
 using VidhanSabha.Api.Responses;
+using VidhanSabha.Application.Common.Dtos;
+using VidhanSabha.Application.Pannels.Admin.Block.Command;
+using VidhanSabha.Application.Pannels.Admin.Block.DTOs;
+using VidhanSabha.Application.Pannels.Admin.Block.Queries;
 using VidhanSabha.Application.Pannels.Admin.Booth.Command;
 using VidhanSabha.Application.Pannels.Admin.Booth.Dtos;
 using VidhanSabha.Application.Pannels.Admin.Booth.Queries;
+using VidhanSabha.Application.Pannels.Admin.DoubleVoter.Command;
+using VidhanSabha.Application.Pannels.Admin.DoubleVoter.DTOs;
+using VidhanSabha.Application.Pannels.Admin.DoubleVoter.Queries;
 using VidhanSabha.Application.Pannels.Admin.Mandal.Commands;
 using VidhanSabha.Application.Pannels.Admin.Mandal.DTOs.Create;
 using VidhanSabha.Application.Pannels.Admin.Mandal.Queries;
@@ -14,9 +21,15 @@ using VidhanSabha.Application.Pannels.Admin.NewVoter.Queries;
 using VidhanSabha.Application.Pannels.Admin.PannaPramukh.Command;
 using VidhanSabha.Application.Pannels.Admin.PannaPramukh.Dtos;
 using VidhanSabha.Application.Pannels.Admin.PannaPramukh.Queries;
+<<<<<<< HEAD
 using VidhanSabha.Application.Pannels.Admin.Pradhan.Command;
 using VidhanSabha.Application.Pannels.Admin.Pradhan.DTOs;
 using VidhanSabha.Application.Pannels.Admin.Pradhan.Queries;
+=======
+using VidhanSabha.Application.Pannels.Admin.PrabhavshaliVyakti.Command;
+using VidhanSabha.Application.Pannels.Admin.PrabhavshaliVyakti.DTOs;
+using VidhanSabha.Application.Pannels.Admin.PrabhavshaliVyakti.Queries;
+>>>>>>> 591ba8c66ea7b863e762236760e8dfc4acdf6a92
 using VidhanSabha.Application.Pannels.Admin.PravasiVoters.Command;
 using VidhanSabha.Application.Pannels.Admin.PravasiVoters.DTOs;
 using VidhanSabha.Application.Pannels.Admin.PravasiVoters.Queries;
@@ -51,8 +64,17 @@ public static class AdminEndpoints
                         .WithTags("NewVoter");
         var sahmatasahmat = app.MapGroup("/api/sahmatasahmat")
                         .WithTags("SahmatAsahmat");
+<<<<<<< HEAD
         var pradhan = app.MapGroup("/api/pradhan")
                         .WithTags("Pradhan");
+=======
+        var doublevoter = app.MapGroup("/api/doublevoter")
+                        .WithTags("DoubleVoter");
+        var prabhavshali = app.MapGroup("/api/prabhavshali")
+                        .WithTags("PrabhavShali");
+        var block = app.MapGroup("/api/block")
+                        .WithTags("Block");
+>>>>>>> 591ba8c66ea7b863e762236760e8dfc4acdf6a92
 
         #region Mandal
         mandal.MapGet("/getAll", async (IMediator mediator) =>
@@ -173,12 +195,11 @@ public static class AdminEndpoints
    .Produces<int>(200);
 
         booth.MapGet("/getAll", async (
-         int? mandalId,
-           int? sectorId,
+            [AsParameters]  BoothQueryParams q,
            IMediator mediator) =>
         {
-            var result = await mediator.Send(new GetAllBoothsQuery(mandalId, sectorId));
-            return Results.Ok(ApiResponse<List<BoothResponseDto>>.Ok(result));
+            var result = await mediator.Send(new GetAllBoothsQuery(q));
+            return Results.Ok(ApiResponse<PagedResult<BoothResponseDto>>.Ok(result));
         });
 
         booth.MapPost("/delete", async (int id, IMediator mediator) =>
@@ -289,6 +310,7 @@ public static class AdminEndpoints
         });
 
         #endregion
+
         #region Sahmat Asahmat
 
         sahmatasahmat.MapPost("/create", async (CreateSahmatAsahmatReqDto dto, IMediator mediator) =>
@@ -323,6 +345,7 @@ public static class AdminEndpoints
 
         #endregion
 
+<<<<<<< HEAD
         #region Pradhan
 
         pradhan.MapPost("/create", async (CreatePradhanRequestDto dto, IMediator mediator) =>
@@ -354,6 +377,107 @@ public static class AdminEndpoints
             return Results.Ok(ApiResponse<List<PradhanResponseDto>>.Ok(result));
         });
 
+=======
+        #region Double Voter
+
+        doublevoter.MapPost("/create", async (CreateDoubleVoterReqDto dto, IMediator mediator) =>
+        {
+            var result = await mediator.Send(new CreateDoubleVoterCommand(dto));
+            return Results.Ok(ApiResponse<int>.Ok(result, "New Voter Created Successfully"));
+        })
+                .WithName("CreateDoubleVoter")
+                .Produces<int>(200);
+        
+        doublevoter.MapPost("/update", async (UpdateDoubleVoterRequestDto dto, IMediator mediator) =>
+        {
+            var result = await mediator.Send(new UpdateDoubleVoterCommand(dto));
+            return Results.Ok(ApiResponse<int>.Ok(result, "Double Voter Updated Successfully"));
+        })
+                .WithName("UpdateDoubleVoter")
+                .Produces<int>(200);
+
+        doublevoter.MapPost("/delete", async (int id, IMediator mediator) =>
+        {
+            var result = await mediator.Send(new DeleteDoubleVoterCommand(id));
+            return Results.Ok(ApiResponse<int>.Ok(result, "Double Voter Deleted Successfully"));
+        })
+                .WithName("DeleteDoubleVoter")
+                .Produces<int>(200);
+
+        doublevoter.MapGet("/getAll", async (IMediator mediator) =>
+        {
+            var result = await mediator.Send(new GetAllDoubleVoterQuery());
+            return Results.Ok(ApiResponse<List<DoubleVoterResponseDto>>.Ok(result));
+        });
+
+        #endregion
+
+        #region PrabhavShali Vyakti
+
+        prabhavshali.MapPost("/create", async (CreatePrabhavshaliReqDto dto, IMediator mediator) =>
+        {
+            var result = await mediator.Send(new CreatePrabhavCommand(dto));
+            return Results.Ok(ApiResponse<int>.Ok(result, "Prabhavshali Vyakti Created Successfully"));
+        })
+               .WithName("CreatePrabhavShali")
+               .Produces<int>(200);
+
+        prabhavshali.MapPost("/update", async (UpdatePrabhavshaliReqDto dto, IMediator mediator) =>
+        {
+            var result = await mediator.Send(new UpdatePrabhavCommand(dto));
+            return Results.Ok(ApiResponse<int>.Ok(result, "Prabhavshali Vyakti Updated Successfully"));
+        })
+                .WithName("UpdatePrabhavshali")
+                .Produces<int>(200);
+
+        prabhavshali.MapPost("/delete", async (int id, IMediator mediator) =>
+        {
+            var result = await mediator.Send(new DeletePrabhavCommand(id));
+            return Results.Ok(ApiResponse<int>.Ok(result, "Prabhavshali Vyakti Deleted Successfully"));
+        })
+                .WithName("DeletePrabhavshali")
+                .Produces<int>(200);
+
+        prabhavshali.MapGet("/getAll", async (IMediator mediator) =>
+        {
+            var result = await mediator.Send(new GetAllPrabhavQuery());
+            return Results.Ok(ApiResponse<List<PrabhavshaliResponseDto>>.Ok(result));
+        });
+
+        #endregion
+
+        #region Block
+
+        block.MapPost("/create", async (CreateBlockReqDto dto, IMediator mediator) =>
+        {
+            var result = await mediator.Send(new CreateBlockCommand(dto));
+            return Results.Ok(ApiResponse<int>.Ok(result, "Block Created Successfully"));
+        })
+                .WithName("CreateBlock")
+                .Produces<int>(200);
+
+        block.MapPost("/update", async (UpdateBlockReqDto dto, IMediator mediator) =>
+        {
+            var result = await mediator.Send(new UpdateBlockCommand(dto));
+            return Results.Ok(ApiResponse<int>.Ok(result, "Block Updated Successfully"));
+        })
+                .WithName("UpdateBlock")
+                .Produces<int>(200);
+
+        block.MapPost("/delete", async (int id, IMediator mediator) =>
+        {
+            var result = await mediator.Send(new DeleteBlockCommand(id));
+            return Results.Ok(ApiResponse<int>.Ok(result, "Block Deleted Successfully"));
+        })
+                .WithName("DeleteBlock")
+                .Produces<int>(200);
+
+        block.MapGet("/getAll", async (IMediator mediator) =>
+        {
+            var result = await mediator.Send(new GetAllBlockQuery());
+            return Results.Ok(ApiResponse<List<BlockResponseDto>>.Ok(result));
+        });
+>>>>>>> 591ba8c66ea7b863e762236760e8dfc4acdf6a92
 
         #endregion
     }
