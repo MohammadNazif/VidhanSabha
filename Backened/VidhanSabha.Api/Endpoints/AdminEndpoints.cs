@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Mvc;
 using VidhanSabha.Api.Responses;
+using VidhanSabha.Application.Common.Dtos;
 using VidhanSabha.Application.Pannels.Admin.Block.Command;
 using VidhanSabha.Application.Pannels.Admin.Block.DTOs;
 using VidhanSabha.Application.Pannels.Admin.Block.Queries;
@@ -183,12 +184,11 @@ public static class AdminEndpoints
    .Produces<int>(200);
 
         booth.MapGet("/getAll", async (
-         int? mandalId,
-           int? sectorId,
+            [AsParameters]  BoothQueryParams q,
            IMediator mediator) =>
         {
-            var result = await mediator.Send(new GetAllBoothsQuery(mandalId, sectorId));
-            return Results.Ok(ApiResponse<List<BoothResponseDto>>.Ok(result));
+            var result = await mediator.Send(new GetAllBoothsQuery(q));
+            return Results.Ok(ApiResponse<PagedResult<BoothResponseDto>>.Ok(result));
         });
 
         booth.MapPost("/delete", async (int id, IMediator mediator) =>

@@ -12,10 +12,18 @@ export class BoothService extends BaseApiService {
     return this.create(this.entity, data);
   }
 
-  getAllBooths(mandalId?: number, sectorId?: number): Observable<any> {
-    let params: any = {};
-    if (mandalId) params['mandalId'] = mandalId;
-    if (sectorId) params['sectorId'] = sectorId;
+  getAllBooths(queryParams: any = {}): Observable<any> {
+    const params: any = {
+      PageNumber: queryParams.pageNumber || 1,
+      PageSize: queryParams.pageSize || 10,
+      IsDescending: queryParams.isDescending === true || queryParams.isDescending === 'true'
+    };
+
+    if (queryParams.mandalId) params['MandalId'] = queryParams.mandalId;
+    if (queryParams.sectorId) params['SectorId'] = queryParams.sectorId;
+    if (queryParams.searchTerm) params['SearchTerm'] = queryParams.searchTerm;
+    if (queryParams.sortBy) params['SortBy'] = queryParams.sortBy;
+
     return this.getAllByParams(this.entity, params);
   }
 

@@ -35,6 +35,16 @@ export class BoothComponent implements OnInit {
   ) { }
 
   isListView = false;
+  totalCount = 0;
+  
+  // Server-side state
+  pageNumber = 1;
+  pageSize = 10;
+  searchTerm = '';
+  sortBy = '';
+  isDescending = false;
+  mandalId: number | null = null;
+  sectorId: number | null = null;
 
   canManage(): boolean {
     if (this.isListView) return false;
@@ -77,9 +87,26 @@ export class BoothComponent implements OnInit {
   }
 
   loadBooths() {
-    this.boothService.getAllBooths().subscribe({
+    const params = {
+      pageNumber: this.pageNumber,
+      pageSize: this.pageSize,
+      searchTerm: this.searchTerm,
+      sortBy: this.sortBy,
+      isDescending: this.isDescending,
+      mandalId: this.mandalId,
+      sectorId: this.sectorId
+    };
+
+    this.boothService.getAllBooths(params).subscribe({
       next: (response) => {
-        this.boothList = response.data || (Array.isArray(response) ? response : []);
+        const dataWrap = response.data;
+        if (dataWrap && dataWrap.items) {
+          this.boothList = dataWrap.items;
+          this.totalCount = dataWrap.totalCount || 0;
+        } else {
+          this.boothList = Array.isArray(dataWrap) ? dataWrap : [];
+          this.totalCount = this.boothList.length;
+        }
       },
       error: (err) => {
         console.error('Error fetching booths:', err);
@@ -339,6 +366,7 @@ export class BoothComponent implements OnInit {
   columns: TableColumn[] = [
     { key: 'mandalName', label: 'Mandal', sortable: true },
     { key: 'sectorName', label: 'Sector', sortable: true },
+    { key: 'boothNumber', label: 'Booth No.', sortable: true },
     {
       key: 'villageName',
       label: 'Village',
@@ -350,7 +378,7 @@ export class BoothComponent implements OnInit {
         return val || 'N/A';
       }
     },
-    { key: 'pollingStationName', label: 'Polling Station Name', sortable: true },
+    { key: 'pollingStationName', label: 'Polling Station', sortable: true },
     {
       key: 'boothAathyaksh',
       label: 'Booth Aathyaksh',
@@ -368,8 +396,7 @@ export class BoothComponent implements OnInit {
       label: 'Cast',
       sortable: true,
       formatter: (val: any, row: any) => row.sanyojak?.castName || 'N/A'
-    },
-    { key: 'pollingStationLocation', label: 'Location', sortable: true }
+    }
   ];
 
   config: TableConfig = {
@@ -382,7 +409,8 @@ export class BoothComponent implements OnInit {
     searchPlaceholder: 'Search booths...',
     showRowNumbers: true,
     striped: true,
-    hoverable: true
+    hoverable: true,
+    serverSide: true
   };
 
   actions: TableAction[] = [
@@ -431,9 +459,26 @@ export class BoothComponent implements OnInit {
       }
 
       this.boothModal.openModal(editData);
-    } else {
-      this.toastService.showWarning('Action Selected', `Action ${action.id} clicked for ${row.boothName || 'this item'}`);
     }
+  }
+
+  handlePageChange(event: any) {
+    this.pageNumber = event.currentPage;
+    this.pageSize = event.pageSize;
+    this.loadBooths();
+  }
+
+  handleSortChange(event: any) {
+    this.sortBy = event.column;
+    this.isDescending = event.direction === 'desc';
+    this.pageNumber = 1; // Reset to first page
+    this.loadBooths();
+  }
+
+  handleSearchChange(term: string) {
+    this.searchTerm = term;
+    this.pageNumber = 1; // Reset to first page
+    this.loadBooths();
   }
 
   handleFormSubmit(result: FormResult) {

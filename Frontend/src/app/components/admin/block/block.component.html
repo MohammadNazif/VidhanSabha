@@ -1,15 +1,15 @@
 <div class="h-screen p-6 flex flex-col overflow-hidden bg-slate-50/50">
-    <app-page-header title="Booth Registration" subtitle="Manage and view all Booths in the legislative assembly.">
+    <app-page-header title="Block Management" subtitle="Manage blocks and block pramukhs.">
         <div class="flex items-center gap-3">
-            <app-generic-modal-button *ngIf="canManage()" #boothModal [config]="addBoothConfig" label="Add Booth" icon="+" variant="primary"
+            <app-generic-modal-button #blockModal [config]="formConfig" label="Add Block" icon="+" variant="primary"
                 (formSubmit)="handleFormSubmit($event)">
             </app-generic-modal-button>
         </div>
     </app-page-header>
 
-    <!-- Table Card Wrapper -->
-    <div class="flex-1 min-h-0 rounded-2xl border border-slate-200 bg-white shadow-sm p-1 lg:p-3 overflow-hidden flex flex-col">
-        <app-generic-table class="flex-1 min-h-0" [data]="boothList" [columns]="columns" [config]="config" 
+    <!-- Table Section -->
+    <div class="flex-1 min-h-0 bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
+        <app-generic-table class="flex-1 min-h-0" [data]="blockList" [columns]="columns" [config]="config" 
             [actions]="actions" [totalItems]="totalCount"
             (actionClick)="handleAction($event)" 
             (pageChange)="handlePageChange($event)"

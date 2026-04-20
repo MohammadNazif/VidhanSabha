@@ -2,15 +2,18 @@
 using System.Collections.Generic;
 using System.Data.SqlTypes;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using VidhanSabha.Application.Common.Booth.Dtos;
+using VidhanSabha.Application.Common.Dtos;
 using VidhanSabha.Application.Pannels.Admin.Booth.Dtos;
 using VidhanSabha.Application.Pannels.Admin.Booth.Interfaces;
 using VidhanSabha.Domain.Entities.Admin;
+using VidhanSabha.Infrastructure.Extensions;
 using VidhanSabha.Infrastructure.Persistence;
 using VidhanSabha.Infrastructure.Repositories.Common;
 
@@ -54,35 +57,47 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
             
         }
 
-        public async Task<List<BoothResponseDto>> GetAllAsync(
-    int? mandalId = null,
-    int? sectorId = null,
-    CancellationToken ct = default)
+        public async Task<PagedResult<BoothResponseDto>> GetAllAsync(
+          BoothQueryParams qp, CancellationToken ct = default)
         {
             var query = _context.Tbl_Booth
-                .Where(b => (!mandalId.HasValue || b.MandalId == mandalId) &&
-                            (!sectorId.HasValue || b.SectorId == sectorId))
-                .Select(b => new BoothResponseDto
+                .AsNoTracking()
+                .Where(b =>
+                    (!qp.MandalId.HasValue || b.MandalId == qp.MandalId) &&
+                    (!qp.SectorId.HasValue || b.SectorId == qp.SectorId));
+
+            Expression<Func<Tbl_Booth, bool>>? search = null;
+            if (!string.IsNullOrWhiteSpace(qp.SearchTerm))
+            {
+                var term = qp.SearchTerm.Trim().ToLower();
+                search = b =>
+                    b.PollingStationName.ToLower().Contains(term) ||
+                    b.PollingStationLocation.ToLower().Contains(term) ||
+                    b.Mandal.Name.ToLower().Contains(term) ||
+                    b.Sector.SectorName.ToLower().Contains(term);
+            }
+
+            return await query.ToPagedResultAsync(
+                queryParams: qp,
+                searchPredicate: search,
+                defaultSort: b => b.BoothNumber,
+                projection: b => new BoothResponseDto
                 {
                     Id = b.Id,
                     MandalId = b.MandalId,
-                    MandalName = b.Mandal.Name,        // ✅ JOIN — already working
+                    MandalName = b.Mandal.Name,
                     SectorId = b.SectorId,
-                    SectorName = b.Sector.SectorName,  // ✅ JOIN — already working
+                    SectorName = b.Sector.SectorName,
                     BoothNumber = b.BoothNumber,
                     PollingStationName = b.PollingStationName,
                     PollingStationLocation = b.PollingStationLocation,
                     IsBoothSanyojak = b.IsBoothSanyojak,
-
-                    // ✅ Single JOIN to Tbl_Village — no subquery
                     Villages = b.Villages.Select(v => new VillageResponseDto
                     {
                         VillageId = v.VillageId,
-                        VillageName = v.Village.VillageName,  // ✅ JOIN
+                        VillageName = v.Village.VillageName,
                         HasAnshik = v.HasAnshik
                     }).ToList(),
-
-                    // ✅ Single JOIN to Tbl_Cast — no subquery
                     Sanyojak = b.Sanyojak != null ? new SanyojakResponseDto
                     {
                         InchargeName = b.Sanyojak.InchargeName,
@@ -90,15 +105,18 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
                         FatherName = b.Sanyojak.FatherName,
                         CategoryId = b.Sanyojak.CategoryId,
                         CastId = b.Sanyojak.CastId,
-                        CastName = b.Sanyojak.Cast.CastName,  // ✅ JOIN
+                        CastName = b.Sanyojak.Cast.CastName,
                         EducationLevel = b.Sanyojak.EducationLevel,
                         PhoneNumber = b.Sanyojak.PhoneNumber,
                         Address = b.Sanyojak.Address
                     } : null
-                });
-
-            return await query.AsNoTracking().ToListAsync(ct);
+                },
+                ct: ct
+            );
         }
+
+       
+
         public async Task<Tbl_Booth?> GetByIdAsync(int id, CancellationToken ct)
         {
             return await _context.Tbl_Booth

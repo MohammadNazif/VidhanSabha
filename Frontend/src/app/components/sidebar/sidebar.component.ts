@@ -58,7 +58,7 @@ export class SidebarComponent implements OnInit {
         { label: 'Varisth Naagarik/Viklaang', route: '/varisth-naagarik-viklaang' },
         { label: 'Booth Voter Description', route: '/booth-voter-description' },
         { label: 'Sahmat/Asahmat', route: '/sahmat-asahmat' },
-        { label: 'DoubleVoter/Married', route: '/double-voter-married' },
+        { label: 'Double Voter/Married', route: '/double-voter' },
         { label: 'Booth Samiti', route: '/booth-samiti' },
         { label: 'Prabhavshali Vyakt', route: '/prabhavshali-vyakt' },
         { label: 'Influencer Person', route: '/influencer-person' },
