@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Reflection;
+using VidhanSabha.Application.Common.AdminDesignation.Interfaces;
 using VidhanSabha.Application.Common.Cast.Interfaces;
 using VidhanSabha.Application.Common.Category.Interfaces;
 using VidhanSabha.Application.Common.CredentialMananger;
@@ -14,10 +15,13 @@ using VidhanSabha.Application.Common.Party.Interfaces;
 using VidhanSabha.Application.Common.SahmatAsahmatType.Interfaces;
 using VidhanSabha.Application.Common.State.Interface;
 using VidhanSabha.Application.Common.UnitOfWork;
+using VidhanSabha.Application.Pannels.Admin.Block.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.Booth.Interfaces;
+using VidhanSabha.Application.Pannels.Admin.DoubleVoter.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.Mandal.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.NewVoter.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.PannaPramukh.Interfaces;
+using VidhanSabha.Application.Pannels.Admin.PrabhavshaliVyakti.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.PravasiVoters.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.SahmatAsahmat.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.Sector.Interface;
@@ -73,7 +77,10 @@ namespace VidhanSabha.Infrastructure.DependencyInjection
             services.AddScoped<IPartyRepository, PartyRepository>();
             services.AddScoped<ISahmatTypeRepository, SahmatTypeRepository>();
             services.AddScoped<ISahmatAsahmatRepository, SahmatAsahmatRepository>();
-            
+            services.AddScoped<IDoubleVoterRepository, DoubleVoterRepository>();
+            services.AddScoped<IAdminDesignationRepository,AdminDesignationRepository>();
+            services.AddScoped<IPrabhavshaliRepository, PrabhavshaliRepository>();
+            services.AddScoped<IBlockRepository, BlockRepository>();
             return services;
         }
     }
