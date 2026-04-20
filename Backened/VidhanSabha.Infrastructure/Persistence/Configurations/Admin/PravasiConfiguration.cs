@@ -7,7 +7,8 @@ using System.Text;
 using System.Threading.Tasks;
 using VidhanSabha.Domain.Entities.Admin;
 namespace VidhanSabha.Infrastructure.Persistence.Configurations.Admin 
-{ public class Tbl_PravasiVoterConfiguration : IEntityTypeConfiguration<Tbl_PravasiVoter> 
+{ 
+    public class Tbl_PravasiVoterConfiguration : IEntityTypeConfiguration<Tbl_PravasiVoter> 
     { public void Configure(EntityTypeBuilder<Tbl_PravasiVoter> entity) 
         { entity.ToTable("Tbl_PravasiVoter");  
             entity.HasKey(e => e.Id);  

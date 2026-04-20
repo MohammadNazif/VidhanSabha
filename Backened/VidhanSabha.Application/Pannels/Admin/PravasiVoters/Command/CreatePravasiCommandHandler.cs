@@ -27,11 +27,8 @@ namespace VidhanSabha.Application.Pannels.Admin.PravasiVoters.Command
                 req.BoothId, req.Name, req.Mobile, req.CategoryId, req.CastId, req.OccupationId,
                 req.VoterId, req.CurrentAddress, req.VillageId);
 
-            
             return  await _repo.AddAsync(data,cancellationToken);
             
-
-
         }
     }
 }

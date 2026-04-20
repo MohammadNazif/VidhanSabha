@@ -18,14 +18,14 @@ namespace VidhanSabha.Application.Pannels.Admin.PravasiVoters.Queries
         {
             _repo = repo;
         }
-        public async Task<List<PravasiVoterResponseDto>> Handle(GetAllPravasiQuery request, CancellationToken cancellationToken)
-        {
-            var res = await _repo.GetAllAsync();
-            if(res==null)
+            public async Task<List<PravasiVoterResponseDto>> Handle(GetAllPravasiQuery request, CancellationToken cancellationToken)
             {
-                throw new NotFoundException("Pravasi Voter Not Found");
+                var res = await _repo.GetAllAsync();
+                if(res==null)
+                {
+                    throw new NotFoundException("Pravasi Voter Not Found");
+                }
+                return res;
             }
-            return res;
-        }
     }
 }

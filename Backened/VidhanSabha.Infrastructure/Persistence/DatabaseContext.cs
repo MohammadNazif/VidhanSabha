@@ -48,6 +48,11 @@ namespace VidhanSabha.Infrastructure.Persistence
         public DbSet<Tbl_SahmatType> Tbl_SahmatType =>Set<Tbl_SahmatType>();
         public DbSet<Tbl_SahmatAsahmat> Tbl_SahmatAsahmat => Set<Tbl_SahmatAsahmat>();
         public DbSet<Tbl_SahmatAsahmatVillage> Tbl_SahmatAsahmatVillage => Set<Tbl_SahmatAsahmatVillage>();
+        public DbSet<Tbl_DoubleVoter> Tbl_DoubleVoter => Set<Tbl_DoubleVoter>();
+        public DbSet<Tbl_AdminDesignation> Tbl_AdminDesignation => Set<Tbl_AdminDesignation>();
+        public DbSet<Tbl_PrabhavshaliVyakti> Tbl_PrabhavshaliVyakti => Set<Tbl_PrabhavshaliVyakti>();
+        public DbSet<Tbl_PrabhavshaliVillage> Tbl_PrabhavshaliVillage => Set<Tbl_PrabhavshaliVillage>();
+        public DbSet<Tbl_Block> Tbl_Block => Set<Tbl_Block>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
             {

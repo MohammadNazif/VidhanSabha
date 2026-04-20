@@ -1,11 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using VidhanSabha.Application.Pannels.Admin.PannaPramukh.Dtos;
+using VidhanSabha.Application.Pannels.Admin.DoubleVoter.DTOs;
+using VidhanSabha.Application.Pannels.Admin.DoubleVoter.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.PravasiVoters.DTOs;
 using VidhanSabha.Application.Pannels.Admin.PravasiVoters.Interfaces;
 using VidhanSabha.Domain.Entities.Admin;
@@ -14,62 +14,59 @@ using VidhanSabha.Infrastructure.Repositories.Common;
 
 namespace VidhanSabha.Infrastructure.Repositories.Admin
 {
-    public class PravasiVoterRepository:BaseRepository<Tbl_PravasiVoter>,IPravasiVoterRepository
+    public class DoubleVoterRepository : BaseRepository<Tbl_PravasiVoter>, IDoubleVoterRepository
     {
-        public PravasiVoterRepository(DatabaseContext context):base(context)
-        {
+        public DoubleVoterRepository(DatabaseContext context) : base(context)
+        { }
 
-        }
-        public async Task<int> AddAsync(Tbl_PravasiVoter pravasi,CancellationToken ct=default)
+        public async Task<int> AddAsync(Tbl_DoubleVoter doublevoter, CancellationToken ct = default)
         {
             try
             {
-                await _context.Tbl_PravasiVoter.AddAsync(pravasi);
+                await _context.Tbl_DoubleVoter.AddAsync(doublevoter);
                 return await _context.SaveChangesAsync();
             }
-            catch(Exception)
+            catch (Exception)
             {
                 throw;
             }
+
+
         }
 
-        public int Update(Tbl_PravasiVoter pravasi)
+        public int Update(Tbl_DoubleVoter doublevoter)
         {
             try
             {
-                _context.Tbl_PravasiVoter.Update(pravasi);
+                _context.Tbl_DoubleVoter.Update(doublevoter);
                 return _context.SaveChanges();
             }
-            catch(Exception)
+            catch (Exception)
             {
                 throw;
             }
-            
+
         }
-        public void Delete(Tbl_PravasiVoter pravasi)
+        public void Delete(Tbl_DoubleVoter doublevoter)
         {
             throw new NotImplementedException();
         }
 
-        public async Task<List<PravasiVoterResponseDto>> GetAllAsync(int? boothId=null,CancellationToken ct=default)
+        public async Task<List<DoubleVoterResponseDto>> GetAllAsync(int? boothId = null, CancellationToken ct = default)
         {
-            var result = await _context.Tbl_PravasiVoter
-                .Select(m => new PravasiVoterResponseDto
+            var result = await _context.Tbl_DoubleVoter
+                .Select(m => new DoubleVoterResponseDto
                 {
                     Id = m.Id,
                     BoothId = m.BoothId,
-                    BoothNumber=m.Booth.BoothNumber,
+                    BoothNumber = m.Booth.BoothNumber,
                     Name = m.Name,
-                    Mobile = m.Mobile,
-                    CategoryId = m.CategoryId,
-                    CategoryName=m.Category.Name,
-                    CastId = m.CastId,
-                    CastName=m.Cast.CastName,
-                    OccupationId = m.OccupationId,
-                    Occupation=m.Occupation.Occupation,
+                    FatherName=m.FatherName,
                     VoterId = m.VoterId,
+                    PreviousAddress=m.PreviousAddress,
                     CurrentAddress = m.CurrentAddress,
-                    Villages = m.Villages.Select(v => new VillageResponseDto
+                    Description=m.Description,
+                    Villages = m.Villages.Select(v => new VillageResponseDtos
                     {
                         VillageId = v.VillageId,
                         VillageName = v.Village.VillageName
@@ -78,11 +75,11 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
             return result;
         }
 
-        public async Task<Tbl_PravasiVoter?> GetByIdAsync(int id)
+        public async Task<Tbl_DoubleVoter?> GetByIdAsync(int id)
         {
             try
             {
-                return await _context.Tbl_PravasiVoter
+                return await _context.Tbl_DoubleVoter
                  .Include(p => p.Villages)
                  .FirstOrDefaultAsync(e => e.Id == id);
             }
