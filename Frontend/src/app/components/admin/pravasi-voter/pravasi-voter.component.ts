@@ -9,6 +9,8 @@ import { PageHeaderComponent } from '../../shared/page-header/page-header.compon
 import { PravasivoterService } from '../../../Services/Admin/pravasivoter/pravasivoter.service';
 import { ToastService } from '../../../Services/common/toast/toast.service';
 import { CrudHandlerService } from '../../../Services/common/crud-handler.service';
+import { AuthServiceService } from '../../../Services/Auth/auth.service';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-pravasi-voter',
@@ -21,6 +23,7 @@ export class PravasiVoterComponent implements OnInit {
   @ViewChild('voterModal') voterModal!: GenericModalButtonComponent;
 
   voterList: any[] = [];
+  isListView = false;
 
   columns: TableColumn[] = [
     { key: 'boothNumber', label: 'Booth No.', sortable: true },
@@ -29,7 +32,7 @@ export class PravasiVoterComponent implements OnInit {
     { key: 'mobile', label: 'Mobile No.', sortable: true },
     { key: 'categoryName', label: 'Category', sortable: true },
     { key: 'castName', label: 'Caste', sortable: true },
-    { key: 'occupationName', label: 'Occupation', sortable: true },
+    { key: 'occupation', label: 'Occupation', sortable: true },
     { key: 'voterId', label: 'Voter ID', sortable: true }
   ];
 
@@ -42,9 +45,15 @@ export class PravasiVoterComponent implements OnInit {
   };
 
   actions: TableAction[] = [
-    { id: 'edit', label: '', variant: 'default', icon: 'edit' },
-    { id: 'delete', label: '', variant: 'danger', icon: 'delete' }
+    { id: 'edit', label: '', variant: 'default', icon: 'edit', show: () => this.canManageVoters() },
+    { id: 'delete', label: '', variant: 'danger', icon: 'delete', show: () => this.canManageVoters() }
   ];
+
+  canManageVoters(): boolean {
+    if (this.isListView) return false;
+    const role = (this.authService.getRole() || '').toUpperCase().trim();
+    return role !== 'STATEPRABHARI' && role !== 'ADHYAKSH';
+  }
 
   addVoterConfig: FormConfig = {
     title: 'Add Pravasi Voter',
@@ -180,11 +189,17 @@ export class PravasiVoterComponent implements OnInit {
   constructor(
     private voterService: PravasivoterService,
     private toastService: ToastService,
-    private crudHandler: CrudHandlerService
+    private crudHandler: CrudHandlerService,
+    private authService: AuthServiceService,
+    private route: ActivatedRoute
   ) { }
 
   ngOnInit() {
-    this.loadVoters();
+    this.route.url.subscribe(url => {
+      const path = url[0]?.path || '';
+      this.isListView = path.includes('-list');
+      this.loadVoters();
+    });
   }
 
   loadVoters() {

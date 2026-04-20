@@ -12,6 +12,7 @@ import { StateService } from '../../../Services/Admin/state/state.service';
 import { AuthServiceService } from '../../../Services/Auth/auth.service';
 import { ToastService } from '../../../Services/common/toast/toast.service';
 import { CrudHandlerService } from '../../../Services/common/crud-handler.service';
+import { ActivatedRoute } from '@angular/router';
 
 
 @Component({
@@ -29,8 +30,17 @@ export class BoothComponent implements OnInit {
     private stateService: StateService,
     private authService: AuthServiceService,
     private toastService: ToastService,
-    private crudHandler: CrudHandlerService
+    private crudHandler: CrudHandlerService,
+    private route: ActivatedRoute
   ) { }
+
+  isListView = false;
+
+  canManage(): boolean {
+    if (this.isListView) return false;
+    // Admins can manage Master Data, but we can add role specific logic here if needed
+    return true; 
+  }
 
   isStatePrabhari(): boolean {
     return (this.authService.getRole() || '').toUpperCase().trim() === 'STATEPRABHARI';
@@ -39,6 +49,12 @@ export class BoothComponent implements OnInit {
   defaultStateId: string | null = null;
 
   ngOnInit() {
+    this.route.url.subscribe(url => {
+      const path = url[0]?.path || '';
+      this.isListView = path.includes('-list');
+      this.loadBooths();
+    });
+
     if (this.isStatePrabhari()) {
       // Fetch the assigned state ID
       this.stateService.getAllStates().subscribe({
@@ -370,8 +386,8 @@ export class BoothComponent implements OnInit {
   };
 
   actions: TableAction[] = [
-    { id: 'edit', label: '', variant: 'default', icon: 'edit' },
-    { id: 'delete', label: '', variant: 'danger', icon: 'delete' }
+    { id: 'edit', label: '', variant: 'default', icon: 'edit', show: () => this.canManage() },
+    { id: 'delete', label: '', variant: 'danger', icon: 'delete', show: () => this.canManage() }
   ];
 
   handleAction(event: any) {

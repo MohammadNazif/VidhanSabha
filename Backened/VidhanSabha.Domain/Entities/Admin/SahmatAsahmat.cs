@@ -12,13 +12,13 @@ namespace VidhanSabha.Domain.Entities.Admin
         public int Id { get; private set; }
         public int BoothId { get; private set; }
         public int TypeId { get; private set; }
-        public bool IsAsahmat { get; private set; }
+        //public bool IsAsahmat { get; private set; }
         public string Name { get; private set; }
         public int Age { get; private set; }
         public string Mobile { get; private set; }
         public int PartyId { get; private set; }
         public int OccupationId { get; private set; }
-        public string Reason { get; private set; }
+        public string? Reason { get; private set; }
         public string VoterId { get; private set; }
         public bool Status { get; private set; } = true;
 
@@ -33,7 +33,7 @@ namespace VidhanSabha.Domain.Entities.Admin
 
         public static Tbl_SahmatAsahmat Create(
             int BoothId,int TypeId,
-            bool IsAsahmat,string Name,
+            string Name,
             int Age,string Mobile,int PartyId,
             int OccupationId,string Reason,string VoterId, List<int> villageIds)
         {
@@ -41,7 +41,7 @@ namespace VidhanSabha.Domain.Entities.Admin
             {
                 BoothId = BoothId,
                 TypeId = TypeId,
-                IsAsahmat = IsAsahmat,
+            
                 Name = Name,
                 Age = Age,
                 Mobile = Mobile,
@@ -73,9 +73,9 @@ namespace VidhanSabha.Domain.Entities.Admin
 
         public void Update(
             int BoothId, int TypeId,
-            bool IsAsahmat, string Name,
+             string Name,
             int Age, string Mobile, int PartyId,
-            int OccupationId, string Reason, string VoterId, List<int> villageIds)
+            int OccupationId, string? Reason, string VoterId, List<int> villageIds)
         {
             this.BoothId = BoothId;
             this.TypeId = TypeId;
@@ -84,7 +84,6 @@ namespace VidhanSabha.Domain.Entities.Admin
             this.Age = Age;
             this.PartyId = PartyId;
             this.Reason = Reason;
-            this.IsAsahmat = IsAsahmat;
             this.OccupationId = OccupationId;
             this.VoterId = VoterId;
             SetVillages(villageIds);

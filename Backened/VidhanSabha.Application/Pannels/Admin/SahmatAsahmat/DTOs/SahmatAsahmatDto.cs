@@ -12,7 +12,7 @@ namespace VidhanSabha.Application.Pannels.Admin.SahmatAsahmat.DTOs
         public int BoothId { get; set; }
         public int TypeId { get;  set; }
         public List<int> VillageId { get; set; } = new();
-        public bool IsAsahmat { get; set; }
+        //public bool IsAsahmat { get; set; }
         public string Name { get; set; }
         public int Age { get; set; }
         public string Mobile { get; set; }
@@ -29,7 +29,7 @@ namespace VidhanSabha.Application.Pannels.Admin.SahmatAsahmat.DTOs
         public int TypeId { get; set; }
         public string Type { get; set; }
         public List<VillageResponseDtos> Villages { get; set; } = new();
-        public bool IsAsahmat { get; set; }
+        //public bool IsAsahmat { get; set; }
         public string Name { get; set; }
         public int Age { get; set; }
         public string Mobile { get; set; }

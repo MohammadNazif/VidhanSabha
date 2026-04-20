@@ -44,9 +44,14 @@ namespace VidhanSabha.Infrastructure.Repositories.StatePrabhari
             throw new NotImplementedException();
         }
 
-        public Task<IReadOnlyList<DistrictWiseCount.VidhansabhaDistrictResponseDto>> GetAllAsync(string? userId, CancellationToken ct = default)
+        public Task<IReadOnlyList<VidhansabhaDistrictRequestDto>> GetAllAsync(string? userId, CancellationToken ct = default)
         {
             throw new NotImplementedException();
+        }
+
+        public async Task<Tbl_DistrictWiseCount> GetByDistrictIdAsync(int districId, CancellationToken ct = default)
+        {
+              return await _context.Tbl_DistrictWiseCount.FirstOrDefaultAsync(x=>x.DistrictId == districId,ct);
         }
 
         public  async  Task<IReadOnlyList<VidhansabhaDistrictResponseDto>?> GetByIdAsync(string userId, CancellationToken ct = default)
@@ -66,14 +71,15 @@ namespace VidhanSabha.Infrastructure.Repositories.StatePrabhari
             return res;
         }
 
-        public Task<int> SaveChangesAsync(CancellationToken ct = default)
+        public async Task<int> SaveChangesAsync(CancellationToken ct = default)
         {
-            throw new NotImplementedException();
+            return await _context.SaveChangesAsync(ct);
         }
 
-        public void Update(Tbl_DistrictWiseCount state)
+        public async void Update(Tbl_DistrictWiseCount state)
         {
-            throw new NotImplementedException();
+            _context.Tbl_DistrictWiseCount.Update(state);
+              
         }
     }
 }

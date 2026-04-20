@@ -25,4 +25,8 @@ export class StatePrabhariService extends BaseApiService {
   updatePrabhari(data: any): Observable<any> {
     return this.update(this.entity, data);
   }
+
+  createVidhanSabhaUnified(data: any): Observable<any> {
+    return this.create(`${this.entity}/vidhansabha`, data);
+  }
 }

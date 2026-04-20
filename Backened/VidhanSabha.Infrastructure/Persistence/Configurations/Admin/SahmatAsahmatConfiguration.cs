@@ -37,9 +37,6 @@ namespace VidhanSabha.Infrastructure.Persistence.Configurations.Admin
             entity.Property(e => e.VoterId)
                   .HasMaxLength(100);
 
-            entity.Property(e => e.IsAsahmat)
-                  .HasDefaultValue(false);
-
             entity.Property(e => e.Age);
 
             // 🔥 Relationships (Same as PravasiVoter style)

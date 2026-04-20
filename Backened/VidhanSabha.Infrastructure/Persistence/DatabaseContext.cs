@@ -60,6 +60,8 @@ namespace VidhanSabha.Infrastructure.Persistence
         public DbSet<Tbl_LoginCredential> Tbl_LoginCredential => Set<Tbl_LoginCredential>();
 
         public DbSet<Tbl_DistrictWiseCount> Tbl_DistrictWiseCount => Set<Tbl_DistrictWiseCount>();
+
+        public DbSet<Tbl_VidhanSabha> Tbl_VidhanSabha => Set<Tbl_VidhanSabha>();
         protected override void OnModelCreating(ModelBuilder modelBuilder)
             {
                 // ✅ Ek line — is assembly ki saari Configuration classes auto-pick ho jayengi

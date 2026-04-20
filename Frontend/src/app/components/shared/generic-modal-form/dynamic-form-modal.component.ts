@@ -62,7 +62,7 @@ export class DynamicFormModalComponent implements OnInit, OnDestroy {
           : this.initialData[field.id])
         : defaultValue;
 
-      group[field.id] = [value, field.validations || []];
+      group[field.id] = [{ value, disabled: !!(field.disabledOnEdit && this.initialData?.id) }, field.validations || []];
       this.fieldVisibility[field.id] = !field.visibleIf;
     });
 
@@ -152,10 +152,15 @@ export class DynamicFormModalComponent implements OnInit, OnDestroy {
       }
 
       this.fieldVisibility[field.id] = isVisible;
+      const control = this.form.get(field.id);
 
-      // If hidden, clear value and validation error
-      if (!isVisible && this.form.get(field.id)?.value) {
-        this.form.get(field.id)?.setValue('', { emitEvent: false });
+      if (isVisible) {
+        if (control?.disabled) control.enable({ emitEvent: false });
+      } else {
+        if (control?.enabled) {
+          control.disable({ emitEvent: false });
+          control.setValue('', { emitEvent: false });
+        }
       }
     });
   }
@@ -344,7 +349,7 @@ export class DynamicFormModalComponent implements OnInit, OnDestroy {
   onSubmit(): void {
     if (this.form.valid) {
       this.submitForm.emit({
-        data: this.form.value,
+        data: this.form.getRawValue(),
         files: this.fileData,
         status: true
       });

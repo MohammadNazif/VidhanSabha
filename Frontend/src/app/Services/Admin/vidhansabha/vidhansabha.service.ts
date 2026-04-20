@@ -6,14 +6,14 @@ import { BaseApiService } from '../../common/base-api.service';
   providedIn: 'root'
 })
 export class VidhanSabhaService extends BaseApiService {
-  private entity = 'vidhansabha';
+  private entity = 'stateprabhari/vidhansabha';
 
   createVidhanSabha(data: any): Observable<any> {
     return this.create(this.entity, data);
   }
 
-  getAllVidhanSabhas(): Observable<any> {
-    return this.getAll(this.entity);
+  getVidhanSabhasByStateId(stateId: any | string): Observable<any> {
+    return this.getAllByParams(this.entity, { stateId });
   }
 
   getVidhanSabhasByDistrictId(districtId: number | string): Observable<any> {

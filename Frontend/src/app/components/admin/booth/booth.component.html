@@ -1,9 +1,7 @@
-<div class="h-screen p-6 flex flex-col overflow-hidden">
+<div class="h-screen p-6 flex flex-col overflow-hidden bg-slate-50/50">
     <app-page-header title="Booth Registration" subtitle="Manage and view all Booths in the legislative assembly.">
-
         <div class="flex items-center gap-3">
-
-            <app-generic-modal-button #boothModal [config]="addBoothConfig" label="Add Booth" icon="+" variant="primary"
+            <app-generic-modal-button *ngIf="canManage()" #boothModal [config]="addBoothConfig" label="Add Booth" icon="+" variant="primary"
                 (formSubmit)="handleFormSubmit($event)">
             </app-generic-modal-button>
         </div>

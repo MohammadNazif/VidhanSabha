@@ -29,6 +29,7 @@ using VidhanSabha.Application.Pannels.Auth.Commands.Login;
 using VidhanSabha.Application.Pannels.Auth.Interfaces;
 using VidhanSabha.Application.Pannels.Auth.Queries.GetMobileNumber;
 using VidhanSabha.Application.Pannels.StatePrabhari.DistrictWiseCount.Interface;
+using VidhanSabha.Application.Pannels.StatePrabhari.VidhanSabha.Interface;
 using VidhanSabha.Application.Pannels.SuperAdmin.designation.Interfaces;
 using VidhanSabha.Application.Pannels.SuperAdmin.StatePrabhari.Interfaces;
 using VidhanSabha.Application.Pannels.SuperAdmin.TotalStateWiseVidhansabhaCount.Interfaces;
@@ -77,6 +78,8 @@ namespace VidhanSabha.Infrastructure.DependencyInjection
             services.AddScoped<IPartyRepository, PartyRepository>();
             services.AddScoped<ISahmatTypeRepository, SahmatTypeRepository>();
             services.AddScoped<ISahmatAsahmatRepository, SahmatAsahmatRepository>();
+            services.AddScoped<IVidhanSabhaRepository, VidhanSabhaRepository>();
+            
             services.AddScoped<IDoubleVoterRepository, DoubleVoterRepository>();
             services.AddScoped<IAdminDesignationRepository,AdminDesignationRepository>();
             services.AddScoped<IPrabhavshaliRepository, PrabhavshaliRepository>();

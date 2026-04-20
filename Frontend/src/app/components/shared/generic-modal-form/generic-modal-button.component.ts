@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output, ChangeDetectorRef } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ChangeDetectorRef, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormConfig, FormResult } from './generic-form.types';
 import { DynamicFormModalComponent } from './dynamic-form-modal.component';
@@ -31,7 +31,7 @@ import { DynamicFormModalComponent } from './dynamic-form-modal.component';
     }
   `]
 })
-export class GenericModalButtonComponent {
+export class GenericModalButtonComponent implements OnChanges {
   @Input({ required: true }) config!: FormConfig;
   @Input() label: string = 'Open Form';
   @Input() icon?: string;
@@ -42,8 +42,15 @@ export class GenericModalButtonComponent {
 
   isModalOpen = false;
   @Input() initialData: any;
+  private baseData: any;
 
   constructor(private cdr: ChangeDetectorRef) { }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['initialData']) {
+      this.baseData = changes['initialData'].currentValue;
+    }
+  }
 
   get buttonClass(): string {
     const base = '';
@@ -60,7 +67,10 @@ export class GenericModalButtonComponent {
   openModal(data?: any): void {
     if (data !== undefined) {
       this.initialData = data;
+    } else {
+      this.initialData = this.baseData;
     }
+
     console.log('Modal Opening Data:', this.initialData);
     this.isModalOpen = true;
     this.cdr.detectChanges();
@@ -70,6 +80,7 @@ export class GenericModalButtonComponent {
 
   closeModal(): void {
     this.isModalOpen = false;
+    this.initialData = this.baseData;
     document.body.style.overflow = 'auto';
   }
 

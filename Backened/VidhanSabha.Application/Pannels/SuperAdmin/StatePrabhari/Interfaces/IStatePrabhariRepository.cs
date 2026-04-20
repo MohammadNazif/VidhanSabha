@@ -15,6 +15,8 @@ namespace VidhanSabha.Application.Pannels.SuperAdmin.StatePrabhari.Interfaces
         Task<bool> EmailExistsAsync(string email, int? excludeId, CancellationToken ct = default);
         Task<int> AddAsync(Tbl_StatePrabhari prabhari, CancellationToken ct = default);
         Task<int> UpdateAsync(Tbl_StatePrabhari prabhari);
+
+        Task<IReadOnlyList<StatePrabhariResponseDto>> GetByStateIdAsync(int stateId, CancellationToken ct = default);
         Task SaveAsync(CancellationToken ct = default);
     }
 }

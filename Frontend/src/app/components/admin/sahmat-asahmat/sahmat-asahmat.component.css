@@ -1,0 +1,4 @@
+/* Custom styles for Sahmat/Asahmat component */
+:host {
+    display: block;
+}

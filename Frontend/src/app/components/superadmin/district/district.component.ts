@@ -15,6 +15,7 @@ import { DistrictPrabhariService } from '../../../Services/Admin/district-prabha
 import { VidhanSabhaCountService } from '../../../Services/Admin/vidhansabha-count/vidhansabha-count.service';
 import { VidhanSabhaService } from '../../../Services/Admin/vidhansabha/vidhansabha.service';
 import { VidhanSabhaPrabhariService } from '../../../Services/Admin/vidhansabha-prabhari/vidhansabha-prabhari.service';
+import { StatePrabhariService } from '../../../Services/Admin/state-prabhari/state-prabhari.service';
 import { AuthServiceService } from '../../../Services/Auth/auth.service';
 
 @Component({
@@ -267,6 +268,7 @@ export class DistrictComponent implements OnInit {
     private vidhanSabhaService: VidhanSabhaService,
     private vidhanSabhaPrabhariService: VidhanSabhaPrabhariService,
     private authService: AuthServiceService,
+    private statePrabhariService: StatePrabhariService,
     private toastService: ToastService,
     private crudHandler: CrudHandlerService
   ) { }
@@ -355,12 +357,15 @@ export class DistrictComponent implements OnInit {
   }
 
   handleFormSubmit(result: FormResult) {
+    console.log(this.districtModal.initialData, "result");
     if (!result.status) return;
 
     const raw = result.data;
+    const rowId = raw.id || (this.districtModal.initialData && this.districtModal.initialData.id);
+
     const submitData = {
       ...raw,
-      id: raw.id ? Number(raw.id) : null,
+      id: rowId ? Number(rowId) : null,
       userId: this.authService.getUserId(),
       stateId: Number(raw.stateId || this.defaultStateId),
       districtId: Number(raw.districtId || raw.id),
@@ -369,7 +374,7 @@ export class DistrictComponent implements OnInit {
 
     const isUpdate = !!submitData.id;
     const request = isUpdate
-      ? this.vidhanSabhaCountService.createVidhanSabhaCount(submitData) // Assuming update uses same endpoint or standard service
+      ? this.vidhanSabhaCountService.updateVidhanSabhaCount(submitData)
       : this.vidhanSabhaCountService.createVidhanSabhaCount(submitData);
 
     this.crudHandler.handleRequest(
@@ -384,50 +389,47 @@ export class DistrictComponent implements OnInit {
     if (!result.status) return;
 
     const raw = result.data;
-    const districtId = this.vidhanSabhaModal.initialData?.districtId;
+    const initial = this.vidhanSabhaModal.initialData;
+    const districtId = initial?.districtId || initial?.id;
 
     if (!districtId) {
       this.toastService.showError('Error', 'District ID missing');
       return;
     }
 
-    const vsData = {
-      name: raw.name,
+    const isPrabhari = raw.assignPrabhari === 'Yes';
+    const submitData: any = {
+      userId: this.authService.getUserId(),
+      vidhanSabhaName: raw.name,
+      vidhanSabhaCount: Number(raw.vidhanSabhaNumber),
       districtId: Number(districtId),
-      vidhanSabhaNumber: Number(raw.vidhanSabhaNumber)
+      stateId: Number(initial?.stateId || this.defaultStateId),
+      isPrabhari: isPrabhari
     };
 
-    this.vidhanSabhaService.createVidhanSabha(vsData).subscribe({
-      next: (response) => {
-        if (response?.isSuccess && raw.assignPrabhari === 'Yes') {
-          const vsId = response.data?.id;
-          const prabhariData = {
-            ...raw,
-            vidhanSabhaId: Number(vsId),
-            castId: Number(raw.castId),
-            categoryId: Number(raw.categoryId)
-          };
-          this.vidhanSabhaPrabhariService.createPrabhari(prabhariData).subscribe({
-            next: () => {
-              this.toastService.showSuccess('Success', 'Vidhan Sabha and Prabhari created successfully!');
-              this.loadDistricts();
-            },
-            error: (err) => {
-              this.toastService.showError('Error', 'Vidhan Sabha created but Prabhari registration failed');
-              console.error(err);
-              this.loadDistricts();
-            }
-          });
-        } else {
-          this.toastService.showSuccess('Success', 'Vidhan Sabha created successfully!');
-          this.loadDistricts();
-        }
-      },
-      error: (err) => {
-        this.toastService.showError('Error', 'Failed to create Vidhan Sabha');
-        console.error(err);
-      }
-    });
+    if (isPrabhari) {
+      submitData.prabhari = {
+        stateId: Number(initial?.stateId || this.defaultStateId),
+        vidhanSanhaId: 0, // Assigned by backend during creation
+        prabhariRole: 2,  // Hardcoded as per specification for VS Prabhari
+        prabhariName: raw.prabhariName,
+        prabhariEmail: raw.prabhariEmail,
+        gender: raw.gender,
+        contactNumber: raw.contactNumber,
+        categoryId: Number(raw.categoryId),
+        castId: Number(raw.castId),
+        education: raw.education,
+        profession: raw.profession,
+        currentAddress: raw.currentAddress
+      };
+    }
+
+    this.crudHandler.handleRequest(
+      this.statePrabhariService.createVidhanSabhaUnified(submitData),
+      'Success',
+      'Vidhan Sabha and Prabhari processed successfully!',
+      () => this.loadDistricts()
+    );
   }
 
   handleExport(format: string) {

@@ -22,4 +22,8 @@ export class VidhanSabhaCountService extends BaseApiService {
   createVidhanSabhaCount(data: any): Observable<any> {
     return this.create(`${this.entity}/districtwise`, data);
   }
+
+  updateVidhanSabhaCount(data: any): Observable<any> {
+    return this.update(`${this.entity}/districtwise`, data);
+  }
 }
