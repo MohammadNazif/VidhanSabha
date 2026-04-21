@@ -33,6 +33,11 @@ namespace VidhanSabha.Application.Pannels.Admin.Block.DTOs
         public int OccupationId { get; set; }
         public string Occupation { get; set; }
     }
+    public class BlockNameResponse
+    {
+        public int Id { get; set; }
+        public string BlockName { get; set; }
+    }
 
     public class UpdateBlockReqDto : CreateBlockReqDto
     {

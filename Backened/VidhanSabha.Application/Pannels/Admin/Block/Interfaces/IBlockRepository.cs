@@ -12,7 +12,8 @@ namespace VidhanSabha.Application.Pannels.Admin.Block.Interfaces
     public interface IBlockRepository
     {
         Task<Tbl_Block?> GetByIdAsync(int id);
-        Task<List<BlockResponseDto>> GetAllAsync(int? boothId = null, CancellationToken ct = default);
+        Task<List<BlockResponseDto>> GetAllAsync(int? Id = null, CancellationToken ct = default);
+        Task<List<BlockNameResponse>> GetAllBlockNameAsync(int? Id = null, CancellationToken ct = default);
         Task<int> AddAsync(Tbl_Block block, CancellationToken ct = default);
         int Update(Tbl_Block block);
         void Delete(Tbl_Block block);

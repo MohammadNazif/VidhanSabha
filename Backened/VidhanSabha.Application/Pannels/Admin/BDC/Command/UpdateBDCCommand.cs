@@ -4,14 +4,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using VidhanSabha.Application.Pannels.Admin.BDC.DTOs;
 using VidhanSabha.Application.Pannels.Admin.PravasiVoters.DTOs;
 
-namespace VidhanSabha.Application.Pannels.Admin.PravasiVoters.Command
+namespace VidhanSabha.Application.Pannels.Admin.BDC.Command
 {
-    public class UpdatePravasiCommand : IRequest<int>
+    public class UpdateBDCCommand : IRequest<int>
     {
-        public UpdatePravasiVoterRequestDto Dto;
-        public UpdatePravasiCommand(UpdatePravasiVoterRequestDto dto)
+        public UpdateBDCReqDto Dto;
+        public UpdateBDCCommand(UpdateBDCReqDto dto)
         {
             Dto = dto;
         }

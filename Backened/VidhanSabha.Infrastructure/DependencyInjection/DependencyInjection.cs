@@ -13,8 +13,10 @@ using VidhanSabha.Application.Common.District.Interfaces;
 using VidhanSabha.Application.Common.Occupation.Interface;
 using VidhanSabha.Application.Common.Party.Interfaces;
 using VidhanSabha.Application.Common.SahmatAsahmatType.Interfaces;
+using VidhanSabha.Application.Common.SeniorDisabledType.Interfaces;
 using VidhanSabha.Application.Common.State.Interface;
 using VidhanSabha.Application.Common.UnitOfWork;
+using VidhanSabha.Application.Pannels.Admin.BDC.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.Block.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.Booth.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.DoubleVoter.Interfaces;
@@ -29,6 +31,7 @@ using VidhanSabha.Application.Pannels.Admin.PrabhavshaliVyakti.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.PravasiVoters.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.SahmatAsahmat.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.Sector.Interface;
+using VidhanSabha.Application.Pannels.Admin.SeniorDisabled.Interfaces;
 using VidhanSabha.Application.Pannels.Auth.Commands.Login;
 using VidhanSabha.Application.Pannels.Auth.Interfaces;
 using VidhanSabha.Application.Pannels.Auth.Queries.GetMobileNumber;
@@ -92,6 +95,9 @@ namespace VidhanSabha.Infrastructure.DependencyInjection
             services.AddScoped<IAdminDesignationRepository,AdminDesignationRepository>();
             services.AddScoped<IPrabhavshaliRepository, PrabhavshaliRepository>();
             services.AddScoped<IBlockRepository, BlockRepository>();
+            services.AddScoped<IBDCRepository, BDCRepository>();
+            services.AddScoped<ISeniorDisabledTypeRepository,SeniorDisabledTypeRepository>();
+            services.AddScoped<ISeniorDisabledRepository,SeniorDisabledRepository>();
 
             return services;
         }

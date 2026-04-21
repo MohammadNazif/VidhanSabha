@@ -2,6 +2,9 @@
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Mvc;
 using VidhanSabha.Api.Responses;
+using VidhanSabha.Application.Pannels.Admin.BDC.Command;
+using VidhanSabha.Application.Pannels.Admin.BDC.DTOs;
+using VidhanSabha.Application.Pannels.Admin.BDC.Queries;
 using VidhanSabha.Application.Common.Dtos;
 using VidhanSabha.Application.Pannels.Admin.Block.Command;
 using VidhanSabha.Application.Pannels.Admin.Block.DTOs;
@@ -38,6 +41,9 @@ using VidhanSabha.Application.Pannels.Admin.SahmatAsahmat.Queries;
 using VidhanSabha.Application.Pannels.Admin.Sector.Commands;
 using VidhanSabha.Application.Pannels.Admin.Sector.DTOs;
 using VidhanSabha.Application.Pannels.Admin.Sector.Queries;
+using VidhanSabha.Application.Pannels.Admin.SeniorDisabled.Command;
+using VidhanSabha.Application.Pannels.Admin.SeniorDisabled.DTOs;
+using VidhanSabha.Application.Pannels.Admin.SeniorDisabled.Queries;
 
 public static class AdminEndpoints
 {
@@ -73,6 +79,10 @@ public static class AdminEndpoints
                         .WithTags("PrabhavShali");
         var block = app.MapGroup("/api/block")
                         .WithTags("Block");
+        var bdc = app.MapGroup("/api/bdc")
+                        .WithTags("BDC");
+        var seniordisabled = app.MapGroup("/api/seniordisabled")
+                        .WithTags("SeniorDisabled");
 
 
         #region Mandal
@@ -475,6 +485,79 @@ public static class AdminEndpoints
         {
             var result = await mediator.Send(new GetAllBlockQuery());
             return Results.Ok(ApiResponse<List<BlockResponseDto>>.Ok(result));
+        });
+        block.MapGet("/getAllBlockName", async (IMediator mediator) =>
+        {
+            var result = await mediator.Send(new GetAllBlockNameQuery());
+            return Results.Ok(ApiResponse<List<BlockNameResponse>>.Ok(result));
+        });
+
+        #endregion
+
+        #region BDC
+
+        bdc.MapPost("/create", async (CreateBDCReqDto dto, IMediator mediator) =>
+        {
+            var result = await mediator.Send(new CreateBDCCommand(dto));
+            return Results.Ok(ApiResponse<int>.Ok(result, "BDC Created Successfully"));
+        })
+                .WithName("CreateBDC")
+                .Produces<int>(200);
+
+        bdc.MapPost("/update", async (UpdateBDCReqDto dto, IMediator mediator) =>
+        {
+            var result = await mediator.Send(new UpdateBDCCommand(dto));
+            return Results.Ok(ApiResponse<int>.Ok(result, "BDC Updated Successfully"));
+        })
+                .WithName("UpdateBDC")
+                .Produces<int>(200);
+
+        bdc.MapPost("/delete", async (int id, IMediator mediator) =>
+        {
+            var result = await mediator.Send(new DeleteBDCCommand(id));
+            return Results.Ok(ApiResponse<int>.Ok(result, "BDC Deleted Successfully"));
+        })
+                .WithName("DeleteBDC")
+                .Produces<int>(200);
+
+        bdc.MapGet("/getAll", async (IMediator mediator) =>
+        {
+            var result = await mediator.Send(new GetAllBDCQuery());
+            return Results.Ok(ApiResponse<List<BDCResponseDto>>.Ok(result));
+        });
+
+        #endregion
+
+        #region Senior Disabled
+
+        seniordisabled.MapPost("/create", async (CreateSeniorDisabledReqDto dto, IMediator mediator) =>
+        {
+            var result = await mediator.Send(new CreateSeniorDisabledCommand(dto));
+            return Results.Ok(ApiResponse<int>.Ok(result, "SeniorDisabled Created Successfully"));
+        })
+                .WithName("CreateSeniorDisabled")
+                .Produces<int>(200);
+
+        seniordisabled.MapPost("/update", async (UpdateSeniorDisabledReqDto dto, IMediator mediator) =>
+        {
+            var result = await mediator.Send(new UpdateSeniorDisabledCommand(dto));
+            return Results.Ok(ApiResponse<int>.Ok(result, "SeniorDisabled Updated Successfully"));
+        })
+                .WithName("UpdateSeniorDisabled")
+                .Produces<int>(200);
+
+        seniordisabled.MapPost("/delete", async (int id, IMediator mediator) =>
+        {
+            var result = await mediator.Send(new DeleteSeniorDisabledCommand(id));
+            return Results.Ok(ApiResponse<int>.Ok(result, "SeniorDisabled Deleted Successfully"));
+        })
+                .WithName("DeleteSeniorDisabled")
+                .Produces<int>(200);
+
+        seniordisabled.MapGet("/getAll", async (IMediator mediator) =>
+        {
+            var result = await mediator.Send(new GetAllSeniorDisabledQuery());
+            return Results.Ok(ApiResponse<List<SeniorDisabledResponseDto>>.Ok(result));
         });
 
 
