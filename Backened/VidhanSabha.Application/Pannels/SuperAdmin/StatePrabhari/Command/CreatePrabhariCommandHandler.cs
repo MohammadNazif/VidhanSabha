@@ -42,6 +42,8 @@ namespace VidhanSabha.Application.Pannels.SuperAdmin.StatePrabhari.Command
                 var data = Tbl_StatePrabhari.Create(
                     userId,
                     request.stateId,
+                    request.vidhanSanhaId,
+                    request.PrabhariRole,
                     request.PrabhariName,
                     request.PrabhariEmail,
                     request.Gender,

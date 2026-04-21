@@ -1,14 +1,14 @@
-<div class="p-4 lg:p-6 min-h-screen bg-slate-50/50">
+<div class="h-screen p-6 flex flex-col overflow-hidden bg-slate-50/50">
   <app-page-header title="Pravasi Voters" subtitle="Manage migrant voters across booths and villages">
     <div class="flex items-center gap-3">
-      <app-generic-modal-button #voterModal [config]="addVoterConfig" (formSubmit)="handleFormSubmit($event)"
+      <app-generic-modal-button *ngIf="canManageVoters()" #voterModal [config]="addVoterConfig" (formSubmit)="handleFormSubmit($event)"
         label="Add Pravasi Voter" icon="+">
       </app-generic-modal-button>
     </div>
   </app-page-header>
 
-  <div class="mt-6">
-    <app-generic-table [columns]="columns" [data]="voterList" [config]="config" [actions]="actions"
+  <div class="flex-1 min-h-0 mt-6 bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
+    <app-generic-table class="flex-1 min-h-0" [columns]="columns" [data]="voterList" [config]="config" [actions]="actions"
       (actionClick)="handleAction($event)">
     </app-generic-table>
   </div>

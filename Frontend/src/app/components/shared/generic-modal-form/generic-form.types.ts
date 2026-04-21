@@ -44,6 +44,7 @@ export interface FormField {
   dependsOn?: string; // ID of the field this field depends on
   optionsMap?: { [key: string]: DropdownOption[] }; // Map of parent values to child options
   multiple?: boolean; // Whether to allow multiple selections
+  disabledOnEdit?: boolean;
 }
 
 export interface FormConfig {

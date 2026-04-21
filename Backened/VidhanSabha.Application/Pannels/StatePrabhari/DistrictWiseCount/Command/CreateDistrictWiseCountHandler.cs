@@ -32,7 +32,7 @@ namespace VidhanSabha.Domain.Entities.StatePrabhari.DistrictWiseCount.Command
                 throw new Exception("Vidhansabha Count should be less than or equal to remaining count");
             }
          
-            data.DecrementRemaining(data.VidhansabhaCount, req.VidhanSabhaCount);
+            data.DecrementRemaining(data.Remainingcount, req.VidhanSabhaCount);
 
             _repo.Update(data);
 

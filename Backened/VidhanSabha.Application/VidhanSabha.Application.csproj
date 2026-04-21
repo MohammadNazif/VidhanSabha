@@ -12,6 +12,11 @@
 
   <ItemGroup>
     <Folder Include="Common\Booth\Interface\" />
+    <Folder Include="Extensions\" />
+    <Folder Include="Pannels\Admin\Booth Samiti\Command\" />
+    <Folder Include="Pannels\Admin\Booth Samiti\Dtos\" />
+    <Folder Include="Pannels\Admin\Booth Samiti\Interfaces\" />
+    <Folder Include="Pannels\Admin\Booth Samiti\Queries\" />
     <Folder Include="Pannels\Admin\VidhansabhaRegistration\Commands\" />
     <Folder Include="Pannels\Admin\VidhansabhaRegistration\DTOs\" />
     <Folder Include="Pannels\Admin\VidhansabhaRegistration\Interfaces\" />

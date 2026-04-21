@@ -58,7 +58,7 @@ export class SidebarComponent implements OnInit {
         { label: 'Varisth Naagarik/Viklaang', route: '/varisth-naagarik-viklaang' },
         { label: 'Booth Voter Description', route: '/booth-voter-description' },
         { label: 'Sahmat/Asahmat', route: '/sahmat-asahmat' },
-        { label: 'DoubleVoter/Married', route: '/double-voter-married' },
+        { label: 'Double Voter/Married', route: '/double-voter' },
         { label: 'Booth Samiti', route: '/booth-samiti' },
         { label: 'Prabhavshali Vyakt', route: '/prabhavshali-vyakt' },
         { label: 'Influencer Person', route: '/influencer-person' },
@@ -92,6 +92,7 @@ export class SidebarComponent implements OnInit {
     },
     { icon: 'layout-dashboard', label: 'Dashboard', route: '/superadmin/dashboard', roles: ['SUPERADMIN'] },
     { icon: 'layout-dashboard', label: 'Dashboard', route: '/state-prabhari/dashboard', roles: ['StatePrabhari'] },
+    { icon: 'users', label: 'Vidhan Sabha Prabhari', route: '/state-prabhari/vidhansabha-prabhari', roles: ['StatePrabhari'] },
     { icon: 'user-cog', label: 'Designation', route: '/superadmin/designation', roles: ['Adhyaksh', 'StatePrabhari'] },
     { icon: 'map', label: 'State', route: '/superadmin/state', roles: ['SUPERADMIN', 'StatePrabhari'] },
     { icon: 'clipboard-list', label: 'State Prabhari', route: '/superadmin/state-prabhari', roles: ['SUPERADMIN'] },
@@ -104,7 +105,7 @@ export class SidebarComponent implements OnInit {
       roles: ['ADMIN'],
       children: [
         { label: 'Booth List', route: '/booth-list' },
-        { label: 'Pravasi Voter List', route: '/pravasi-voter' },
+        { label: 'Pravasi Voter List', route: '/pravasi-voter-list' },
         { label: 'Double Voter List', route: '/double-voter-list' },
         { label: 'New Voter List', route: '/new-voter-list' },
         { label: 'Sahmat List', route: '/sahmat-list' },
@@ -117,6 +118,7 @@ export class SidebarComponent implements OnInit {
         { label: 'BlockPramukh List', route: '/block-pramukh-list' },
         { label: 'Senior Citizen List', route: '/senior-citizen-list' },
         { label: 'Disabled List', route: '/disabled-list' },
+        { label: 'Panna Pramukh List', route: '/panna-pramukh-list' },
         { label: 'Influencer Person List', route: '/influencer-person-list' },
       ]
     },

@@ -3,7 +3,7 @@
     icon="🗺️">
     <div class="flex gap-3">
       <app-generic-modal-button #stateModal [config]="addStateConfig" label="Add State" icon="+"
-        [hideButton]="isStatePrabhari()" (formSubmit)="handleFormSubmit($event)">
+        (formSubmit)="handleFormSubmit($event)">
       </app-generic-modal-button>
     </div>
   </app-page-header>

@@ -88,6 +88,8 @@ export interface TableConfig {
   compact?: boolean;
   /** Enable advanced filtering */
   filterable?: boolean;
+  /** Enable server-side pagination, sorting, and filtering */
+  serverSide?: boolean;
   /** Enable export (future) */
   exportable?: boolean;
 }

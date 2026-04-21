@@ -8,7 +8,7 @@ namespace VidhanSabha.Application.Pannels.StatePrabhari.DistrictWiseCount.Dtos
 {
     public class DistrictWiseCount
     {
-        public sealed class VidhansabhaDistrictResponseDto
+        public class VidhansabhaDistrictResponseDto
         {
             public int Id { get; init; }
 
@@ -21,13 +21,18 @@ namespace VidhanSabha.Application.Pannels.StatePrabhari.DistrictWiseCount.Dtos
           
         }
 
-        public sealed class VidhansabhaDistrictRequestDto
+        public class VidhansabhaDistrictRequestDto
         {
 
             public string UserId { get; set; } = string.Empty;
             public int StateId { get; set; }
             public int DistrictId { get; init; }
             public int VidhanSabhaCount { get; init; }
+        }
+
+        public class UpdateVidhansabhaDistrictReqDto : VidhansabhaDistrictRequestDto
+        {
+            public int Id { get; set; }
         }
     }
 }

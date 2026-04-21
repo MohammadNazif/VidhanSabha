@@ -85,8 +85,7 @@ namespace VidhanSabha.Infrastructure.Repositories.SuperAdmin
 
         public async void Update(Tbl_VidhansabhaStatewiseCount state)
         {
-            _context.Tbl_VidhansabhaStatewiseCount.Update(state);
-             await _context.SaveChangesAsync();
+              _context.Tbl_VidhansabhaStatewiseCount.Update(state);
         }
     }
 }

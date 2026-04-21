@@ -61,6 +61,13 @@ namespace VidhanSabha.Infrastructure.Persistence
         public DbSet<Tbl_LoginCredential> Tbl_LoginCredential => Set<Tbl_LoginCredential>();
 
         public DbSet<Tbl_DistrictWiseCount> Tbl_DistrictWiseCount => Set<Tbl_DistrictWiseCount>();
+
+        public DbSet<Tbl_Pradhan> Tbl_Pradhan => Set<Tbl_Pradhan>();
+        public DbSet<Tbl_PradhanVillage> Tbl_PradhanVillage => Set<Tbl_PradhanVillage>();
+        public DbSet<Tbl_BoothSamiti> Tbl_BoothSamitis { get; set; }
+
+        public DbSet<Tbl_VidhanSabha> Tbl_VidhanSabha => Set<Tbl_VidhanSabha>();
+
         public DbSet<Tbl_BDC> Tbl_BDC => Set<Tbl_BDC>();
         public DbSet<Tbl_BDCVillage> Tbl_BDCVillage => Set<Tbl_BDCVillage>();
         public DbSet<Tbl_SeniorDisabledType> Tbl_SeniorDisabledType => Set<Tbl_SeniorDisabledType>();
@@ -73,4 +80,5 @@ namespace VidhanSabha.Infrastructure.Persistence
                 base.OnModelCreating(modelBuilder);
             }
         }
+        
     }

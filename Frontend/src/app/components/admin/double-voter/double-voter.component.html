@@ -1,0 +1,16 @@
+<div class="h-screen p-6 flex flex-col overflow-hidden bg-slate-50/50">
+    <app-page-header title="Double Voter Management" subtitle="Manage voters registered in multiple locations.">
+        <div class="flex items-center gap-3">
+            <app-generic-modal-button #voterModal [config]="addVoterConfig" label="Add Double Voter" icon="+" variant="primary"
+                (formSubmit)="handleFormSubmit($event)">
+            </app-generic-modal-button>
+        </div>
+    </app-page-header>
+
+    <!-- Table Section -->
+    <div class="flex-1 min-h-0 bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
+        <app-generic-table class="flex-1 min-h-0" [data]="voterList" [columns]="columns" [config]="config" [actions]="actions"
+            (actionClick)="handleAction($event)">
+        </app-generic-table>
+    </div>
+</div>

@@ -64,6 +64,7 @@ export class GenericTableComponent implements OnInit, OnChanges {
   @Input() actions: TableAction[] = [];
   @Input() config: TableConfig = {};
   @Input() loading = false;
+  @Input() totalItems = 0;
 
   // ── Custom Templates ──
   @ContentChild('cellTemplate') cellTemplate!: TemplateRef<any>;
@@ -89,7 +90,7 @@ export class GenericTableComponent implements OnInit, OnChanges {
 
   pageState: PageState = {
     currentPage: 1,
-    pageSize: 10,
+    pageSize: 50,
     totalItems: 0,
     totalPages: 0
   };
@@ -99,7 +100,7 @@ export class GenericTableComponent implements OnInit, OnChanges {
     selectable: false,
     paginated: true,
     pageSizeOptions: [5, 10, 25, 50],
-    defaultPageSize: 10,
+    defaultPageSize: 50,
     searchable: true,
     searchPlaceholder: 'Search records...',
     hoverable: true,
@@ -109,6 +110,7 @@ export class GenericTableComponent implements OnInit, OnChanges {
     emptyIcon: '📭',
     loading: false,
     compact: false,
+    serverSide: false,
     exportable: false
   };
 
@@ -160,6 +162,14 @@ export class GenericTableComponent implements OnInit, OnChanges {
 
   // ── Data Processing ──
   processData() {
+    if (this.mergedConfig.serverSide) {
+      this.processedData = [...this.data];
+      this.pageState.totalItems = this.totalItems || this.data.length;
+      this.pageState.totalPages = Math.ceil(this.pageState.totalItems / this.pageState.pageSize) || 1;
+      this.displayedData = this.processedData;
+      return;
+    }
+
     let result = [...this.data];
 
     // Search / Filter
@@ -204,6 +214,11 @@ export class GenericTableComponent implements OnInit, OnChanges {
   }
 
   updateDisplayedData() {
+    if (this.mergedConfig.serverSide) {
+      this.displayedData = [...this.data];
+      return;
+    }
+
     if (this.mergedConfig.paginated) {
       const start = (this.pageState.currentPage - 1) * this.pageState.pageSize;
       const end = start + this.pageState.pageSize;
@@ -229,7 +244,10 @@ export class GenericTableComponent implements OnInit, OnChanges {
     }
 
     this.sortChange.emit(this.sortState);
-    this.processData();
+    
+    if (!this.mergedConfig.serverSide) {
+      this.processData();
+    }
   }
 
   getSortIcon(column: TableColumn): string {
@@ -253,15 +271,21 @@ export class GenericTableComponent implements OnInit, OnChanges {
   goToPage(page: number) {
     if (page < 1 || page > this.pageState.totalPages) return;
     this.pageState.currentPage = page;
-    this.updateDisplayedData();
     this.pageChange.emit(this.pageState);
+    
+    if (!this.mergedConfig.serverSide) {
+      this.updateDisplayedData();
+    }
   }
 
   onPageSizeChange(size: number) {
     this.pageState.pageSize = size;
     this.pageState.currentPage = 1;
-    this.processData();
     this.pageChange.emit(this.pageState);
+    
+    if (!this.mergedConfig.serverSide) {
+      this.processData();
+    }
   }
 
   get pageNumbers(): number[] {
