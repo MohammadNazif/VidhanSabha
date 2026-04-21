@@ -20,6 +20,8 @@ using VidhanSabha.Application.Common.Party.DTOs;
 using VidhanSabha.Application.Common.Party.Queries;
 using VidhanSabha.Application.Common.SahmatAsahmatType.DTOs;
 using VidhanSabha.Application.Common.SahmatAsahmatType.Queries;
+using VidhanSabha.Application.Common.SeniorDisabledType.DTOs;
+using VidhanSabha.Application.Common.SeniorDisabledType.Queries;
 using VidhanSabha.Application.Common.State.Dto;
 using VidhanSabha.Application.Common.State.Query;
 using VidhanSabha.Application.Common.Village.DTOs;
@@ -142,6 +144,14 @@ namespace VidhanSabha.Api.Endpoints
             })
                 .WithName("getadmindesignation")
                 .Produces<List<SahmatTypeResponseDto>>(200);
+
+            common.MapGet("/getseniordisabledtype", async (IMediator mediator) =>
+            {
+                var result = await mediator.Send(new GetAllSeniorDisabledTypeQuery());
+                return Results.Ok(ApiResponse<List<SeniorDisabledTypeResponseDto>>.Ok(result));
+            })
+                .WithName("getseniordisabledtype")
+                .Produces<List<SeniorDisabledTypeResponseDto>>(200);
         }
     }
 }
