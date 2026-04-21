@@ -85,15 +85,15 @@ public static class AdminEndpoints
                         .WithTags("PrabhavShali");
         var block = app.MapGroup("/api/block")
                         .WithTags("Block");
-<<<<<<< HEAD
+
         var boothSamiti = app.MapGroup("/api/boothsamiti")
                     .WithTags("BoothSamiti");
-=======
+
         var bdc = app.MapGroup("/api/bdc")
                         .WithTags("BDC");
         var seniordisabled = app.MapGroup("/api/seniordisabled")
                         .WithTags("SeniorDisabled");
->>>>>>> c432c1d99f4dcb9fce84c4694b3b6263c42826dc
+
 
         var boothSamitiDesignation = app.MapGroup("/api/boothsamiti-designation")
     .WithTags("BoothSamitiDesignation");
