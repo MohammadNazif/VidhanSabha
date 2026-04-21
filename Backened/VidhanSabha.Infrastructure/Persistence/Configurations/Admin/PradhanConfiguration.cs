@@ -31,10 +31,10 @@ namespace VidhanSabha.Infrastructure.Persistence.Configurations.Admin
                    .HasDefaultValue(true);
 
             // 🔗 Designation FK
-            //builder.HasOne(e => e.DesignationId)
-            //       .WithMany()
-            //       .HasForeignKey(x => x.DesignationId)
-            //       .OnDelete(DeleteBehavior.Restrict);
+            builder.HasOne(e => e.Designation)
+                   .WithMany()
+                   .HasForeignKey(x => x.DesignationId)
+                   .OnDelete(DeleteBehavior.Restrict);
 
 
         }
