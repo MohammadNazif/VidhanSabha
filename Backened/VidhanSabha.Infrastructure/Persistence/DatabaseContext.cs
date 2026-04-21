@@ -39,6 +39,7 @@ namespace VidhanSabha.Infrastructure.Persistence
         public DbSet<Tbl_State> Tbl_State => Set<Tbl_State>();
         public DbSet<Tbl_District>Tbl_District=>Set<Tbl_District>();
 
+
         public DbSet<Tbl_VidhansabhaStatewiseCount> Tbl_VidhansabhaStatewiseCount => Set<Tbl_VidhansabhaStatewiseCount>();
         public DbSet<Tbl_Occupation> Tbl_Occupation => Set<Tbl_Occupation>();
         public DbSet<Tbl_PravasiVoter> Tbl_PravasiVoter => Set<Tbl_PravasiVoter>();
@@ -60,6 +61,10 @@ namespace VidhanSabha.Infrastructure.Persistence
         public DbSet<Tbl_LoginCredential> Tbl_LoginCredential => Set<Tbl_LoginCredential>();
 
         public DbSet<Tbl_DistrictWiseCount> Tbl_DistrictWiseCount => Set<Tbl_DistrictWiseCount>();
+        public DbSet<Tbl_BDC> Tbl_BDC => Set<Tbl_BDC>();
+        public DbSet<Tbl_BDCVillage> Tbl_BDCVillage => Set<Tbl_BDCVillage>();
+        public DbSet<Tbl_SeniorDisabledType> Tbl_SeniorDisabledType => Set<Tbl_SeniorDisabledType>();
+        public DbSet<Tbl_SeniorDisabled> Tbl_SeniorDisabled => Set<Tbl_SeniorDisabled>();
         protected override void OnModelCreating(ModelBuilder modelBuilder)
             {
                 // ✅ Ek line — is assembly ki saari Configuration classes auto-pick ho jayengi

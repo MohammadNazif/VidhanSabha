@@ -49,7 +49,18 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
             throw new NotImplementedException();
         }
 
-        public async Task<List<BlockResponseDto>> GetAllAsync(int? boothId = null, CancellationToken ct = default)
+        public async Task<List<BlockNameResponse>> GetAllBlockNameAsync(int? Id = null, CancellationToken ct = default)
+        {
+            var result = await _context.Tbl_Block
+                .Select(m => new BlockNameResponse
+                {
+                    Id = m.Id,
+                    BlockName = m.BlockName
+                }).ToListAsync();
+            return result;
+        }
+
+        public async Task<List<BlockResponseDto>> GetAllAsync(int? Id = null, CancellationToken ct = default)
         {
             var result = await _context.Tbl_Block
                 .Select(m => new BlockResponseDto
