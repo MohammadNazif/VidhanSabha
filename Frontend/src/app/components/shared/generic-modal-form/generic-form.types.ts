@@ -13,6 +13,7 @@ export type FieldType =
   | 'checkbox'
   | 'radio'
   | 'selection-table'
+  | 'form-array'
   | 'hidden';
 
 export interface DropdownOption {
@@ -45,6 +46,8 @@ export interface FormField {
   optionsMap?: { [key: string]: DropdownOption[] }; // Map of parent values to child options
   multiple?: boolean; // Whether to allow multiple selections
   disabledOnEdit?: boolean;
+  subFields?: FormField[]; // Schema for form-array items
+  addLabel?: string; // Label for "Add Item" button
 }
 
 export interface FormConfig {

@@ -140,6 +140,59 @@
                       </tbody>
                     </table>
                   </div>
+                  
+                  <!-- Form Array (Dynamic Entries) -->
+                  <div *ngIf="field.type === 'form-array' && fieldVisibility[field.id]" [ngClass]="getFieldColumnClass(field)" class="mt-4 flex flex-col gap-4">
+                    <div class="flex items-center justify-between px-1">
+                      <h4 class="text-xs font-bold text-slate-600 flex items-center gap-2">
+                        <span class="w-1.5 h-1.5 rounded-full bg-violet-500"></span>
+                        Details List
+                      </h4>
+                      <button type="button" (click)="addArrayItem(field.id)" 
+                        class="flex items-center gap-1.5 px-3 py-1 bg-violet-50 hover:bg-violet-100 text-violet-600 rounded-md text-[10px] font-bold transition-all border border-violet-100 active:scale-95">
+                        <span>+</span> {{ field.addLabel || 'Add Entry' }}
+                      </button>
+                    </div>
+
+                    <div class="space-y-4">
+                      <div *ngFor="let item of getFormArray(field.id).controls; let idx = index" 
+                        class="relative p-4 rounded-xl border border-slate-200 bg-slate-50/30 hover:border-violet-200 hover:bg-violet-50/10 transition-all group">
+                        
+                        <!-- Remove button -->
+                        <button *ngIf="getFormArray(field.id).length > 1"
+                          type="button" (click)="removeArrayItem(field.id, idx)"
+                          class="absolute -top-2 -right-2 w-6 h-6 bg-white border border-red-100 text-red-400 hover:bg-red-50 hover:text-red-600 rounded-full flex items-center justify-center shadow-sm opacity-0 group-hover:opacity-100 transition-all z-10">
+                          ×
+                        </button>
+
+                        <div [formGroup]="$any(item)" class="grid grid-cols-1 md:grid-cols-12 gap-x-4 gap-y-2">
+                          <ng-container *ngFor="let subField of field.subFields">
+                            <div [ngClass]="getFieldColumnClass(subField)" class="flex flex-col gap-0.5">
+                              <label [for]="subField.id + '_' + idx" class="text-[11px] font-semibold text-slate-500 tracking-tight ml-0.5 mb-1.5 block">
+                                {{ subField.label }}
+                                <span *ngIf="isRequired(subField)" class="text-red-500 ml-0.5">*</span>
+                              </label>
+
+                              <!-- Support basic types inside array for now -->
+                              <input *ngIf="['text', 'number', 'email', 'password', 'date'].includes(subField.type)"
+                                [type]="subField.type" [id]="subField.id + '_' + idx" [formControlName]="subField.id"
+                                [placeholder]="subField.placeholder || ''"
+                                class="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-md focus:border-violet-500 focus:ring-2 focus:ring-violet-500/10 outline-none transition-all text-xs font-medium text-slate-700 shadow-sm hover:border-slate-400" />
+                              
+                              <select *ngIf="subField.type === 'select' && !subField.multiple" 
+                                [id]="subField.id + '_' + idx" [formControlName]="subField.id"
+                                class="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-md focus:border-violet-500 focus:ring-2 focus:ring-violet-500/10 outline-none transition-all text-xs font-medium text-slate-700 hover:border-slate-400 appearance-none bg-[url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%2394a3b8\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'%3e%3cpolyline points=\'6 9 12 15 18 9\'%3e%3c/polyline%3e%3c/svg%3e')] bg-no-repeat bg-[right_8px_center] bg-[length:10px] shadow-sm">
+                                <option value="" disabled selected>{{ subField.placeholder || 'Select ' + subField.label }}</option>
+                                <option *ngFor="let option of fieldOptions[subField.id] || []" [value]="option.value">
+                                  {{ option.label }}
+                                </option>
+                              </select>
+                            </div>
+                          </ng-container>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
 
                   <!-- Error Message -->
                   <span *ngIf="form.get(field.id)?.touched && form.get(field.id)?.invalid"

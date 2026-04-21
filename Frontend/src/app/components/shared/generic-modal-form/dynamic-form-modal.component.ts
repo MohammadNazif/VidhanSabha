@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, Output, OnDestroy, HostListener, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators } from '@angular/forms';
 import { FormConfig, FormField, FormResult, DropdownOption } from './generic-form.types';
 import { FormDataService } from './form-data.service';
 import { Subscription, isObservable, of, Observable } from 'rxjs';
@@ -55,50 +55,72 @@ export class DynamicFormModalComponent implements OnInit, OnDestroy {
     const group: any = {};
 
     this.config.fields.forEach(field => {
-      const defaultValue = field.multiple ? [] : (field.defaultValue ?? '');
-      const value = (this.initialData && this.initialData[field.id] !== undefined)
-        ? (field.multiple && !Array.isArray(this.initialData[field.id])
-          ? [this.initialData[field.id]]
-          : this.initialData[field.id])
-        : defaultValue;
+      if (field.type === 'form-array') {
+        const array: any = this.fb.array([]);
+        const initialArrayData = this.initialData?.[field.id] || (field.defaultValue ? [field.defaultValue] : [{}]);
+        if (Array.isArray(initialArrayData)) {
+          initialArrayData.forEach(item => {
+            array.push(this.createGroupFromFields(field.subFields || [], item));
+          });
+        } else {
+          array.push(this.createGroupFromFields(field.subFields || [], {}));
+        }
+        group[field.id] = array;
+      } else {
+        const defaultValue = field.multiple ? [] : (field.defaultValue ?? '');
+        const value = (this.initialData && this.initialData[field.id] !== undefined)
+          ? (field.multiple && !Array.isArray(this.initialData[field.id])
+            ? [this.initialData[field.id]]
+            : this.initialData[field.id])
+          : defaultValue;
 
-      group[field.id] = [{ value, disabled: !!(field.disabledOnEdit && this.initialData?.id) }, field.validations || []];
+        group[field.id] = [{ value, disabled: !!(field.disabledOnEdit && this.initialData?.id) }, field.validations || []];
+      }
       this.fieldVisibility[field.id] = !field.visibleIf;
     });
 
     this.form = this.fb.group(group);
   }
 
-  private initializeOptions(): void {
-    this.config.fields.forEach(field => {
-      if (field.type === 'select') {
-        const apiUrl = field.apiUrl;
-        if (apiUrl) {
-          const url = typeof apiUrl === 'function' ? apiUrl(this.form.value) : apiUrl;
-          this.subscriptions.add(
-            this.formDataService.getOptionsFromApi(url, field.apiMapper, this.form.value).subscribe(options => {
-              this.fieldOptions[field.id] = options;
+  private createGroupFromFields(fields: FormField[], data: any): FormGroup {
+    const group: any = {};
+    fields.forEach(field => {
+      const value = data[field.id] !== undefined ? data[field.id] : (field.defaultValue ?? '');
+      group[field.id] = [value, field.validations || []];
+    });
+    return this.fb.group(group);
+  }
 
-              // Re-apply current value to fix binding if rows are loaded after value is set
-              const currentValue = this.form.get(field.id)?.value;
-              if (currentValue) {
-                this.form.get(field.id)?.patchValue(currentValue, { emitEvent: false });
-              }
-            })
-          );
-        } else if (field.options) {
-          if (isObservable(field.options)) {
+  private initializeOptions(): void {
+    const processFields = (fields: FormField[]) => {
+      fields.forEach(field => {
+        if (field.type === 'select') {
+          const apiUrl = field.apiUrl;
+          if (apiUrl && typeof apiUrl === 'string') {
             this.subscriptions.add(
-              field.options.subscribe(options => {
+              this.formDataService.getOptionsFromApi(apiUrl, field.apiMapper, this.form.value).subscribe(options => {
                 this.fieldOptions[field.id] = options;
               })
             );
-          } else {
-            this.fieldOptions[field.id] = field.options;
+          } else if (field.options) {
+            if (isObservable(field.options)) {
+              this.subscriptions.add(
+                field.options.subscribe(options => {
+                  this.fieldOptions[field.id] = options;
+                })
+              );
+            } else {
+              this.fieldOptions[field.id] = field.options;
+            }
           }
         }
-      }
-    });
+        if (field.subFields) {
+          processFields(field.subFields);
+        }
+      });
+    };
+
+    processFields(this.config.fields);
   }
 
   private setupFieldInteractions(): void {
@@ -166,72 +188,61 @@ export class DynamicFormModalComponent implements OnInit, OnDestroy {
   }
 
   private updateCascadingOptions(): void {
-    this.config.fields.forEach(field => {
-      if (!field.dependsOn) return;
+    const processFields = (fields: FormField[], parentGroup: FormGroup | any = this.form) => {
+      fields.forEach(field => {
+        // Scenario A/B: Select dependency
+        if (field.dependsOn) {
+          const parentValue = parentGroup.get(field.dependsOn)?.value;
 
-      const parentValue = this.form.get(field.dependsOn)?.value;
-
-      // Scenario A: Static Mapping (optionsMap)
-      if (field.optionsMap) {
-        const newOptions = parentValue ? (field.optionsMap[parentValue] || []) : [];
-        const currentOptions = this.fieldOptions[field.id];
-
-        if (JSON.stringify(currentOptions) !== JSON.stringify(newOptions)) {
-          this.fieldOptions[field.id] = newOptions;
-          this.handleChildValueReset(field.id, newOptions);
-        }
-      }
-
-      // Scenario B: API call (apiUrl is a function OR a string with dependency)
-      else if (field.apiUrl && parentValue) {
-        const url = typeof field.apiUrl === 'function' ? field.apiUrl(parentValue) : field.apiUrl;
-
-        // Prevent redundant API calls if URL is same as last one (only for dynamic URLs)
-        if (typeof field.apiUrl === 'function' && this.lastApiUrl[field.id] === url) return;
-        this.lastApiUrl[field.id] = url;
-
-        const formValues = this.form.value;
-        this.subscriptions.add(
-          this.formDataService.getOptionsFromApi(url, field.apiMapper, formValues).subscribe(options => {
-            this.fieldOptions[field.id] = options;
-
-            // Re-apply current value to fix binding if rows are loaded after value is set
-            const currentValue = this.form.get(field.id)?.value;
-            if (currentValue) {
-              this.form.get(field.id)?.patchValue(currentValue, { emitEvent: false });
+          if (field.optionsMap) {
+            const newOptions = parentValue ? (field.optionsMap[parentValue] || []) : [];
+            this.fieldOptions[field.id] = newOptions;
+          } else if (field.apiUrl && parentValue) {
+            const url = typeof field.apiUrl === 'function' ? field.apiUrl(parentValue) : field.apiUrl;
+            if (this.lastApiUrl[field.id] !== url) {
+              this.lastApiUrl[field.id] = url;
+              this.subscriptions.add(
+                this.formDataService.getOptionsFromApi(url, field.apiMapper, this.form.value).subscribe(options => {
+                  this.fieldOptions[field.id] = options;
+                  this.handleChildValueReset(field.id, options);
+                })
+              );
             }
-
-            this.handleChildValueReset(field.id, options);
-          })
-        );
-      }
-
-      // Scenario C: Selection Table (Populating rows from parent selection)
-      else if (field.type === 'selection-table' && field.dependsOn) {
-        const parentControl = this.form.get(field.dependsOn);
-        const parentValues = parentControl?.value;
-
-        if (Array.isArray(parentValues)) {
-          const parentOptions = this.fieldOptions[field.dependsOn] || [];
-          const currentTableData = this.form.get(field.id)?.value || [];
-
-          const newTableData = parentValues.map(val => {
-            const existing = currentTableData.find((row: any) => String(row.id) === String(val));
-            const option = parentOptions.find(o => String(o.value) === String(val));
-            return {
-              id: val,
-              name: option?.label || existing?.name || 'Unknown',
-              anshik: existing ? existing.anshik : 'No' // Default to No
-            };
-          });
-
-          // Only update if data has actually changed to avoid loop
-          if (JSON.stringify(newTableData) !== JSON.stringify(currentTableData)) {
-            this.form.get(field.id)?.setValue(newTableData, { emitEvent: false });
           }
         }
-      }
-    });
+
+        // Scenario C: Selection table dependency
+        if (field.type === 'selection-table' && field.dependsOn) {
+          const parentValues = parentGroup.get(field.dependsOn)?.value;
+          if (Array.isArray(parentValues)) {
+            const parentOptions = this.fieldOptions[field.dependsOn] || [];
+            const currentTableData = parentGroup.get(field.id)?.value || [];
+            const newTableData = parentValues.map(val => {
+              const existing = currentTableData.find((row: any) => String(row.id) === String(val));
+              const option = parentOptions.find(o => String(o.value) === String(val));
+              return { id: val, name: option?.label || existing?.name || 'Unknown', anshik: existing ? existing.anshik : 'No' };
+            });
+            if (JSON.stringify(newTableData) !== JSON.stringify(currentTableData)) {
+              parentGroup.get(field.id)?.setValue(newTableData, { emitEvent: false });
+            }
+          }
+        }
+
+        // Recurse into FormArrays
+        if (field.type === 'form-array') {
+          const array = parentGroup.get(field.id) as FormArray;
+          if (array && field.subFields) {
+            array.controls.forEach(control => {
+              if (control instanceof FormGroup) {
+                processFields(field.subFields || [], control);
+              }
+            });
+          }
+        }
+      });
+    };
+
+    processFields(this.config.fields);
   }
 
   setTableCellValue(fieldId: string, rowId: any, key: string, value: any): void {
@@ -400,11 +411,26 @@ export class DynamicFormModalComponent implements OnInit, OnDestroy {
     return 'md:col-span-6';
   }
 
-  isRequired(field: FormField): boolean {
+  isRequired(field: FormField | any): boolean {
     if (!field.validations) return false;
-    // Check if Validators.required is present in the validations array
-    // Since Validators.required is a function, we check if the array contains it
-    // Note: This is a heuristic check for standard Validators.required
-    return field.validations.some(v => v.name === 'required' || v === Validators.required);
+    return field.validations.some((v: any) => v.name === 'required' || v === Validators.required);
+  }
+
+  getFormArray(fieldId: string): FormArray {
+    return this.form.get(fieldId) as FormArray;
+  }
+
+  addArrayItem(fieldId: string): void {
+    const field = this.config.fields.find(f => f.id === fieldId);
+    if (field && field.subFields) {
+      this.getFormArray(fieldId).push(this.createGroupFromFields(field.subFields, {}));
+    }
+  }
+
+  removeArrayItem(fieldId: string, index: number): void {
+    const array = this.getFormArray(fieldId);
+    if (array.length > 1) {
+      array.removeAt(index);
+    }
   }
 }

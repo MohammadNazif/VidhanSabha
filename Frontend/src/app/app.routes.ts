@@ -21,6 +21,8 @@ import { DoubleVoterComponent } from './components/admin/double-voter/double-vot
 import { PrabhavshaliComponent } from './components/admin/prabhavshali/prabhavshali.component';
 import { BlockComponent } from './components/admin/block/block.component';
 import { PradhanComponent } from './components/admin/pradhan/pradhan.component';
+import { BdcComponent } from './components/admin/bdc/bdc.component';
+import { SeniorDisabledComponent } from './components/admin/senior-disabled/senior-disabled.component';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -47,6 +49,12 @@ export const routes: Routes = [
   { path: 'block-pramukh-list', component: BlockComponent },
   { path: 'pradhan', component: PradhanComponent },
   { path: 'pradhan-list', component: PradhanComponent },
+  { path: 'bdc', component: BdcComponent },
+  { path: 'bdc-list', component: BdcComponent },
+  { path: 'varisth-naagarik-viklaang', component: SeniorDisabledComponent },
+  { path: 'varisth-naagarik-viklaang-list', component: SeniorDisabledComponent },
+  { path: 'senior-citizen-list', component: SeniorDisabledComponent },
+  { path: 'disabled-list', component: SeniorDisabledComponent },
   { path: 'superadmin/dashboard', component: SuperDashboardComponent },
   { path: 'superadmin/designation', component: DesignationComponent },
   { path: 'superadmin/state', component: StateComponent },

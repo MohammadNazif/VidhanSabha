@@ -90,6 +90,8 @@ export interface TableConfig {
   filterable?: boolean;
   /** Enable server-side pagination, sorting, and filtering */
   serverSide?: boolean;
+  /** Debounce time for search input in milliseconds (default: 400) */
+  searchDebounceTime?: number;
   /** Enable export (future) */
   exportable?: boolean;
 }
