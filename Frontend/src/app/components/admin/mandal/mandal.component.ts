@@ -166,12 +166,12 @@ export class MandalComponent implements OnInit {
     const isUpdate = !!(raw.id || (this.mandalModal.initialData && this.mandalModal.initialData.id));
 
     const submitData: any = {
-      vidhanId: 0, // Static vidhanId as requested
-      name: raw.name
+      VidhanId: 0, // Static VidhanId as requested
+      Name: raw.name
     };
 
     if (isUpdate) {
-      submitData.id = Number(raw.id || this.mandalModal.initialData.id);
+      submitData.Id = Number(raw.id || this.mandalModal.initialData.id);
     }
 
     const request = isUpdate

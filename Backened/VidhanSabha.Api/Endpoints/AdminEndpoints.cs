@@ -193,7 +193,7 @@ public static class AdminEndpoints
             .Produces<List<SectorByMAndalResponseDto>>(200);
         #endregion
 
-        #region Booth
+          #region Booth
         booth.MapPost("/create", async (BoothRequestDto dto, IMediator mediator, HttpContext http) =>
         {
             //var userId = 1;

@@ -20,6 +20,7 @@ import { VidhanSabhaPrabhariListComponent } from './components/state-prabhari/vi
 import { DoubleVoterComponent } from './components/admin/double-voter/double-voter.component';
 import { PrabhavshaliComponent } from './components/admin/prabhavshali/prabhavshali.component';
 import { BlockComponent } from './components/admin/block/block.component';
+import { PradhanComponent } from './components/admin/pradhan/pradhan.component';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -44,6 +45,8 @@ export const routes: Routes = [
   { path: 'influencer-person-list', component: PrabhavshaliComponent },
   { path: 'block', component: BlockComponent },
   { path: 'block-pramukh-list', component: BlockComponent },
+  { path: 'pradhan', component: PradhanComponent },
+  { path: 'pradhan-list', component: PradhanComponent },
   { path: 'superadmin/dashboard', component: SuperDashboardComponent },
   { path: 'superadmin/designation', component: DesignationComponent },
   { path: 'superadmin/state', component: StateComponent },

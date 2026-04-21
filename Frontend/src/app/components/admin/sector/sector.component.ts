@@ -313,23 +313,23 @@ export class SectorComponent implements OnInit {
     const isSanyojak = raw.isSectorSanyojak === 'Yes';
 
     const submitData: any = {
-      mandalId: Number(raw.mandalId),
-      villageId: Number(raw.villageId),
-      sectorName: raw.sectorName || "",
-      isSectorSanyojak: isSanyojak,
-      inchargeName: isSanyojak ? (raw.inchargeName || "") : "",
-      age: isSanyojak ? (raw.age ? Number(raw.age) : 0) : 0,
-      fatherName: isSanyojak ? (raw.fatherName || "") : "",
-      categoryId: isSanyojak ? (raw.categoryId ? Number(raw.categoryId) : 0) : 0,
-      castId: isSanyojak ? (raw.castId ? Number(raw.castId) : 0) : 0,
-      educationLevel: isSanyojak ? (raw.educationLevel || "") : "",
-      phoneNumber: isSanyojak ? (raw.phoneNumber || "") : "",
-      address: isSanyojak ? (raw.address || "") : "",
-      profileImage: isSanyojak ? (raw.profileImage || "") : ""
+      MandalId: Number(raw.mandalId),
+      VillageId: Number(raw.villageId),
+      SectorName: raw.sectorName || "",
+      IsSectorSanyojak: isSanyojak,
+      InchargeName: isSanyojak ? (raw.inchargeName || "") : null,
+      Age: isSanyojak ? (raw.age ? Number(raw.age) : 0) : null,
+      FatherName: isSanyojak ? (raw.fatherName || "") : null,
+      CategoryId: isSanyojak ? (raw.categoryId ? Number(raw.categoryId) : 0) : null,
+      CastId: isSanyojak ? (raw.castId ? Number(raw.castId) : 0) : null,
+      EducationLevel: isSanyojak ? (raw.educationLevel || "") : null,
+      PhoneNumber: isSanyojak ? (raw.phoneNumber || "") : null,
+      Address: isSanyojak ? (raw.address || "") : null,
+      ProfileImage: isSanyojak ? (raw.profileImage || "") : null
     };
 
     if (isUpdate) {
-      submitData.id = Number(raw.id || this.sectorModal.initialData.id);
+      submitData.Id = Number(raw.id || this.sectorModal.initialData.id);
     }
 
     const request = isUpdate

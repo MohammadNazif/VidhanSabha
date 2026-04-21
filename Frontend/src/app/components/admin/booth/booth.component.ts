@@ -454,50 +454,41 @@ export class BoothComponent implements OnInit {
     const isUpdate = !!(raw.id || (this.boothModal.initialData && this.boothModal.initialData.id));
 
     const submitData: any = {
-      mandalId: Number(raw.mandalId),
-      sectorId: Number(raw.sectorId),
-      villages: [],
-      boothNumber: Number(raw.boothNumber),
-      pollingStationName: raw.pollingStationName || "",
-      pollingStationLocation: raw.pollingStationLocation || "",
-      isBoothSanyojak: isSanyojak,
-      sanyojak: isSanyojak ? {
-        inchargeName: raw.inchargeName || "",
-        age: raw.age ? Number(raw.age) : 0,
-        fatherName: raw.fatherName || "",
-        categoryId: raw.categoryId ? Number(raw.categoryId) : 0,
-        castId: raw.castId ? Number(raw.castId) : 0,
-        educationLevel: raw.educationLevel || "",
-        phoneNumber: raw.phoneNumber || "",
-        address: raw.address || ""
-      } : {
-        inchargeName: "",
-        age: 0,
-        fatherName: "",
-        categoryId: 0,
-        castId: 0,
-        educationLevel: "",
-        phoneNumber: "",
-        address: ""
-      }
+      MandalId: Number(raw.mandalId),
+      SectorId: Number(raw.sectorId),
+      Villages: [],
+      BoothNumber: Number(raw.boothNumber),
+      PollingStationName: raw.pollingStationName || "",
+      PollingStationLocation: raw.pollingStationLocation || "",
+      IsBoothSanyojak: isSanyojak,
+      Sanyojak: isSanyojak ? {
+        InchargeName: raw.inchargeName || "",
+        Age: raw.age ? Number(raw.age) : 0,
+        FatherName: raw.fatherName || "",
+        CategoryId: raw.categoryId ? Number(raw.categoryId) : 0,
+        CastId: raw.castId ? Number(raw.castId) : 0,
+        EducationLevel: raw.educationLevel || "",
+        PhoneNumber: raw.phoneNumber || "",
+        Address: raw.address || ""
+      } : null
     };
 
-    // Transform anshikData or villageId to villages array
+    // Transform anshikData or villageId to Villages array
     if (raw.anshikData && Array.isArray(raw.anshikData)) {
-      submitData.villages = raw.anshikData.map((v: any) => ({
-        villageId: Number(v.id || v.villageId),
-        hasAnshik: v.anshik === 'Yes'
+      submitData.Villages = raw.anshikData.map((v: any) => ({
+        VillageId: Number(v.id || v.villageId),
+        HasAnshik: v.anshik === 'Yes'
       }));
     } else if (raw.villageId) {
       const ids = Array.isArray(raw.villageId) ? raw.villageId : [raw.villageId];
-      submitData.villages = ids.map((id: any) => ({
-        villageId: Number(id),
-        hasAnshik: false
+      submitData.Villages = ids.map((id: any) => ({
+        VillageId: Number(id),
+        HasAnshik: false
       }));
     }
 
     if (isUpdate) {
-      submitData.id = Number(raw.id || this.boothModal.initialData.id);
+      submitData.Id = Number(raw.id || this.boothModal.initialData.id);
     }
 
     const request = isUpdate
