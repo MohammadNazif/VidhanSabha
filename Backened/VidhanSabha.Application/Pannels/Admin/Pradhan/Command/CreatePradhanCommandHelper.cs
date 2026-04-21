@@ -20,6 +20,11 @@ namespace VidhanSabha.Application.Pannels.Admin.Pradhan.Command
         public async Task<int> Handle(CreatePradhanCommand request, CancellationToken cancellationToken)
         {
             var req = request.Dto;
+            if (!Enum.IsDefined(typeof(VidhanSabha.Domain.Enums.Gender), req.Gender))
+            {
+                throw new Exception("Invalid Gender Value");
+            }
+            
 
             var data = Tbl_Pradhan.Create(
                 req.Name, req.DesignationId, req.Contact, req.Gender, req.VillageId);

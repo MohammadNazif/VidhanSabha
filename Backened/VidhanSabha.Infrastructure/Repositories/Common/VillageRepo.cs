@@ -28,6 +28,19 @@ namespace VidhanSabha.Infrastructure.Repositories.Common
                 ToListAsync();
         }
 
+        public async Task<List<VillageResponseDtos>> GetAllVillageAsync()
+        {
+            return await _context.Set<Tbl_Village>()
+                  
+                  .Select(m => new VillageResponseDtos
+                  {
+                      Id = m.Id,
+                      Name = m.VillageName
+                  }
+                  ).
+                   ToListAsync();
+        }
+
         public async Task<List<Tbl_Village>> GetAllByMandalIdAsync(int mandalId)
         {
             return await _context.Set<Tbl_Village>().

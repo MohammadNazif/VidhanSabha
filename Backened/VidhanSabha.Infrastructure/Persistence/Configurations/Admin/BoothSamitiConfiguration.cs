@@ -25,11 +25,15 @@ namespace VidhanSabha.Infrastructure.Persistence.Configurations.Admin
             builder.Property(x => x.Name)
                    .HasMaxLength(200);
 
-            builder.Property(x => x.Category)
-                   .HasMaxLength(100);
+            builder.HasOne(x => x.Category)
+        .WithMany()
+        .HasForeignKey(x => x.CategoryId)
+        .OnDelete(DeleteBehavior.Restrict);
 
-            builder.Property(x => x.Caste)
-                   .HasMaxLength(100);
+            builder.HasOne(x => x.Caste)
+                   .WithMany()
+                   .HasForeignKey(x => x.CasteId)
+                   .OnDelete(DeleteBehavior.Restrict);
 
             builder.Property(x => x.Contact)
                    .HasMaxLength(50);
@@ -41,10 +45,10 @@ namespace VidhanSabha.Infrastructure.Persistence.Configurations.Admin
                    .HasDefaultValue(true);
 
             // 🔗 Designation FK 
-            builder.HasOne(e => e.Designation)
-                   .WithMany()
-                   .HasForeignKey(x => x.DesignationId)
-                   .OnDelete(DeleteBehavior.Restrict);
+            builder.HasOne(x => x.Designation)
+       .WithMany()
+       .HasForeignKey(x => x.DesignationId)
+       .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

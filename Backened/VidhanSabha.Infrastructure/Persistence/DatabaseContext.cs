@@ -65,6 +65,7 @@ namespace VidhanSabha.Infrastructure.Persistence
         public DbSet<Tbl_Pradhan> Tbl_Pradhan => Set<Tbl_Pradhan>();
         public DbSet<Tbl_PradhanVillage> Tbl_PradhanVillage => Set<Tbl_PradhanVillage>();
         public DbSet<Tbl_BoothSamiti> Tbl_BoothSamitis { get; set; }
+        public DbSet<Tbl_BoothSamitiDesignation> Tbl_BoothSamitiDesignations { get; set; }
 
         public DbSet<Tbl_VidhanSabha> Tbl_VidhanSabha => Set<Tbl_VidhanSabha>();
 

@@ -11,6 +11,7 @@ namespace VidhanSabha.Application.Common.Category.Interfaces
     public interface  IVillageRepository
     {
         Task<List<Tbl_Village>> GetAllAsync();
+        Task<List<VillageResponseDtos>> GetAllVillageAsync();
         Task<List<Tbl_Village>> GetAllByMandalIdAsync(int mandalId);
 
         Task<List<VillageByBoothResponseDto>> GetAllByBoothIdAsync(int boothId);

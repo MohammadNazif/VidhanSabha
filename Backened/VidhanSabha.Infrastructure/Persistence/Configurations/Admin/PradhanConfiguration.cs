@@ -25,7 +25,7 @@ namespace VidhanSabha.Infrastructure.Persistence.Configurations.Admin
                    .HasMaxLength(50);
 
             builder.Property(x => x.Gender)
-                   .HasMaxLength(50);
+       .IsRequired();
 
             builder.Property(x => x.Status)
                    .HasDefaultValue(true);
