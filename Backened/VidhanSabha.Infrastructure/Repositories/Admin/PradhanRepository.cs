@@ -87,14 +87,18 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
             {
                 return _context.Tbl_Pradhan
                     .Include(p => p.Villages)
+                    .Include(p => p.Designation)
                     .Select(p => new PradhanResponseDto
                     {
                         Id = p.Id,
                         Name = p.Name,
                         DesignationId = p.DesignationId,
-                        DesignationName= p.Designation.DesignationName,
+                        DesignationName = p.Designation.DesignationName,
                         Contact = p.Contact,
+
                         Gender = p.Gender,
+                        GenderValue = ((VidhanSabha.Domain.Enums.Gender)p.Gender).ToString(),
+
                         Villages = p.Villages.Select(v => new VillageResponseDtos
                         {
                             VillageId = v.VillageId,

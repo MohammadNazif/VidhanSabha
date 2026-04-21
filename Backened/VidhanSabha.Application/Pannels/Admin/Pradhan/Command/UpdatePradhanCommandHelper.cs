@@ -22,6 +22,11 @@ namespace VidhanSabha.Application.Pannels.Admin.Pradhan.Command
         public async Task<int> Handle(UpdatePradhanCommand request, CancellationToken cancellationtoken)
         {
             var dto = request.Dto;
+            if (!Enum.IsDefined(typeof(VidhanSabha.Domain.Enums.Gender), dto.Gender))
+            {
+                throw new Exception("Invalid Gender Value");
+            }
+            
             var pradhan = await _repo.GetByIdAsync(dto.Id);
             if (pradhan == null)
             {

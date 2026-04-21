@@ -6,11 +6,16 @@ using System.Threading.Tasks;
 
 namespace VidhanSabha.Application.Common.Village.DTOs
 {
+    public class VillageResponseDtos
+    {
+        public int Id { get; set; }
+        public int MandalId { get; set; }
+        public string Name { get; set; }
+        public bool Status { get; set; }
+    }
     public class VillageResponseDto
     {
         public int Id { get; set; }
-
-
         public int MandalId { get; set; }
         public string Name { get; set; }
         public bool Status { get; set; }

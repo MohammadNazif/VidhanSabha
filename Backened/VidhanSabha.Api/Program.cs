@@ -1,8 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Data.SqlClient;
-using VidhanSabha.Infrastructure.DependencyInjection;
 using System.Data;
 using VidhanSabha.Api.Endpoints;
+using VidhanSabha.Infrastructure.Extensions;
 var builder = WebApplication.CreateBuilder(args);
 
 

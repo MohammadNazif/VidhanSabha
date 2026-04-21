@@ -39,6 +39,12 @@ using VidhanSabha.Application.Pannels.Admin.Sector.Commands;
 using VidhanSabha.Application.Pannels.Admin.Sector.DTOs;
 using VidhanSabha.Application.Pannels.Admin.Sector.Queries;
 
+using VidhanSabha.Application.Pannels.Admin.BoothSamiti.Command;
+using VidhanSabha.Application.Pannels.Admin.BoothSamiti.Dtos;
+using VidhanSabha.Application.Pannels.Admin.BoothSamiti.Queries;
+
+using VidhanSabha.Application.Common.BoothSamitiDesignation.Queries;
+using VidhanSabha.Application.Common.BoothSamitiDesignation.DTOs;
 public static class AdminEndpoints
 {
     public static void MapAdminEndpoints(this WebApplication app)
@@ -73,7 +79,11 @@ public static class AdminEndpoints
                         .WithTags("PrabhavShali");
         var block = app.MapGroup("/api/block")
                         .WithTags("Block");
+        var boothSamiti = app.MapGroup("/api/boothsamiti")
+                    .WithTags("BoothSamiti");
 
+        var boothSamitiDesignation = app.MapGroup("/api/boothsamiti-designation")
+    .WithTags("BoothSamitiDesignation");
 
         #region Mandal
         mandal.MapGet("/getAll", async (IMediator mediator) =>
@@ -375,6 +385,54 @@ public static class AdminEndpoints
             var result = await mediator.Send(new GetAllPradhanQuery());
             return Results.Ok(ApiResponse<List<PradhanResponseDto>>.Ok(result));
         });
+        #endregion
+
+        #region BoothSamiti
+
+        boothSamiti.MapPost("/create", async (CreateBoothSamitiRequestDto dto, IMediator mediator) =>
+        {
+            var result = await mediator.Send(new CreateBoothSamitiCommand(dto));
+            return Results.Ok(ApiResponse<int>.Ok(result, "Booth Samiti Created Successfully"));
+        })
+        .WithName("CreateBoothSamiti")
+        .Produces<int>(200);
+
+
+        boothSamiti.MapPost("/update", async (UpdateBoothSamitiRequestDto dto, IMediator mediator) =>
+        {
+            var result = await mediator.Send(new UpdateBoothSamitiCommand(dto));
+            return Results.Ok(ApiResponse<int>.Ok(result, "Booth Samiti Updated Successfully"));
+        })
+        .WithName("UpdateBoothSamiti")
+        .Produces<int>(200);
+
+
+        boothSamiti.MapPost("/delete", async (int id, IMediator mediator) =>
+        {
+            var result = await mediator.Send(new DeleteBoothSamitiCommand(id));
+            return Results.Ok(ApiResponse<int>.Ok(result, "Booth Samiti Deleted Successfully"));
+        })
+        .WithName("DeleteBoothSamiti")
+        .Produces<int>(200);
+
+
+        boothSamiti.MapGet("/getAll", async (IMediator mediator) =>
+        {
+            var result = await mediator.Send(new GetAllBoothSamitiQuery());
+            return Results.Ok(ApiResponse<List<BoothSamitiResponseDto>>.Ok(result));
+        });
+
+        #endregion
+
+        #region BoothSamitiDesignation
+
+        boothSamitiDesignation.MapGet("/getAll", async (IMediator mediator) =>
+        {
+            var result = await mediator.Send(new GetAllBoothSamitiDesignationQuery());
+            return Results.Ok(ApiResponse<List<DesignationDto>>.Ok(result));
+        })
+.WithName("GetAllBoothSamitiDesignation")
+.Produces<ApiResponse<List<DesignationDto>>>(200);
         #endregion
 
         #region Double Voter

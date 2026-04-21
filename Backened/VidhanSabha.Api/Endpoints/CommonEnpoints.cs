@@ -78,6 +78,14 @@ namespace VidhanSabha.Api.Endpoints
                 .WithName("GetVillagesByBoothId")
                 .Produces<List<VillageByBoothResponseDto>>(200);
 
+            common.MapGet("/getallvillages", async (IMediator mediator) =>
+            {
+                var result = await mediator.Send(new GetAllVillageQuery());
+                return Results.Ok(ApiResponse<List<VillageResponseDtos>>.Ok(result));
+            })
+                .WithName("GetVillages")
+                .Produces<List<VillageResponseDtos>>(200);
+
             common.MapGet("/designationType", async (IMediator mediator) =>
             {
                 var result = await mediator.Send(new getdesignationTypeQuery());
