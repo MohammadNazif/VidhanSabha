@@ -399,4 +399,12 @@ export class DynamicFormModalComponent implements OnInit, OnDestroy {
 
     return 'md:col-span-6';
   }
+
+  isRequired(field: FormField): boolean {
+    if (!field.validations) return false;
+    // Check if Validators.required is present in the validations array
+    // Since Validators.required is a function, we check if the array contains it
+    // Note: This is a heuristic check for standard Validators.required
+    return field.validations.some(v => v.name === 'required' || v === Validators.required);
+  }
 }

@@ -12,8 +12,8 @@ export class SectorService extends BaseApiService {
     return this.create(this.entity, data);
   }
 
-  getAllSectors(): Observable<any> {
-    return this.getAll(this.entity);
+  getAllSectors(params: any = {}): Observable<any> {
+    return this.getAllByParams(this.entity, params);
   }
 
   deleteSector(id: number): Observable<any> {

@@ -13,10 +13,12 @@ export class StateService extends BaseApiService {
     return this.create(this.entity, data);
   }
 
-  getAllStates(): Observable<any> {
+  getAllStates(params: any = {}): Observable<any> {
     const userId = localStorage.getItem('userId');
-    const params = userId ? new HttpParams().set('userId', userId) : undefined;
-    return this.http.get<any>(`${this.apiUrl}/${this.entity}/getAll`, { params });
+    if (userId) {
+      params['userId'] = userId;
+    }
+    return this.getAllByParams(this.entity, params);
   }
 
   deleteState(id: number): Observable<any> {

@@ -8,8 +8,8 @@ import { BaseApiService } from '../../common/base-api.service';
 export class SahmatAsahmatService extends BaseApiService {
   private entity = 'sahmatasahmat';
 
-  getAllSahmatAsahmat(): Observable<any> {
-    return this.getAll(this.entity);
+  getAllSahmatAsahmat(params: any = {}): Observable<any> {
+    return this.getAllByParams(this.entity, params);
   }
 
   createSahmatAsahmat(data: any): Observable<any> {

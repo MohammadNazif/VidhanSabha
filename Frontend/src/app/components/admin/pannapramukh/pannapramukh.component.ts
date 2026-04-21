@@ -23,6 +23,15 @@ export class PannapramukhComponent implements OnInit {
   @ViewChild('pannaModal') pannaModal!: GenericModalButtonComponent;
 
   pannaList: any[] = [];
+  totalCount = 0;
+
+  // Server-side state
+  pageNumber = 1;
+  pageSize = 50;
+  searchTerm = '';
+  sortBy = '';
+  isDescending = false;
+
   isListView = false;
 
   columns: TableColumn[] = [
@@ -50,7 +59,9 @@ export class PannapramukhComponent implements OnInit {
     filterable: false,
     showRowNumbers: true,
     striped: true,
-    hoverable: true
+    hoverable: true,
+    serverSide: true,
+    defaultPageSize: 50
   };
 
   actions: TableAction[] = [
@@ -80,12 +91,12 @@ export class PannapramukhComponent implements OnInit {
         label: 'Booth',
         type: 'select',
         placeholder: '--Select Booth--',
-        apiUrl: 'booth/getall',
+        apiUrl: 'common/boothNumber',
         apiMapper: (data: any) => {
           const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
           return list.map((item: any) => ({
-            value: String(item.id),
-            label: `BoothNumber ${item.boothNumber} - ${item.pollingStationName}`
+            value: String(item.boothId || item.id),
+            label: `Booth No. ${item.boothNumber} - ${item.boothName || item.pollingStationName || ''}`
           }));
         },
         validations: [Validators.required],
@@ -100,10 +111,10 @@ export class PannapramukhComponent implements OnInit {
         dependsOn: 'boothId',
         apiUrl: (boothId: string) => `common/villagesByBoothId?boothId=${boothId}`,
         apiMapper: (data: any) => {
-          const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
+          const list = Array.isArray(data?.data?.items) ? data.data.items : (Array.isArray(data?.items) ? data.items : (Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : [])));
           return list.map((item: any) => ({
             value: String(item.id),
-            label: item.name
+            label: item.name || item.villageName
           }));
         },
         validations: [Validators.required],
@@ -215,20 +226,59 @@ export class PannapramukhComponent implements OnInit {
     this.route.url.subscribe(url => {
       const path = url[0]?.path || '';
       this.isListView = path.includes('-list');
-      this.loadPannas();
+      this.loadData();
     });
   }
 
-  loadPannas() {
-    this.pannaService.getAllPannapramukhs().subscribe({
-      next: (response) => {
-        this.pannaList = response.data || (Array.isArray(response) ? response : []);
+  loadData() {
+    const params = {
+      pageNumber: this.pageNumber,
+      pageSize: this.pageSize,
+      searchTerm: this.searchTerm,
+      sortBy: this.sortBy,
+      isDescending: this.isDescending
+    };
 
+    this.pannaService.getAllPannapramukhs(params).subscribe({
+      next: (response) => {
+        const dataWrap = response.data;
+        const items = dataWrap?.items || (Array.isArray(dataWrap) ? dataWrap : []);
+
+        this.pannaList = items.map((item: any) => ({
+          ...item,
+          villageName: Array.isArray(item.villages) ? item.villages.map((v: any) => v.villageName).join(', ') : '',
+          villageId: Array.isArray(item.villages) ? item.villages.map((v: any) => v.villageId) : []
+        }));
+
+        this.totalCount = dataWrap?.totalCount || this.pannaList.length;
       },
       error: (err) => {
         console.error('Error fetching panna pramukhs:', err);
       }
     });
+  }
+
+  handlePageChange(event: any) {
+    this.pageNumber = event.currentPage;
+    this.pageSize = event.pageSize;
+    this.loadData();
+  }
+
+  handleSortChange(event: any) {
+    this.sortBy = event.column;
+    this.isDescending = event.direction === 'desc';
+    this.pageNumber = 1;
+    this.loadData();
+  }
+
+  handleSearchChange(term: string) {
+    this.searchTerm = term;
+    this.pageNumber = 1;
+    this.loadData();
+  }
+
+  handleSelection(selected: any[]) {
+    console.log('Selected panna pramukhs:', selected);
   }
 
   handleAction(event: any) {
@@ -238,7 +288,7 @@ export class PannapramukhComponent implements OnInit {
         this.pannaService.deletePannapramukh(row.id),
         'Deleted',
         'Panna Pramukh deleted successfully!',
-        () => this.loadPannas()
+        () => this.loadData()
       );
     } else if (action.id === 'edit') {
       const editData = { ...row };
@@ -282,7 +332,7 @@ export class PannapramukhComponent implements OnInit {
       request,
       isUpdate ? 'Updated' : 'Success',
       `Panna Pramukh ${isUpdate ? 'updated' : 'created'} successfully!`,
-      () => this.loadPannas()
+      () => this.loadData()
     );
   }
 }

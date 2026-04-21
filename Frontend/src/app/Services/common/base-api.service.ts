@@ -15,32 +15,37 @@ export class BaseApiService {
    * Generic GET request for a list of entities with standardized query parameters.
    */
   getAllByParams<T>(entity: string, queryParams: any = {}): Observable<T> {
-    // 1. Initialize with mandatory defaults
-    const params: any = {
-      PageNumber: queryParams.pageNumber || queryParams.PageNumber || 1,
-      PageSize: queryParams.pageSize || queryParams.PageSize || 50,
-      IsDescending: queryParams.isDescending === true || queryParams.isDescending === 'true' || queryParams.IsDescending === true || false
-    };
+    let params = new HttpParams();
 
-    // 2. Map standard optional parameters to PascalCase if they exist
-    const standardMap: Record<string, string> = {
-      searchTerm: 'SearchTerm',
-      SearchTerm: 'SearchTerm',
-      sortBy: 'SortBy',
-      SortBy: 'SortBy'
-    };
+    // 1. Handle Mandatory Parameters with Defaults
+    const pageNumber = queryParams.PageNumber || queryParams.pageNumber || 1;
+    const pageSize = queryParams.PageSize || queryParams.pageSize || 50;
+    const isDescending = queryParams.IsDescending ?? queryParams.isDescending ?? false;
 
-    Object.keys(standardMap).forEach(key => {
-      if (queryParams[key] !== undefined && queryParams[key] !== null) {
-        params[standardMap[key]] = queryParams[key];
-      }
-    });
+    params = params.set('PageNumber', String(pageNumber));
+    params = params.set('PageSize', String(pageSize));
+    params = params.set('IsDescending', String(isDescending));
 
-    // 3. Merge every other parameter as-is (filtering by MandalId, SectorId, etc.)
-    const handledKeys = ['pageNumber', 'PageNumber', 'pageSize', 'PageSize', 'isDescending', 'IsDescending', ...Object.keys(standardMap)];
+    // 2. Handle Standard Optional Parameters (PascalCase)
+    if (queryParams.searchTerm || queryParams.SearchTerm) {
+      params = params.set('SearchTerm', String(queryParams.searchTerm || queryParams.SearchTerm));
+    }
+    if (queryParams.sortBy || queryParams.SortBy) {
+      params = params.set('SortBy', String(queryParams.sortBy || queryParams.SortBy));
+    }
+
+    // 3. Handle Custom Parameters (MandalId, SectorId, etc.)
+    const standardKeys = [
+      'pageNumber', 'PageNumber',
+      'pageSize', 'PageSize',
+      'isDescending', 'IsDescending',
+      'searchTerm', 'SearchTerm',
+      'sortBy', 'SortBy'
+    ];
+
     Object.keys(queryParams).forEach(key => {
-      if (!handledKeys.includes(key) && queryParams[key] !== undefined && queryParams[key] !== null) {
-        params[key] = queryParams[key];
+      if (!standardKeys.includes(key) && queryParams[key] !== undefined && queryParams[key] !== null) {
+        params = params.set(key, String(queryParams[key]));
       }
     });
 

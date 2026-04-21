@@ -13,8 +13,8 @@ export class StatePrabhariService extends BaseApiService {
     return this.create(this.entity, data);
   }
 
-  getAllPrabharis(): Observable<any> {
-    return this.getAll(this.entity);
+  getAllPrabharis(params: any = {}): Observable<any> {
+    return this.getAllByParams(this.entity, params);
   }
 
   deletePrabhari(id: number, userId: string, data: any): Observable<any> {

@@ -12,8 +12,8 @@ export class DoubleVoterService extends BaseApiService {
     return this.create(this.entity, data);
   }
 
-  getAllDoubleVoters(): Observable<any> {
-    return this.getAll(this.entity);
+  getAllDoubleVoters(params: any = {}): Observable<any> {
+    return this.getAllByParams(this.entity, params);
   }
 
   deleteDoubleVoter(id: number): Observable<any> {

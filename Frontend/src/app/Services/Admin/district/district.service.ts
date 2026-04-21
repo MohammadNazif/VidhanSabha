@@ -12,8 +12,8 @@ export class DistrictService extends BaseApiService {
     return this.create(this.entity, data);
   }
 
-  getAllDistricts(): Observable<any> {
-    return this.getAll(this.entity);
+  getAllDistricts(params: any = {}): Observable<any> {
+    return this.getAllByParams(this.entity, params);
   }
 
   getDistrictsByStateId(stateId: number | string): Observable<any> {

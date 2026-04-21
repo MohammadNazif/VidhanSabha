@@ -21,6 +21,14 @@ export class BlockComponent implements OnInit {
   @ViewChild('blockModal') blockModal!: GenericModalButtonComponent;
 
   blockList: any[] = [];
+  totalCount = 0;
+
+  // Server-side state
+  pageNumber = 1;
+  pageSize = 50;
+  searchTerm = '';
+  sortBy = '';
+  isDescending = false;
 
   columns: TableColumn[] = [
     { key: 'blockName', label: 'Block Name', sortable: true },
@@ -37,7 +45,9 @@ export class BlockComponent implements OnInit {
     paginated: true,
     showRowNumbers: true,
     striped: true,
-    hoverable: true
+    hoverable: true,
+    serverSide: true,
+    defaultPageSize: 50
   };
 
   actions: TableAction[] = [
@@ -84,10 +94,10 @@ export class BlockComponent implements OnInit {
         placeholder: '-- Select Party --',
         apiUrl: 'common/getparty',
         apiMapper: (data: any) => {
-          const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
+          const list = Array.isArray(data?.data?.items) ? data.data.items : (Array.isArray(data?.items) ? data.items : (Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : [])));
           return list.map((item: any) => ({
             value: String(item.id),
-            label: item.partyName || item.party
+            label: item.partyName || item.party || item.name
           }));
         },
         validations: [Validators.required],
@@ -101,7 +111,7 @@ export class BlockComponent implements OnInit {
         placeholder: '-- Select Category --',
         apiUrl: 'common/category',
         apiMapper: (data: any) => {
-          const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
+          const list = Array.isArray(data?.data?.items) ? data.data.items : (Array.isArray(data?.items) ? data.items : (Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : [])));
           return list.map((item: any) => ({
             value: String(item.id),
             label: item.name || item.category
@@ -119,7 +129,7 @@ export class BlockComponent implements OnInit {
         dependsOn: 'categoryId',
         apiUrl: (catId: string) => `common/cast?id=${catId}`,
         apiMapper: (data: any) => {
-          const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
+          const list = Array.isArray(data?.data?.items) ? data.data.items : (Array.isArray(data?.items) ? data.items : (Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : [])));
           return list.map((item: any) => ({
             value: String(item.id),
             label: item.name || item.castName
@@ -136,10 +146,10 @@ export class BlockComponent implements OnInit {
         placeholder: '-- Select Occupation --',
         apiUrl: 'common/getoccupation',
         apiMapper: (data: any) => {
-          const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
+          const list = Array.isArray(data?.data?.items) ? data.data.items : (Array.isArray(data?.items) ? data.items : (Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : [])));
           return list.map((item: any) => ({
             value: String(item.id),
-            label: item.occupationName || item.occupation
+            label: item.occupationName || item.occupation || item.name
           }));
         },
         validations: [Validators.required],
@@ -167,12 +177,50 @@ export class BlockComponent implements OnInit {
   }
 
   loadData() {
-    this.blockService.getAllBlocks().subscribe({
+    const params = {
+      pageNumber: this.pageNumber,
+      pageSize: this.pageSize,
+      searchTerm: this.searchTerm,
+      sortBy: this.sortBy,
+      isDescending: true
+    };
+
+    this.blockService.getAllBlocks(params).subscribe({
       next: (response) => {
-        this.blockList = response.data || (Array.isArray(response) ? response : []);
+        const dataWrap = response.data;
+        if (dataWrap && dataWrap.items) {
+          this.blockList = dataWrap.items;
+          this.totalCount = dataWrap.totalCount || 0;
+        } else {
+          this.blockList = Array.isArray(dataWrap) ? dataWrap : [];
+          this.totalCount = this.blockList.length;
+        }
       },
       error: (err) => console.error('Error fetching block list:', err)
     });
+  }
+
+  handlePageChange(event: any) {
+    this.pageNumber = event.currentPage;
+    this.pageSize = event.pageSize;
+    this.loadData();
+  }
+
+  handleSortChange(event: any) {
+    this.sortBy = event.column;
+    this.isDescending = event.direction === 'desc';
+    this.pageNumber = 1;
+    this.loadData();
+  }
+
+  handleSearchChange(term: string) {
+    this.searchTerm = term;
+    this.pageNumber = 1;
+    this.loadData();
+  }
+
+  handleSelection(selected: any[]) {
+    console.log('Selected blocks:', selected);
   }
 
   handleAction(event: any) {

@@ -24,7 +24,16 @@ import { ViewChild, OnInit } from '@angular/core';
 export class SectorComponent implements OnInit {
   @ViewChild('sectorModal') sectorModal!: GenericModalButtonComponent;
 
-  membersData: any[] = [];
+  sectorList: any[] = [];
+  totalCount = 0;
+
+  // Server-side state
+  pageNumber = 1;
+  pageSize = 50;
+  searchTerm = '';
+  sortBy = '';
+  isDescending = false;
+
   defaultStateId: string | null = null;
 
   isStatePrabhari(): boolean {
@@ -44,13 +53,14 @@ export class SectorComponent implements OnInit {
     selectable: false,
     filterable: true,
     paginated: true,
-    defaultPageSize: 10,
+    defaultPageSize: 50,
     pageSizeOptions: [10, 20, 50],
     searchable: true,
     searchPlaceholder: 'Search sectors...',
     showRowNumbers: true,
     striped: true,
-    hoverable: true
+    hoverable: true,
+    serverSide: true
   };
 
   actions: TableAction[] = [
@@ -63,50 +73,15 @@ export class SectorComponent implements OnInit {
     submitLabel: 'Register Sector',
     fields: [
       {
-        id: 'districtId',
-        name: 'districtId',
-        label: 'Select District',
-        type: 'select',
-        placeholder: '--Select District--',
-        apiUrl: () => `district/getAll?stateId=${this.defaultStateId || ''}`,
-        apiMapper: (data: any) => {
-          const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
-          return list.map((item: any) => ({
-            value: String(item.id),
-            label: item.name
-          }));
-        },
-        validations: [Validators.required],
-        gridColSpan: 6
-      },
-      {
-        id: 'vidhanId',
-        name: 'vidhanId',
-        label: 'Select Vidhan Sabha',
-        type: 'select',
-        placeholder: '--Select Vidhan Sabha--',
-        dependsOn: 'districtId',
-        apiUrl: (districtId: any) => `vidhansabha/getAll?districtId=${districtId}`,
-        apiMapper: (data: any) => {
-          const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
-          return list.map((item: any) => ({
-            value: String(item.id),
-            label: item.name
-          }));
-        },
-        validations: [Validators.required],
-        gridColSpan: 6
-      },
-      {
         id: 'mandalId',
         name: 'mandalId',
         label: 'Mandal',
         type: 'select',
         placeholder: '--Select Mandal--',
         dependsOn: 'vidhanId',
-        apiUrl: (vidhanId: any) => `mandal/getall?vidhanId=${vidhanId}`,
+        apiUrl: (vidhanId: any) => `mandal/getall?vidhanId=${vidhanId}&pageSize=1000`,
         apiMapper: (data: any) => {
-          const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
+          const list = Array.isArray(data?.data?.items) ? data.data.items : (Array.isArray(data?.items) ? data.items : (Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : [])));
           return list.map((item: any) => ({
             value: String(item.id),
             label: item.name
@@ -124,15 +99,15 @@ export class SectorComponent implements OnInit {
         placeholder: '--Select Village--',
         apiUrl: (mandalId: any) => `common/village?id=${mandalId}`,
         apiMapper: (data: any) => {
-          const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
+          const list = Array.isArray(data?.data?.items) ? data.data.items : (Array.isArray(data?.items) ? data.items : (Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : [])));
           return list.map((item: any) => ({
             value: String(item.id),
-            label: item.name
+            label: item.name || item.villageName
           }));
         },
         validations: [Validators.required],
         gridColSpan: 6,
-        multiple: true
+        multiple: false
       },
       {
         id: 'sectorName',
@@ -192,13 +167,11 @@ export class SectorComponent implements OnInit {
         placeholder: '-- Select Category --',
         apiUrl: 'common/category',
         apiMapper: (data: any) => {
-          if (Array.isArray(data?.data)) {
-            return data.data.map((item: any) => ({
-              value: String(item.id),
-              label: item.name
-            }));
-          }
-          return [];
+          const list = Array.isArray(data?.data?.items) ? data.data.items : (Array.isArray(data?.items) ? data.items : (Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : [])));
+          return list.map((item: any) => ({
+            value: String(item.id),
+            label: item.name || item.category
+          }));
         },
         visibleIf: { field: 'isSectorSanyojak', operator: '==', value: 'Yes' },
         gridColSpan: 6
@@ -212,13 +185,11 @@ export class SectorComponent implements OnInit {
         dependsOn: 'categoryId',
         apiUrl: (catId: any) => `common/cast?id=${catId}`,
         apiMapper: (data: any) => {
-          if (Array.isArray(data?.data)) {
-            return data.data.map((item: any) => ({
-              value: String(item.id),
-              label: item.name
-            }));
-          }
-          return [];
+          const list = Array.isArray(data?.data?.items) ? data.data.items : (Array.isArray(data?.items) ? data.items : (Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : [])));
+          return list.map((item: any) => ({
+            value: String(item.id),
+            label: item.name || item.castName
+          }));
         },
         visibleIf: { field: 'isSectorSanyojak', operator: '==', value: 'Yes' },
         gridColSpan: 6
@@ -293,46 +264,72 @@ export class SectorComponent implements OnInit {
   }
 
   loadSectors() {
-    this.sectorService.getAllSectors().subscribe({
+    const params = {
+      pageNumber: this.pageNumber,
+      pageSize: this.pageSize,
+      searchTerm: this.searchTerm,
+      sortBy: this.sortBy,
+      isDescending: this.isDescending
+    };
+
+    this.sectorService.getAllSectors(params).subscribe({
       next: (response) => {
-        this.membersData = response.data || response;
+        const dataWrap = response.data;
+        if (dataWrap && dataWrap.items) {
+          this.sectorList = dataWrap.items;
+          this.totalCount = dataWrap.totalCount || 0;
+        } else {
+          this.sectorList = Array.isArray(dataWrap) ? dataWrap : [];
+          this.totalCount = this.sectorList.length;
+        }
       },
       error: (err) => console.error('Error loading sectors:', err)
     });
   }
 
+  handlePageChange(event: any) {
+    this.pageNumber = event.currentPage;
+    this.pageSize = event.pageSize;
+    this.loadSectors();
+  }
+
+  handleSortChange(event: any) {
+    this.sortBy = event.column;
+    this.isDescending = event.direction === 'desc';
+    this.pageNumber = 1;
+    this.loadSectors();
+  }
+
+  handleSearchChange(term: string) {
+    this.searchTerm = term;
+    this.pageNumber = 1;
+    this.loadSectors();
+  }
+
   handleFormSubmit(result: FormResult) {
     if (!result.status) return;
-    console.log(result.data);
-    const raw = { ...result.data };
-    const userId = this.authService.getUserId();
+    const raw = result.data;
     const isUpdate = !!(raw.id || (this.sectorModal.initialData && this.sectorModal.initialData.id));
+    const isSanyojak = raw.isSectorSanyojak === 'Yes';
 
     const submitData: any = {
-      ...raw,
-      id: isUpdate ? (raw.id || this.sectorModal.initialData.id) : null,
       mandalId: Number(raw.mandalId),
-      stateId: Number(raw.stateId || this.defaultStateId),
-      villageId: Array.isArray(raw.villageId) ? raw.villageId.map((v: any) => Number(v)) : Number(raw.villageId),
-      sectorName: raw.sectorName,
-      isSectorSanyojak: raw.isSectorSanyojak === 'Yes',
-      userId: userId ? String(userId) : null
+      villageId: Number(raw.villageId),
+      sectorName: raw.sectorName || "",
+      isSectorSanyojak: isSanyojak,
+      inchargeName: isSanyojak ? (raw.inchargeName || "") : "",
+      age: isSanyojak ? (raw.age ? Number(raw.age) : 0) : 0,
+      fatherName: isSanyojak ? (raw.fatherName || "") : "",
+      categoryId: isSanyojak ? (raw.categoryId ? Number(raw.categoryId) : 0) : 0,
+      castId: isSanyojak ? (raw.castId ? Number(raw.castId) : 0) : 0,
+      educationLevel: isSanyojak ? (raw.educationLevel || "") : "",
+      phoneNumber: isSanyojak ? (raw.phoneNumber || "") : "",
+      address: isSanyojak ? (raw.address || "") : "",
+      profileImage: isSanyojak ? (raw.profileImage || "") : ""
     };
 
-    if (submitData.isSectorSanyojak) {
-      submitData.inchargeName = raw.inchargeName || null;
-      submitData.age = raw.age ? Number(raw.age) : null;
-      submitData.fatherName = raw.fatherName || null;
-      submitData.categoryId = raw.categoryId ? Number(raw.categoryId) : null;
-      submitData.castId = raw.castId ? Number(raw.castId) : null;
-      submitData.educationLevel = raw.educationLevel || null;
-      submitData.phoneNumber = raw.phoneNumber || null;
-      submitData.address = raw.address || null;
-      submitData.profileImage = raw.profileImage || null;
-    }
-
-    if (isUpdate && !submitData.id) {
-      submitData.id = this.sectorModal.initialData.id;
+    if (isUpdate) {
+      submitData.id = Number(raw.id || this.sectorModal.initialData.id);
     }
 
     const request = isUpdate
@@ -360,8 +357,14 @@ export class SectorComponent implements OnInit {
       const editData = { ...row };
 
       // Convert IDs to strings to ensure matching with dropdown values
-      ['mandalId', 'villageId', 'categoryId', 'castId'].forEach(key => {
-        if (editData[key]) editData[key] = String(editData[key]);
+      ['id', 'mandalId', 'villageId', 'categoryId', 'castId'].forEach(key => {
+        if (editData[key]) {
+          if (key === 'villageId' && Array.isArray(editData[key])) {
+            editData[key] = String(editData[key][0]);
+          } else {
+            editData[key] = String(editData[key]);
+          }
+        }
       });
 
       if (editData.isSectorSanyojak !== undefined) {

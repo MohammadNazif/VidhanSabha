@@ -32,6 +32,15 @@ export class MandalComponent implements OnInit {
     private crudHandler: CrudHandlerService
   ) { }
 
+  totalCount = 0;
+
+  // Server-side state
+  pageNumber = 1;
+  pageSize = 50;
+  searchTerm = '';
+  sortBy = '';
+  isDescending = false;
+
   isStatePrabhari(): boolean {
     return (this.authService.getRole() || '').toUpperCase().trim() === 'STATEPRABHARI';
   }
@@ -39,39 +48,27 @@ export class MandalComponent implements OnInit {
   defaultStateId: string | null = null;
 
   ngOnInit() {
-    if (this.isStatePrabhari()) {
-      // Fetch the assigned state ID
-      this.stateService.getAllStates().subscribe({
-        next: (response) => {
-          const list = response?.data || response || [];
-          if (list.length > 0) {
-            this.defaultStateId = String(list[0].stateId || list[0].id);
-
-            // Simplify fields for State Prabhari
-            const districtField = this.addMandalConfig.fields.find(f => f.id === 'districtId');
-            if (districtField) {
-              delete districtField.dependsOn;
-              districtField.apiUrl = () => `district/getAll?stateId=${this.defaultStateId}`;
-            }
-          }
-        }
-      });
-    }
     this.loadMandals();
   }
 
   loadMandals() {
-    this.mandalService.getAllMandals().subscribe({
+    const params = {
+      pageNumber: this.pageNumber,
+      pageSize: this.pageSize,
+      searchTerm: this.searchTerm,
+      sortBy: this.sortBy,
+      isDescending: this.isDescending
+    };
+
+    this.mandalService.getAllMandals(params).subscribe({
       next: (response) => {
-        if (response.isSuccess) {
-          this.mandalList = response.data;
-        } else if (Array.isArray(response)) {
-          this.mandalList = response;
-        } else if (response && Array.isArray(response.data)) {
-          this.mandalList = response.data;
+        const dataWrap = response.data;
+        if (dataWrap && dataWrap.items) {
+          this.mandalList = dataWrap.items;
+          this.totalCount = dataWrap.totalCount || 0;
         } else {
-          console.warn('Unexpected response format:', response);
-          this.mandalList = [];
+          this.mandalList = Array.isArray(dataWrap) ? dataWrap : [];
+          this.totalCount = this.mandalList.length;
         }
       },
       error: (err) => {
@@ -80,45 +77,29 @@ export class MandalComponent implements OnInit {
     });
   }
 
+  handlePageChange(event: any) {
+    this.pageNumber = event.currentPage;
+    this.pageSize = event.pageSize;
+    this.loadMandals();
+  }
+
+  handleSortChange(event: any) {
+    this.sortBy = event.column;
+    this.isDescending = event.direction === 'desc';
+    this.pageNumber = 1;
+    this.loadMandals();
+  }
+
+  handleSearchChange(term: string) {
+    this.searchTerm = term;
+    this.pageNumber = 1;
+    this.loadMandals();
+  }
+
   addMandalConfig: FormConfig = {
     title: 'Add New Mandal',
     submitLabel: 'Create Mandal',
     fields: [
-      {
-        id: 'districtId',
-        name: 'districtId',
-        label: 'Select District',
-        type: 'select',
-        placeholder: '--Select District--',
-        apiUrl: () => `district/getAll?stateId=${this.defaultStateId || ''}`,
-        apiMapper: (data: any) => {
-          const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
-          return list.map((item: any) => ({
-            value: String(item.id),
-            label: item.name
-          }));
-        },
-        validations: [Validators.required],
-        gridColSpan: 6
-      },
-      {
-        id: 'vidhanId',
-        name: 'vidhanId',
-        label: 'Select Vidhan Sabha',
-        type: 'select',
-        placeholder: '--Select Vidhan Sabha--',
-        dependsOn: 'districtId',
-        apiUrl: (districtId: any) => `vidhansabha/getAll?districtId=${districtId}`,
-        apiMapper: (data: any) => {
-          const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
-          return list.map((item: any) => ({
-            value: String(item.id),
-            label: item.name
-          }));
-        },
-        validations: [Validators.required],
-        gridColSpan: 6
-      },
       {
         id: 'name',
         name: 'name',
@@ -142,13 +123,14 @@ export class MandalComponent implements OnInit {
     selectable: false,
     filterable: true,
     paginated: true,
-    defaultPageSize: 10,
+    defaultPageSize: 50,
     pageSizeOptions: [10, 20, 50],
     searchable: true,
-    searchPlaceholder: 'Search members...',
+    searchPlaceholder: 'Search mandals...',
     showRowNumbers: true,
     striped: true,
-    hoverable: true
+    hoverable: true,
+    serverSide: true
   };
 
   actions: TableAction[] = [
@@ -181,16 +163,16 @@ export class MandalComponent implements OnInit {
     if (!result.status) return;
 
     const raw = result.data;
-    const userId = this.authService.getUserId();
     const isUpdate = !!(raw.id || (this.mandalModal.initialData && this.mandalModal.initialData.id));
 
     const submitData: any = {
-      ...raw,
-      id: isUpdate ? (raw.id || this.mandalModal.initialData.id) : null,
-      vidhanId: Number(raw.vidhanId),
-      stateId: Number(raw.stateId || this.defaultStateId),
-      userId: userId ? String(userId) : null
+      vidhanId: 0, // Static vidhanId as requested
+      name: raw.name
     };
+
+    if (isUpdate) {
+      submitData.id = Number(raw.id || this.mandalModal.initialData.id);
+    }
 
     const request = isUpdate
       ? this.mandalService.updateMandal(submitData)
