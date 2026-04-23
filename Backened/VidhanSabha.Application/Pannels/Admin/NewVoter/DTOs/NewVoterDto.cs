@@ -23,8 +23,12 @@ namespace VidhanSabha.Application.Pannels.Admin.NewVoter.DTOs
         public class NewVoterResponseDto
         {
             public int Id { get; set; }
+            public int SectorId { get; set; }
+            public string SectorName { get; set; }
+            public string SectorSanyojak { get; set; }
             public int BoothId { get; set; }
             public int BoothNumber { get; set; }
+            public string BoothSanyojak { get; set; }
             public List<VillageResponseDtos> Villages { get; set; } = new();
             public string Name { get; set; } = string.Empty;
             public string FatherName { get; set; }
