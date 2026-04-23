@@ -11,6 +11,7 @@ using VidhanSabha.Application.Common.CredentialMananger;
 using VidhanSabha.Application.Common.CredentialMananger.Interface;
 using VidhanSabha.Application.Common.DesignatinType.Interface;
 using VidhanSabha.Application.Common.District.Interfaces;
+using VidhanSabha.Application.Common.NewFolder.Interface;
 using VidhanSabha.Application.Common.Occupation.Interface;
 using VidhanSabha.Application.Common.Party.Interfaces;
 using VidhanSabha.Application.Common.SahmatAsahmatType.Interfaces;
@@ -102,6 +103,7 @@ namespace VidhanSabha.Infrastructure.DependencyInjection
             services.AddScoped<IBDCRepository, BDCRepository>();
             services.AddScoped<ISeniorDisabledTypeRepository,SeniorDisabledTypeRepository>();
             services.AddScoped<ISeniorDisabledRepository,SeniorDisabledRepository>();
+            services.AddScoped<IMemberModulePermissionRepository, MemberModulePermissionRepository>();
 
             return services;
         }

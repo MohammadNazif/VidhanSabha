@@ -1,6 +1,9 @@
 ﻿// Endpoints/AuthEndpoints.cs
 using MediatR;
 using VidhanSabha.Api.Responses;
+using VidhanSabha.Application.Common.MemberModulePermission.Command;
+using VidhanSabha.Application.Common.MemberModulePermission.Dtos;
+using VidhanSabha.Application.Common.MemberModulePermission.Query;
 using VidhanSabha.Application.Pannels.Auth.Commands.Login;
 using VidhanSabha.Application.Pannels.Auth.DTOs;
 using VidhanSabha.Application.Pannels.Auth.Queries.GetMobileNumber;
@@ -11,6 +14,10 @@ public static class AuthEndpoints
     {
         var auth = app.MapGroup("/api/auth")
                       .WithTags("Auth");
+
+        var permissions = app.MapGroup("/api/permission")
+              .WithTags("Permission");
+
 
         // ── LOGIN ────────────────────────────────────────────
         auth.MapPost("/login", async (
@@ -42,5 +49,19 @@ public static class AuthEndpoints
         .WithName("GetUserByMobile")
         .Produces<ApiResponse<LoginResponseDto>>(200)
         .Produces<ApiResponse<LoginRequestDto>>(404);
+
+        permissions.MapPost("/create", async (IMediator mediator, List<MemberModulePermissionDto> request) =>
+        {
+            var data = await mediator.Send(new CreateMemberModulePermissionCommand(request));
+            return Results.Ok(ApiResponse<int>.Ok(data, "Permession Granted Successfully"));
+        }).WithName("accessPermission")
+        .Produces(200);
+
+        permissions.MapPost("/getbyuserid", async (IMediator mediator,string UserId) =>
+        {
+            var data = await mediator.Send(new getAllPermissionbyUseridQuery(UserId));
+            return Results.Ok(ApiResponse<IReadOnlyList<MemberModulePermissionResDto>>.Ok(data, "Permession fetched Successfully"));
+        }).WithName("getPermission")
+      .Produces(200);
     }
 }

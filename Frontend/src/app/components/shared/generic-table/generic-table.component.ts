@@ -150,7 +150,9 @@ export class GenericTableComponent implements OnInit, OnChanges, OnDestroy {
     );
   }
 
-  trackByIndex: TrackByFunction<any> = (index: number) => index;
+  trackById(index: number, item: any) {
+    return item.id || index;
+  }
 
   ngOnInit() {
     this.pageState.pageSize = this.mergedConfig.defaultPageSize || 10;

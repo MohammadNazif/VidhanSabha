@@ -24,12 +24,12 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
         public BoothRepository(DatabaseContext context ) : base(context)
         { 
         }
-        public async Task AddAsync(Tbl_Booth booth, CancellationToken ct = default)
+        public async Task<int> AddAsync(Tbl_Booth booth, CancellationToken ct = default)
         {
             try
             {
                 await _context.Tbl_Booth.AddAsync(booth, ct);
-                await _context.SaveChangesAsync();
+                return await _context.SaveChangesAsync();
             }
             catch(Exception ex)
             {
@@ -84,11 +84,13 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
                 defaultSort: b => b.BoothNumber,
                 projection: b => new BoothResponseDto
                 {
+                   
                     Id = b.Id,
                     MandalId = b.MandalId,
                     MandalName = b.Mandal.Name,
                     SectorId = b.SectorId,
                     SectorName = b.Sector.SectorName,
+                    UserId = b.Sanyojak.UserId,
                     BoothNumber = b.BoothNumber,
                     PollingStationName = b.PollingStationName,
                     PollingStationLocation = b.PollingStationLocation,
@@ -116,7 +118,10 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
             );
         }
 
-       
+        public Task<Tbl_BoothSanyojak?> GetByBoothIdAsync(int boothId, CancellationToken ct)
+        {
+            throw new NotImplementedException();
+        }
 
         public async Task<Tbl_Booth?> GetByIdAsync(int id, CancellationToken ct)
         {
@@ -124,6 +129,26 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
                 .Include(b => b.Villages)    
                 .Include(b => b.Sanyojak)   
                 .FirstOrDefaultAsync(b => b.Id == id, ct);
+        }
+
+        public async Task<List<BoothInchargeResponse>> GetInchargeByBoothIdAsync(int? boothId, CancellationToken ct)
+        {
+            var query = _context.Tbl_BoothSanyojak.AsQueryable();
+
+            if (boothId.HasValue)
+            {
+                query = query.Where(x => x.BoothId == boothId && x.Status);
+            }
+
+            return await query
+                .Where( x =>x.Status)
+                .Select(x => new BoothInchargeResponse
+                {
+                    UserId = x.UserId,
+                    BoothId = x.BoothId,
+                    BoothInchargeName = x.InchargeName
+                })
+                .ToListAsync(ct);
         }
 
         public Task SaveAsync(CancellationToken ct = default)

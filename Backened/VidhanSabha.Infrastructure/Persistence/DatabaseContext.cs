@@ -83,6 +83,7 @@ namespace VidhanSabha.Infrastructure.Persistence
         public DbSet<Tbl_SeniorDisabledType> Tbl_SeniorDisabledType => Set<Tbl_SeniorDisabledType>();
         public DbSet<Tbl_SeniorDisabled> Tbl_SeniorDisabled => Set<Tbl_SeniorDisabled>();
 
+        public DbSet<Tbl_MemberModulePermissions> Tbl_MemberModulePermissions => Set<Tbl_MemberModulePermissions>();
         protected override void OnModelCreating(ModelBuilder modelBuilder)
             {
                 // ✅ Ek line — is assembly ki saari Configuration classes auto-pick ho jayengi

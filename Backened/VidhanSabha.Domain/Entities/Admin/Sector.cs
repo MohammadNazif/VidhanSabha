@@ -15,6 +15,7 @@ namespace VidhanSabha.Domain.Entities.Admin
         public string SectorName { get; private set; }
         public bool IsSectorSanyojak { get; private set; }
 
+        public string? UserId { get; set; }
         public string CreatedBy { get; set; }
         public int CreatedById { get; private set; }
 
@@ -71,6 +72,7 @@ namespace VidhanSabha.Domain.Entities.Admin
             int mandalId,
             int villageId,
             string sectorName,
+            string userId,
             string inchargeName,
             int age,
             string fatherName,
@@ -92,6 +94,7 @@ namespace VidhanSabha.Domain.Entities.Admin
 
             return new Tbl_Sector
             {
+                UserId =userId,
                 CreatedById = createdById,
                 CreatedBy = createdBy,
                 MandalId = mandalId,

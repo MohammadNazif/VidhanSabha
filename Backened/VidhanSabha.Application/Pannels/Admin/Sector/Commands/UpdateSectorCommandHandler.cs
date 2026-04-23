@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using MediatR;
+using VidhanSabha.Application.Common.CredentialMananger;
+using VidhanSabha.Application.Common.CredentialMananger.Interface;
 using VidhanSabha.Application.Pannels.Admin.Sector.DTOs;
 using VidhanSabha.Application.Pannels.Admin.Sector.Interface;
 using VidhanSabha.Domain.Entities.Admin;
@@ -13,12 +16,14 @@ namespace VidhanSabha.Application.Pannels.Admin.Sector.Commands
     public class UpdateSectorCommandHandler : IRequestHandler<UpdateSectorCommand, SectorResponseDto>
     {
         private readonly ISectorRepository _sectorRepository;
-      
+        private readonly CredentialManagerFunc _credentialManager;
 
-        public UpdateSectorCommandHandler(ISectorRepository sectorRepository)
+        public UpdateSectorCommandHandler(ISectorRepository sectorRepository, CredentialManagerFunc credentialManager)
         {
             _sectorRepository = sectorRepository;
-         
+            _credentialManager = credentialManager;
+
+
         }
 
         public async Task<SectorResponseDto> Handle(UpdateSectorCommand request, CancellationToken cancellationToken)
@@ -34,6 +39,7 @@ namespace VidhanSabha.Application.Pannels.Admin.Sector.Commands
             }
             else
             {
+                var oldPhone = sector.PhoneNumber;
                 if (dto.InchargeName is null || dto.Age is null || dto.FatherName is null ||
                     dto.CategoryId is null || dto.CastId is null ||
                     dto.EducationLevel is null || dto.PhoneNumber is null || dto.Address is null)
@@ -52,7 +58,14 @@ namespace VidhanSabha.Application.Pannels.Admin.Sector.Commands
                     dto.PhoneNumber,
                     dto.Address,
                     dto.ProfileImage
-                );
+                 );
+                if (oldPhone != dto.PhoneNumber)
+                {
+                    await _credentialManager.UpdateCredentialAsync(
+                         sector.UserId,
+                        dto.PhoneNumber
+                    );
+                }
             }
             _sectorRepository.UpdateAsync(sector);
             return MapToDto(sector);

@@ -23,6 +23,8 @@ import { BlockComponent } from './components/admin/block/block.component';
 import { PradhanComponent } from './components/admin/pradhan/pradhan.component';
 import { BdcComponent } from './components/admin/bdc/bdc.component';
 import { SeniorDisabledComponent } from './components/admin/senior-disabled/senior-disabled.component';
+import { AllowAccessComponent } from './components/admin/access/allow-access.component';
+import { AllowAccessListComponent } from './components/admin/access/allow-access-list.component';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -55,6 +57,8 @@ export const routes: Routes = [
   { path: 'varisth-naagarik-viklaang-list', component: SeniorDisabledComponent },
   { path: 'senior-citizen-list', component: SeniorDisabledComponent },
   { path: 'disabled-list', component: SeniorDisabledComponent },
+  { path: 'allow-access', component: AllowAccessComponent },
+  { path: 'allow-access-list', component: AllowAccessListComponent },
   { path: 'superadmin/dashboard', component: SuperDashboardComponent },
   { path: 'superadmin/designation', component: DesignationComponent },
   { path: 'superadmin/state', component: StateComponent },

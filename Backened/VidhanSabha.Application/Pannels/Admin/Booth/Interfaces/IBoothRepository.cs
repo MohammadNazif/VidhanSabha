@@ -13,10 +13,14 @@ namespace VidhanSabha.Application.Pannels.Admin.Booth.Interfaces
     public interface IBoothRepository
     {
         Task<Tbl_Booth?> GetByIdAsync(int id, CancellationToken ct = default);
+
+        Task<Tbl_BoothSanyojak?> GetByBoothIdAsync(int boothId, CancellationToken ct);
+
+        Task<List<BoothInchargeResponse>> GetInchargeByBoothIdAsync(int? boothId, CancellationToken ct);
         Task<PagedResult<BoothResponseDto>> GetAllAsync(BoothQueryParams qp, CancellationToken ct = default);
         //Task<Tbl_Booth?> GetByIdAsync(int id, CancellationToken ct);
         Task<List<BoothNumberDto>> BoothNumberExistsAsync();
-        Task AddAsync(Tbl_Booth booth, CancellationToken ct = default);
+        Task<int> AddAsync(Tbl_Booth booth, CancellationToken ct = default);
         Task UpdateAsync(Tbl_Booth booth, CancellationToken ct);
         Task Delete(Tbl_Booth booth);
         Task SaveAsync(CancellationToken ct = default);

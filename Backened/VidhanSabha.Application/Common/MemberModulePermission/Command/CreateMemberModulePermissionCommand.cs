@@ -10,8 +10,8 @@ namespace VidhanSabha.Application.Common.MemberModulePermission.Command
 {
     public class CreateMemberModulePermissionCommand : IRequest<int>
     {
-        public MemberModulePermissionDto Dto;
-        public CreateMemberModulePermissionCommand(MemberModulePermissionDto dto)
+        public List<MemberModulePermissionDto> Dto;
+        public CreateMemberModulePermissionCommand(List<MemberModulePermissionDto> dto)
         {
             Dto = dto;
         }

@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MediatR;
 using VidhanSabha.Application.Common.NewFolder.Interface;
+using VidhanSabha.Domain.Entities.Common;
 
 namespace VidhanSabha.Application.Common.MemberModulePermission.Command
 {
@@ -12,15 +13,21 @@ namespace VidhanSabha.Application.Common.MemberModulePermission.Command
     //    {
     //        private IMemberModulePermissionRepository _repository;
 
-    //        public CreateMemberModulePermissionCommandHandler(IMemberModulePermissionRepository repository)
-    //        {
+        public CreateMemberModulePermissionCommandHandler(IMemberModulePermissionRepository repository)
+        {
 
-    //            _repository = repository;
-    //        }
-    //        public Task<int> Handle(CreateMemberModulePermissionCommand request, CancellationToken cancellationToken)
-    //        {
-    //            return _repository.Add(request.Dto);
-    //        }
-    //    }
-    //}
+            _repository = repository;
+        }
+        public Task<int> Handle(CreateMemberModulePermissionCommand request, CancellationToken cancellationToken)
+        {
+            var req = request.Dto;
+            var entities = req.Select(b => Tbl_MemberModulePermissions.Create(b.MemberId,
+                b.Module,b.HasPermission
+                )).ToList();
+
+      
+              return _repository.AddRangeAsync(entities);
+        }
+    }
 }
+   

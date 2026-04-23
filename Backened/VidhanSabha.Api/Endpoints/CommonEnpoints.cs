@@ -26,6 +26,8 @@ using VidhanSabha.Application.Common.State.Dto;
 using VidhanSabha.Application.Common.State.Query;
 using VidhanSabha.Application.Common.Village.DTOs;
 using VidhanSabha.Application.Common.Village.Queries;
+using VidhanSabha.Application.Pannels.Admin.Booth.Dtos;
+using VidhanSabha.Application.Pannels.Admin.Booth.Queries;
 using VidhanSabha.Application.Pannels.Auth.DTOs;
 
 namespace VidhanSabha.Api.Endpoints
@@ -59,10 +61,10 @@ namespace VidhanSabha.Api.Endpoints
             common.MapGet("/village", async (int id, IMediator mediator) =>
             {
                 var result = await mediator.Send(new GetallVillageByMandalId(id));
-                return Results.Ok(ApiResponse<List<VillageResponseDto>>.Ok(result));
+                return Results.Ok(ApiResponse<List<Application.Common.Village.DTOs.VillageResponseDto>>.Ok(result));
             })
              .WithName("GetAllVillages")
-             .Produces<List<VillageResponseDto>>(200);
+             .Produces<List<Application.Common.Village.DTOs.VillageResponseDto>>(200);
 
             common.MapGet("/boothNumber", async (IMediator mediator) =>
             {
@@ -99,10 +101,18 @@ namespace VidhanSabha.Api.Endpoints
             common.MapGet("/getstates", async (IMediator mediator) =>
             {
                 var result = await mediator.Send(new getAllStateQuery());
-                return Results.Ok(ApiResponse<IReadOnlyList<StateResponseDto>>.Ok(result));
+                return Results.Ok(ApiResponse<IReadOnlyList<StateResponseDto>>.Ok(result)); 
              })
              .WithName("getstates")
              .Produces<List<StateResponseDto>>(200);
+
+               common.MapGet("/getboothincharge", async (IMediator mediator,int? boothId) =>
+            {
+                var result = await mediator.Send(new getAllBoothInchargeQuery(boothId));
+                return Results.Ok(ApiResponse<IReadOnlyList<BoothInchargeResponse>>.Ok(result)); 
+             })
+             .WithName("getboothincharge")
+             .Produces<List<BoothInchargeResponse>>(200);
 
             common.MapGet("/getdistrict", async (IMediator mediator, int id) =>
             {

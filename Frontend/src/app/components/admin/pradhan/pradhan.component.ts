@@ -1,17 +1,14 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, Validators } from '@angular/forms';
 import { GenericTableComponent } from '../../shared/generic-table/generic-table.component';
-
 import { TableConfig, TableColumn, TableAction } from '../../shared/generic-table/generic-table.types';
 import { FormConfig, FormResult } from '../../shared/generic-modal-form/generic-form.types';
 import { PradhanService } from '../../../Services/Admin/pradhan/pradhan.service';
 import { CrudHandlerService } from '../../../Services/common/crud-handler.service';
-import { Validators } from '@angular/forms';
 import { ToastService } from '../../../Services/common/toast/toast.service';
 import { GenericModalButtonComponent } from '../../shared/generic-modal-form/generic-modal-button.component';
 import { PageHeaderComponent } from '../../shared/page-header/page-header.component';
-
 
 @Component({
   selector: 'app-pradhan',
@@ -57,11 +54,11 @@ export class PradhanComponent implements OnInit {
     { key: 'name', label: 'Name', sortable: true },
     { key: 'designationName', label: 'Designation' },
     { key: 'contact', label: 'Contact' },
-    { key: 'gender', label: 'Gender' },
+    { key: 'genderValue', label: 'Gender' },
     {
       key: 'villageNames', label: 'Assigned Villages', formatter: (val: any, row: any) => {
         if (row.villages && Array.isArray(row.villages)) {
-          return row.villages.map((v: any) => v.villageName || 'na').join(', ');
+          return row.villages.map((v: any) => v.villageName || v.name || 'na').join(', ');
         }
         return val || 'N/A';
       }
@@ -77,6 +74,7 @@ export class PradhanComponent implements OnInit {
     selectable: false,
     paginated: true,
     searchable: true,
+    serverSide: true,
     defaultPageSize: 10
   };
 
@@ -99,9 +97,9 @@ export class PradhanComponent implements OnInit {
         label: 'Gender',
         type: 'select',
         options: [
-          { value: 'Male', label: 'Male' },
-          { value: 'Female', label: 'Female' },
-          { value: 'Other', label: 'Other' }
+          { value: '1', label: 'Male' },
+          { value: '2', label: 'Female' },
+          { value: '3', label: 'Other' }
         ],
         gridColSpan: 6,
         validations: [Validators.required]
@@ -135,16 +133,16 @@ export class PradhanComponent implements OnInit {
         id: 'villageId',
         name: 'villageId',
         label: 'Assigned Villages',
-        type: 'selection-table',
+        type: 'select',
         gridColSpan: 12,
+        multiple: true,
         validations: [Validators.required],
-        apiUrl: 'common/village',
+        apiUrl: 'common/getallvillages',
         apiMapper: (data: any) => {
           const list = Array.isArray(data?.data?.items) ? data.data.items : (Array.isArray(data?.items) ? data.items : (Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : [])));
           return list.map((item: any) => ({
-            id: item.id || item.villageId || item.VillageId,
-            name: item.villageName || item.name || item.Name,
-            anshik: 'No'
+            value: String(item.id || item.villageId),
+            label: item.name || item.villageName
           }));
         }
       }
@@ -186,7 +184,18 @@ export class PradhanComponent implements OnInit {
         () => this.loadPradhans()
       );
     } else if (action.id === 'edit') {
-      this.pradhanModal.openModal(row);
+      const editData = { ...row };
+
+      // Standardize select values as strings
+      if (editData.designationId) editData.designationId = String(editData.designationId);
+      if (editData.gender) editData.gender = String(editData.gender);
+
+      // Transform villages for multi-select binding (expects array of string IDs)
+      if (row.villages && Array.isArray(row.villages)) {
+        editData.villageId = row.villages.map((v: any) => String(v.villageId || v.id));
+      }
+
+      this.pradhanModal.openModal(editData);
     }
   }
 
@@ -201,12 +210,11 @@ export class PradhanComponent implements OnInit {
     const raw = result.data;
     const isUpdate = !!(raw.id || (this.pradhanModal.initialData && this.pradhanModal.initialData.id));
 
-    // Mapping to camelCase as strictly requested in the JSON snippet
     const submitData: any = {
       name: raw.name,
       designationId: Number(raw.designationId),
       contact: String(raw.contact),
-      gender: raw.gender,
+      gender: Number(raw.gender),
       villageId: Array.isArray(raw.villageId)
         ? raw.villageId.map((v: any) => Number(v.id || v))
         : [Number(raw.villageId)]
