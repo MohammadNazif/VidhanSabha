@@ -31,10 +31,7 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
             {
                 throw;
             }
-
-
         }
-
         public int Update(Tbl_NewVoter newvoter)
         {
             try
@@ -48,7 +45,6 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
             }
 
         }
-
         public void Delete(Tbl_NewVoter newvoter)
         {
             throw new NotImplementedException();

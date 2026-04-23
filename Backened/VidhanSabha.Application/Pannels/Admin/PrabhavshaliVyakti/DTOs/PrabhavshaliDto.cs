@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.PortableExecutable;
 using System.Text;
 using System.Threading.Tasks;
 using VidhanSabha.Application.Pannels.Admin.PravasiVoters.DTOs;
@@ -34,6 +35,28 @@ namespace VidhanSabha.Application.Pannels.Admin.PrabhavshaliVyakti.DTOs
         public string Mobile { get; set; }
         public string Description { get; set; }
     }
+
+    public class PrabhavshaliResponseDesinIdDto
+    {
+        public int DesgId { get; set; }
+        public int Id { get; set; }
+        public int SectorId { get; set; }
+        public string SectorName { get; set; }
+        public string SectoeSanyojak { get; set; }
+        public int BoothId { get; set; }
+        public int BoothNumber { get; set; }
+        public string BoothSanyojak { get; set; }
+        public string DesignationName { get; set; }
+        public List<VillageResponseDtos> Villages { get; set; } = new();
+        public string Name { get; set; }
+        public int CategoryId { get; set; }
+        public string CategoryName { get; set; }
+        public int CastId { get; set; }
+        public string CastName { get; set; }
+        public string Mobile { get; set; }
+        public string Description { get; set; }
+    }
+
     public class VillageResponseDtos
     {
         public int VillageId { get; set; }

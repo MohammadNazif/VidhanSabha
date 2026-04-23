@@ -92,5 +92,42 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
             }
         }
 
+        public async Task<List<PrabhavshaliResponseDesinIdDto>> GetByDesgIdAsync(int desgid)
+        {
+            try
+            {
+                return await _context.Tbl_PrabhavshaliVyakti
+                    .Where(m => m.DesignationId == desgid)
+                    .Select(m => new PrabhavshaliResponseDesinIdDto
+                    {
+                        Id = m.Id,
+                        DesgId = m.DesignationId,
+                        SectorId = m.Booth.Sector.Id,
+                        SectorName = m.Booth.Sector.SectorName,
+                        SectoeSanyojak = m.Booth.Sector.InchargeName,
+                        BoothId = m.BoothId,
+                        BoothNumber = m.Booth != null ? m.Booth.BoothNumber : 0,
+                        BoothSanyojak = m.Booth.Sanyojak.InchargeName,
+                        DesignationName = m.Designation != null ? m.Designation.DesignationName : "Unknown",
+                        Name = m.Name,
+                        CategoryId = m.CategoryId,
+                        CategoryName = m.Category != null ? m.Category.Name : "N/A",
+                        CastId = m.CastId,
+                        CastName = m.Cast != null ? m.Cast.CastName : "N/A",
+                        Mobile = m.Mobile,
+                        Description = m.Description,
+                        Villages = m.Villages.Select(v => new VillageResponseDtos
+                        {
+                            VillageId = v.VillageId,
+                            VillageName = v.Village != null ? v.Village.VillageName : "N/A"
+                        }).ToList(),
+                    }).ToListAsync();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
     }
 }

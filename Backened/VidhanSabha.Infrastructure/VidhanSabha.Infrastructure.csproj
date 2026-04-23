@@ -17,8 +17,4 @@
     <ProjectReference Include="..\VidhanSabha.Domain\VidhanSabha.Domain.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="DependencyInjection\" />
-  </ItemGroup>
-
 </Project>

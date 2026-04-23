@@ -21,7 +21,9 @@ using VidhanSabha.Application.Pannels.Admin.BDC.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.Block.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.Booth.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.BoothSamiti.Interfaces;
+using VidhanSabha.Application.Pannels.Admin.BoothVoter.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.DoubleVoter.Interfaces;
+using VidhanSabha.Application.Pannels.Admin.Influencer.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.Mandal.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.NewVoter.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.PannaPramukh.Interfaces;
@@ -47,7 +49,7 @@ using VidhanSabha.Infrastructure.Repositories.StatePrabhari;
 using VidhanSabha.Infrastructure.Repositories.SuperAdmin;
 
 
-namespace VidhanSabha.Infrastructure.Extensions
+namespace VidhanSabha.Infrastructure.DependencyInjection
 {
     public static class DependencyInjection
     {
@@ -88,6 +90,9 @@ namespace VidhanSabha.Infrastructure.Extensions
             services.AddScoped<IPradhanRepository, PradhanRepository>();
             services.AddScoped<IBoothSamitiDesignationRepository, BoothSamitiDesignationRepository>();
             services.AddScoped<IBoothSamitiRepository, BoothSamitiRepository>();
+            services.AddScoped<IInfluencerRepository, InfluencerRepository>();
+            services.AddScoped<IBoothVoterRepository, BoothVoterRepository>();
+
             services.AddScoped<IVidhanSabhaRepository, VidhanSabhaRepository>();
             
             services.AddScoped<IDoubleVoterRepository, DoubleVoterRepository>();
