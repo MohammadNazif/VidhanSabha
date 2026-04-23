@@ -15,6 +15,10 @@ export class AccessService extends BaseApiService {
     return this.http.post(`${this.apiUrl}/permission/create`, data);
   }
 
+  updatePermission(data: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/permission/update`, data);
+  }
+
   /**
    * Old method - deprecated
    */

@@ -70,5 +70,32 @@ namespace VidhanSabha.Infrastructure.Repositories.Common
         {
             throw new NotImplementedException();
         }
+        public async Task<int> UpdateRangeAsync(List<Tbl_MemberModulePermissions> entities)
+        {
+            try
+            {
+                var memberId = entities.First().MemberId;
+
+                // Fetch existing tracked entities from DB
+                var existing = await _context.Tbl_MemberModulePermissions
+                    .Where(x => x.MemberId == memberId)
+                    .ToListAsync();
+
+                foreach (var existingItem in existing)
+                {
+                    var updated = entities.FirstOrDefault(e => e.Module == existingItem.Module);
+                    if (updated != null)
+                    {
+                        existingItem.UpdateProperties(updated.hasPermission); // update on tracked entity
+                    }
+                }
+
+                return await _context.SaveChangesAsync();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

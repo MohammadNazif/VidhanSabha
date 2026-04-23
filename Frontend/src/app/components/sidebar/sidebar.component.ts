@@ -3,10 +3,12 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { NavItem } from './sidebar.types';
 import { AuthServiceService } from '../../Services/Auth/auth.service';
+import { ModulePermission } from '../../models/module-permission.enum';
 
 import {
   LucideAngularModule
 } from 'lucide-angular';
+import { PermissionService } from '../../Services/common/permission.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -24,7 +26,11 @@ export class SidebarComponent implements OnInit {
   @Input() isMobile = false;
   @Output() collapsedChange = new EventEmitter<boolean>();
 
-  constructor(private router: Router, private authService: AuthServiceService) { }
+  constructor(
+    private router: Router,
+    private authService: AuthServiceService,
+    private permissionService: PermissionService
+  ) { }
 
   profileMenuOpen = false;
 
@@ -42,29 +48,29 @@ export class SidebarComponent implements OnInit {
   }
 
   navItems: NavItem[] = [
-    { icon: 'layout-dashboard', label: 'Dashboard', route: '/', roles: ['ADMIN'] },
+    { icon: 'layout-dashboard', label: 'Dashboard', route: '/', roles: ['ADMIN', 'BoothSanyojak'] },
     {
       icon: 'database', label: 'Master Data',
       badge: 543,
       expanded: false,
-      roles: ['ADMIN'],
+      roles: ['ADMIN', 'BoothSanyojak'],
       children: [
-        { label: 'Mandal', route: '/mandal' },
-        { label: 'Sector', route: '/sector' },
-        { label: 'Booth', route: '/booth' },
-        { label: 'PannaPramukh', route: '/panna-pramukh' },
-        { label: 'Pravasi Voter', route: '/pravasi-voter' },
-        { label: 'New Voter', route: '/new-voter' },
-        { label: 'Varisth Naagarik/Viklaang', route: '/varisth-naagarik-viklaang' },
-        { label: 'Booth Voter Description', route: '/booth-voter-description' },
-        { label: 'Sahmat/Asahmat', route: '/sahmat-asahmat' },
-        { label: 'Double Voter/Married', route: '/double-voter' },
-        { label: 'Booth Samiti', route: '/booth-samiti' },
-        { label: 'Prabhavshali Vyakt', route: '/prabhavshali-vyakt' },
-        { label: 'Influencer Person', route: '/influencer-person' },
-        { label: 'Block', route: '/block' },
-        { label: 'BDC', route: '/bdc' },
-        { label: 'Pradhan', route: '/pradhan' }
+        { label: 'Mandal', route: '/mandal', roles: ['ADMIN'] },
+        { label: 'Sector', route: '/sector', roles: ['ADMIN'] },
+        { label: 'Booth', route: '/booth', roles: ['ADMIN'] },
+        { label: 'PannaPramukh', route: '/panna-pramukh', roles: ['ADMIN', 'BoothSanyojak'], moduleId: ModulePermission.PannaPramukh },
+        { label: 'Pravasi Voter', route: '/pravasi-voter', roles: ['ADMIN', 'BoothSanyojak'], moduleId: ModulePermission.PravashiVoter },
+        { label: 'New Voter', route: '/new-voter', roles: ['ADMIN', 'BoothSanyojak'], moduleId: ModulePermission.NewVoter },
+        { label: 'Varisth Naagarik/Viklaang', route: '/varisth-naagarik-viklaang', roles: ['ADMIN', 'BoothSanyojak'], moduleId: ModulePermission.SeniororDisabled },
+        { label: 'Booth Voter Description', route: '/booth-voter-description', roles: ['ADMIN', 'BoothSanyojak'], moduleId: ModulePermission.BoothVoterDescrition },
+        { label: 'Sahmat/Asahmat', route: '/sahmat-asahmat', roles: ['ADMIN', 'BoothSanyojak'], moduleId: ModulePermission.Sahmat },
+        { label: 'Double Voter/Married', route: '/double-voter', roles: ['ADMIN', 'BoothSanyojak'], moduleId: ModulePermission.DoubleVoter },
+        { label: 'Booth Samiti', route: '/booth-samiti', roles: ['ADMIN', 'BoothSanyojak'], moduleId: ModulePermission.BoothSamiti },
+        { label: 'Prabhavshali Vyakt', route: '/prabhavshali-vyakt', roles: ['ADMIN', 'BoothSanyojak'], moduleId: ModulePermission.EffectivePersion },
+        { label: 'Influencer Person', route: '/influencer-person', roles: ['ADMIN'] },
+        { label: 'Block', route: '/block', roles: ['ADMIN'] },
+        { label: 'BDC', route: '/bdc', roles: ['ADMIN'] },
+        { label: 'Pradhan', route: '/pradhan', roles: ['ADMIN'] }
       ]
     },
     {
@@ -123,9 +129,9 @@ export class SidebarComponent implements OnInit {
         { label: 'Influencer Person List', route: '/influencer-person-list' },
       ]
     },
-    { icon: 'share-2', label: 'Socail Media', route: '/socail-media', roles: ['ADMIN'] },
-    { icon: 'calendar', label: 'Activity', route: '/activity', roles: ['ADMIN'] },
-    { icon: 'layout-dashboard', label: 'Dashboard', route: '/', roles: ['BoothSanyojak'] },
+    { icon: 'share-2', label: 'Socail Media', route: '/socail-media', roles: ['ADMIN', 'BoothSanyojak'], moduleId: ModulePermission.SocialMedia },
+    { icon: 'calendar', label: 'Activity', route: '/activity', roles: ['ADMIN', 'BoothSanyojak'], moduleId: ModulePermission.Activity },
+
     {
       icon: 'clipboard-list', label: 'Lists',
       badge: 0,
@@ -156,6 +162,11 @@ export class SidebarComponent implements OnInit {
     this.authService.userRole$.subscribe(() => {
       this.updateRenderedItems();
     });
+
+    // Also update when permissions change
+    this.permissionService.permissions$.subscribe(() => {
+      this.updateRenderedItems();
+    });
   }
 
   onSearch(event: Event) {
@@ -166,17 +177,31 @@ export class SidebarComponent implements OnInit {
   updateRenderedItems() {
     const currentRole = this.authService.getRole();
 
-    // First filter by role
+    // First filter by role and permission
     let filteredItems = this.navItems.filter(item => {
-      if (!item.roles || item.roles.length === 0) return true;
-      return currentRole && item.roles.some(role => role.toUpperCase() === currentRole.toUpperCase());
+      // Role check
+      const hasRole = !item.roles || item.roles.length === 0 ||
+        (currentRole && item.roles.some(role => role.toUpperCase() === currentRole.toUpperCase()));
+      if (!hasRole) return false;
+
+      // Permission check (skip for ADMIN/SUPERADMIN usually, but keep it generic)
+      if (item.moduleId !== undefined && !this.permissionService.hasPermission(item.moduleId)) return false;
+
+      return true;
     }).map(item => {
       if (item.children) {
         return {
           ...item,
           children: item.children.filter(child => {
-            if (!child.roles || child.roles.length === 0) return true;
-            return currentRole && child.roles.some(role => role.toUpperCase() === currentRole.toUpperCase());
+            // Role check
+            const hasRole = !child.roles || child.roles.length === 0 ||
+              (currentRole && child.roles.some(role => role.toUpperCase() === currentRole.toUpperCase()));
+            if (!hasRole) return false;
+
+            // Permission check
+            if (child.moduleId !== undefined && !this.permissionService.hasPermission(child.moduleId)) return false;
+
+            return true;
           })
         };
       }

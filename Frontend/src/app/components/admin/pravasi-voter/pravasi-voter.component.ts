@@ -11,6 +11,7 @@ import { ToastService } from '../../../Services/common/toast/toast.service';
 import { CrudHandlerService } from '../../../Services/common/crud-handler.service';
 import { AuthServiceService } from '../../../Services/Auth/auth.service';
 import { ActivatedRoute } from '@angular/router';
+import { ModulePermission } from '../../../models/module-permission.enum';
 
 @Component({
   selector: 'app-pravasi-voter',
@@ -214,13 +215,18 @@ export class PravasiVoterComponent implements OnInit {
   }
 
   loadVoters() {
-    const params = {
+    const params: any = {
       pageNumber: this.pageNumber,
       pageSize: this.pageSize,
       searchTerm: this.searchTerm,
       sortBy: this.sortBy,
       isDescending: this.isDescending
     };
+
+    const userId = this.authService.getUserId();
+    if (userId) {
+      params.userId = userId;
+    }
 
     this.voterService.getAllPravasivoters(params).subscribe({
       next: (response) => {
@@ -278,7 +284,9 @@ export class PravasiVoterComponent implements OnInit {
         this.voterService.deletePravasivoter(row.id),
         'Deleted',
         'Pravasi Voter deleted successfully!',
-        () => this.loadVoters()
+        () => this.loadVoters(),
+        true,
+        ModulePermission.PravashiVoter
       );
     } else if (action.id === 'edit') {
       const editData = { ...row };
@@ -308,7 +316,8 @@ export class PravasiVoterComponent implements OnInit {
       castId: Number(raw.castId),
       occupationId: Number(raw.occupationId),
       voterId: raw.voterId,
-      currentAddress: raw.currentAddress
+      currentAddress: raw.currentAddress,
+      userId: this.authService.getUserId()
     };
 
     const isUpdate = !!submitData.id;
@@ -320,7 +329,9 @@ export class PravasiVoterComponent implements OnInit {
       request,
       isUpdate ? 'Updated' : 'Success',
       `Pravasi Voter ${isUpdate ? 'updated' : 'created'} successfully!`,
-      () => this.loadVoters()
+      () => this.loadVoters(),
+      true,
+      ModulePermission.PravashiVoter
     );
   }
 }

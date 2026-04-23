@@ -11,6 +11,7 @@ import { ToastService } from '../../../Services/common/toast/toast.service';
 import { CrudHandlerService } from '../../../Services/common/crud-handler.service';
 import { AuthServiceService } from '../../../Services/Auth/auth.service';
 import { ActivatedRoute } from '@angular/router';
+import { ModulePermission } from '../../../models/module-permission.enum';
 
 @Component({
   selector: 'app-pannapramukh',
@@ -294,7 +295,9 @@ export class PannapramukhComponent implements OnInit {
         this.pannaService.deletePannapramukh(row.id),
         'Deleted',
         'Panna Pramukh deleted successfully!',
-        () => this.loadData()
+        () => this.loadData(),
+        true,
+        ModulePermission.PannaPramukh
       );
     } else if (action.id === 'edit') {
       const editData = { ...row };
@@ -339,7 +342,9 @@ export class PannapramukhComponent implements OnInit {
       request,
       isUpdate ? 'Updated' : 'Success',
       `Panna Pramukh ${isUpdate ? 'updated' : 'created'} successfully!`,
-      () => this.loadData()
+      () => this.loadData(),
+      true,
+      ModulePermission.PannaPramukh
     );
   }
 }

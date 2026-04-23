@@ -10,6 +10,7 @@ import { DoubleVoterService } from '../../../Services/Admin/double-voter/double-
 import { ToastService } from '../../../Services/common/toast/toast.service';
 import { CrudHandlerService } from '../../../Services/common/crud-handler.service';
 import { AuthServiceService } from '../../../Services/Auth/auth.service';
+import { ModulePermission } from '../../../models/module-permission.enum';
 
 @Component({
   selector: 'app-double-voter',
@@ -163,13 +164,18 @@ export class DoubleVoterComponent implements OnInit {
   }
 
   loadVoters() {
-    const params = {
+    const params: any = {
       pageNumber: this.pageNumber,
       pageSize: this.pageSize,
       searchTerm: this.searchTerm,
       sortBy: this.sortBy,
       isDescending: this.isDescending
     };
+
+    const userId = this.authService.getUserId();
+    if (userId) {
+      params.userId = userId;
+    }
 
     this.voterService.getAllDoubleVoters(params).subscribe({
       next: (response) => {
@@ -221,7 +227,9 @@ export class DoubleVoterComponent implements OnInit {
         this.voterService.deleteDoubleVoter(row.id),
         'Deleted',
         'Voter entry deleted successfully!',
-        () => this.loadVoters()
+        () => this.loadVoters(),
+        true,
+        ModulePermission.DoubleVoter
       );
     } else if (action.id === 'edit') {
       const editData = { ...row };
@@ -250,7 +258,8 @@ export class DoubleVoterComponent implements OnInit {
       voterId: raw.voterId,
       previousAddress: raw.previousAddress,
       currentAddress: raw.currentAddress,
-      description: raw.description
+      description: raw.description,
+      userId: this.authService.getUserId()
     };
 
     const isUpdate = !!submitData.id;
@@ -262,7 +271,9 @@ export class DoubleVoterComponent implements OnInit {
       request,
       isUpdate ? 'Updated' : 'Success',
       `Double voter ${isUpdate ? 'updated' : 'registered'} successfully!`,
-      () => this.loadVoters()
+      () => this.loadVoters(),
+      true,
+      ModulePermission.DoubleVoter
     );
   }
 
