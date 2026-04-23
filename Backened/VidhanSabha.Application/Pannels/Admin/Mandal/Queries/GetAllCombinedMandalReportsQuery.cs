@@ -9,7 +9,7 @@ using VidhanSabha.Application.Pannels.Admin.Mandal.DTOs;
 
 namespace VidhanSabha.Application.Pannels.Admin.Mandal.Queries
 {
-    public record GetAllCombinedMandalReportsQuery(MandalQueryParams QueryParams):IRequest<PagedResult<CombinedMandalReportDto>>
+    public record GetAllCombinedMandalReportsQuery(MandalQueryParams QueryParams):IRequest<PagedResult<MandalFullDto>>
     {
     }
 }

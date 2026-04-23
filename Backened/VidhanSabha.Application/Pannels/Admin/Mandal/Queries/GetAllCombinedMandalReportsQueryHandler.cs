@@ -13,7 +13,7 @@ using VidhanSabha.Application.Pannels.Admin.Mandal.Interfaces;
 namespace VidhanSabha.Application.Pannels.Admin.Mandal.Queries
 {
     public class GetAllCombinedMandalReportsQueryHandler
-        : IRequestHandler<GetAllCombinedMandalReportsQuery, PagedResult<CombinedMandalReportDto>>
+        : IRequestHandler<GetAllCombinedMandalReportsQuery, PagedResult<MandalFullDto>>
     {
         private readonly IMandalRepository _repo;
 
@@ -22,7 +22,7 @@ namespace VidhanSabha.Application.Pannels.Admin.Mandal.Queries
             _repo = repo;
         }
 
-        public async Task<PagedResult<CombinedMandalReportDto>> Handle(GetAllCombinedMandalReportsQuery request, CancellationToken ct)
+        public async Task<PagedResult<MandalFullDto>> Handle(GetAllCombinedMandalReportsQuery request, CancellationToken ct)
         {
             var mandals = await _repo.GetAllCombinedMandalReports(request.QueryParams,ct);
 

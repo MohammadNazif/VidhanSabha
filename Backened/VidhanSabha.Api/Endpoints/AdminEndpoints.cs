@@ -163,10 +163,8 @@ public static class AdminEndpoints
         {
             var result = await mediator.Send(new GetAllCombinedMandalReportsQuery(q));
 
-            return Results.Ok(ApiResponse<PagedResult<CombinedMandalReportDto>>.Ok(result));
-        })
-        .WithName("GetAllMandalCombinedReports")
-        .Produces<ApiResponse<PagedResult<MandalResponseDto>>>(200);
+            return Results.Ok(ApiResponse<PagedResult<MandalFullDto>>.Ok(result));
+        });
 
         #endregion
 
@@ -182,7 +180,6 @@ public static class AdminEndpoints
           .WithName("CreateSector")
           .Produces<SectorResponseDto>(200);
 
-
         sector.MapPost("/update", async (UpdateSectorRequestDto dto, IMediator mediator) =>
         {
             var result = await mediator.Send(new UpdateSectorCommand(dto));
@@ -190,16 +187,6 @@ public static class AdminEndpoints
         })
         .WithName("UpdateSector")
         .Produces<SectorResponseDto>(200);
-
-        sector.MapGet("/getAll", async (
-            [AsParameters] SectorQueryParams q,
-            IMediator mediator) =>
-        {
-            var result = await mediator.Send(new GetAllSectorsQuery(q));
-            return Results.Ok(ApiResponse<PagedResult<SectorResponseDto>>.Ok(result));
-        }).WithName("GetAll")
-        .Produces<List<SectorResponseDto>>(200);
-
 
         sector.MapPost("/delete", async (int id, IMediator mediator) =>
         {
@@ -217,9 +204,27 @@ public static class AdminEndpoints
         })
             .WithName("GetSectorByMandal")
             .Produces<List<SectorByMAndalResponseDto>>(200);
+
+        sector.MapGet("/getAll", async (
+            [AsParameters] SectorQueryParams q,
+            IMediator mediator) =>
+        {
+            var result = await mediator.Send(new GetAllSectorsQuery(q));
+            return Results.Ok(ApiResponse<PagedResult<SectorResponseDto>>.Ok(result));
+        }).WithName("GetAll")
+        .Produces<List<SectorResponseDto>>(200);
+
+        sector.MapGet("/getAllSectorReports", async (
+            [AsParameters] SectorQueryParams q,
+            IMediator mediator) =>
+        {
+            var result = await mediator.Send(new GetAllSectorReportsQuery(q));
+            return Results.Ok(ApiResponse<PagedResult<SectorReportDto>>.Ok(result));
+        });
+
         #endregion
 
-          #region Booth
+        #region Booth
         booth.MapPost("/create", async (BoothRequestDto dto, IMediator mediator, HttpContext http) =>
         {
             //var userId = 1;
