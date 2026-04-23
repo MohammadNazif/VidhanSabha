@@ -18,8 +18,8 @@ export class MandalService extends BaseApiService {
   /**
    * Fetches all Mandals from the API.
    */
-  getAllMandals(): Observable<any> {
-    return this.getAll(this.entity);
+  getAllMandals(params: any = {}): Observable<any> {
+    return this.getAllByParams(this.entity, params);
   }
 
   /**

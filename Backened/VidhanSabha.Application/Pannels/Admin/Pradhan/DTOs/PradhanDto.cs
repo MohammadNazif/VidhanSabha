@@ -11,7 +11,7 @@ namespace VidhanSabha.Application.Pannels.Admin.Pradhan.DTOs
         public string Name { get; set; }
         public int DesignationId { get; set; }
         public string Contact { get; set; }
-        public string Gender { get; set; }
+        public int Gender { get; set; }
         public List<int> VillageId { get; set; } = new();
         }
         public class PradhanResponseDto
@@ -21,7 +21,8 @@ namespace VidhanSabha.Application.Pannels.Admin.Pradhan.DTOs
         public int DesignationId { get; set; }
         public string DesignationName { get; set; }
         public string Contact { get; set; }
-        public string Gender { get; set; }
+        public int Gender { get; set; }
+        public string GenderValue { get; set; }
         public List<VillageResponseDtos> Villages { get; set; } = new();
         }
         public class VillageResponseDtos

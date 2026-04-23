@@ -15,7 +15,7 @@ namespace VidhanSabha.Domain.Entities.Admin
         public string Name { get; private set; }
         public int DesignationId { get; private set; }
         public string Contact { get; private set; }
-        public string Gender { get; private set; }
+        public int Gender { get; private set; }
         public bool Status { get; private set; } = true;
         private readonly List<Tbl_PradhanVillage> _villages = new();
         public IReadOnlyCollection<Tbl_PradhanVillage> Villages => _villages.AsReadOnly();
@@ -25,7 +25,7 @@ namespace VidhanSabha.Domain.Entities.Admin
         public Tbl_Pradhan() { }
 
         public static Tbl_Pradhan Create(
-             string Name, int DesignationId, string Contact, string Gender, List<int> VillageId)
+             string Name, int DesignationId, string Contact, int Gender, List<int> VillageId)
         {
             var pradhan = new Tbl_Pradhan
             {
@@ -55,7 +55,7 @@ namespace VidhanSabha.Domain.Entities.Admin
         }
 
 
-        public void Update(string Name, int DesignationId, string Contact, string Gender, List<int> VillageId)
+        public void Update(string Name, int DesignationId, string Contact, int Gender, List<int> VillageId)
         {
             this.Name = Name;
             this.DesignationId = DesignationId;

@@ -8,8 +8,8 @@ import { BaseApiService } from '../../common/base-api.service';
 export class PravasivoterService extends BaseApiService {
   private entity = 'pravasivoter';
 
-  getAllPravasivoters(): Observable<any> {
-    return this.getAll(this.entity);
+  getAllPravasivoters(params: any = {}): Observable<any> {
+    return this.getAllByParams(this.entity, params);
   }
 
   createPravasivoter(data: any): Observable<any> {

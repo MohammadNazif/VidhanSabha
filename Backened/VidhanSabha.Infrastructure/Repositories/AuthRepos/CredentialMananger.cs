@@ -43,6 +43,13 @@ namespace VidhanSabha.Infrastructure.Repositories.AuthRepos
             return entry.Entity;
 
         }
+        public async Task<Tbl_LoginCredential> UpdateAsync(Tbl_LoginCredential login)
+        {
+            var entry =  _context.Tbl_LoginCredential.Update(login);
+            await _context.SaveChangesAsync();
+            return entry.Entity;
+
+        }
 
         public Task<int> SoftDeleteAsync(Tbl_LoginCredential data)
         {

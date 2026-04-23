@@ -23,6 +23,15 @@ export class SahmatAsahmatComponent implements OnInit {
   @ViewChild('voterModal') voterModal!: GenericModalButtonComponent;
 
   voterList: any[] = [];
+  totalCount = 0;
+  
+  // Server-side state
+  pageNumber = 1;
+  pageSize = 50;
+  searchTerm = '';
+  sortBy = '';
+  isDescending = false;
+
   isAsahmatView = false;
   isListView = false;
 
@@ -49,7 +58,9 @@ export class SahmatAsahmatComponent implements OnInit {
     paginated: true,
     showRowNumbers: true,
     striped: true,
-    hoverable: true
+    hoverable: true,
+    serverSide: true,
+    defaultPageSize: 50
   };
 
   actions: TableAction[] = [
@@ -73,12 +84,12 @@ export class SahmatAsahmatComponent implements OnInit {
         label: 'Booth No',
         type: 'select',
         placeholder: '-- Select Booth No --',
-        apiUrl: 'booth/getall',
+        apiUrl: 'common/boothNumber',
         apiMapper: (data: any) => {
           const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
           return list.map((item: any) => ({
-            value: String(item.id),
-            label: `${item.boothNumber} - ${item.pollingStationName || ''}`
+            value: String(item.boothId || item.id),
+            label: `Booth No. ${item.boothNumber} - ${item.boothName || item.pollingStationName || ''}`
           }));
         },
         validations: [Validators.required],
@@ -93,10 +104,10 @@ export class SahmatAsahmatComponent implements OnInit {
         dependsOn: 'boothId',
         apiUrl: (boothId: string) => `common/villagesByBoothId?boothId=${boothId}`,
         apiMapper: (data: any) => {
-          const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
+          const list = Array.isArray(data?.data?.items) ? data.data.items : (Array.isArray(data?.items) ? data.items : (Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : [])));
           return list.map((item: any) => ({
             value: String(item.id),
-            label: item.name
+            label: item.name || item.villageName
           }));
         },
         validations: [Validators.required],
@@ -138,10 +149,10 @@ export class SahmatAsahmatComponent implements OnInit {
         placeholder: '-- Select Type --',
         apiUrl: 'common/getsahmattype',
         apiMapper: (data: any) => {
-          const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
+          const list = Array.isArray(data?.data?.items) ? data.data.items : (Array.isArray(data?.items) ? data.items : (Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : [])));
           return list.map((item: any) => ({
             value: String(item.id),
-            label: item.type
+            label: item.type || item.name
           }));
         },
         validations: [Validators.required],
@@ -155,10 +166,10 @@ export class SahmatAsahmatComponent implements OnInit {
         placeholder: '-- Select Party --',
         apiUrl: 'common/getparty',
         apiMapper: (data: any) => {
-          const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
+          const list = Array.isArray(data?.data?.items) ? data.data.items : (Array.isArray(data?.items) ? data.items : (Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : [])));
           return list.map((item: any) => ({
             value: String(item.id),
-            label: item.party
+            label: item.partyName || item.party || item.name
           }));
         },
         validations: [Validators.required],
@@ -172,10 +183,10 @@ export class SahmatAsahmatComponent implements OnInit {
         placeholder: '-- Select Occupation --',
         apiUrl: 'common/getoccupation',
         apiMapper: (data: any) => {
-          const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
+          const list = Array.isArray(data?.data?.items) ? data.data.items : (Array.isArray(data?.items) ? data.items : (Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : [])));
           return list.map((item: any) => ({
             value: String(item.id),
-            label: item.occupation
+            label: item.occupationName || item.occupation || item.name
           }));
         },
         validations: [Validators.required],
@@ -223,33 +234,72 @@ export class SahmatAsahmatComponent implements OnInit {
   }
 
   loadVoters() {
-    this.voterService.getAllSahmatAsahmat().subscribe({
+    const params: any = {
+      pageNumber: this.pageNumber,
+      pageSize: this.pageSize,
+      searchTerm: this.searchTerm,
+      sortBy: this.sortBy,
+      isDescending: this.isDescending
+    };
+
+    // Filter by type on server if possible, or handle locally if backend doesn't support TypeId filter
+    // For now, we'll assume we want the full list and we can filter locally or pass type if supported
+    if (this.isAsahmatView) {
+      params['TypeId'] = 2;
+    } else if (this.route.snapshot.url[0]?.path === 'sahmat-list') {
+      params['TypeId'] = 1;
+    }
+
+    this.voterService.getAllSahmatAsahmat(params).subscribe({
       next: (response) => {
-        const rawList = response.data || (Array.isArray(response) ? response : []);
-        let filtered = rawList.map((item: any) => ({
+        const dataWrap = response.data;
+        const items = dataWrap?.items || (Array.isArray(dataWrap) ? dataWrap : []);
+        
+        this.voterList = items.map((item: any) => ({
           ...item,
           isAsahmat: item.typeId === 2,
           villageName: Array.isArray(item.villages) ? item.villages.map((v: any) => v.villageName).join(', ') : '',
           villageId: Array.isArray(item.villages) ? item.villages.map((v: any) => v.villageId) : []
         }));
 
-        // Filter based on route if applicable
+        this.totalCount = dataWrap?.totalCount || this.voterList.length;
+
+        // Visibility adjustments for reason column
         if (this.isAsahmatView) {
-          filtered = filtered.filter((item: any) => item.isAsahmat === true);
           this.columns = this.columns.map(col => col.key === 'reason' ? { ...col, visible: true } : col);
         } else if (this.route.snapshot.url[0]?.path === 'sahmat-list') {
-          filtered = filtered.filter((item: any) => item.isAsahmat === false);
           this.columns = this.columns.map(col => col.key === 'reason' ? { ...col, visible: false } : col);
         } else {
           this.columns = this.columns.map(col => col.key === 'reason' ? { ...col, visible: true } : col);
         }
-
-        this.voterList = filtered;
       },
       error: (err) => {
         console.error('Error fetching voters:', err);
       }
     });
+  }
+
+  handlePageChange(event: any) {
+    this.pageNumber = event.currentPage;
+    this.pageSize = event.pageSize;
+    this.loadVoters();
+  }
+
+  handleSortChange(event: any) {
+    this.sortBy = event.column;
+    this.isDescending = event.direction === 'desc';
+    this.pageNumber = 1; 
+    this.loadVoters();
+  }
+
+  handleSearchChange(term: string) {
+    this.searchTerm = term;
+    this.pageNumber = 1; 
+    this.loadVoters();
+  }
+
+  handleSelection(selected: any[]) {
+    console.log('Selected voters:', selected);
   }
 
   handleAction(event: any) {

@@ -36,20 +36,20 @@ export class BoothComponent implements OnInit {
 
   isListView = false;
   totalCount = 0;
-  
+
   // Server-side state
   pageNumber = 1;
   pageSize = 10;
   searchTerm = '';
   sortBy = '';
-  isDescending = false;
+  isDescending = true;
   mandalId: number | null = null;
   sectorId: number | null = null;
 
   canManage(): boolean {
     if (this.isListView) return false;
     // Admins can manage Master Data, but we can add role specific logic here if needed
-    return true; 
+    return true;
   }
 
   isStatePrabhari(): boolean {
@@ -119,50 +119,14 @@ export class BoothComponent implements OnInit {
     submitLabel: 'Create Booth',
     fields: [
       {
-        id: 'districtId',
-        name: 'districtId',
-        label: 'Select District',
-        type: 'select',
-        placeholder: '--Select District--',
-        apiUrl: () => `district/getAll?stateId=${this.defaultStateId || ''}`,
-        apiMapper: (data: any) => {
-          const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
-          return list.map((item: any) => ({
-            value: String(item.id),
-            label: item.name
-          }));
-        },
-        validations: [Validators.required],
-        gridColSpan: 6
-      },
-      {
-        id: 'vidhanId',
-        name: 'vidhanId',
-        label: 'Select Vidhan Sabha',
-        type: 'select',
-        placeholder: '--Select Vidhan Sabha--',
-        dependsOn: 'districtId',
-        apiUrl: (districtId: any) => `vidhansabha/getAll?districtId=${districtId}`,
-        apiMapper: (data: any) => {
-          const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
-          return list.map((item: any) => ({
-            value: String(item.id),
-            label: item.name
-          }));
-        },
-        validations: [Validators.required],
-        gridColSpan: 6
-      },
-      {
         id: 'mandalId',
         name: 'mandalId',
         label: 'Mandal',
         type: 'select',
         placeholder: '--Select Mandal--',
-        dependsOn: 'vidhanId',
-        apiUrl: (vidhanId: any) => `mandal/getall?vidhanId=${vidhanId}`,
+        apiUrl: `mandal/getAll`,
         apiMapper: (data: any) => {
-          const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
+          const list = Array.isArray(data?.data?.items) ? data.data.items : (Array.isArray(data?.items) ? data.items : (Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : [])));
           return list.map((item: any) => ({
             value: String(item.id),
             label: item.name
@@ -178,11 +142,11 @@ export class BoothComponent implements OnInit {
         type: 'select',
         dependsOn: 'mandalId',
         placeholder: '--Select Sector--',
-        apiUrl: (mandalId: any) => `sector/getall?mandalId=${mandalId}`,
+        apiUrl: (mandalId: any) => `sector/getByMandalId?id=${mandalId}&pageSize=1000`,
         apiMapper: (data: any) => {
-          const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
+          const list = Array.isArray(data?.data?.items) ? data.data.items : (Array.isArray(data?.items) ? data.items : (Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : [])));
           return list.map((item: any) => ({
-            value: String(item.id),
+            value: String(item.sectorId),
             label: item.sectorName || item.name
           }));
         },
@@ -335,7 +299,7 @@ export class BoothComponent implements OnInit {
         id: 'phoneNumber',
         name: 'phoneNumber',
         label: 'Phone Number',
-        type: 'number',
+        type: 'text',
         placeholder: 'Enter 10-digit mobile number',
         validations: [Validators.pattern('^[0-9]{10}$')],
         visibleIf: { field: 'isBoothSanyojak', operator: '==', value: 'Yes' },
@@ -485,52 +449,46 @@ export class BoothComponent implements OnInit {
     if (!result.status) return;
 
     const raw = result.data;
-    const userId = this.authService.getUserId();
     const isSanyojak = raw.isBoothSanyojak === 'Yes';
     const isUpdate = !!(raw.id || (this.boothModal.initialData && this.boothModal.initialData.id));
 
     const submitData: any = {
-      ...raw,
-      id: isUpdate ? (raw.id || this.boothModal.initialData.id) : null,
-      mandalId: Number(raw.mandalId),
-      sectorId: Number(raw.sectorId),
-      stateId: Number(raw.stateId || this.defaultStateId),
-      boothNumber: Number(raw.boothNumber),
-      pollingStationName: raw.pollingStationName,
-      pollingStationLocation: raw.pollingStationLocation,
-      isBoothSanyojak: isSanyojak,
-      villages: [],
-      userId: userId ? String(userId) : null
+      MandalId: Number(raw.mandalId),
+      SectorId: Number(raw.sectorId),
+      Villages: [],
+      BoothNumber: Number(raw.boothNumber),
+      PollingStationName: raw.pollingStationName || "",
+      PollingStationLocation: raw.pollingStationLocation || "",
+      IsBoothSanyojak: isSanyojak,
+      Sanyojak: isSanyojak ? {
+        InchargeName: raw.inchargeName || "",
+        Age: raw.age ? Number(raw.age) : 0,
+        FatherName: raw.fatherName || "",
+        CategoryId: raw.categoryId ? Number(raw.categoryId) : 0,
+        CastId: raw.castId ? Number(raw.castId) : 0,
+        EducationLevel: raw.educationLevel || "",
+        PhoneNumber: raw.phoneNumber || "",
+        Address: raw.address || ""
+      } : null
     };
 
-    // Transform anshikData to villages array
+    // Transform anshikData or villageId to Villages array
     if (raw.anshikData && Array.isArray(raw.anshikData)) {
-      submitData.villages = raw.anshikData.map((v: any) => ({
-        villageId: Number(v.id || v.villageId),
-        hasAnshik: v.anshik === 'Yes'
+      submitData.Villages = raw.anshikData.map((v: any) => ({
+        VillageId: Number(v.id || v.villageId),
+        HasAnshik: v.anshik === 'Yes'
       }));
     } else if (raw.villageId) {
       const ids = Array.isArray(raw.villageId) ? raw.villageId : [raw.villageId];
-      submitData.villages = ids.map((id: any) => ({
-        villageId: Number(id),
-        hasAnshik: false
+      submitData.Villages = ids.map((id: any) => ({
+        VillageId: Number(id),
+        HasAnshik: false
       }));
     }
 
-    // Nest sanyojak details if applicable
-    if (isSanyojak) {
-      submitData.sanyojak = {
-        inchargeName: raw.inchargeName,
-        age: Number(raw.age),
-        fatherName: raw.fatherName,
-        categoryId: Number(raw.categoryId),
-        castId: Number(raw.castId),
-        educationLevel: raw.educationLevel,
-        phoneNumber: raw.phoneNumber,
-        address: raw.address
-      };
+    if (isUpdate) {
+      submitData.Id = Number(raw.id || this.boothModal.initialData.id);
     }
-
 
     const request = isUpdate
       ? this.boothService.updateBooth(submitData)

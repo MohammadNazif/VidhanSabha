@@ -21,6 +21,14 @@ export class PrabhavshaliComponent implements OnInit {
   @ViewChild('prabhavshaliModal') prabhavshaliModal!: GenericModalButtonComponent;
 
   personList: any[] = [];
+  totalCount = 0;
+  
+  // Server-side state
+  pageNumber = 1;
+  pageSize = 50;
+  searchTerm = '';
+  sortBy = '';
+  isDescending = false;
 
   columns: TableColumn[] = [
     { key: 'boothNumber', label: 'Booth No.', sortable: true },
@@ -38,7 +46,9 @@ export class PrabhavshaliComponent implements OnInit {
     paginated: true,
     showRowNumbers: true,
     striped: true,
-    hoverable: true
+    hoverable: true,
+    serverSide: true,
+    defaultPageSize: 50
   };
 
   actions: TableAction[] = [
@@ -56,12 +66,12 @@ export class PrabhavshaliComponent implements OnInit {
         label: 'Booth No',
         type: 'select',
         placeholder: '-- Select Booth --',
-        apiUrl: 'booth/getall',
+        apiUrl: 'common/boothNumber',
         apiMapper: (data: any) => {
           const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
           return list.map((item: any) => ({
-            value: String(item.id),
-            label: `${item.boothNumber} - ${item.pollingStationName || ''}`
+            value: String(item.boothId || item.id),
+            label: `Booth No. ${item.boothNumber} - ${item.boothName || item.pollingStationName || ''}`
           }));
         },
         validations: [Validators.required],
@@ -76,10 +86,10 @@ export class PrabhavshaliComponent implements OnInit {
         dependsOn: 'boothId',
         apiUrl: (boothId: string) => `common/villagesByBoothId?boothId=${boothId}`,
         apiMapper: (data: any) => {
-          const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
+          const list = Array.isArray(data?.data?.items) ? data.data.items : (Array.isArray(data?.items) ? data.items : (Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : [])));
           return list.map((item: any) => ({
             value: String(item.id),
-            label: item.name
+            label: item.name || item.villageName
           }));
         },
         validations: [Validators.required],
@@ -112,7 +122,7 @@ export class PrabhavshaliComponent implements OnInit {
         placeholder: '-- Select Designation --',
         apiUrl: 'common/getadmindesignation',
         apiMapper: (data: any) => {
-          const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
+          const list = Array.isArray(data?.data?.items) ? data.data.items : (Array.isArray(data?.items) ? data.items : (Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : [])));
           return list.map((item: any) => ({
             value: String(item.id),
             label: item.designationName || item.name
@@ -129,7 +139,7 @@ export class PrabhavshaliComponent implements OnInit {
         placeholder: '-- Select Category --',
         apiUrl: 'common/category',
         apiMapper: (data: any) => {
-          const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
+          const list = Array.isArray(data?.data?.items) ? data.data.items : (Array.isArray(data?.items) ? data.items : (Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : [])));
           return list.map((item: any) => ({
             value: String(item.id),
             label: item.name || item.category
@@ -147,7 +157,7 @@ export class PrabhavshaliComponent implements OnInit {
         dependsOn: 'categoryId',
         apiUrl: (catId: string) => `common/cast?id=${catId}`,
         apiMapper: (data: any) => {
-          const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
+          const list = Array.isArray(data?.data?.items) ? data.data.items : (Array.isArray(data?.items) ? data.items : (Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : [])));
           return list.map((item: any) => ({
             value: String(item.id),
             label: item.name || item.castName
@@ -178,17 +188,59 @@ export class PrabhavshaliComponent implements OnInit {
   }
 
   loadData() {
-    this.prabhavshaliService.getAllPrabhavshali().subscribe({
+    const params = {
+      pageNumber: this.pageNumber,
+      pageSize: this.pageSize,
+      searchTerm: this.searchTerm,
+      sortBy: this.sortBy,
+      isDescending: this.isDescending
+    };
+
+    this.prabhavshaliService.getAllPrabhavshali(params).subscribe({
       next: (response) => {
-        const rawList = response.data || (Array.isArray(response) ? response : []);
-        this.personList = rawList.map((item: any) => ({
-          ...item,
-          villageName: Array.isArray(item.villages) ? item.villages.map((v: any) => v.villageName).join(', ') : '',
-          villageId: Array.isArray(item.villages) ? item.villages.map((v: any) => v.villageId) : []
-        }));
+        const dataWrap = response.data;
+        if (dataWrap && dataWrap.items) {
+          this.personList = dataWrap.items.map((item: any) => ({
+            ...item,
+            villageName: Array.isArray(item.villages) ? item.villages.map((v: any) => v.villageName).join(', ') : '',
+            villageId: Array.isArray(item.villages) ? item.villages.map((v: any) => v.villageId) : []
+          }));
+          this.totalCount = dataWrap.totalCount || 0;
+        } else {
+          const rawList = Array.isArray(dataWrap) ? dataWrap : [];
+          this.personList = rawList.map((item: any) => ({
+            ...item,
+            villageName: Array.isArray(item.villages) ? item.villages.map((v: any) => v.villageName).join(', ') : '',
+            villageId: Array.isArray(item.villages) ? item.villages.map((v: any) => v.villageId) : []
+          }));
+          this.totalCount = this.personList.length;
+        }
       },
       error: (err) => console.error('Error fetching Prabhavshali list:', err)
     });
+  }
+
+  handlePageChange(event: any) {
+    this.pageNumber = event.currentPage;
+    this.pageSize = event.pageSize;
+    this.loadData();
+  }
+
+  handleSortChange(event: any) {
+    this.sortBy = event.column;
+    this.isDescending = event.direction === 'desc';
+    this.pageNumber = 1; 
+    this.loadData();
+  }
+
+  handleSearchChange(term: string) {
+    this.searchTerm = term;
+    this.pageNumber = 1; 
+    this.loadData();
+  }
+
+  handleSelection(selected: any[]) {
+    console.log('Selected persons:', selected);
   }
 
   handleAction(event: any) {

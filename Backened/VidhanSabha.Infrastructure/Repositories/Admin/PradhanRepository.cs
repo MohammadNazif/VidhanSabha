@@ -95,7 +95,10 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
                         DesignationId = p.DesignationId,
                         DesignationName = p.Designation.DesignationName,
                         Contact = p.Contact,
-                        //Gender = p.Gender,
+
+                        Gender = p.Gender,
+                        GenderValue = ((VidhanSabha.Domain.Enums.Gender)p.Gender).ToString(),
+
                         Villages = p.Villages.Select(v => new VillageResponseDtos
                         {
                             VillageId = v.VillageId,

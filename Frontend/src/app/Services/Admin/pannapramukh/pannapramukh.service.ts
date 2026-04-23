@@ -10,8 +10,8 @@ import { BaseApiService } from '../../common/base-api.service';
 export class PannapramukhService extends BaseApiService {
   private entity = 'pannapramukh';
 
-  getAllPannapramukhs(): Observable<any> {
-    return this.getAll(this.entity);
+  getAllPannapramukhs(params: any = {}): Observable<any> {
+    return this.getAllByParams(this.entity, params);
   }
 
   createPannapramukh(data: any): Observable<any> {

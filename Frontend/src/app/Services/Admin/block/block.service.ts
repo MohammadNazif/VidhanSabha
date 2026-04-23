@@ -12,8 +12,8 @@ export class BlockService extends BaseApiService {
     return this.create(this.entity, data);
   }
 
-  getAllBlocks(): Observable<any> {
-    return this.getAll(this.entity);
+  getAllBlocks(params: any = {}): Observable<any> {
+    return this.getAllByParams(this.entity, params);
   }
 
   deleteBlock(id: number): Observable<any> {

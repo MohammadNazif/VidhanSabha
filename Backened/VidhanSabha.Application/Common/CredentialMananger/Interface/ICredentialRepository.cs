@@ -10,6 +10,7 @@ namespace VidhanSabha.Application.Common.CredentialMananger.Interface
     public interface ICredentialRepository
     {
         Task<Tbl_LoginCredential> InsertAsync(Tbl_LoginCredential login);
+        Task<Tbl_LoginCredential> UpdateAsync(Tbl_LoginCredential login);
         Task<Tbl_LoginCredential?> GetByUserIdAsync(string userId);  // ← add
         Task<int> SoftDeleteAsync(Tbl_LoginCredential data);
     }

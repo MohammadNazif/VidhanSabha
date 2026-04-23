@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MediatR;
+﻿using MediatR;
+using VidhanSabha.Application.Common.CredentialMananger;
+using VidhanSabha.Application.Common.UnitOfWork;
 using VidhanSabha.Application.Pannels.Admin.Booth.Interfaces;
 using VidhanSabha.Domain.Entities.Admin;
 
@@ -11,71 +8,139 @@ namespace VidhanSabha.Application.Pannels.Admin.Booth.Command
 {
     public class updateBoothCommandHandler : IRequestHandler<updateBoothCommand, bool>
     {
-        private IBoothRepository _repo;
+        private readonly IBoothRepository _repo;
+        private readonly CredentialManagerFunc _credentialManager;
+        private readonly IUnitOfWork _uow;
 
-        public updateBoothCommandHandler(IBoothRepository repo)
+        public updateBoothCommandHandler(
+            IBoothRepository repo,
+            CredentialManagerFunc credentialManager,
+            IUnitOfWork uow)
         {
             _repo = repo;
+            _credentialManager = credentialManager;
+            _uow = uow;
         }
 
-        public async Task<bool> Handle(updateBoothCommand request, CancellationToken cancellationToken)
+        public async Task<bool> Handle(updateBoothCommand request, CancellationToken ct)
         {
-            // ✅ Step 1 — Validate request
             var dto = request.Dto;
 
-            if (dto.IsBoothSanyojak && dto.Sanyojak == null)
-                throw new Exception("Sanyojak details required when IsBoothSanyojak is true");
+            await _uow.BeginTransactionAsync();
 
-            // ✅ Step 2 — Load existing booth WITH children (critical!)
-            var booth = await _repo.GetByIdAsync(dto.id, cancellationToken);
-
-            if (booth == null)
-                throw new Exception($"Booth with Id {dto.id} not found");
-
-            // ✅ Step 3 — Build villages list
-            var villages = dto.Villages
-                .Select(v => Tbl_BoothVillage.Create(v.VillageId, v.HasAnshik))
-                .ToList();
-
-            // ✅ Step 4 — Build sanyojak only if needed
-            // Note: Pass null if !IsBoothSanyojak — domain entity handles the rest
-            Tbl_BoothSanyojak? sanyojak = null;
-            if (dto.IsBoothSanyojak && dto.Sanyojak != null)
+            try
             {
-                sanyojak = Tbl_BoothSanyojak.Create(  // ✅ Use Create (no .update() static method)
-                    dto.Sanyojak.InchargeName,
-                    dto.Sanyojak.Age,
-                    dto.Sanyojak.FatherName,
-                    dto.Sanyojak.CategoryId,
-                    dto.Sanyojak.CastId,
-                    dto.Sanyojak.EducationLevel,
-                    dto.Sanyojak.PhoneNumber,
-                    dto.Sanyojak.Address
+                // ✅ Load Booth Aggregate
+                var booth = await _repo.GetByIdAsync(dto.id, ct);
+
+                if (booth == null)
+                    throw new Exception($"Booth with Id {dto.id} not found");
+
+                // ✅ Build Villages
+                var villages = dto.Villages
+                    .Select(v => Tbl_BoothVillage.Create(v.VillageId, v.HasAnshik))
+                    .ToList();
+
+                Tbl_BoothSanyojak? sanyojak = null;
+
+                // =========================
+                // ✅ SANYOJAK LOGIC
+                // =========================
+                if (dto.IsBoothSanyojak)
+                {
+                    if (dto.Sanyojak != null)
+                    {
+                        // 🆕 CASE: CREATE NEW SANYOJAK
+                        if (booth.Sanyojak == null)
+                        {
+                            var userId = $"USR_{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}";
+
+                            await _credentialManager.InsertCredentialAsync(
+                                userId: userId,
+                                mobile: dto.Sanyojak.PhoneNumber,
+                                email: "",
+                                role: "BoothSanyojak"
+                            );
+
+                            sanyojak = Tbl_BoothSanyojak.Create(
+                                userId,
+                                dto.Sanyojak.InchargeName,
+                                dto.Sanyojak.Age,
+                                dto.Sanyojak.FatherName,
+                                dto.Sanyojak.CategoryId,
+                                dto.Sanyojak.CastId,
+                                dto.Sanyojak.EducationLevel,
+                                dto.Sanyojak.PhoneNumber,
+                                dto.Sanyojak.Address
+                            );
+                        }
+                        else
+                        {
+                          
+
+                            var oldPhone = booth.Sanyojak.PhoneNumber;
+
+                            // Update DOMAIN
+                            booth.Sanyojak.UpdateProfile(
+                                dto.Sanyojak.InchargeName,
+                                dto.Sanyojak.Age,
+                                dto.Sanyojak.FatherName,
+                                dto.Sanyojak.CategoryId,
+                                dto.Sanyojak.CastId,
+                                dto.Sanyojak.EducationLevel,
+                                dto.Sanyojak.PhoneNumber,
+                                dto.Sanyojak.Address
+                            );
+
+                            sanyojak = booth.Sanyojak;
+
+                            // 🔥 Sync LOGIN if mobile changed
+                            if (oldPhone != dto.Sanyojak.PhoneNumber)
+                            {
+                                await _credentialManager.UpdateCredentialAsync(
+                                    booth.Sanyojak.UserId,
+                                    dto.Sanyojak.PhoneNumber
+                                );
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // 🟡 CASE: BOOTH ONLY UPDATE (KEEP EXISTING SANYOJAK)
+                        sanyojak = booth.Sanyojak;
+                    }
+                }
+                else
+                {
+                    // ❌ CASE: REMOVE SANYOJAK
+                    sanyojak = null;
+                }
+
+                // =========================
+                // ✅ UPDATE BOOTH AGGREGATE
+                // =========================
+                booth.Update(
+                    dto.MandalId,
+                    dto.SectorId,
+                    dto.BoothNumber,
+                    dto.PollingStationName,
+                    dto.PollingStationLocation,
+                    dto.IsBoothSanyojak,
+                    villages,
+                    sanyojak
                 );
+
+          
+                await _repo.UpdateAsync(booth, ct);
+
+                await _uow.CommitAsync();
+                return true;
             }
-
-            // ✅ Step 5 — Call domain Update (instance method on loaded booth)
-            // Domain handles:
-            // - isBoothSanyojak=false → sets Sanyojak=null (EF deletes via cascade)
-            // - isBoothSanyojak=true, existing sanyojak → calls UpdateProfile()
-            // - isBoothSanyojak=true, no existing sanyojak → assigns new one
-            // - villages → clears old, adds new (EF deletes+inserts)
-            booth.Update(
-                dto.MandalId,
-                dto.SectorId,
-                dto.BoothNumber,
-                dto.PollingStationName,
-                dto.PollingStationLocation,
-                dto.IsBoothSanyojak,
-                villages,
-                sanyojak
-            );
-
-            // ✅ Step 6 — Persist
-            await _repo.UpdateAsync(booth, cancellationToken);
-
-            return true;
+            catch (Exception ex)
+            {
+                await _uow.RollbackAsync();
+                throw new ApplicationException($"Update failed: {ex.Message}", ex);
+            }
         }
-
     }
-    }
+}

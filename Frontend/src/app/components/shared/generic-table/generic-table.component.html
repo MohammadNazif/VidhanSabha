@@ -3,10 +3,11 @@
   <!-- Search & Filters -->
   <div class="search-box-wrapper" *ngIf="mergedConfig.searchable">
     <div class="search-box">
-      <span class="search-icon">🔍</span>
+      <span class="search-icon" *ngIf="!loading">🔍</span>
+      <div class="search-spinner" *ngIf="loading"></div>
       <input type="text" [placeholder]="mergedConfig.searchPlaceholder || 'Search...'" [(ngModel)]="searchTerm"
         (ngModelChange)="onSearch()" class="search-input" />
-      <button *ngIf="searchTerm" (click)="clearSearch()" class="search-clear" title="Clear search">✕</button>
+      <button *ngIf="searchTerm && !loading" (click)="clearSearch()" class="search-clear" title="Clear search">✕</button>
     </div>
 
     <!-- Filter Button -->
@@ -33,7 +34,13 @@
 </div>
 
 <!-- ─── Table ─── -->
-<div class="table-container" [style.max-height]="mergedConfig.maxHeight || 'none'">
+<div class="table-container" [style.max-height]="mergedConfig.maxHeight || 'none'" [class.is-loading]="loading">
+  <!-- Loading Overlay (Modern approach: doesn't disrupt table layout) -->
+  <div class="table-loading-overlay" *ngIf="loading && displayedData.length > 0">
+    <div class="overlay-spinner"></div>
+    <span>Updating results...</span>
+  </div>
+
   <table class="data-table" [class.compact]="mergedConfig.compact" [class.striped]="mergedConfig.striped">
     <!-- Header -->
     <thead>
@@ -69,8 +76,8 @@
 
     <!-- Body -->
     <tbody>
-      <!-- Loading State -->
-      <tr *ngIf="loading" class="loading-row">
+      <!-- Initial Loading State (Full Row) -->
+      <tr *ngIf="loading && displayedData.length === 0" class="loading-row">
         <td [attr.colspan]="totalColumnCount">
           <div class="loading-container">
             <div class="loading-spinner"></div>
@@ -91,8 +98,8 @@
       </tr>
 
       <!-- Data Rows -->
-      <ng-container *ngIf="!loading">
-        <tr *ngFor="let row of displayedData; let i = index; trackBy: trackByIndex"
+      <ng-container>
+        <tr *ngFor="let row of displayedData; let i = index; trackBy: trackById"
           [class.hoverable]="mergedConfig.hoverable" [class.selected]="isRowSelected(i)" (click)="onRowClick(row, i)"
           (dblclick)="onRowDoubleClick(row, i)">
           <!-- Checkbox -->
@@ -175,7 +182,7 @@
 </div>
 
 <!-- ─── Pagination ─── -->
-<div class="table-footer" *ngIf="mergedConfig.paginated && processedData.length > 0">
+<div class="table-footer" *ngIf="mergedConfig.paginated && processedData.length > 0" [class.is-loading]="loading">
   <div class="footer-left">
     <span class="showing-text">
       Showing <strong>{{ showingFrom }}</strong> to <strong>{{ showingTo }}</strong> of <strong>{{

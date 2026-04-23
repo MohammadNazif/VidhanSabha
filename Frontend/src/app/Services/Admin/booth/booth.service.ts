@@ -12,18 +12,7 @@ export class BoothService extends BaseApiService {
     return this.create(this.entity, data);
   }
 
-  getAllBooths(queryParams: any = {}): Observable<any> {
-    const params: any = {
-      PageNumber: queryParams.pageNumber || 1,
-      PageSize: queryParams.pageSize || 10,
-      IsDescending: queryParams.isDescending === true || queryParams.isDescending === 'true'
-    };
-
-    if (queryParams.mandalId) params['MandalId'] = queryParams.mandalId;
-    if (queryParams.sectorId) params['SectorId'] = queryParams.sectorId;
-    if (queryParams.searchTerm) params['SearchTerm'] = queryParams.searchTerm;
-    if (queryParams.sortBy) params['SortBy'] = queryParams.sortBy;
-
+  getAllBooths(params: any = {}): Observable<any> {
     return this.getAllByParams(this.entity, params);
   }
 
@@ -33,5 +22,9 @@ export class BoothService extends BaseApiService {
 
   updateBooth(data: any): Observable<any> {
     return this.update(this.entity, data);
+  }
+
+  getBoothIncharge(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/common/getboothincharge?pageSize=1000`);
   }
 }

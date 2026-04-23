@@ -4,12 +4,14 @@ using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Reflection;
 using VidhanSabha.Application.Common.AdminDesignation.Interfaces;
+using VidhanSabha.Application.Common.BoothSamitiDesignation.Interfaces;
 using VidhanSabha.Application.Common.Cast.Interfaces;
 using VidhanSabha.Application.Common.Category.Interfaces;
 using VidhanSabha.Application.Common.CredentialMananger;
 using VidhanSabha.Application.Common.CredentialMananger.Interface;
 using VidhanSabha.Application.Common.DesignatinType.Interface;
 using VidhanSabha.Application.Common.District.Interfaces;
+using VidhanSabha.Application.Common.NewFolder.Interface;
 using VidhanSabha.Application.Common.Occupation.Interface;
 using VidhanSabha.Application.Common.Party.Interfaces;
 using VidhanSabha.Application.Common.SahmatAsahmatType.Interfaces;
@@ -19,15 +21,13 @@ using VidhanSabha.Application.Common.UnitOfWork;
 using VidhanSabha.Application.Pannels.Admin.BDC.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.Block.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.Booth.Interfaces;
+using VidhanSabha.Application.Pannels.Admin.BoothSamiti.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.DoubleVoter.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.Mandal.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.NewVoter.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.PannaPramukh.Interfaces;
-
-using VidhanSabha.Application.Pannels.Admin.Pradhan.Interfaces;
-
 using VidhanSabha.Application.Pannels.Admin.PrabhavshaliVyakti.Interfaces;
-
+using VidhanSabha.Application.Pannels.Admin.Pradhan.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.PravasiVoters.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.SahmatAsahmat.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.Sector.Interface;
@@ -48,7 +48,7 @@ using VidhanSabha.Infrastructure.Repositories.StatePrabhari;
 using VidhanSabha.Infrastructure.Repositories.SuperAdmin;
 
 
-namespace VidhanSabha.Infrastructure.DependencyInjection
+namespace VidhanSabha.Infrastructure.Extensions
 {
     public static class DependencyInjection
     {
@@ -87,8 +87,8 @@ namespace VidhanSabha.Infrastructure.DependencyInjection
             services.AddScoped<ISahmatAsahmatRepository, SahmatAsahmatRepository>();
 
             services.AddScoped<IPradhanRepository, PradhanRepository>();
-
-
+            services.AddScoped<IBoothSamitiDesignationRepository, BoothSamitiDesignationRepository>();
+            services.AddScoped<IBoothSamitiRepository, BoothSamitiRepository>();
             services.AddScoped<IVidhanSabhaRepository, VidhanSabhaRepository>();
             
             services.AddScoped<IDoubleVoterRepository, DoubleVoterRepository>();
@@ -98,6 +98,7 @@ namespace VidhanSabha.Infrastructure.DependencyInjection
             services.AddScoped<IBDCRepository, BDCRepository>();
             services.AddScoped<ISeniorDisabledTypeRepository,SeniorDisabledTypeRepository>();
             services.AddScoped<ISeniorDisabledRepository,SeniorDisabledRepository>();
+            services.AddScoped<IMemberModulePermissionRepository, MemberModulePermissionRepository>();
 
             return services;
         }

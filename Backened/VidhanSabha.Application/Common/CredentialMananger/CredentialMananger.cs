@@ -70,7 +70,33 @@ namespace VidhanSabha.Application.Common.CredentialMananger
 
            
         }
+        public async Task<CredentialDto> UpdateCredentialAsync(string userId, string mobile)
+        {
+            // ✅ Step 1 — Get existing record
+            var login = await _repo.GetByUserIdAsync(userId);
 
+            if (login == null)
+                throw new NotFoundException("Login Credential Not Found");
+
+            // ✅ Step 2 — Update fields
+            login.Username = mobile;
+            login.Mobile = mobile;
+
+            // (optional if you want username = mobile always)
+          // add if you have column
+
+            // ✅ Step 3 — Save proper entity
+            var saved = await _repo.UpdateAsync(login);
+
+            return new CredentialDto
+            {
+                LoginId = saved.LoginId,
+                UserId = saved.UserId,
+                Username = saved.Username,
+                Password = null, // don’t return password on update
+                Role = saved.Role
+            };
+        }
         public async Task<Tbl_LoginCredential> Delete(string userId)
         {
             var data =  await _repo.GetByUserIdAsync(userId);

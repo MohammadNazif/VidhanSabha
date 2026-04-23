@@ -23,6 +23,15 @@ export class PravasiVoterComponent implements OnInit {
   @ViewChild('voterModal') voterModal!: GenericModalButtonComponent;
 
   voterList: any[] = [];
+  totalCount = 0;
+  
+  // Server-side state
+  pageNumber = 1;
+  pageSize = 50;
+  searchTerm = '';
+  sortBy = '';
+  isDescending = false;
+
   isListView = false;
 
   columns: TableColumn[] = [
@@ -41,7 +50,9 @@ export class PravasiVoterComponent implements OnInit {
     paginated: true,
     showRowNumbers: true,
     striped: true,
-    hoverable: true
+    hoverable: true,
+    serverSide: true,
+    defaultPageSize: 50
   };
 
   actions: TableAction[] = [
@@ -203,19 +214,61 @@ export class PravasiVoterComponent implements OnInit {
   }
 
   loadVoters() {
-    this.voterService.getAllPravasivoters().subscribe({
+    const params = {
+      pageNumber: this.pageNumber,
+      pageSize: this.pageSize,
+      searchTerm: this.searchTerm,
+      sortBy: this.sortBy,
+      isDescending: this.isDescending
+    };
+
+    this.voterService.getAllPravasivoters(params).subscribe({
       next: (response) => {
-        const rawList = response.data || (Array.isArray(response) ? response : []);
-        this.voterList = rawList.map((item: any) => ({
-          ...item,
-          villageName: Array.isArray(item.villages) ? item.villages.map((v: any) => v.villageName).join(', ') : '',
-          villageId: Array.isArray(item.villages) ? item.villages.map((v: any) => v.villageId) : []
-        }));
+        const dataWrap = response.data;
+        if (dataWrap && dataWrap.items) {
+          this.voterList = dataWrap.items.map((item: any) => ({
+            ...item,
+            villageName: Array.isArray(item.villages) ? item.villages.map((v: any) => v.villageName).join(', ') : '',
+            villageId: Array.isArray(item.villages) ? item.villages.map((v: any) => v.villageId) : []
+          }));
+          this.totalCount = dataWrap.totalCount || 0;
+        } else {
+          const rawList = Array.isArray(dataWrap) ? dataWrap : [];
+          this.voterList = rawList.map((item: any) => ({
+            ...item,
+            villageName: Array.isArray(item.villages) ? item.villages.map((v: any) => v.villageName).join(', ') : '',
+            villageId: Array.isArray(item.villages) ? item.villages.map((v: any) => v.villageId) : []
+          }));
+          this.totalCount = this.voterList.length;
+        }
       },
       error: (err) => {
         console.error('Error fetching pravasi voters:', err);
       }
     });
+  }
+
+  handlePageChange(event: any) {
+    this.pageNumber = event.currentPage;
+    this.pageSize = event.pageSize;
+    this.loadVoters();
+  }
+
+  handleSortChange(event: any) {
+    this.sortBy = event.column;
+    this.isDescending = event.direction === 'desc';
+    this.pageNumber = 1; 
+    this.loadVoters();
+  }
+
+  handleSearchChange(term: string) {
+    this.searchTerm = term;
+    this.pageNumber = 1; 
+    this.loadVoters();
+  }
+
+  handleSelection(selected: any[]) {
+    console.log('Selected voters:', selected);
   }
 
   handleAction(event: any) {
