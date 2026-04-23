@@ -18,6 +18,9 @@ namespace VidhanSabha.Domain.Entities.Admin
         public string Name { get => _name; private set => _name = value; }
         public bool Status { get; private set; }
 
+        // Navigations
+
+        public ICollection<Tbl_Sector>? Sectors { get; private set; }
         // ── Factory ──────────────────────────────────────────────
         public static Tbl_Mandal Create(int vidhanId, string name)
         {

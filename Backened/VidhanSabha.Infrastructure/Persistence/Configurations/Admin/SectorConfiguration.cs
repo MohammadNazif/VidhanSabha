@@ -36,9 +36,9 @@ namespace VidhanSabha.Infrastructure.Persistence.Configurations.Admin
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("GETUTCDATE()");
 
             // FK
-            entity.HasOne(e => e.Mandal)
-                  .WithMany()
-                  .HasForeignKey(e => e.MandalId)
+            entity.HasOne(s => s.Mandal)
+                  .WithMany(m => m.Sectors)
+                  .HasForeignKey(s => s.MandalId)  
                   .OnDelete(DeleteBehavior.Restrict);
         }
     }
