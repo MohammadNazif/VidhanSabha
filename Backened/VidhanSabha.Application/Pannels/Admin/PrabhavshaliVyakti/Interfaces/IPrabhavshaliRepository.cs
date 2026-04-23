@@ -13,6 +13,8 @@ namespace VidhanSabha.Application.Pannels.Admin.PrabhavshaliVyakti.Interfaces
     public interface IPrabhavshaliRepository
     {
         Task<Tbl_PrabhavshaliVyakti?> GetByIdAsync(int id);
+        Task<List<PrabhavshaliResponseDesinIdDto?>> GetByDesgIdAsync(int id);
+        
         Task<PagedResult<PrabhavshaliResponseDto>> GetAllAsync(PrabhavshaliQueryParams qp, CancellationToken ct = default);
         Task<int> AddAsync(Tbl_PrabhavshaliVyakti prabhav, CancellationToken ct = default);
         int Update(Tbl_PrabhavshaliVyakti prabhav);

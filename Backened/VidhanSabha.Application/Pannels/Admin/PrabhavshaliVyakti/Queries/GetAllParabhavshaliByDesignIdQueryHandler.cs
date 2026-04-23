@@ -22,7 +22,7 @@ namespace VidhanSabha.Application.Pannels.Admin.PrabhavshaliVyakti.Queries
         {
             var res = await _repo.GetByDesgIdAsync(request.DesgId);
 
-            if (res == null || !res.Any())
+            if (res == null )
             {
                 throw new NotFoundException("Prabhavshali Vyakti Not Found");
             }
