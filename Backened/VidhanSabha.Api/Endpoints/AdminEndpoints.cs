@@ -108,16 +108,7 @@ public static class AdminEndpoints
                         .WithTags("BoothVoter");
 
         #region Mandal
-        mandal.MapGet("/getAll", async (
-            [AsParameters] MandalQueryParams q,
-            IMediator mediator) =>
-        {
-            var result = await mediator.Send(new GetAllMandalsQuery(q));
-
-            return Results.Ok(ApiResponse<PagedResult<MandalResponseDto>>.Ok(result));
-        })
-        .WithName("GetAllMandals")
-        .Produces<ApiResponse<List<MandalResponseDto>>>(200);
+        
 
         mandal.MapPost("/create", async (
             CreateMandalRequestDto request,
@@ -133,15 +124,6 @@ public static class AdminEndpoints
         .Produces<ApiResponse<MandalResponseDto>>(201)
         .Produces(400);
 
-        mandal.MapPost("/delete", async (int id, IMediator mediator) =>
-        {
-            var result = await mediator.Send(new DeleteMandalCommand(id));
-
-            return Results.Ok(ApiResponse<int>.Ok(result, "Mandal Deleted Succesfully"));
-        })
-         .WithName("DeleteMandal")
-         .Produces<int>(200);
-
         mandal.MapPost("/update", async (UpdateMandalRequestDto request, IMediator mediator) =>
         {
             var result = await mediator.Send(new UpdateMandalCommand
@@ -152,8 +134,39 @@ public static class AdminEndpoints
 
             return Results.Ok(ApiResponse<MandalResponseDto>.Ok(result, "Mandal Updated Succesfully"));
         })
-        .WithName("UpdateMandal")
-        .Produces<ApiResponse<MandalResponseDto>>(200);
+       .WithName("UpdateMandal")
+       .Produces<ApiResponse<MandalResponseDto>>(200);
+
+        mandal.MapPost("/delete", async (int id, IMediator mediator) =>
+        {
+            var result = await mediator.Send(new DeleteMandalCommand(id));
+
+            return Results.Ok(ApiResponse<int>.Ok(result, "Mandal Deleted Succesfully"));
+        })
+         .WithName("DeleteMandal")
+         .Produces<int>(200);
+
+        mandal.MapGet("/getAll", async (
+            [AsParameters] MandalQueryParams q,
+            IMediator mediator) =>
+        {
+            var result = await mediator.Send(new GetAllMandalsQuery(q));
+
+            return Results.Ok(ApiResponse<PagedResult<MandalResponseDto>>.Ok(result));
+        })
+        .WithName("GetAllMandals")
+        .Produces<ApiResponse<PagedResult<MandalResponseDto>>>(200);
+
+        mandal.MapGet("/getAllCombinedReports", async (
+            [AsParameters] MandalQueryParams q,
+            IMediator mediator) =>
+        {
+            var result = await mediator.Send(new GetAllCombinedMandalReportsQuery(q));
+
+            return Results.Ok(ApiResponse<PagedResult<CombinedMandalReportDto>>.Ok(result));
+        })
+        .WithName("GetAllMandalCombinedReports")
+        .Produces<ApiResponse<PagedResult<MandalResponseDto>>>(200);
 
         #endregion
 

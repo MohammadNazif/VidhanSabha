@@ -36,6 +36,7 @@ namespace VidhanSabha.Domain.Entities.Admin
         // Navigation
         public Tbl_Mandal Mandal { get; private set; }
         public Tbl_Village Village { get; private set; }
+        public Tbl_Booth Booth { get; private set; }
         public Tbl_Category Category { get; private set; }
         public Tbl_Cast Cast { get; private set; }
 
