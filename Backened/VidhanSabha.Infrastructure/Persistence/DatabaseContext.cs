@@ -61,11 +61,20 @@ namespace VidhanSabha.Infrastructure.Persistence
         public DbSet<Tbl_LoginCredential> Tbl_LoginCredential => Set<Tbl_LoginCredential>();
 
         public DbSet<Tbl_DistrictWiseCount> Tbl_DistrictWiseCount => Set<Tbl_DistrictWiseCount>();
+        #region Gaurav
 
         public DbSet<Tbl_Pradhan> Tbl_Pradhan => Set<Tbl_Pradhan>();
         public DbSet<Tbl_PradhanVillage> Tbl_PradhanVillage => Set<Tbl_PradhanVillage>();
         public DbSet<Tbl_BoothSamiti> Tbl_BoothSamitis { get; set; }
         public DbSet<Tbl_BoothSamitiDesignation> Tbl_BoothSamitiDesignations { get; set; }
+
+        public DbSet<Tbl_Influencer> Tbl_Influencer => Set<Tbl_Influencer>();
+        public DbSet<Tbl_InfluencerVillage> Tbl_InfluencerVillage => Set<Tbl_InfluencerVillage>();
+
+        public DbSet<Tbl_BoothVoter> Tbl_BoothVoter => Set<Tbl_BoothVoter>();
+
+        #endregion
+
 
         public DbSet<Tbl_VidhanSabha> Tbl_VidhanSabha => Set<Tbl_VidhanSabha>();
 

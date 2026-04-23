@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Mvc;
 using VidhanSabha.Api.Responses;
+using VidhanSabha.Application.Common.BoothSamitiDesignation.DTOs;
+using VidhanSabha.Application.Common.BoothSamitiDesignation.Queries;
 using VidhanSabha.Application.Common.Dtos;
 using VidhanSabha.Application.Pannels.Admin.BDC.Command;
 using VidhanSabha.Application.Pannels.Admin.BDC.DTOs;
@@ -12,9 +14,18 @@ using VidhanSabha.Application.Pannels.Admin.Block.Queries;
 using VidhanSabha.Application.Pannels.Admin.Booth.Command;
 using VidhanSabha.Application.Pannels.Admin.Booth.Dtos;
 using VidhanSabha.Application.Pannels.Admin.Booth.Queries;
+using VidhanSabha.Application.Pannels.Admin.BoothSamiti.Command;
+using VidhanSabha.Application.Pannels.Admin.BoothSamiti.Dtos;
+using VidhanSabha.Application.Pannels.Admin.BoothSamiti.Queries;
+using VidhanSabha.Application.Pannels.Admin.BoothVoter.Command;
+using VidhanSabha.Application.Pannels.Admin.BoothVoter.DTOs;
+using VidhanSabha.Application.Pannels.Admin.BoothVoter.Queries;
 using VidhanSabha.Application.Pannels.Admin.DoubleVoter.Command;
 using VidhanSabha.Application.Pannels.Admin.DoubleVoter.DTOs;
 using VidhanSabha.Application.Pannels.Admin.DoubleVoter.Queries;
+using VidhanSabha.Application.Pannels.Admin.Influencer.Command;
+using VidhanSabha.Application.Pannels.Admin.Influencer.DTOs;
+using VidhanSabha.Application.Pannels.Admin.Influencer.Queries;
 using VidhanSabha.Application.Pannels.Admin.Mandal.Commands;
 using VidhanSabha.Application.Pannels.Admin.Mandal.DTOs;
 using VidhanSabha.Application.Pannels.Admin.Mandal.DTOs.Create;
@@ -43,13 +54,6 @@ using VidhanSabha.Application.Pannels.Admin.Sector.Queries;
 using VidhanSabha.Application.Pannels.Admin.SeniorDisabled.Command;
 using VidhanSabha.Application.Pannels.Admin.SeniorDisabled.DTOs;
 using VidhanSabha.Application.Pannels.Admin.SeniorDisabled.Queries;
-
-using VidhanSabha.Application.Pannels.Admin.BoothSamiti.Command;
-using VidhanSabha.Application.Pannels.Admin.BoothSamiti.Dtos;
-using VidhanSabha.Application.Pannels.Admin.BoothSamiti.Queries;
-
-using VidhanSabha.Application.Common.BoothSamitiDesignation.Queries;
-using VidhanSabha.Application.Common.BoothSamitiDesignation.DTOs;
 public static class AdminEndpoints
 {
     public static void MapAdminEndpoints(this WebApplication app)
@@ -95,7 +99,13 @@ public static class AdminEndpoints
 
 
         var boothSamitiDesignation = app.MapGroup("/api/boothsamiti-designation")
-    .WithTags("BoothSamitiDesignation");
+                                    .WithTags("BoothSamitiDesignation");
+
+        var influencer = app.MapGroup("/api/influencer")
+                        .WithTags("Influencer");
+
+        var boothvoter = app.MapGroup("/api/boothvoter")
+                        .WithTags("BoothVoter");
 
         #region Mandal
         mandal.MapGet("/getAll", async (
@@ -342,6 +352,39 @@ public static class AdminEndpoints
 
         #endregion
 
+        #region Booth Voter
+
+        boothvoter.MapPost("/create", async (CreateBoothVoterRequestDto dto, IMediator mediator) =>
+        {
+            var result = await mediator.Send(new CreateBoothVoterCommand(dto));
+            return Results.Ok(ApiResponse<int>.Ok(result, "Booth Voter Created Successfully"));
+        })
+                .WithName("CreateBoothVoter")
+                .Produces<int>(200);
+
+        boothvoter.MapPost("/update", async (UpdateBoothVoterRequestDto dto, IMediator mediator) =>
+        {
+            var result = await mediator.Send(new UpdateBoothVoterCommand(dto));
+            return Results.Ok(ApiResponse<int>.Ok(result, "Booth Voter Updated Successfully"));
+        })
+                .WithName("UpdateBoothVoter")
+                .Produces<int>(200);
+
+        boothvoter.MapPost("/delete", async (int id, IMediator mediator) =>
+        {
+            var result = await mediator.Send(new DeleteBoothVoterCommand(id));
+            return Results.Ok(ApiResponse<int>.Ok(result, "BoothVoter Deleted Successfully"));
+        })
+                .WithName("DeleteBoothVoter")
+                .Produces<int>(200);
+        boothvoter.MapGet("/getAll", async (IMediator mediator) =>
+        {
+            var result = await mediator.Send(new GetAllBoothVoterQuery());
+            return Results.Ok(ApiResponse<List<BoothVoterResponseDto>>.Ok(result));
+        });
+
+        #endregion
+
         #region Sahmat Asahmat
 
         sahmatasahmat.MapPost("/create", async (CreateSahmatAsahmatReqDto dto, IMediator mediator) =>
@@ -449,6 +492,44 @@ public static class AdminEndpoints
 
         #endregion
 
+        #region influencer
+
+        
+
+        influencer.MapPost("/create", async (CreateInfluencerReqDto dto, IMediator mediator) =>
+        {
+            var result = await mediator.Send(new CreateInfluencerCommand(dto));
+            return Results.Ok(ApiResponse<int>.Ok(result, "Influencer Created Successfully"));
+        })
+                .WithName("CreateInfluencer")
+                .Produces<int>(200);
+
+        
+        influencer.MapPost("/update", async (UpdateInfluencerReqDto dto, IMediator mediator) =>
+        {
+            int result = await mediator.Send(new UpdateInfluencerCommand(dto));
+            return Results.Ok(ApiResponse<int>.Ok(result, "Influencer Updated Successfully"));
+        })
+            .WithName("UpdateInfluencer")
+            .Produces<int>(200);
+
+        influencer.MapPost("/delete", async (int id, IMediator mediator) =>
+        {
+            var res = await mediator.Send(new DeleteInfluencerCommand(id));
+            return Results.Ok("Influencer Deleted Successfully");
+        })
+            .WithName("DeleteInfluencer")
+            .Produces(200);
+
+        influencer.MapGet("/getAll", async (IMediator mediator) =>
+        {
+            var result = await mediator.Send(new GetAllInfluencerQuery());
+            return Results.Ok(ApiResponse<List<InfluencerResponseDto>>.Ok(result));
+        })
+         .WithName("GetAllInfluencer")
+         .Produces<ApiResponse<List<InfluencerResponseDto>>>(200);
+        #endregion
+
         #region BoothSamitiDesignation
 
         boothSamitiDesignation.MapGet("/getAll", async (IMediator mediator) =>
@@ -528,6 +609,17 @@ public static class AdminEndpoints
         {
             var result = await mediator.Send(new GetAllPrabhavQuery(q));
             return Results.Ok(ApiResponse<PagedResult<PrabhavshaliResponseDto>>.Ok(result));
+        });
+
+        prabhavshali.MapGet("/getDesgById", async (int desgId, IMediator mediator) =>
+        {
+            var result = await mediator.Send(
+                new GetAllParabhavshaliByDesignIdQuery
+                {
+                    DesgId = desgId
+                });
+
+            return Results.Ok(ApiResponse<List<PrabhavshaliResponseDesinIdDto>>.Ok(result));
         });
 
         #endregion

@@ -9,9 +9,9 @@ using VidhanSabha.Domain.Entities.Common;
 
 namespace VidhanSabha.Application.Common.MemberModulePermission.Command
 {
-    internal class CreateMemberModulePermissionCommandHandler : IRequestHandler<CreateMemberModulePermissionCommand, int>
-    {
-        private IMemberModulePermissionRepository _repository;
+    //    internal class CreateMemberModulePermissionCommandHandler : IRequestHandler<CreateMemberModulePermissionCommand, int>
+    //    {
+    //        private IMemberModulePermissionRepository _repository;
 
         public CreateMemberModulePermissionCommandHandler(IMemberModulePermissionRepository repository)
         {

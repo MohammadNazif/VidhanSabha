@@ -23,7 +23,7 @@ namespace VidhanSabha.Application.Pannels.Admin.PannaPramukh.Command
 
             if(panna == null)
             {
-                throw new NotFoundException("PannaPramukh Not Found");
+                throw new NotFoundException("Panna Pranukh Not Found");
             }
 
             panna.Delete();
