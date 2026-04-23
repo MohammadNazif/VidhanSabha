@@ -12,8 +12,8 @@ export class PrabhavshaliService extends BaseApiService {
     return this.create(this.entity, data);
   }
 
-  getAllPrabhavshali(): Observable<any> {
-    return this.getAll(this.entity);
+  getAllPrabhavshali(params: any = {}): Observable<any> {
+    return this.getAllByParams(this.entity, params);
   }
 
   deletePrabhavshali(id: number): Observable<any> {

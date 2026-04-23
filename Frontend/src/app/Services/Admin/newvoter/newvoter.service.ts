@@ -8,8 +8,8 @@ import { BaseApiService } from '../../common/base-api.service';
 export class NewvoterService extends BaseApiService {
   private entity = 'newvoter';
 
-  getAllNewvoters(): Observable<any> {
-    return this.getAll(this.entity);
+  getAllNewvoters(params: any = {}): Observable<any> {
+    return this.getAllByParams(this.entity, params);
   }
 
   createNewvoter(data: any): Observable<any> {

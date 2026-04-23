@@ -12,8 +12,8 @@ export class DistrictPrabhariService extends BaseApiService {
     return this.create(this.entity, data);
   }
 
-  getAllPrabharis(): Observable<any> {
-    return this.getAll(this.entity);
+  getAllPrabharis(params: any = {}): Observable<any> {
+    return this.getAllByParams(this.entity, params);
   }
 
   deletePrabhari(id: number): Observable<any> {

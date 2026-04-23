@@ -118,6 +118,7 @@ export class SidebarComponent implements OnInit {
         { label: 'BlockPramukh List', route: '/block-pramukh-list' },
         { label: 'Senior Citizen List', route: '/senior-citizen-list' },
         { label: 'Disabled List', route: '/disabled-list' },
+        { label: 'Varisth/Viklaang List', route: '/varisth-naagarik-viklaang-list' },
         { label: 'Panna Pramukh List', route: '/panna-pramukh-list' },
         { label: 'Influencer Person List', route: '/influencer-person-list' },
       ]

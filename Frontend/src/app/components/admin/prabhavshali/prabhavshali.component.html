@@ -9,8 +9,13 @@
 
     <!-- Table Section -->
     <div class="flex-1 min-h-0 bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
-        <app-generic-table class="flex-1 min-h-0" [data]="personList" [columns]="columns" [config]="config" [actions]="actions"
-            (actionClick)="handleAction($event)">
+        <app-generic-table class="flex-1 min-h-0" [data]="personList" [columns]="columns" [config]="config" 
+            [actions]="actions" [totalItems]="totalCount"
+            (actionClick)="handleAction($event)" 
+            (pageChange)="handlePageChange($event)"
+            (sortChange)="handleSortChange($event)"
+            (searchChange)="handleSearchChange($event)"
+            (selectionChange)="handleSelection($event)">
         </app-generic-table>
     </div>
 </div>

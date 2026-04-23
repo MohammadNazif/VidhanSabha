@@ -22,6 +22,14 @@ export class DoubleVoterComponent implements OnInit {
   @ViewChild('voterModal') voterModal!: GenericModalButtonComponent;
 
   voterList: any[] = [];
+  totalCount = 0;
+  
+  // Server-side state
+  pageNumber = 1;
+  pageSize = 50;
+  searchTerm = '';
+  sortBy = '';
+  isDescending = false;
 
   columns: TableColumn[] = [
     { key: 'boothNumber', label: 'Booth No.', sortable: true },
@@ -38,7 +46,9 @@ export class DoubleVoterComponent implements OnInit {
     paginated: true,
     showRowNumbers: true,
     striped: true,
-    hoverable: true
+    hoverable: true,
+    serverSide: true,
+    defaultPageSize: 50
   };
 
   actions: TableAction[] = [
@@ -56,12 +66,12 @@ export class DoubleVoterComponent implements OnInit {
         label: 'Booth No',
         type: 'select',
         placeholder: '-- Select Booth --',
-        apiUrl: 'booth/getall',
+        apiUrl: 'common/boothNumber',
         apiMapper: (data: any) => {
           const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
           return list.map((item: any) => ({
-            value: String(item.id),
-            label: `${item.boothNumber} - ${item.pollingStationName || ''}`
+            value: String(item.boothId || item.id),
+            label: `Booth No. ${item.boothNumber} - ${item.boothName || item.pollingStationName || ''}`
           }));
         },
         validations: [Validators.required],
@@ -76,10 +86,10 @@ export class DoubleVoterComponent implements OnInit {
         dependsOn: 'boothId',
         apiUrl: (boothId: string) => `common/villagesByBoothId?boothId=${boothId}`,
         apiMapper: (data: any) => {
-          const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
+          const list = Array.isArray(data?.data?.items) ? data.data.items : (Array.isArray(data?.items) ? data.items : (Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : [])));
           return list.map((item: any) => ({
             value: String(item.id),
-            label: item.name
+            label: item.name || item.villageName
           }));
         },
         validations: [Validators.required],
@@ -153,17 +163,55 @@ export class DoubleVoterComponent implements OnInit {
   }
 
   loadVoters() {
-    this.voterService.getAllDoubleVoters().subscribe({
+    const params = {
+      pageNumber: this.pageNumber,
+      pageSize: this.pageSize,
+      searchTerm: this.searchTerm,
+      sortBy: this.sortBy,
+      isDescending: this.isDescending
+    };
+
+    this.voterService.getAllDoubleVoters(params).subscribe({
       next: (response) => {
-        const rawList = response.data || (Array.isArray(response) ? response : []);
-        this.voterList = rawList.map((item: any) => ({
-          ...item,
-          villageName: Array.isArray(item.villages) ? item.villages.map((v: any) => v.villageName).join(', ') : '',
-          villageId: Array.isArray(item.villages) ? item.villages.map((v: any) => v.villageId) : []
-        }));
+        const dataWrap = response.data;
+        if (dataWrap && dataWrap.items) {
+          this.voterList = dataWrap.items.map((item: any) => ({
+            ...item,
+            villageName: Array.isArray(item.villages) ? item.villages.map((v: any) => v.villageName).join(', ') : '',
+            villageId: Array.isArray(item.villages) ? item.villages.map((v: any) => v.villageId) : []
+          }));
+          this.totalCount = dataWrap.totalCount || 0;
+        } else {
+          const rawList = Array.isArray(dataWrap) ? dataWrap : [];
+          this.voterList = rawList.map((item: any) => ({
+            ...item,
+            villageName: Array.isArray(item.villages) ? item.villages.map((v: any) => v.villageName).join(', ') : '',
+            villageId: Array.isArray(item.villages) ? item.villages.map((v: any) => v.villageId) : []
+          }));
+          this.totalCount = this.voterList.length;
+        }
       },
       error: (err) => console.error('Error fetching double voters:', err)
     });
+  }
+
+  handlePageChange(event: any) {
+    this.pageNumber = event.currentPage;
+    this.pageSize = event.pageSize;
+    this.loadVoters();
+  }
+
+  handleSortChange(event: any) {
+    this.sortBy = event.column;
+    this.isDescending = event.direction === 'desc';
+    this.pageNumber = 1; 
+    this.loadVoters();
+  }
+
+  handleSearchChange(term: string) {
+    this.searchTerm = term;
+    this.pageNumber = 1; 
+    this.loadVoters();
   }
 
   handleAction(event: any) {
@@ -216,5 +264,9 @@ export class DoubleVoterComponent implements OnInit {
       `Double voter ${isUpdate ? 'updated' : 'registered'} successfully!`,
       () => this.loadVoters()
     );
+  }
+
+  handleSelection(selected: any[]) {
+    console.log('Selected voters:', selected);
   }
 }

@@ -9,11 +9,14 @@ import {
   TemplateRef,
   ContentChild,
   TrackByFunction,
-  inject
+  inject,
+  OnDestroy
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { Subject, Subscription } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import {
   TableColumn,
   TableAction,
@@ -46,7 +49,7 @@ const _iconCache = new Map<string, SafeHtml>();
   templateUrl: './generic-table.component.html',
   styleUrl: './generic-table.component.css'
 })
-export class GenericTableComponent implements OnInit, OnChanges {
+export class GenericTableComponent implements OnInit, OnChanges, OnDestroy {
   private readonly sanitizer = inject(DomSanitizer);
 
   /** Returns the cached SafeHtml SVG for the given icon key. Created once per key. */
@@ -84,6 +87,8 @@ export class GenericTableComponent implements OnInit, OnChanges {
   processedData: any[] = [];
   displayedData: any[] = [];
   searchTerm = '';
+  private searchSubject = new Subject<string>();
+  private searchSubscription?: Subscription;
   sortState: SortState = { column: '', direction: null };
   selectedRows: Set<number> = new Set();
   allSelected = false;
@@ -111,6 +116,7 @@ export class GenericTableComponent implements OnInit, OnChanges {
     loading: false,
     compact: false,
     serverSide: false,
+    searchDebounceTime: 400,
     exportable: false
   };
 
@@ -148,7 +154,28 @@ export class GenericTableComponent implements OnInit, OnChanges {
 
   ngOnInit() {
     this.pageState.pageSize = this.mergedConfig.defaultPageSize || 10;
+    this.setupSearchDebounce();
     this.processData();
+  }
+
+  ngOnDestroy() {
+    if (this.searchSubscription) {
+      this.searchSubscription.unsubscribe();
+    }
+  }
+
+  private setupSearchDebounce() {
+    if (this.searchSubscription) {
+      this.searchSubscription.unsubscribe();
+    }
+
+    this.searchSubscription = this.searchSubject.pipe(
+      debounceTime(this.mergedConfig.searchDebounceTime || 400),
+      distinctUntilChanged()
+    ).subscribe(term => {
+      this.searchChange.emit(term);
+      this.processData();
+    });
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -157,6 +184,9 @@ export class GenericTableComponent implements OnInit, OnChanges {
     }
     if (changes['loading']) {
       this.loading = changes['loading'].currentValue;
+    }
+    if (changes['config'] && changes['config'].currentValue?.searchDebounceTime !== changes['config'].previousValue?.searchDebounceTime) {
+      this.setupSearchDebounce();
     }
   }
 
@@ -258,13 +288,16 @@ export class GenericTableComponent implements OnInit, OnChanges {
   // ── Search ──
   onSearch() {
     this.pageState.currentPage = 1;
-    this.searchChange.emit(this.searchTerm);
-    this.processData();
+    this.searchSubject.next(this.searchTerm);
   }
 
   clearSearch() {
     this.searchTerm = '';
-    this.onSearch();
+    this.pageState.currentPage = 1;
+    this.searchChange.emit('');
+    this.processData();
+    // Also push to subject to avoid the next debounced emission from overwriting this
+    this.searchSubject.next('');
   }
 
   // ── Pagination ──

@@ -54,7 +54,7 @@ namespace VidhanSabha.Application.Pannels.Admin.Sector.Commands
                     dto.ProfileImage
                 );
             }
-
+            _sectorRepository.UpdateAsync(sector);
             return MapToDto(sector);
         }
 

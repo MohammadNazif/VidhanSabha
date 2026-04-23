@@ -62,6 +62,7 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
         {
             var query = _context.Tbl_Booth
                 .AsNoTracking()
+                .Where(b => b.Status)
                 .Where(b =>
                     (!qp.MandalId.HasValue || b.MandalId == qp.MandalId) &&
                     (!qp.SectorId.HasValue || b.SectorId == qp.SectorId));
