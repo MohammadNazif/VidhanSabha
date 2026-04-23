@@ -1,14 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MediatR;
+﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Text;
+using System.Threading.Tasks;
+using VidhanSabha.Application.Common.Dtos;
 using VidhanSabha.Application.Pannels.Admin.PannaPramukh.Dtos;
 using VidhanSabha.Application.Pannels.Admin.PannaPramukh.Interfaces;
 using VidhanSabha.Domain.Entities.Admin;
+using VidhanSabha.Infrastructure.Extensions;
 using VidhanSabha.Infrastructure.Persistence;
 using VidhanSabha.Infrastructure.Repositories.Common;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
@@ -33,31 +36,53 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
             throw new NotImplementedException();
         }
 
-        public async Task<List<PannaPramukhResponseDto>> GetAllAsync(int? boothId = null, CancellationToken ct = default)
+        public async Task<PagedResult<PannaPramukhResponseDto>> GetAllAsync(PannaPramukhQueryParams qp, CancellationToken ct = default)
         {
-           var res = await _context.Tbl_PannaPramukh
-               .Select(m => new PannaPramukhResponseDto
-               {
-                   Id = m.Id,
-                   PannaPramukhName = m.PannaPramukhName,
-                   PannaNumber = m.PannaNumber,
-                   BoothId = m.BoothId,
-                  BoothNumber= m.Booth.BoothNumber,
-                   CastId = m.CastId,
-                   CastName = m.Cast.CastName,
-                   CategoryId = m.CategoryId,
-                   CategoryName = m.Category.Name,
-                   Address = m.Address,
-                   Villages = m.Villages.Select(v => new VillageDto
-                   {
-                       VillageId = v.VillageId,
-                       VillageName = v.Village.VillageName
-                   }).ToList(),
-                   VoterId = m.VoterId,
-                   PhoneNumber = m.PhoneNumber,
-               }).ToListAsync();
+            var query = _context.Tbl_PannaPramukh
+              .AsNoTracking()
+              .Where(b =>
+                  (!qp.Id.HasValue || b.Id == qp.Id));
 
-            return  res;
+            Expression<Func<Tbl_PannaPramukh, bool>>? search = null;
+
+            if (!string.IsNullOrWhiteSpace(qp.SearchTerm))
+            {
+                var term = qp.SearchTerm.Trim().ToLower();
+                search = b =>
+                    b.Booth.BoothNumber.Equals(Convert.ToInt32(term)) ||
+                    b.PannaPramukhName.ToLower().Contains(term) ||
+                    b.PannaNumber.Equals(Convert.ToInt32(term)) ||
+                    b.Address.ToLower().Contains(term) ||
+                    //b.Village.VillageName.ToLower().Contains(term) ||
+                    b.VoterId.ToLower().Contains(term);
+            }
+
+            return await query.ToPagedResultAsync(
+                queryParams: qp,
+                searchPredicate: search,
+                defaultSort: b => b.Booth.BoothNumber,
+                projection: m => new PannaPramukhResponseDto
+                {
+                    Id = m.Id,
+                    PannaPramukhName = m.PannaPramukhName,
+                    PannaNumber = m.PannaNumber,
+                    BoothId = m.BoothId,
+                    BoothNumber = m.Booth.BoothNumber,
+                    CastId = m.CastId,
+                    CastName = m.Cast.CastName,
+                    CategoryId = m.CategoryId,
+                    CategoryName = m.Category.Name,
+                    Address = m.Address,
+                    Villages = m.Villages.Select(v => new VillageDto
+                    {
+                        VillageId = v.VillageId,
+                        VillageName = v.Village.VillageName
+                    }).ToList(),
+                    VoterId = m.VoterId,
+                    PhoneNumber = m.PhoneNumber,
+                },
+                ct: ct
+                );
         }
 
         public async Task<Tbl_PannaPramukh?> GetByIdAsync(int id)

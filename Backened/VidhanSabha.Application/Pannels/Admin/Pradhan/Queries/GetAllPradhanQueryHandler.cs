@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using VidhanSabha.Application.Common.Dtos;
 using VidhanSabha.Application.Exceptions;
 using VidhanSabha.Application.Pannels.Admin.NewVoter.DTOs;
 using VidhanSabha.Application.Pannels.Admin.NewVoter.Interfaces;

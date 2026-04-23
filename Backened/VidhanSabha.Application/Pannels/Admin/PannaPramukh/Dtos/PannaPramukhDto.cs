@@ -11,9 +11,7 @@ namespace VidhanSabha.Application.Pannels.Admin.PannaPramukh.Dtos
     public class CreatePannaPramukhRequestDto
     {
         public int BoothId { get; set; }
-
         public List<int> VillageId { get; set; } = new();
-
         public string PannaPramukhName { get; set; } = string.Empty;
         public int PannaNumber { get; set; }
         public int CategoryId { get; set; }

@@ -27,6 +27,7 @@ using VidhanSabha.Application.Pannels.Admin.Influencer.Command;
 using VidhanSabha.Application.Pannels.Admin.Influencer.DTOs;
 using VidhanSabha.Application.Pannels.Admin.Influencer.Queries;
 using VidhanSabha.Application.Pannels.Admin.Mandal.Commands;
+using VidhanSabha.Application.Pannels.Admin.Mandal.DTOs;
 using VidhanSabha.Application.Pannels.Admin.Mandal.DTOs.Create;
 using VidhanSabha.Application.Pannels.Admin.Mandal.Queries;
 using VidhanSabha.Application.Pannels.Admin.NewVoter.Command;
@@ -107,11 +108,13 @@ public static class AdminEndpoints
                         .WithTags("BoothVoter");
 
         #region Mandal
-        mandal.MapGet("/getAll", async (IMediator mediator) =>
+        mandal.MapGet("/getAll", async (
+            [AsParameters] MandalQueryParams q,
+            IMediator mediator) =>
         {
-            var result = await mediator.Send(new GetAllMandalsQuery());
+            var result = await mediator.Send(new GetAllMandalsQuery(q));
 
-            return Results.Ok(ApiResponse<List<MandalResponseDto>>.Ok(result));
+            return Results.Ok(ApiResponse<PagedResult<MandalResponseDto>>.Ok(result));
         })
         .WithName("GetAllMandals")
         .Produces<ApiResponse<List<MandalResponseDto>>>(200);
@@ -175,10 +178,12 @@ public static class AdminEndpoints
         .WithName("UpdateSector")
         .Produces<SectorResponseDto>(200);
 
-        sector.MapGet("/getAll", async (IMediator mediator) =>
+        sector.MapGet("/getAll", async (
+            [AsParameters] SectorQueryParams q,
+            IMediator mediator) =>
         {
-            var result = await mediator.Send(new GetAllSectorsQuery());
-            return Results.Ok(ApiResponse<List<SectorResponseDto>>.Ok(result));
+            var result = await mediator.Send(new GetAllSectorsQuery(q));
+            return Results.Ok(ApiResponse<PagedResult<SectorResponseDto>>.Ok(result));
         }).WithName("GetAll")
         .Produces<List<SectorResponseDto>>(200);
 
@@ -242,10 +247,12 @@ public static class AdminEndpoints
 
         #region PannaPramukh
 
-        pannapramukh.MapGet("/getAll", async (IMediator mediator) =>
+        pannapramukh.MapGet("/getAll", async (
+            [AsParameters] PannaPramukhQueryParams q,
+            IMediator mediator) =>
          {
-             var result = await mediator.Send(new GetAllPannaQuery());
-             return Results.Ok(ApiResponse<List<PannaPramukhResponseDto>>.Ok(result));
+             var result = await mediator.Send(new GetAllPannaQuery(q));
+             return Results.Ok(ApiResponse<PagedResult<PannaPramukhResponseDto>>.Ok(result));
          })
          .WithName("GetAllPannaPramukh")
          .Produces<ApiResponse<List<PannaPramukhResponseDto>>>(200);
@@ -300,10 +307,12 @@ public static class AdminEndpoints
                 .WithName("DeletePravasiVoter")
                 .Produces<int>(200);
 
-        pravasivoter.MapGet("/getAll", async (IMediator mediator) =>
+        pravasivoter.MapGet("/getAll", async (
+            [AsParameters] PravasiQueryParams q,
+            IMediator mediator) =>
         {
-            var result = await mediator.Send(new GetAllPravasiQuery());
-            return Results.Ok(ApiResponse<List<PravasiVoterResponseDto>>.Ok(result));
+            var result = await mediator.Send(new GetAllPravasiQuery(q));
+            return Results.Ok(ApiResponse<PagedResult<PravasiVoterResponseDto>>.Ok(result));
         });
 
         #endregion
@@ -333,10 +342,12 @@ public static class AdminEndpoints
         })
                 .WithName("DeleteNewVoter")
                 .Produces<int>(200);
-        newvoter.MapGet("/getAll", async (IMediator mediator) =>
+        newvoter.MapGet("/getAll", async (
+            [AsParameters] NewVoterQueryParams q,
+            IMediator mediator) =>
         {
-            var result = await mediator.Send(new GetAllNewVoterQuery());
-            return Results.Ok(ApiResponse<List<NewVoterResponseDto>>.Ok(result));
+            var result = await mediator.Send(new GetAllNewVoterQuery(q));
+            return Results.Ok(ApiResponse<PagedResult<NewVoterResponseDto>>.Ok(result));
         });
 
         #endregion
@@ -400,10 +411,12 @@ public static class AdminEndpoints
                 .WithName("DeleteSahmat/Asahmat")
                 .Produces<int>(200);
 
-        sahmatasahmat.MapGet("/getAll", async (IMediator mediator) =>
+        sahmatasahmat.MapGet("/getAll", async (
+            [AsParameters] SahmatAsahmatQueryParams q,
+            IMediator mediator) =>
         {
-            var result = await mediator.Send(new GetAllSahmatAsahmatQuery());
-            return Results.Ok(ApiResponse<List<SahmatAsahmatResponseDto>>.Ok(result));
+            var result = await mediator.Send(new GetAllSahmatAsahmatQuery(q));
+            return Results.Ok(ApiResponse<PagedResult<SahmatAsahmatResponseDto>>.Ok(result));
         });
 
         #endregion
@@ -434,7 +447,8 @@ public static class AdminEndpoints
         })
                 .WithName("DeletePradhan")
                 .Produces<int>(200);
-        pradhan.MapGet("/getAll", async (IMediator mediator) =>
+        pradhan.MapGet("/getAll", async (
+            IMediator mediator) =>
         {
             var result = await mediator.Send(new GetAllPradhanQuery());
             return Results.Ok(ApiResponse<List<PradhanResponseDto>>.Ok(result));
@@ -553,10 +567,12 @@ public static class AdminEndpoints
                 .WithName("DeleteDoubleVoter")
                 .Produces<int>(200);
 
-        doublevoter.MapGet("/getAll", async (IMediator mediator) =>
+        doublevoter.MapGet("/getAll", async (
+            [AsParameters] DoubleVoterQueryParams q, 
+            IMediator mediator) =>
         {
-            var result = await mediator.Send(new GetAllDoubleVoterQuery());
-            return Results.Ok(ApiResponse<List<DoubleVoterResponseDto>>.Ok(result));
+            var result = await mediator.Send(new GetAllDoubleVoterQuery(q));
+            return Results.Ok(ApiResponse<PagedResult<DoubleVoterResponseDto>>.Ok(result));
         });
 
         #endregion
@@ -587,10 +603,12 @@ public static class AdminEndpoints
                 .WithName("DeletePrabhavshali")
                 .Produces<int>(200);
 
-        prabhavshali.MapGet("/getAll", async (IMediator mediator) =>
+        prabhavshali.MapGet("/getAll", async (
+            [AsParameters] PrabhavshaliQueryParams q,
+            IMediator mediator) =>
         {
-            var result = await mediator.Send(new GetAllPrabhavQuery());
-            return Results.Ok(ApiResponse<List<PrabhavshaliResponseDto>>.Ok(result));
+            var result = await mediator.Send(new GetAllPrabhavQuery(q));
+            return Results.Ok(ApiResponse<PagedResult<PrabhavshaliResponseDto>>.Ok(result));
         });
 
         prabhavshali.MapGet("/getDesgById", async (int desgId, IMediator mediator) =>
@@ -632,10 +650,12 @@ public static class AdminEndpoints
                 .WithName("DeleteBlock")
                 .Produces<int>(200);
 
-        block.MapGet("/getAll", async (IMediator mediator) =>
+        block.MapGet("/getAll", async (
+            [AsParameters] BlockQueryParams q,
+            IMediator mediator) =>
         {
-            var result = await mediator.Send(new GetAllBlockQuery());
-            return Results.Ok(ApiResponse<List<BlockResponseDto>>.Ok(result));
+            var result = await mediator.Send(new GetAllBlockQuery(q));
+            return Results.Ok(ApiResponse<PagedResult<BlockResponseDto>>.Ok(result));
         });
         block.MapGet("/getAllBlockName", async (IMediator mediator) =>
         {
@@ -671,10 +691,12 @@ public static class AdminEndpoints
                 .WithName("DeleteBDC")
                 .Produces<int>(200);
 
-        bdc.MapGet("/getAll", async (IMediator mediator) =>
+        bdc.MapGet("/getAll", async (
+            [AsParameters] BDCQueryParams q,
+            IMediator mediator) =>
         {
-            var result = await mediator.Send(new GetAllBDCQuery());
-            return Results.Ok(ApiResponse<List<BDCResponseDto>>.Ok(result));
+            var result = await mediator.Send(new GetAllBDCQuery(q));
+            return Results.Ok(ApiResponse<PagedResult<BDCResponseDto>>.Ok(result));
         });
 
         #endregion
@@ -705,10 +727,12 @@ public static class AdminEndpoints
                 .WithName("DeleteSeniorDisabled")
                 .Produces<int>(200);
 
-        seniordisabled.MapGet("/getAll", async (IMediator mediator) =>
+        seniordisabled.MapGet("/getAll", async (
+            [AsParameters] SeniorDisabledQueryParams q,
+            IMediator mediator) =>
         {
-            var result = await mediator.Send(new GetAllSeniorDisabledQuery());
-            return Results.Ok(ApiResponse<List<SeniorDisabledResponseDto>>.Ok(result));
+            var result = await mediator.Send(new GetAllSeniorDisabledQuery(q));
+            return Results.Ok(ApiResponse<PagedResult<SeniorDisabledResponseDto>>.Ok(result));
         });
 
 

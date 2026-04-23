@@ -28,7 +28,8 @@ namespace VidhanSabha.Application.Pannels.Admin.PannaPramukh.Command
             }
 
             panna.Update
-                (dto.BoothId, dto.PannaNumber, dto.PannaPramukhName, dto.CategoryId, dto.CastId, dto.VoterId, dto.PhoneNumber, dto.Address, dto.VillageId);
+                (dto.BoothId, dto.PannaNumber, dto.PannaPramukhName, dto.CategoryId,
+                dto.CastId, dto.VoterId, dto.PhoneNumber, dto.Address, dto.VillageId);
 
              return _repo.Update(panna);
 

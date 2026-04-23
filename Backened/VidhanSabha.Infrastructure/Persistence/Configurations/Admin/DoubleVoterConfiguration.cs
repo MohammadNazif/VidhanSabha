@@ -49,6 +49,10 @@ namespace VidhanSabha.Infrastructure.Persistence.Configurations.Admin
                   .WithMany()
                   .HasForeignKey(e => e.BoothId)
                   .OnDelete(DeleteBehavior.Restrict);
+           
+
+
+
         }
     }
     public class Tbl_DoubleVillageConfiguration : IEntityTypeConfiguration<Tbl_DoubleVoterVillage>
