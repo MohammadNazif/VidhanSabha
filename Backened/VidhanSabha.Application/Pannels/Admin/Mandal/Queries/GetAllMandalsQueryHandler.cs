@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MediatR;
+using VidhanSabha.Application.Common.Dtos;
 using VidhanSabha.Application.Exceptions;
 using VidhanSabha.Application.Pannels.Admin.Mandal.DTOs.Create;
 using VidhanSabha.Application.Pannels.Admin.Mandal.Interfaces;
@@ -11,7 +12,7 @@ using VidhanSabha.Application.Pannels.Admin.Mandal.Interfaces;
 namespace VidhanSabha.Application.Pannels.Admin.Mandal.Queries
 {
     public class GetAllMandalsQueryHandler
-        : IRequestHandler<GetAllMandalsQuery, List<MandalResponseDto>>
+        : IRequestHandler<GetAllMandalsQuery, PagedResult<MandalResponseDto>>
     {
         private readonly IMandalRepository _repo;
 
@@ -20,20 +21,18 @@ namespace VidhanSabha.Application.Pannels.Admin.Mandal.Queries
             _repo = repo;
         }
 
-        public async Task<List<MandalResponseDto>> Handle(
+        public async Task<PagedResult<MandalResponseDto>> Handle(
             GetAllMandalsQuery query, CancellationToken ct)
         {
-            var mandals = await _repo.GetAllAsync();
-            if (mandals == null || !mandals.Any())
-                throw new NotFoundException("No Mandals found.");
+            var mandals = await _repo.GetAllAsync(query.QueryParams,ct);
 
-            return mandals.Select(m => new MandalResponseDto
+            if (mandals == null)
             {
-                Id = m.Id,
-                VidhanId = m.VidhanId,
-                Name = m.Name,
-                Status = m.Status
-            }).ToList();
+                throw new NotFoundException("No Mandals found.");
+            }
+                
+            return mandals;
+            
         }
     }
 }

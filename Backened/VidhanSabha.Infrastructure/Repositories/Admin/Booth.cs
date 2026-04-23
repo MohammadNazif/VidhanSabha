@@ -67,6 +67,7 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
                     (!qp.SectorId.HasValue || b.SectorId == qp.SectorId));
 
             Expression<Func<Tbl_Booth, bool>>? search = null;
+
             if (!string.IsNullOrWhiteSpace(qp.SearchTerm))
             {
                 var term = qp.SearchTerm.Trim().ToLower();

@@ -81,20 +81,21 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
             }
         }
 
-        public Task<List<PradhanResponseDto>> GetAllAsync(int? id, CancellationToken ct = default)
+        public async Task<List<PradhanResponseDto>> GetAllAsync(int? boothId = null, CancellationToken ct = default)
         {
             try
             {
-                return _context.Tbl_Pradhan
+                return await _context.Tbl_Pradhan
                     .Include(p => p.Villages)
+                    .Include(p => p.Designation)
                     .Select(p => new PradhanResponseDto
                     {
                         Id = p.Id,
                         Name = p.Name,
                         DesignationId = p.DesignationId,
-                        DesignationName= p.Designation.DesignationName,
+                        DesignationName = p.Designation.DesignationName,
                         Contact = p.Contact,
-                        Gender = p.Gender,
+                        //Gender = p.Gender,
                         Villages = p.Villages.Select(v => new VillageResponseDtos
                         {
                             VillageId = v.VillageId,
@@ -108,5 +109,6 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
                 throw;
             }
         }
+
     }
 }

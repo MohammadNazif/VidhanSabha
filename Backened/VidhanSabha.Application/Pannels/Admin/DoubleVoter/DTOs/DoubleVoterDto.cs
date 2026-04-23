@@ -9,6 +9,7 @@ namespace VidhanSabha.Application.Pannels.Admin.DoubleVoter.DTOs
 {
     public class CreateDoubleVoterReqDto
     {
+
         public int BoothId { get; set; }
         public List<int> VillageId { get; set; } = new();
         public string Name { get; set; }
@@ -22,8 +23,12 @@ namespace VidhanSabha.Application.Pannels.Admin.DoubleVoter.DTOs
     public class DoubleVoterResponseDto
     {
         public int Id { get; set; }
+        public int SectorId { get; set; }
+        public string Sector { get; set; }
+        public string SectorSanyojak { get; set; }
         public int BoothId { get; set; }
         public int BoothNumber { get; set; }
+        public string BoothAdhyaksh { get; set; }
         public List<VillageResponseDtos> Villages { get; set; } = new();
         public string Name { get; set; }
         public string FatherName { get; set; }

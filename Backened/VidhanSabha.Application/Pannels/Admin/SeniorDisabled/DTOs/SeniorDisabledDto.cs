@@ -28,6 +28,9 @@ namespace VidhanSabha.Application.Pannels.Admin.SeniorDisabled.DTOs
         public int Id { get; set; }
         public int TypeId { get; set; }
         public string TypeName { get; set; }
+        public int SectorId { get; set; }
+        public string SectorName { get; set; }
+        public string SectorSanyojak { get; set; }
         public int BoothId { get; set; }
         public int BoothNumber { get; set; }
         public List<VillageResponseDtos> Villages { get; set; } = new();
