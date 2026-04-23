@@ -10,5 +10,9 @@ namespace VidhanSabha.Application.Pannels.Admin.PannaPramukh.Dtos
     public class PannaPramukhQueryParams:BaseQueryParams
     {
         public int? Id { get; set; }
+
+        public string? UserId { get; set; }
+
+        public int? BoothId { get; set; }
     }
 }

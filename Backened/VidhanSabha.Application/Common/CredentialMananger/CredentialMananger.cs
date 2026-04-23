@@ -79,8 +79,8 @@ namespace VidhanSabha.Application.Common.CredentialMananger
                 throw new NotFoundException("Login Credential Not Found");
 
             // ✅ Step 2 — Update fields
-            login.Username = mobile;
-            login.Mobile = mobile;
+               login.Username = mobile;
+               login.Mobile = mobile;
 
             // (optional if you want username = mobile always)
           // add if you have column

@@ -18,17 +18,32 @@ public class LoginRepository : ILoginRepository
         throw new NotImplementedException();
     }
 
-    public Task<Tbl_LoginCredential?> GetByMobileAsync(string mobileNumber)
+    public  async Task<Tbl_LoginCredential?> GetByMobileAsync(string mobileNumber)
     {
-        return _context.Tbl_LoginCredential.FirstOrDefaultAsync( x => x.Mobile == mobileNumber);
-         
+       return await _context.Tbl_LoginCredential.Where(x => x.Mobile == mobileNumber).Select(b => new Tbl_LoginCredential
+        {
+            UserId = b.UserId,
+            Mobile = b.Mobile,
+            Role = b.Role,
+            Password = b.Password,
+        }).FirstOrDefaultAsync();
     }
 
-    public Task<Tbl_LoginCredential?> GetByUserIdAsync(int userId)
+    public async Task<int> GetBoothByUserIdAsync(string userId)
     {
-        throw new NotImplementedException();
+        return await _context.Tbl_BoothSanyojak
+            .Where(x => x.UserId == userId && x.Status)
+            .Select(b => b.BoothId)
+            .FirstOrDefaultAsync();
     }
 
+    public async Task<int> GetSectorByUserIdAsync(string userId)
+    {
+        return await _context.Tbl_Sector
+            .Where(x => x.UserId == userId && x.Status)
+            .Select(b => b.Id)
+            .FirstOrDefaultAsync();
+    }
     public Task UpdateAsync(Tbl_LoginCredential login)
     {
         throw new NotImplementedException();

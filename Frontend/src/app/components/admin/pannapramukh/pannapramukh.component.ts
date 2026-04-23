@@ -231,13 +231,19 @@ export class PannapramukhComponent implements OnInit {
   }
 
   loadData() {
-    const params = {
+    const params: any = {
       pageNumber: this.pageNumber,
       pageSize: this.pageSize,
       searchTerm: this.searchTerm,
       sortBy: this.sortBy,
       isDescending: this.isDescending
     };
+
+    // Filter by userId for BoothSanyojak or as requested
+    const userId = this.authService.getUserId();
+    if (userId) {
+      params.userId = userId;
+    }
 
     this.pannaService.getAllPannapramukhs(params).subscribe({
       next: (response) => {
@@ -320,7 +326,8 @@ export class PannapramukhComponent implements OnInit {
       castId: Number(raw.castId),
       pannaNumber: Number(raw.pannaNumber),
       voterId: String(raw.voterId), // voterId is string in response JSON
-      villageId: Array.isArray(raw.villageId) ? raw.villageId.map((v: any) => Number(v)) : Number(raw.villageId)
+      villageId: Array.isArray(raw.villageId) ? raw.villageId.map((v: any) => Number(v)) : Number(raw.villageId),
+      userId: this.authService.getUserId()
     };
 
     const isUpdate = !!submitData.id;
