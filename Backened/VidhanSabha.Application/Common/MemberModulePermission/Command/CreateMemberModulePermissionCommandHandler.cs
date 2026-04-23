@@ -8,18 +8,19 @@ using VidhanSabha.Application.Common.NewFolder.Interface;
 
 namespace VidhanSabha.Application.Common.MemberModulePermission.Command
 {
-    internal class CreateMemberModulePermissionCommandHandler : IRequestHandler<CreateMemberModulePermissionCommand, int>
-    {
-        private IMemberModulePermissionRepository _repository;
+    //    internal class CreateMemberModulePermissionCommandHandler : IRequestHandler<CreateMemberModulePermissionCommand, int>
+    //    {
+    //        private IMemberModulePermissionRepository _repository;
 
-        public CreateMemberModulePermissionCommandHandler(IMemberModulePermissionRepository repository)
-        {
-            
-            _repository = repository;
-        }
-        //public Task<int> Handle(CreateMemberModulePermissionCommand request, CancellationToken cancellationToken)
-        //{
-        //    return _repository.Add(request.Dto);
-        //}
-    }
+    //        public CreateMemberModulePermissionCommandHandler(IMemberModulePermissionRepository repository)
+    //        {
+
+    //            _repository = repository;
+    //        }
+    //        public Task<int> Handle(CreateMemberModulePermissionCommand request, CancellationToken cancellationToken)
+    //        {
+    //            return _repository.Add(request.Dto);
+    //        }
+    //    }
+    //}
 }
