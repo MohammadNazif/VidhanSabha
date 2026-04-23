@@ -8,6 +8,7 @@ namespace VidhanSabha.Application.Pannels.Admin.Booth.Dtos
 {
     public class BoothResponseDto
     {
+        public string UserId { get; set; }
         public int Id { get; set; }
         public int MandalId { get; set; }
 

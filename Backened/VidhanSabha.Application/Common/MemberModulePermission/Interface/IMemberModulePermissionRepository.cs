@@ -3,24 +3,28 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using VidhanSabha.Application.Common.MemberModulePermission.Dtos;
 using VidhanSabha.Domain.Entities.Common;
 
 namespace VidhanSabha.Application.Common.NewFolder.Interface
 {
     public interface IMemberModulePermissionRepository
     {
-        Task<Tbl_MemberModulePermission?> GetAsync(int memberId, string module,
+        Task<Tbl_MemberModulePermissions?> GetAsync(int memberId, string module,
                                            CancellationToken ct = default);
 
-        Task<List<Tbl_MemberModulePermission>> GetAllByMemberAsync(int memberId,
+        Task<List<Tbl_MemberModulePermissions>> GetAllByMemberAsync(int memberId,
                                                                 CancellationToken ct = default);
 
+
+        Task<IReadOnlyList<MemberModulePermissionResDto>> GetPermissionByUserIdAsync(string userId,
+                                                            CancellationToken ct = default);
         Task<bool> ExistsAsync(int memberId, string module,
                                CancellationToken ct = default);
 
-        void Add(Tbl_MemberModulePermission permission);
-        void Remove(Tbl_MemberModulePermission permission);
-
+        Task<int> Add(Tbl_MemberModulePermissions permission);
+        void Remove(Tbl_MemberModulePermissions permission);
+        Task<int> AddRangeAsync(List<Tbl_MemberModulePermissions> entities);
         Task SaveChangesAsync(CancellationToken ct = default);
     }
 }

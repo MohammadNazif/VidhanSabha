@@ -23,4 +23,8 @@ export class BoothService extends BaseApiService {
   updateBooth(data: any): Observable<any> {
     return this.update(this.entity, data);
   }
+
+  getBoothIncharge(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/common/getboothincharge?pageSize=1000`);
+  }
 }

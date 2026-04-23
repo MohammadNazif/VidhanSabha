@@ -3,26 +3,26 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using VidhanSabha.Domain.Enums;
 
 namespace VidhanSabha.Domain.Entities.Common
 {
-    public class Tbl_MemberModulePermission
+    public class Tbl_MemberModulePermissions
     {
 
         public int Id { get; private set; }
 
-        public int MemberId { get; private set; }
-        public string Module { get; private set; } = string.Empty;
+        public string MemberId { get; private set; }
+        public ModulePermission Module { get; private set; }
         public bool hasPermission { get; private set; }
 
-        private Tbl_MemberModulePermission() { } // EF Core
+        private Tbl_MemberModulePermissions() { } 
 
 
-        public static Tbl_MemberModulePermission Create(int memberId, string module, bool hasPermission)
+        public static Tbl_MemberModulePermissions Create(string memberId, ModulePermission module, bool hasPermission)
         {
-            if (string.IsNullOrWhiteSpace(module))
-                throw new ArgumentException("Module name is required.");
-            return new Tbl_MemberModulePermission
+        
+            return new Tbl_MemberModulePermissions
             {
                 MemberId = memberId,
                 Module = module,

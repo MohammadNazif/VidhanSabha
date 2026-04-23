@@ -75,6 +75,7 @@ export class BdcComponent implements OnInit {
     selectable: false,
     paginated: true,
     searchable: true,
+    serverSide: true,
     defaultPageSize: 10
   };
 
@@ -192,7 +193,8 @@ export class BdcComponent implements OnInit {
         type: 'select',
         gridColSpan: 6,
         validations: [Validators.required],
-        apiUrl: 'common/village',
+        apiUrl: 'common/getallvillages',
+        multiple: true,
         apiMapper: (data: any) => {
           const list = data?.data?.items || data?.items || data?.data || data || [];
           return list.map((item: any) => ({
@@ -244,9 +246,9 @@ export class BdcComponent implements OnInit {
       ['categoryId', 'castId', 'partyId'].forEach(key => {
         if (editData[key]) editData[key] = String(editData[key]);
       });
-      // Map for select
+      // Map all assigned villages for multi-select binding
       if (row.villages && Array.isArray(row.villages)) {
-        editData.villageId = String(row.villages[0]?.villageId || '');
+        editData.villageId = row.villages.map((v: any) => String(v.villageId || v.id));
       }
       this.bdcModal.openModal(editData);
     }

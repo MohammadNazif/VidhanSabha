@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MediatR;
+﻿using MediatR;
+using VidhanSabha.Application.Common.CredentialMananger;
 using VidhanSabha.Application.Pannels.Admin.Sector.DTOs;
 using VidhanSabha.Application.Pannels.Admin.Sector.Interface;
 using VidhanSabha.Domain.Entities.Admin;
@@ -13,34 +9,25 @@ namespace VidhanSabha.Application.Pannels.Admin.Sector.Commands
     public class CreateSectorCommandHandler : IRequestHandler<CreateSectorCommand, SectorResponseDto>
     {
         private readonly ISectorRepository _sectorRepository;
+        private readonly CredentialManagerFunc _credentialManager;
 
-        //private readonly IWebHostEnvironment _env;
-        public CreateSectorCommandHandler(ISectorRepository sectorRepository)
+        public CreateSectorCommandHandler(
+            ISectorRepository sectorRepository,
+            CredentialManagerFunc credentialManager)
         {
             _sectorRepository = sectorRepository;
-            //_env = env;
+            _credentialManager = credentialManager;
         }
 
         public async Task<SectorResponseDto> Handle(CreateSectorCommand request, CancellationToken cancellationToken)
         {
-            //string? imagePath = null;
-
-            //if (request.profile != null)
-            //{
-            //    var uploads = Path.Combine(_env.WebRootPath, "uploads", "sectors");
-            //    Directory.CreateDirectory(uploads);
-            //    var fileName = $"{Guid.NewGuid()}{Path.GetExtension(request.ProfileImage.FileName)}";
-            //    var filePath = Path.Combine(uploads, fileName);
-            //    using var stream = new FileStream(filePath, FileMode.Create);
-            //    await request.ProfileImage.CopyToAsync(stream, cancellationToken);
-            //    imagePath = $"/uploads/sectors/{fileName}";
-            //}
             var dto = request.Dto;
 
             Tbl_Sector sector;
 
             if (!dto.IsSectorSanyojak)
             {
+                // ✅ No Sanyojak
                 sector = Tbl_Sector.CreateBasic(
                     request.CreatedById,
                     request.CreatedBy,
@@ -51,17 +38,31 @@ namespace VidhanSabha.Application.Pannels.Admin.Sector.Commands
             }
             else
             {
+                // ✅ Validation
                 if (dto.InchargeName is null || dto.Age is null || dto.FatherName is null ||
                     dto.CategoryId is null || dto.CastId is null ||
-                    dto.EducationLevel is null || dto.PhoneNumber is null || dto.Address is null)
-                    throw new ArgumentException("All Sanyojak fields are required when IsSectorSanyojak is true.");
+                    dto.PhoneNumber is null)
+                    throw new ArgumentException("All Sanyojak fields are required");
 
+                // ✅ Step 1 — Generate UserId
+                var userId = $"USR_{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}";
+
+                // ✅ Step 2 — Insert credential
+                await _credentialManager.InsertCredentialAsync(
+                    userId: userId,
+                    mobile: dto.PhoneNumber,
+                    email: "",
+                    role: "SectorSanyojak"
+                );
+
+                // ✅ Step 3 — Create sector with Sanyojak
                 sector = Tbl_Sector.CreateWithSanyojak(
                     request.CreatedById,
                     request.CreatedBy,
                     dto.MandalId,
                     dto.VillageId,
                     dto.SectorName,
+                    userId, // 👈 IMPORTANT
                     dto.InchargeName,
                     dto.Age.Value,
                     dto.FatherName,
@@ -75,7 +76,6 @@ namespace VidhanSabha.Application.Pannels.Admin.Sector.Commands
             }
 
             await _sectorRepository.AddAsync(sector);
-           
 
             return MapToDto(sector);
         }

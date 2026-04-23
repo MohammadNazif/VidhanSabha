@@ -148,6 +148,7 @@ namespace VidhanSabha.Domain.Entities.Admin
         public string InchargeName { get; private set; }
         public int Age { get; private set; }
 
+        public string? UserId { get; set; }
         public int BoothId { get; private set; }
         public string FatherName { get; private set; }
         public int CategoryId { get; private set; }
@@ -161,12 +162,13 @@ namespace VidhanSabha.Domain.Entities.Admin
         public Boolean Status { get; private set; } = true;
         private Tbl_BoothSanyojak() { }
 
-        public static Tbl_BoothSanyojak Create(
+        public static Tbl_BoothSanyojak Create(string userId,
             string inchargeName, int age, string fatherName,
             int categoryId, int castId, string? educationLevel,
             string phoneNumber, string? address)
             => new()
             {
+                UserId = userId,
                 InchargeName = inchargeName,
                 Age = age,
                 FatherName = fatherName,

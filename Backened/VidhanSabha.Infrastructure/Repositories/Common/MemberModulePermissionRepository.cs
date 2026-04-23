@@ -1,23 +1,40 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using VidhanSabha.Application.Common.MemberModulePermission.Dtos;
 using VidhanSabha.Application.Common.NewFolder.Interface;
 using VidhanSabha.Domain.Entities.Common;
 using VidhanSabha.Infrastructure.Persistence;
 
 namespace VidhanSabha.Infrastructure.Repositories.Common
 {
-    internal class MemberModulePermissionRepository : BaseRepository<Tbl_MemberModulePermission>, IMemberModulePermissionRepository
+    internal class MemberModulePermissionRepository : BaseRepository<Tbl_MemberModulePermissions>, IMemberModulePermissionRepository
     {
-        public MemberModulePermissionRepository(DatabaseContext context) : base(context)    
+        public MemberModulePermissionRepository(DatabaseContext context) : base(context)
         {
-            
+
         }
-        public void Add(Tbl_MemberModulePermission permission)
+        public async Task<int> Add(Tbl_MemberModulePermissions permission)
         {
-            throw new NotImplementedException();
+            try
+            {
+                _context.Tbl_MemberModulePermissions.Add(permission);
+                return await _context.SaveChangesAsync();
+            }
+            catch(Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<int> AddRangeAsync(List<Tbl_MemberModulePermissions> entities)
+        {
+             await _context.Tbl_MemberModulePermissions.AddRangeAsync(entities);
+            return await _context.SaveChangesAsync();
         }
 
         public Task<bool> ExistsAsync(int memberId, string module, CancellationToken ct = default)
@@ -25,17 +42,26 @@ namespace VidhanSabha.Infrastructure.Repositories.Common
             throw new NotImplementedException();
         }
 
-        public Task<List<Tbl_MemberModulePermission>> GetAllByMemberAsync(int memberId, CancellationToken ct = default)
+        public Task<List<Tbl_MemberModulePermissions>> GetAllByMemberAsync(int memberId, CancellationToken ct = default)
         {
             throw new NotImplementedException();
         }
 
-        public Task<Tbl_MemberModulePermission?> GetAsync(int memberId, string module, CancellationToken ct = default)
+        public Task<Tbl_MemberModulePermissions?> GetAsync(int memberId, string module, CancellationToken ct = default)
         {
             throw new NotImplementedException();
         }
 
-        public void Remove(Tbl_MemberModulePermission permission)
+        public async Task< IReadOnlyList<MemberModulePermissionResDto>> GetPermissionByUserIdAsync(string userId, CancellationToken ct = default)
+        {
+             return await _context.Tbl_MemberModulePermissions.Where(x => x.MemberId == userId).Select(b => new MemberModulePermissionResDto
+            {
+                Module = b.Module,
+                hasPermission = b.hasPermission
+            }).ToListAsync(ct);
+        }  
+
+        public void Remove(Tbl_MemberModulePermissions permission)
         {
             throw new NotImplementedException();
         }
