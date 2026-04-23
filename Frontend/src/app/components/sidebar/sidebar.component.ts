@@ -124,7 +124,29 @@ export class SidebarComponent implements OnInit {
       ]
     },
     { icon: 'share-2', label: 'Socail Media', route: '/socail-media', roles: ['ADMIN'] },
-    { icon: 'calendar', label: 'Activity', route: '/activity', roles: ['ADMIN'] }
+    { icon: 'calendar', label: 'Activity', route: '/activity', roles: ['ADMIN'] },
+    { icon: 'layout-dashboard', label: 'Dashboard', route: '/', roles: ['BoothSanyojak'] },
+    {
+      icon: 'clipboard-list', label: 'Lists',
+      badge: 0,
+      expanded: false,
+      roles: ['BoothSanyojak'],
+      children: [
+        { label: 'Booth Voters', route: '/booth-list' },
+        { label: 'Panna Pramukh', route: '/panna-pramukh-list' },
+        { label: 'Activities', route: '/activity' },
+        { label: 'New Voters', route: '/new-voter-list' },
+        { label: 'Pravasi Voter', route: '/pravasi-voter-list' },
+        { label: 'Sahmat', route: '/sahmat-list' },
+        { label: 'Asahmat', route: '/asahmat-list' },
+        { label: 'Double Voter/Married', route: '/double-voter-list' },
+        { label: 'Booth Samiti', route: '/booth-samiti-list' },
+        { label: 'Prabhavshali Vyakti', route: '/influencer-person-list' },
+        { label: 'Varishth Nagrik', route: '/senior-citizen-list' },
+        { label: 'Viklaang', route: '/disabled-list' },
+        { label: 'Social Media', route: '/socail-media' },
+      ]
+    }
   ];
 
   renderedNavItems: NavItem[] = [];

@@ -41,7 +41,9 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
             var query = _context.Tbl_PannaPramukh
               .AsNoTracking()
               .Where(b =>
-                  (!qp.Id.HasValue || b.Id == qp.Id));
+                  (!qp.Id.HasValue || b.Id == qp.Id) &&
+                  (!qp.BoothId.HasValue || b.BoothId == qp.BoothId ));
+
 
             Expression<Func<Tbl_PannaPramukh, bool>>? search = null;
 

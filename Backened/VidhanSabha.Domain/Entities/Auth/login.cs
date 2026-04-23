@@ -1,6 +1,7 @@
 ﻿
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using VidhanSabha.Domain.Entities.Admin;
 using VidhanSabha.Domain.Entities.SuperAdmin;
 
 namespace VidhanSabha.Domain.Entities.Auth
@@ -33,10 +34,13 @@ namespace VidhanSabha.Domain.Entities.Auth
         [Column("Status")]
         public bool Status { get; set; } = true;
 
+      
+
         [Column("created_at")]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public bool CanLogin() => Status;
+
 
     }
 }

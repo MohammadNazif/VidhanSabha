@@ -292,7 +292,7 @@ export class AllowAccessComponent implements OnInit {
     }
 
     const memberId = isNaN(Number(entityField.value)) ? entityField.value : Number(entityField.value);
-    
+
     // Construct payload as an array of permission objects
     const payload = this.permissionData.map(p => ({
       memberId: memberId,
