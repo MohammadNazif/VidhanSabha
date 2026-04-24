@@ -16,7 +16,8 @@ namespace VidhanSabha.Domain.Enums
        BoothSamiti = 6,
        EffectivePersion = 7,
        Activity = 8,
-       SeniororDisabled = 9
+       SeniororDisabled = 9,
+       Booth=10
     }
 
     public enum UserRole
