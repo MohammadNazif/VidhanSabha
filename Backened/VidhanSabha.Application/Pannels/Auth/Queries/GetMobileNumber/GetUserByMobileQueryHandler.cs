@@ -29,8 +29,8 @@ namespace VidhanSabha.Application.Pannels.Auth.Queries.GetMobileNumber
             {
                 UserId = user.UserId,
                 MobileNumber = user.Mobile,
-                Role = user.Role,
-                Status = user.Status
+                Role = user.Role
+               
             };
         }
     }

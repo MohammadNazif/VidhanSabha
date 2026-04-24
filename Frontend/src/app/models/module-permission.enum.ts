@@ -7,5 +7,10 @@ export enum ModulePermission {
   BoothSamiti = 6,
   EffectivePersion = 7,
   Activity = 8,
-  SeniororDisabled = 9
+  SeniororDisabled = 9,
+  Sahmat = 10,
+  Asahmat = 11,
+  SocialMedia = 12,
+  SeniorCitizen = 13,
+  Disabled = 14
 }

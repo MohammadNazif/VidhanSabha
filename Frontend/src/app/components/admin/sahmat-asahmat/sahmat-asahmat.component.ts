@@ -11,6 +11,7 @@ import { ToastService } from '../../../Services/common/toast/toast.service';
 import { CrudHandlerService } from '../../../Services/common/crud-handler.service';
 import { ActivatedRoute } from '@angular/router';
 import { AuthServiceService } from '../../../Services/Auth/auth.service';
+import { ModulePermission } from '../../../models/module-permission.enum';
 
 @Component({
   selector: 'app-sahmat-asahmat',
@@ -242,6 +243,11 @@ export class SahmatAsahmatComponent implements OnInit {
       isDescending: this.isDescending
     };
 
+    const userId = this.authService.getUserId();
+    if (userId) {
+      params.userId = userId;
+    }
+
     // Filter by type on server if possible, or handle locally if backend doesn't support TypeId filter
     // For now, we'll assume we want the full list and we can filter locally or pass type if supported
     if (this.isAsahmatView) {
@@ -309,7 +315,9 @@ export class SahmatAsahmatComponent implements OnInit {
         this.voterService.deleteSahmatAsahmat(row.id),
         'Deleted',
         'Voter deleted successfully!',
-        () => this.loadVoters()
+        () => this.loadVoters(),
+        true,
+        ModulePermission.Sahmat
       );
     } else if (action.id === 'edit') {
       const editData = { ...row };
@@ -340,7 +348,8 @@ export class SahmatAsahmatComponent implements OnInit {
       partyId: Number(raw.partyId),
       occupationId: Number(raw.occupationId),
       reason: raw.reason,
-      voterId: raw.voterId
+      voterId: raw.voterId,
+      userId: this.authService.getUserId()
     };
 
     const isUpdate = !!submitData.id;
@@ -352,7 +361,9 @@ export class SahmatAsahmatComponent implements OnInit {
       request,
       isUpdate ? 'Updated' : 'Success',
       `Voter ${isUpdate ? 'updated' : 'created'} successfully!`,
-      () => this.loadVoters()
+      () => this.loadVoters(),
+      true,
+      ModulePermission.Sahmat
     );
   }
 }

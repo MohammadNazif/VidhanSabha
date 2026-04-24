@@ -57,6 +57,13 @@ public static class AuthEndpoints
         }).WithName("accessPermission")
         .Produces(200);
 
+        permissions.MapPost("/update", async (IMediator mediator, List<updateMemberModulePermissionDto> request) =>
+        {
+            var data = await mediator.Send(new UpdateMemberModulePermissionCommand(request));
+            return Results.Ok(ApiResponse<int>.Ok(data, "Permession Updated Successfully"));
+        }).WithName("updatePermission")
+       .Produces(200);
+
         permissions.MapPost("/getbyuserid", async (IMediator mediator,string UserId) =>
         {
             var data = await mediator.Send(new getAllPermissionbyUseridQuery(UserId));

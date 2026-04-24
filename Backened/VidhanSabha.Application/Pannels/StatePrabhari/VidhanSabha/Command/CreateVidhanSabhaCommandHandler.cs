@@ -51,7 +51,7 @@ public class CreateVidhanSabhaCommandHandler : IRequestHandler<CreateVidhanSabha
                 
                 await _mediator.Send(new CreatePrabhariCommand(new CreatePrabhariRequestDto
                 {
-                    PrabhariRole = PrabhariRole.VidhanSabha,
+                    PrabhariRole = PrabhariRole.VidhanSabhaPrabhari,
                     stateId  = p.stateId,
                     vidhanSanhaId = vidhanSabhaId, 
                     PrabhariName =p.PrabhariName,

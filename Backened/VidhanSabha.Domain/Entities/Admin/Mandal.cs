@@ -14,19 +14,22 @@ namespace VidhanSabha.Domain.Entities.Admin
         private Tbl_Mandal() { }
 
         public int Id { get; private set; }
-        public int VidhanId { get; private set; }   // ← add
+        public int? VidhanId { get; private set; }   // ← add
         public string Name { get => _name; private set => _name = value; }
         public bool Status { get; private set; }
 
+        // Navigations
+
+        public ICollection<Tbl_Sector>? Sectors { get; private set; }
         // ── Factory ──────────────────────────────────────────────
-        public static Tbl_Mandal Create(int vidhanId, string name)
+        public static Tbl_Mandal Create(int? vidhanId, string name)
         {
             ValidateVidhanId(vidhanId);                // ← add
             ValidateName(name);
 
             return new Tbl_Mandal
             {
-                VidhanId = 1,
+                VidhanId = vidhanId,
                 _name = name.Trim(),
                 Status = true
             };
@@ -59,7 +62,7 @@ namespace VidhanSabha.Domain.Entities.Admin
         }
 
         // ── Validations ──────────────────────────────────────────
-        private static void ValidateVidhanId(int vidhanId)
+        private static void ValidateVidhanId(int? vidhanId)
         {
             if (vidhanId <= 0)
                 throw new ArgumentException("VidhanId must be greater than 0.");

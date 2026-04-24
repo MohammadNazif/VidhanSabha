@@ -11,6 +11,7 @@ import { ToastService } from '../../../Services/common/toast/toast.service';
 import { CrudHandlerService } from '../../../Services/common/crud-handler.service';
 import { AuthServiceService } from '../../../Services/Auth/auth.service';
 import { ActivatedRoute } from '@angular/router';
+import { ModulePermission } from '../../../models/module-permission.enum';
 
 @Component({
   selector: 'app-new-voter',
@@ -217,13 +218,18 @@ export class NewVoterComponent implements OnInit {
   }
 
   loadData() {
-    const params = {
+    const params: any = {
       pageNumber: this.pageNumber,
       pageSize: this.pageSize,
       searchTerm: this.searchTerm,
       sortBy: this.sortBy,
       isDescending: this.isDescending
     };
+
+    const userId = this.authService.getUserId();
+    if (userId) {
+      params.userId = userId;
+    }
 
     this.voterService.getAllNewvoters(params).subscribe({
       next: (response) => {
@@ -281,7 +287,9 @@ export class NewVoterComponent implements OnInit {
         this.voterService.deleteNewvoter(row.id),
         'Deleted',
         'New Voter deleted successfully!',
-        () => this.loadData()
+        () => this.loadData(),
+        true,
+        ModulePermission.NewVoter
       );
     } else if (action.id === 'edit') {
       const editData = { ...row };
@@ -317,7 +325,8 @@ export class NewVoterComponent implements OnInit {
       castId: Number(raw.castId),
       dob: raw.dob,
       age: Number(raw.age),
-      voterId: raw.voterId
+      voterId: raw.voterId,
+      userId: this.authService.getUserId()
     };
 
     const isUpdate = !!submitData.id;
@@ -329,7 +338,9 @@ export class NewVoterComponent implements OnInit {
       request,
       isUpdate ? 'Updated' : 'Success',
       `New Voter ${isUpdate ? 'updated' : 'created'} successfully!`,
-      () => this.loadData()
+      () => this.loadData(),
+      true,
+      ModulePermission.NewVoter
     );
   }
 }

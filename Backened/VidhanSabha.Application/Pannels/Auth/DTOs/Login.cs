@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using VidhanSabha.Domain.Enums;
 
 namespace VidhanSabha.Application.Pannels.Auth.DTOs
 {
@@ -17,7 +18,9 @@ namespace VidhanSabha.Application.Pannels.Auth.DTOs
     {
         public string UserId { get; set; }
         public string MobileNumber { get; set; }
-        public string Role { get; set; }
-        public bool Status { get; set; }
+        public PrabhariRole Role { get; set; }
+        public string Status { get; set; }
+        public string Token { get; set; }      // <-- added
+        public DateTime ExpiresAt { get; set; } // <-- added
     }
 }

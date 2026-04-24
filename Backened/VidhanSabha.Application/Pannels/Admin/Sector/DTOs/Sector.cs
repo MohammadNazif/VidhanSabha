@@ -47,7 +47,7 @@ namespace VidhanSabha.Application.Pannels.Admin.Sector.DTOs
         public string VillageName { get; set; }
         public string CategoryName { get; set; }
         public string CastName { get; set; }
-        public int VillageId { get; set; }
+        public int? VillageId { get; set; }
         public string SectorName { get; set; }
         public bool IsSectorSanyojak { get; set; }
         public string? InchargeName { get; set; }

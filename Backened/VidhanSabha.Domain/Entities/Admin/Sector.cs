@@ -11,7 +11,7 @@ namespace VidhanSabha.Domain.Entities.Admin
     {
         public int Id { get; private set; }
         public int MandalId { get; private set; }
-        public int VillageId { get; private set; }
+        public int? VillageId { get; private set; }
         public string SectorName { get; private set; }
         public bool IsSectorSanyojak { get; private set; }
 
@@ -34,10 +34,11 @@ namespace VidhanSabha.Domain.Entities.Admin
         public DateTime? UpdatedAt { get; private set; }
 
         // Navigation
-        public Tbl_Mandal Mandal { get; private set; }
-        public Tbl_Village Village { get; private set; }
-        public Tbl_Category Category { get; private set; }
-        public Tbl_Cast Cast { get; private set; }
+        public Tbl_Mandal? Mandal { get; private set; }
+        public Tbl_Village? Village { get; private set; }
+        public Tbl_Booth? Booth { get; private set; }
+        public Tbl_Category? Category { get; private set; }
+        public Tbl_Cast? Cast { get; private set; }
 
         private Tbl_Sector() { } // EF Core
 

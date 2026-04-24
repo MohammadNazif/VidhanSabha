@@ -14,6 +14,14 @@ namespace VidhanSabha.Application.Common.MemberModulePermission.Dtos
   
    );
 
+    public record updateMemberModulePermissionDto(
+
+string MemberId,
+ModulePermission Module,
+bool HasPermission
+
+);
+
     public class MemberModulePermissionResDto
     {
         public bool hasPermission { get; set; }

@@ -21,7 +21,8 @@ namespace VidhanSabha.Infrastructure.Persistence.Configurations.Auth
             builder.Property(x => x.UserId).HasMaxLength(50).IsRequired();
             builder.Property(x => x.Username).HasMaxLength(100).IsRequired();
             builder.Property(x => x.Password).HasMaxLength(255).IsRequired();
-            builder.Property(x => x.Role).HasMaxLength(50).IsRequired();
+            builder.Property(x => x.Role)
+             .HasConversion<int>();
             builder.Property(x => x.Mobile).HasMaxLength(15).IsRequired();
 
         }

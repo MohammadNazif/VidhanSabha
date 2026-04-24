@@ -13,6 +13,7 @@ import { AuthServiceService } from '../../../Services/Auth/auth.service';
 import { ToastService } from '../../../Services/common/toast/toast.service';
 import { CrudHandlerService } from '../../../Services/common/crud-handler.service';
 import { ActivatedRoute } from '@angular/router';
+import { ModulePermission } from '../../../models/module-permission.enum';
 
 
 @Component({
@@ -87,7 +88,7 @@ export class BoothComponent implements OnInit {
   }
 
   loadBooths() {
-    const params = {
+    const params: any = {
       pageNumber: this.pageNumber,
       pageSize: this.pageSize,
       searchTerm: this.searchTerm,
@@ -96,6 +97,11 @@ export class BoothComponent implements OnInit {
       mandalId: this.mandalId,
       sectorId: this.sectorId
     };
+
+    const userId = this.authService.getUserId();
+    if (userId) {
+      params.userId = userId;
+    }
 
     this.boothService.getAllBooths(params).subscribe({
       next: (response) => {
@@ -389,7 +395,9 @@ export class BoothComponent implements OnInit {
         this.boothService.deleteBooth(row.id),
         'Deleted',
         'Booth deleted successfully!',
-        () => this.loadBooths()
+        () => this.loadBooths(),
+        true,
+        ModulePermission.BoothVoterDescrition
       );
     } else if (action.id === 'edit') {
       // Flatten nested data for form editing
@@ -469,7 +477,8 @@ export class BoothComponent implements OnInit {
         EducationLevel: raw.educationLevel || "",
         PhoneNumber: raw.phoneNumber || "",
         Address: raw.address || ""
-      } : null
+      } : null,
+      userId: this.authService.getUserId()
     };
 
     // Transform anshikData or villageId to Villages array
@@ -498,7 +507,9 @@ export class BoothComponent implements OnInit {
       request,
       isUpdate ? 'Updated' : 'Success',
       `Booth ${isUpdate ? 'updated' : 'created'} successfully!`,
-      () => this.loadBooths()
+      () => this.loadBooths(),
+      true,
+      ModulePermission.BoothVoterDescrition
     );
   }
 

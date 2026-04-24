@@ -30,5 +30,10 @@ namespace VidhanSabha.Domain.Entities.Common
             };
         }
 
+        public void UpdateProperties(bool hasPermission)
+        {
+            this.hasPermission = hasPermission;
+        }
+
     }
 }

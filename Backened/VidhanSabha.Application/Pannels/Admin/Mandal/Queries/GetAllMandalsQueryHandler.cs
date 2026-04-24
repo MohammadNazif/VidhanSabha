@@ -24,7 +24,8 @@ namespace VidhanSabha.Application.Pannels.Admin.Mandal.Queries
         public async Task<PagedResult<MandalResponseDto>> Handle(
             GetAllMandalsQuery query, CancellationToken ct)
         {
-            var mandals = await _repo.GetAllAsync(query.QueryParams,ct);
+           int? VidhanSabhaId =  await  _repo.GetVidhansabhaIdByuserIdAsync(query.UserId);
+            var mandals = await _repo.GetAllAsync(query.QueryParams, VidhanSabhaId, ct);
 
             if (mandals == null)
             {
@@ -34,5 +35,7 @@ namespace VidhanSabha.Application.Pannels.Admin.Mandal.Queries
             return mandals;
             
         }
+
+        
     }
 }

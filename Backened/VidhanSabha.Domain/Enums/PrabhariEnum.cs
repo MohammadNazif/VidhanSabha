@@ -8,7 +8,9 @@ namespace VidhanSabha.Domain.Enums
 {
     public enum PrabhariRole
     {
-        State = 1,
-        VidhanSabha = 2
+        StatePrabhari = 1,
+        VidhanSabhaPrabhari = 2,
+        BoothSanyojak =3,
+        SectorSanyojak= 4,
     }
 }

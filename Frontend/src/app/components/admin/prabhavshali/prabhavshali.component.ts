@@ -9,6 +9,8 @@ import { PageHeaderComponent } from '../../shared/page-header/page-header.compon
 import { PrabhavshaliService } from '../../../Services/Admin/prabhavshali/prabhavshali.service';
 import { ToastService } from '../../../Services/common/toast/toast.service';
 import { CrudHandlerService } from '../../../Services/common/crud-handler.service';
+import { AuthServiceService } from '../../../Services/Auth/auth.service';
+import { ModulePermission } from '../../../models/module-permission.enum';
 
 @Component({
   selector: 'app-prabhavshali',
@@ -180,7 +182,8 @@ export class PrabhavshaliComponent implements OnInit {
   constructor(
     private prabhavshaliService: PrabhavshaliService,
     private toastService: ToastService,
-    private crudHandler: CrudHandlerService
+    private crudHandler: CrudHandlerService,
+    private authService: AuthServiceService
   ) { }
 
   ngOnInit() {
@@ -188,13 +191,18 @@ export class PrabhavshaliComponent implements OnInit {
   }
 
   loadData() {
-    const params = {
+    const params: any = {
       pageNumber: this.pageNumber,
       pageSize: this.pageSize,
       searchTerm: this.searchTerm,
       sortBy: this.sortBy,
       isDescending: this.isDescending
     };
+
+    const userId = this.authService.getUserId();
+    if (userId) {
+      params.userId = userId;
+    }
 
     this.prabhavshaliService.getAllPrabhavshali(params).subscribe({
       next: (response) => {
@@ -250,7 +258,9 @@ export class PrabhavshaliComponent implements OnInit {
         this.prabhavshaliService.deletePrabhavshali(row.id),
         'Deleted',
         'Entry deleted successfully!',
-        () => this.loadData()
+        () => this.loadData(),
+        true,
+        ModulePermission.EffectivePersion
       );
     } else if (action.id === 'edit') {
       const editData = { ...row };
@@ -279,7 +289,8 @@ export class PrabhavshaliComponent implements OnInit {
       categoryId: Number(raw.categoryId),
       castId: Number(raw.castId),
       mobile: raw.mobile,
-      description: raw.description
+      description: raw.description,
+      userId: this.authService.getUserId()
     };
 
     const isUpdate = !!submitData.id;
@@ -291,7 +302,9 @@ export class PrabhavshaliComponent implements OnInit {
       request,
       isUpdate ? 'Updated' : 'Success',
       `Prabhavshali Vyakt ${isUpdate ? 'updated' : 'created'} successfully!`,
-      () => this.loadData()
+      () => this.loadData(),
+      true,
+      ModulePermission.EffectivePersion
     );
   }
 }

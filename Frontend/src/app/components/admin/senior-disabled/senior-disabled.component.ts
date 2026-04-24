@@ -10,6 +10,8 @@ import { SeniorDisabledService } from '../../../Services/Admin/senior-disabled/s
 import { ToastService } from '../../../Services/common/toast/toast.service';
 import { CrudHandlerService } from '../../../Services/common/crud-handler.service';
 import { ActivatedRoute } from '@angular/router';
+import { AuthServiceService } from '../../../Services/Auth/auth.service';
+import { ModulePermission } from '../../../models/module-permission.enum';
 
 @Component({
   selector: 'app-senior-disabled',
@@ -212,7 +214,8 @@ export class SeniorDisabledComponent implements OnInit {
     private citizenService: SeniorDisabledService,
     private toastService: ToastService,
     private crudHandler: CrudHandlerService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private authService: AuthServiceService
   ) { }
 
   ngOnInit() {
@@ -226,6 +229,12 @@ export class SeniorDisabledComponent implements OnInit {
   loadCitizens() {
     this.loading = true;
     const params: any = { searchTerm: this.searchTerm };
+    
+    const userId = this.authService.getUserId();
+    if (userId) {
+      params.userId = userId;
+    }
+
     // Assuming backend returns filtered results or we filter locally
     // If backend supports TypeId:
     params['TypeId'] = this.isDisabledView ? 2 : 1;
@@ -265,7 +274,9 @@ export class SeniorDisabledComponent implements OnInit {
         this.citizenService.deleteSeniorDisabled(row.id),
         'Deleted',
         'Record deleted successfully!',
-        () => this.loadCitizens()
+        () => this.loadCitizens(),
+        true,
+        this.isDisabledView ? ModulePermission.Disabled : ModulePermission.SeniorCitizen
       );
     } else if (action.id === 'edit') {
       // Note: Edit might need special handling for the nested array if backend returns flat results
@@ -314,7 +325,8 @@ export class SeniorDisabledComponent implements OnInit {
         castId: Number(item.castId),
         mobile: String(item.mobile),
         voterId: item.voterId
-      }))
+      })),
+      userId: this.authService.getUserId()
     };
 
     if (isUpdate) {
@@ -329,7 +341,9 @@ export class SeniorDisabledComponent implements OnInit {
       request,
       isUpdate ? 'Updated' : 'Created',
       `Record ${isUpdate ? 'updated' : 'created'} successfully!`,
-      () => this.loadCitizens()
+      () => this.loadCitizens(),
+      true,
+      this.isDisabledView ? ModulePermission.Disabled : ModulePermission.SeniorCitizen
     );
   }
 }

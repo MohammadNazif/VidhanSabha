@@ -6,33 +6,38 @@ using VidhanSabha.Application.Pannels.Auth.Interfaces;
 
 namespace VidhanSabha.Application.Pannels.Auth.Commands.Login
 {
-    public class LoginCommandHandler : IRequestHandler<LoginCommand, LoginResponseDto>
-    {
-        private readonly ILoginRepository _repo;
-
-        public LoginCommandHandler(ILoginRepository repo)
+ 
+        public class LoginCommandHandler : IRequestHandler<LoginCommand, LoginResponseDto>
         {
-            _repo = repo;
-        }
+            private readonly ILoginRepository _repo;
+            private readonly IJwtService _jwtService;
 
-        public async Task<LoginResponseDto> Handle(LoginCommand command, CancellationToken cancellationToken)
-        {
-            // Step 1: Fetch entity from DB by mobile
-            var user = await _repo.GetByMobileAsync(command.MobileNumber);
-
-            if (user == null)
-                throw new UnauthorizedAccessException("Mobile number not found.");
-
-            if(user.Password != command.Password)
-                throw new UnauthorizedAccessException("Invalid password."); 
-
-            return new LoginResponseDto
+            public LoginCommandHandler(ILoginRepository repo, IJwtService jwtService)
             {
-                UserId = user.UserId,
-                MobileNumber = user.Mobile,
-                Role = user.Role,
-                Status = user.Status
-            };
+                _repo = repo;
+                _jwtService = jwtService;
+            }
+
+            public async Task<LoginResponseDto> Handle(LoginCommand command, CancellationToken cancellationToken)
+            {
+                var user = await _repo.GetByMobileAsync(command.MobileNumber);
+
+                if (user == null)
+                    throw new UnauthorizedAccessException("Mobile number not found.");
+
+                if (user.Password != command.Password)
+                    throw new UnauthorizedAccessException("Invalid password.");
+
+                var token = _jwtService.GenerateToken(user.UserId, user.Mobile, user.Role.ToString());
+
+                return new LoginResponseDto
+                {
+                    UserId = user.UserId,
+                    MobileNumber = user.Mobile,
+                    Role = user.Role,
+                    Token = token,
+                    ExpiresAt = DateTime.UtcNow.AddMinutes(60)
+                };
+            }
         }
     }
-}

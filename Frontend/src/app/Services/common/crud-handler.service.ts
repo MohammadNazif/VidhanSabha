@@ -3,6 +3,7 @@ import { Observable } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { ToastService } from './toast/toast.service';
 import { LoaderService } from './loader/loader.service';
+import { PermissionService } from './permission.service';
 
 @Injectable({
   providedIn: 'root'
@@ -11,26 +12,35 @@ export class CrudHandlerService {
 
   constructor(
     private toastService: ToastService,
-    private loaderService: LoaderService
+    private loaderService: LoaderService,
+    private permissionService: PermissionService
   ) { }
 
   /**
    * Standard handler for CRUD operations.
-   * Handles: Loader, Success Toast, Error Toast, and Success Callback.
+   * Handles: Permissions, Loader, Success Toast, Error Toast, and Success Callback.
    * 
    * @param request The API observable to execute.
    * @param successTitle Title for the success toast.
    * @param successMessage Message for the success toast.
    * @param onComplete Optional callback to refresh data on success.
    * @param showSuccessToast Whether to show a success toast (default: true).
+   * @param moduleId Optional module ID to check permissions before execution.
    */
   handleRequest<T>(
     request: Observable<T>,
     successTitle: string,
     successMessage: string,
     onComplete?: (response: T) => void,
-    showSuccessToast: boolean = true
+    showSuccessToast: boolean = true,
+    moduleId?: number
   ): void {
+    // Check permission if moduleId is provided
+    if (moduleId !== undefined && !this.permissionService.hasPermission(moduleId)) {
+      this.toastService.showError('Access Denied', 'You do not have permission to perform this action.');
+      return;
+    }
+
     this.loaderService.showLoader();
 
     request.pipe(

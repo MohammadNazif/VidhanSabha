@@ -25,6 +25,8 @@ namespace VidhanSabha.Application.Common.NewFolder.Interface
         Task<int> Add(Tbl_MemberModulePermissions permission);
         void Remove(Tbl_MemberModulePermissions permission);
         Task<int> AddRangeAsync(List<Tbl_MemberModulePermissions> entities);
+
+        Task<int> UpdateRangeAsync(List<Tbl_MemberModulePermissions> entities);
         Task SaveChangesAsync(CancellationToken ct = default);
     }
 }

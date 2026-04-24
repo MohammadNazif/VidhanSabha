@@ -11,6 +11,7 @@ import { ToastService } from '../../../Services/common/toast/toast.service';
 import { CrudHandlerService } from '../../../Services/common/crud-handler.service';
 import { AuthServiceService } from '../../../Services/Auth/auth.service';
 import { ActivatedRoute } from '@angular/router';
+import { ModulePermission } from '../../../models/module-permission.enum';
 
 @Component({
   selector: 'app-pannapramukh',
@@ -231,13 +232,19 @@ export class PannapramukhComponent implements OnInit {
   }
 
   loadData() {
-    const params = {
+    const params: any = {
       pageNumber: this.pageNumber,
       pageSize: this.pageSize,
       searchTerm: this.searchTerm,
       sortBy: this.sortBy,
       isDescending: this.isDescending
     };
+
+    // Filter by userId for BoothSanyojak or as requested
+    const userId = this.authService.getUserId();
+    if (userId) {
+      params.userId = userId;
+    }
 
     this.pannaService.getAllPannapramukhs(params).subscribe({
       next: (response) => {
@@ -288,7 +295,9 @@ export class PannapramukhComponent implements OnInit {
         this.pannaService.deletePannapramukh(row.id),
         'Deleted',
         'Panna Pramukh deleted successfully!',
-        () => this.loadData()
+        () => this.loadData(),
+        true,
+        ModulePermission.PannaPramukh
       );
     } else if (action.id === 'edit') {
       const editData = { ...row };
@@ -320,7 +329,8 @@ export class PannapramukhComponent implements OnInit {
       castId: Number(raw.castId),
       pannaNumber: Number(raw.pannaNumber),
       voterId: String(raw.voterId), // voterId is string in response JSON
-      villageId: Array.isArray(raw.villageId) ? raw.villageId.map((v: any) => Number(v)) : Number(raw.villageId)
+      villageId: Array.isArray(raw.villageId) ? raw.villageId.map((v: any) => Number(v)) : Number(raw.villageId),
+      userId: this.authService.getUserId()
     };
 
     const isUpdate = !!submitData.id;
@@ -332,7 +342,9 @@ export class PannapramukhComponent implements OnInit {
       request,
       isUpdate ? 'Updated' : 'Success',
       `Panna Pramukh ${isUpdate ? 'updated' : 'created'} successfully!`,
-      () => this.loadData()
+      () => this.loadData(),
+      true,
+      ModulePermission.PannaPramukh
     );
   }
 }
