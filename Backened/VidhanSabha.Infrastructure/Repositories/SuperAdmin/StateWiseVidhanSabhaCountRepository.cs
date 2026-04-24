@@ -44,7 +44,7 @@ namespace VidhanSabha.Infrastructure.Repositories.SuperAdmin
             throw new NotImplementedException();
         }
 
-        public async Task<IReadOnlyList<VidhansabhaResponseDto>> GetAllAsync(string? userId, CancellationToken ct = default)
+        public async Task<IReadOnlyList<VidhansabhaResponseDto>>   GetAllAsync(string? userId, CancellationToken ct = default)
         {
             
             var stateId = await _context.Tbl_StatePrabhari

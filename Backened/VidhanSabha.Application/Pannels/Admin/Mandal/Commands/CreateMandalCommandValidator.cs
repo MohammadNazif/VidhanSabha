@@ -12,8 +12,7 @@ namespace VidhanSabha.Application.Pannels.Admin.Mandal.Commands.Create
     {
         public CreateMandalCommandValidator()
         {
-            RuleFor(x => x.VidhanId)
-                .GreaterThan(0).WithMessage("VidhanId must be greater than 0.");
+          
 
             RuleFor(x => x.Name)
                 .NotEmpty().WithMessage("Mandal name is required.")

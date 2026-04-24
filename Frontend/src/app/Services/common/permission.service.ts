@@ -55,7 +55,7 @@ export class PermissionService {
     const role = (this.authService.getRole() || '').toUpperCase();
     
     // Admins and Superadmins usually have all permissions
-    if (role === 'ADMIN' || role === 'SUPERADMIN') {
+    if (role === 'VIDHANSABHAPRABHARI' || role === 'SUPERADMIN' || role === 'ADMIN') {
       return true;
     }
 

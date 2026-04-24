@@ -7,6 +7,7 @@ using VidhanSabha.Application.Common.CredentialMananger.Dto;
 using VidhanSabha.Application.Common.CredentialMananger.Interface;
 using VidhanSabha.Application.Exceptions;
 using VidhanSabha.Domain.Entities.Auth;
+using VidhanSabha.Domain.Enums;
 
 namespace VidhanSabha.Application.Common.CredentialMananger
 {
@@ -41,7 +42,7 @@ namespace VidhanSabha.Application.Common.CredentialMananger
             return new string(chars.OrderBy(_ => rng.Next()).ToArray());
         }
 
-        public async Task<CredentialDto> InsertCredentialAsync(string userId, string mobile, string email, string role)
+        public async Task<CredentialDto> InsertCredentialAsync(string userId, string mobile, string email, PrabhariRole role)
         {
             var rawPassword = GeneratePassword();
 

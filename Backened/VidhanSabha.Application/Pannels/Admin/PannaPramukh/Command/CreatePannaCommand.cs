@@ -11,6 +11,7 @@ namespace VidhanSabha.Application.Pannels.Admin.PannaPramukh.Command
     public class CreatePannaCommand : IRequest<int>
     {
         public CreatePannaPramukhRequestDto Dto { get; set; }
+
         public CreatePannaCommand(CreatePannaPramukhRequestDto createPannaPramukhRequestDto)
         {
             Dto = createPannaPramukhRequestDto;

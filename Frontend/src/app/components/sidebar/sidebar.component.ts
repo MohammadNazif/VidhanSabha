@@ -48,36 +48,36 @@ export class SidebarComponent implements OnInit {
   }
 
   navItems: NavItem[] = [
-    { icon: 'layout-dashboard', label: 'Dashboard', route: '/', roles: ['ADMIN', 'BoothSanyojak'] },
+    { icon: 'layout-dashboard', label: 'Dashboard', route: '/', roles: ['VidhanSabhaPrabhari', 'BoothSanyojak'] },
     {
       icon: 'database', label: 'Master Data',
       badge: 543,
       expanded: false,
-      roles: ['ADMIN', 'BoothSanyojak'],
+      roles: ['VidhanSabhaPrabhari', 'BoothSanyojak'],
       children: [
-        { label: 'Mandal', route: '/mandal', roles: ['ADMIN'] },
-        { label: 'Sector', route: '/sector', roles: ['ADMIN'] },
-        { label: 'Booth', route: '/booth', roles: ['ADMIN'] },
-        { label: 'PannaPramukh', route: '/panna-pramukh', roles: ['ADMIN', 'BoothSanyojak'], moduleId: ModulePermission.PannaPramukh },
-        { label: 'Pravasi Voter', route: '/pravasi-voter', roles: ['ADMIN', 'BoothSanyojak'], moduleId: ModulePermission.PravashiVoter },
-        { label: 'New Voter', route: '/new-voter', roles: ['ADMIN', 'BoothSanyojak'], moduleId: ModulePermission.NewVoter },
-        { label: 'Varisth Naagarik/Viklaang', route: '/varisth-naagarik-viklaang', roles: ['ADMIN', 'BoothSanyojak'], moduleId: ModulePermission.SeniororDisabled },
-        { label: 'Booth Voter Description', route: '/booth-voter-description', roles: ['ADMIN', 'BoothSanyojak'], moduleId: ModulePermission.BoothVoterDescrition },
-        { label: 'Sahmat/Asahmat', route: '/sahmat-asahmat', roles: ['ADMIN', 'BoothSanyojak'], moduleId: ModulePermission.Sahmat },
-        { label: 'Double Voter/Married', route: '/double-voter', roles: ['ADMIN', 'BoothSanyojak'], moduleId: ModulePermission.DoubleVoter },
-        { label: 'Booth Samiti', route: '/booth-samiti', roles: ['ADMIN', 'BoothSanyojak'], moduleId: ModulePermission.BoothSamiti },
-        { label: 'Prabhavshali Vyakt', route: '/prabhavshali-vyakt', roles: ['ADMIN', 'BoothSanyojak'], moduleId: ModulePermission.EffectivePersion },
-        { label: 'Influencer Person', route: '/influencer-person', roles: ['ADMIN'] },
-        { label: 'Block', route: '/block', roles: ['ADMIN'] },
-        { label: 'BDC', route: '/bdc', roles: ['ADMIN'] },
-        { label: 'Pradhan', route: '/pradhan', roles: ['ADMIN'] }
+        { label: 'Mandal', route: '/mandal', roles: ['VidhanSabhaPrabhari'] },
+        { label: 'Sector', route: '/sector', roles: ['VidhanSabhaPrabhari'] },
+        { label: 'Booth', route: '/booth', roles: ['VidhanSabhaPrabhari'] },
+        { label: 'PannaPramukh', route: '/panna-pramukh', roles: ['VidhanSabhaPrabhari', 'BoothSanyojak'], moduleId: ModulePermission.PannaPramukh },
+        { label: 'Pravasi Voter', route: '/pravasi-voter', roles: ['VidhanSabhaPrabhari', 'BoothSanyojak'], moduleId: ModulePermission.PravashiVoter },
+        { label: 'New Voter', route: '/new-voter', roles: ['VidhanSabhaPrabhari', 'BoothSanyojak'], moduleId: ModulePermission.NewVoter },
+        { label: 'Varisth Naagarik/Viklaang', route: '/varisth-naagarik-viklaang', roles: ['VidhanSabhaPrabhari', 'BoothSanyojak'], moduleId: ModulePermission.SeniororDisabled },
+        { label: 'Booth Voter Description', route: '/booth-voter-description', roles: ['VidhanSabhaPrabhari', 'BoothSanyojak'], moduleId: ModulePermission.BoothVoterDescrition },
+        { label: 'Sahmat/Asahmat', route: '/sahmat-asahmat', roles: ['VidhanSabhaPrabhari', 'BoothSanyojak'], moduleId: ModulePermission.Sahmat },
+        { label: 'Double Voter/Married', route: '/double-voter', roles: ['VidhanSabhaPrabhari', 'BoothSanyojak'], moduleId: ModulePermission.DoubleVoter },
+        { label: 'Booth Samiti', route: '/booth-samiti', roles: ['VidhanSabhaPrabhari', 'BoothSanyojak'], moduleId: ModulePermission.BoothSamiti },
+        { label: 'Prabhavshali Vyakt', route: '/prabhavshali-vyakt', roles: ['VidhanSabhaPrabhari', 'BoothSanyojak'], moduleId: ModulePermission.EffectivePersion },
+        { label: 'Influencer Person', route: '/influencer-person', roles: ['VidhanSabhaPrabhari'] },
+        { label: 'Block', route: '/block', roles: ['VidhanSabhaPrabhari'] },
+        { label: 'BDC', route: '/bdc', roles: ['VidhanSabhaPrabhari'] },
+        { label: 'Pradhan', route: '/pradhan', roles: ['VidhanSabhaPrabhari'] }
       ]
     },
     {
       icon: 'bar-chart-3', label: 'Reports',
       badge: 0,
       expanded: false,
-      roles: ['ADMIN'],
+      roles: ['VidhanSabhaPrabhari'],
       children: [
         { label: 'Combined Report', route: '/combined-report' },
         { label: 'SectorWithBooth Report', route: '/sector-with-booth-report' },
@@ -90,7 +90,7 @@ export class SidebarComponent implements OnInit {
       icon: 'shield-check', label: 'Access',
       badge: 28,
       expanded: false,
-      roles: ['ADMIN'],
+      roles: ['VidhanSabhaPrabhari'],
       children: [
         { label: 'Allow Access', route: '/allow-access' },
         { label: 'Allow Access List', route: '/allow-access-list' },
@@ -108,7 +108,7 @@ export class SidebarComponent implements OnInit {
       icon: 'clipboard-list', label: 'Lists',
       badge: 0,
       expanded: false,
-      roles: ['ADMIN'],
+      roles: ['VidhanSabhaPrabhari'],
       children: [
         { label: 'Booth List', route: '/booth-list' },
         { label: 'Pravasi Voter List', route: '/pravasi-voter-list' },
@@ -129,8 +129,8 @@ export class SidebarComponent implements OnInit {
         { label: 'Influencer Person List', route: '/influencer-person-list' },
       ]
     },
-    { icon: 'share-2', label: 'Socail Media', route: '/socail-media', roles: ['ADMIN', 'BoothSanyojak'], moduleId: ModulePermission.SocialMedia },
-    { icon: 'calendar', label: 'Activity', route: '/activity', roles: ['ADMIN', 'BoothSanyojak'], moduleId: ModulePermission.Activity },
+    { icon: 'share-2', label: 'Social Media', route: '/socail-media', roles: ['VidhanSabhaPrabhari', 'BoothSanyojak'], moduleId: ModulePermission.SocialMedia },
+    { icon: 'calendar', label: 'Activity', route: '/activity', roles: ['VidhanSabhaPrabhari', 'BoothSanyojak'], moduleId: ModulePermission.Activity },
 
     {
       icon: 'clipboard-list', label: 'Lists',
@@ -181,7 +181,7 @@ export class SidebarComponent implements OnInit {
     let filteredItems = this.navItems.filter(item => {
       // Role check
       const hasRole = !item.roles || item.roles.length === 0 ||
-        (currentRole && item.roles.some(role => role.toUpperCase() === currentRole.toUpperCase()));
+        (currentRole && item.roles.some(role => String(role).toUpperCase() === String(currentRole).toUpperCase()));
       if (!hasRole) return false;
 
       // Permission check (skip for ADMIN/SUPERADMIN usually, but keep it generic)
@@ -195,7 +195,7 @@ export class SidebarComponent implements OnInit {
           children: item.children.filter(child => {
             // Role check
             const hasRole = !child.roles || child.roles.length === 0 ||
-              (currentRole && child.roles.some(role => role.toUpperCase() === currentRole.toUpperCase()));
+              (currentRole && child.roles.some(role => String(role).toUpperCase() === String(currentRole).toUpperCase()));
             if (!hasRole) return false;
 
             // Permission check

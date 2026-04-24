@@ -10,7 +10,7 @@ using VidhanSabha.Application.Pannels.Admin.Mandal.DTOs.Create;
 
 namespace VidhanSabha.Application.Pannels.Admin.Mandal.Queries
 {
-    public record GetAllMandalsQuery(MandalQueryParams QueryParams) : IRequest<PagedResult<MandalResponseDto>>
+    public record GetAllMandalsQuery(MandalQueryParams QueryParams,string UserId) : IRequest<PagedResult<MandalResponseDto>>
     {
     }
 }

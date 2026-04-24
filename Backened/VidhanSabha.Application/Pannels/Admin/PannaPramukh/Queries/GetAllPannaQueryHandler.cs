@@ -24,7 +24,7 @@ namespace VidhanSabha.Application.Pannels.Admin.PannaPramukh.Queries
         }
         public async Task<PagedResult<PannaPramukhResponseDto>> Handle(GetAllPannaQuery request, CancellationToken cancellationToken)
         {
-
+            
             var boothId = await  _login.GetBoothByUserIdAsync(request.QueryParams.UserId);
 
             if(boothId != 0)

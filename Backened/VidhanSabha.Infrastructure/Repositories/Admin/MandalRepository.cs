@@ -22,13 +22,13 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
 
         public MandalRepository(DatabaseContext context) => _context = context;
 
-        public async Task<PagedResult<MandalResponseDto>> GetAllAsync(MandalQueryParams qp,CancellationToken ct=default)
+        public async Task<PagedResult<MandalResponseDto>> GetAllAsync(MandalQueryParams qp,int? vidhanid,CancellationToken ct=default)
         {
             var query = _context.Tbl_Mandal
                .AsNoTracking()
                .Where(b =>
-                   (!qp.Id.HasValue || b.Id == qp.Id)
-                   
+                   (!qp.Id.HasValue || b.Id == qp.Id) &&
+                    (b.VidhanId == vidhanid)
                    );
 
             Expression<Func<Tbl_Mandal, bool>>? search = null;
@@ -165,7 +165,7 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
                      .FirstOrDefaultAsync(x => x.Id == id);
 
 
-        public async Task<bool> ExistsByNameAsync(int vidhanId, string name)
+        public async Task<bool> ExistsByNameAsync(int? vidhanId, string name)
           => await _context.Set<Tbl_Mandal>().
                             Where(m => m.Status)
                            .AnyAsync(m => m.VidhanId == vidhanId
@@ -181,6 +181,16 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
         {
              _context.Set<Tbl_Mandal>().Update(mandal);
             await _context.SaveChangesAsync();
+        }
+
+        public async Task<int?> GetVidhansabhaIdByuserIdAsync(string userId)
+        {
+            var data = await _context.Tbl_StatePrabhari
+                .Where(v => v.userId == userId && v.Status)
+                .Select(v => v.VidhansabhaId)
+                .FirstOrDefaultAsync();
+
+            return data;
         }
     }
 }

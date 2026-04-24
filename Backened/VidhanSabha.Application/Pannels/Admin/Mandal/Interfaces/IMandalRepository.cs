@@ -12,11 +12,13 @@ namespace VidhanSabha.Application.Pannels.Admin.Mandal.Interfaces
 {
     public interface IMandalRepository
     {
-        Task<PagedResult<MandalResponseDto>> GetAllAsync(MandalQueryParams qp,CancellationToken ct);
+        Task<PagedResult<MandalResponseDto>> GetAllAsync(MandalQueryParams qp,int? vidhanid,CancellationToken ct);
         Task<PagedResult<MandalFullDto>> GetAllCombinedMandalReports(MandalQueryParams qp,CancellationToken ct);
-        Task<bool> ExistsByNameAsync(int vidhanId, string name);
+        Task<bool> ExistsByNameAsync(int? vidhanId, string name);
         Task AddAsync(Tbl_Mandal mandal);
         Task<Tbl_Mandal> GetByIdAsync(int id);
+
+        Task<int?> GetVidhansabhaIdByuserIdAsync(string userId);
         Task UpdateAsync(Tbl_Mandal mandal);
         
     }
