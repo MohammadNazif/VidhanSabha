@@ -366,9 +366,10 @@ public static class AdminEndpoints
 
         #region New Voter
 
-        newvoter.MapPost("/create", async (CreateNewVoterRequestDto dto, IMediator mediator) =>
+        newvoter.MapPost("/create", async (CreateNewVoterRequestDto dto, IMediator mediator, HttpContext http) =>
         {
-            var result = await mediator.Send(new CreateNewVoterCommand(dto));
+            string UserId = http.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var result = await mediator.Send(new CreateNewVoterCommand(dto,UserId));
             return Results.Ok(ApiResponse<int>.Ok(result, "New Voter Created Successfully"));
         }).RequireAuthorization(ModulePermission.NewVoter.ToString())
                 .WithName("CreateNewVoter")
@@ -402,9 +403,10 @@ public static class AdminEndpoints
 
         #region Booth Voter
 
-        boothvoter.MapPost("/create", async (CreateBoothVoterRequestDto dto, IMediator mediator) =>
+        boothvoter.MapPost("/create", async (CreateBoothVoterRequestDto dto, IMediator mediator, HttpContext http) =>
         {
-            var result = await mediator.Send(new CreateBoothVoterCommand(dto));
+            string UserId = http.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var result = await mediator.Send(new CreateBoothVoterCommand(dto,UserId));
             return Results.Ok(ApiResponse<int>.Ok(result, "Booth Voter Created Successfully"));
         }).RequireAuthorization(ModulePermission.BoothVoterDescrition.ToString())
                 .WithName("CreateBoothVoter")

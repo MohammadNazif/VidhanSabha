@@ -12,9 +12,11 @@ namespace VidhanSabha.Application.Pannels.Admin.NewVoter.Command
     public class CreateNewVoterCommand : IRequest<int>
     {
         public CreateNewVoterRequestDto Dto { get; set; }
-        public CreateNewVoterCommand(CreateNewVoterRequestDto dto)
+        public string UserId { get; set; }
+        public CreateNewVoterCommand(CreateNewVoterRequestDto dto, string? userId)
         {
             Dto = dto;
+            UserId = userId;
         }
     }
 }
