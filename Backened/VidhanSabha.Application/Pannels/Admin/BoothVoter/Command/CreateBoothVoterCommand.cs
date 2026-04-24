@@ -12,9 +12,11 @@ namespace VidhanSabha.Application.Pannels.Admin.BoothVoter.Command
     public class CreateBoothVoterCommand: IRequest<int>
     {
         public CreateBoothVoterRequestDto Dto { get; set; }
-        public CreateBoothVoterCommand(CreateBoothVoterRequestDto dto)
+        public string UserId { get; set; }
+        public CreateBoothVoterCommand(CreateBoothVoterRequestDto dto, string userId)
         {
             Dto = dto;
+            UserId = userId;
         }
     }
 }

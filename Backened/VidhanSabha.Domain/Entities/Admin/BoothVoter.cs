@@ -1,4 +1,4 @@
-﻿using System;
+﻿    using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -16,6 +16,7 @@ namespace VidhanSabha.Domain.Entities.Admin
         public int Female { get; private set; }
         public int Other { get; private set; }
         public bool Status { get; private set; } = true;
+        public string? UserId { get; private set; }
 
         private static void Validate(int totalVoter, int male, int female, int other)
         {
@@ -39,7 +40,7 @@ namespace VidhanSabha.Domain.Entities.Admin
 
         public static Tbl_BoothVoter Create(
             int BoothId, int TotalVoter, int Male,
-            int Female, int Other,
+            int Female, int Other, string UserId,
             List<int> villageIds
             )
         {
@@ -50,7 +51,8 @@ namespace VidhanSabha.Domain.Entities.Admin
                 TotalVoter = TotalVoter,
                 Male = Male,
                 Female = Female,
-                Other = Other
+                Other = Other,
+                UserId = UserId
             };
             boothvoter.SetVillages(villageIds);
             return boothvoter;
