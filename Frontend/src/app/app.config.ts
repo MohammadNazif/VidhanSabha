@@ -35,12 +35,13 @@ import {
 
 import { routes } from './app.routes';
 import { loaderInterceptor } from './interceptors/loader/loader.interceptor';
+import { authInterceptor } from './interceptors/auth.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
-    provideHttpClient(withInterceptors([loaderInterceptor])),
+    provideHttpClient(withInterceptors([loaderInterceptor, authInterceptor])),
     provideAnimations(),
     importProvidersFrom(
       ReactiveFormsModule,

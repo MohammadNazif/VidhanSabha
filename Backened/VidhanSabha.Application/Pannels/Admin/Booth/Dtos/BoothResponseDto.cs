@@ -35,6 +35,7 @@ namespace VidhanSabha.Application.Pannels.Admin.Booth.Dtos
         public string PollingStationName { get; init; } = string.Empty;
         public string PollingStationLocation { get; init; } = string.Empty;
         public bool IsBoothSanyojak { get; init; }
+
         public SanyojakRequestDto? Sanyojak { get; init; }
     }
 

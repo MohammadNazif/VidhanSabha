@@ -24,8 +24,14 @@ namespace VidhanSabha.Application.Pannels.Admin.Mandal.Commands.Create
         public async Task<MandalResponseDto> Handle(
             CreateMandalCommand command, CancellationToken ct)
         {
+
+            int? VidhanId =  await _repo.GetVidhansabhaIdByuserIdAsync(command.userId);
+            if(VidhanId == 0)
+            {
+                throw new NotFoundException("VidhanSabha not found for the given user");
+            }
             // Check duplicate name under same VidhanId
-            var exists = await _repo.ExistsByNameAsync(command.VidhanId, command.Name);
+            var exists = await _repo.ExistsByNameAsync(VidhanId, command.Name);
             if (exists)
                 throw new ValidationException(new Dictionary<string, string[]>
                 {
@@ -34,7 +40,7 @@ namespace VidhanSabha.Application.Pannels.Admin.Mandal.Commands.Create
 
             // Domain entity — validates + creates
             var mandal = Tbl_Mandal.Create(
-                command.VidhanId,
+                VidhanId,
                 command.Name);
 
             await _repo.AddAsync(mandal);

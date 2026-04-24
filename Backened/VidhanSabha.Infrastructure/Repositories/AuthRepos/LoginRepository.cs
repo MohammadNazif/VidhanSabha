@@ -20,13 +20,20 @@ public class LoginRepository : ILoginRepository
 
     public  async Task<Tbl_LoginCredential?> GetByMobileAsync(string mobileNumber)
     {
-       return await _context.Tbl_LoginCredential.Where(x => x.Mobile == mobileNumber).Select(b => new Tbl_LoginCredential
+        try
         {
-            UserId = b.UserId,
-            Mobile = b.Mobile,
-            Role = b.Role,
-            Password = b.Password,
-        }).FirstOrDefaultAsync();
+            return await _context.Tbl_LoginCredential.Where(x => x.Mobile == mobileNumber).Select(b => new Tbl_LoginCredential
+            {
+                UserId = b.UserId,
+                Mobile = b.Mobile,
+                Role = b.Role,
+                Password = b.Password,
+            }).FirstOrDefaultAsync();
+        }
+        catch (Exception)
+        {
+            throw;
+        }
     }
 
     public async Task<int> GetBoothByUserIdAsync(string userId)

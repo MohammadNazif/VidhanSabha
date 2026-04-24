@@ -24,6 +24,7 @@ namespace VidhanSabha.Application.Pannels.SuperAdmin.StatePrabhari.Command
 
         public async Task<int> Handle(CreatePrabhariCommand req, CancellationToken cancellationToken)
         {
+            
             var request = req.Dto;
             var userId = $"USR_{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}";
             await _uow.BeginTransactionAsync();
@@ -35,7 +36,7 @@ namespace VidhanSabha.Application.Pannels.SuperAdmin.StatePrabhari.Command
                      userId: userId,
                     mobile: request.ContactNumber,
                     email: request.PrabhariEmail,
-                    role: "StatePrabhari"
+                    role: request.PrabhariRole
                 );
 
                 // Step 2 — Insert tbl_stateprabhari

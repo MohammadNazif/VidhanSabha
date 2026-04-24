@@ -42,9 +42,9 @@ export class LoginComponent {
       this.redirectByRole('SUPERADMIN');
       return;
     } else if (mobile === '9999999999') {
-      this.authService.setRole('ADMIN');
-      this.toastService.showSuccess('Test Mode', 'Static Login Successful as ADMIN');
-      this.redirectByRole('ADMIN');
+      this.authService.setRole('VidhanSabhaPrabhari');
+      this.toastService.showSuccess('Test Mode', 'Static Login Successful as VidhanSabhaPrabhari');
+      this.redirectByRole('VidhanSabhaPrabhari');
       return;
     } else if (mobile === '7777777777') {
       this.authService.setRole('STATEPRABHARI');
@@ -57,10 +57,26 @@ export class LoginComponent {
       .subscribe({
         next: (res: any) => {
           this.toastService.showSuccess('Success', 'Login Successful!');
-          const role = res.data?.role || 'ADMIN';
+          let role = res.data?.role || 'VidhanSabhaPrabhari';
+          
+          // Map numeric roles to strings
+          const roleMap: { [key: number]: string } = {
+            1: 'StatePrabhari',
+            2: 'VidhanSabhaPrabhari',
+            3: 'BoothSanyojak',
+            4: 'SectorSanyojak'
+          };
+          
+          if (typeof role === 'number') {
+            role = roleMap[role] || role.toString();
+          }
           const userId = res.data?.userId || '';
+          const token = res.data?.token || '';
+          
           this.authService.setRole(role);
           if (userId) this.authService.setUserId(userId);
+          if (token) this.authService.setToken(token);
+          
           this.redirectByRole(role);
         },
         error: (err: any) => {
@@ -70,8 +86,8 @@ export class LoginComponent {
       });
   }
 
-  private redirectByRole(role: string) {
-    const r = (role || '').toUpperCase().trim();
+  private redirectByRole(role: any) {
+    const r = String(role || '').toUpperCase().trim();
     console.log('Redirecting for role:', r);
     if (r === 'SUPERADMIN') {
       this.router.navigate(['/superadmin/dashboard']);

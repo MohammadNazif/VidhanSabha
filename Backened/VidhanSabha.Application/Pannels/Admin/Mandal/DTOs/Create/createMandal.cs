@@ -9,7 +9,7 @@ namespace VidhanSabha.Application.Pannels.Admin.Mandal.DTOs.Create
     public class MandalResponseDto
     {
         public int Id { get; set; }
-        public int VidhanId { get; set; }
+        public int? VidhanId { get; set; }
         public string Name { get; set; }
         public bool Status { get; set; }
     }

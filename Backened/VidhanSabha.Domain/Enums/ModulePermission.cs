@@ -18,4 +18,11 @@ namespace VidhanSabha.Domain.Enums
        Activity = 8,
        SeniororDisabled = 9
     }
+
+    public enum UserRole
+    {
+        Admin = 1,
+        BoothSanjoyak = 2,
+        PannaPramukh = 3,
+    }
 }

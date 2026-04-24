@@ -11,6 +11,9 @@ export class AuthServiceService {
   private userIdSubject = new BehaviorSubject<string | null>(localStorage.getItem('userId'));
   userId$ = this.userIdSubject.asObservable();
 
+  private tokenSubject = new BehaviorSubject<string | null>(localStorage.getItem('token'));
+  token$ = this.tokenSubject.asObservable();
+
   constructor() { }
 
   setRole(role: string) {
@@ -31,10 +34,21 @@ export class AuthServiceService {
     return this.userIdSubject.value;
   }
 
+  setToken(token: string) {
+    localStorage.setItem('token', token);
+    this.tokenSubject.next(token);
+  }
+
+  getToken(): string | null {
+    return this.tokenSubject.value;
+  }
+
   clearRole() {
     localStorage.removeItem('userRole');
     localStorage.removeItem('userId');
+    localStorage.removeItem('token');
     this.userRoleSubject.next(null);
     this.userIdSubject.next(null);
+    this.tokenSubject.next(null);
   }
 }

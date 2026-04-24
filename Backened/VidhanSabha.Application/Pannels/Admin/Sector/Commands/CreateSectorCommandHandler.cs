@@ -52,7 +52,7 @@ namespace VidhanSabha.Application.Pannels.Admin.Sector.Commands
                     userId: userId,
                     mobile: dto.PhoneNumber,
                     email: "",
-                    role: "SectorSanyojak"
+                    role: Domain.Enums.PrabhariRole.SectorSanyojak
                 );
 
                 // ✅ Step 3 — Create sector with Sanyojak

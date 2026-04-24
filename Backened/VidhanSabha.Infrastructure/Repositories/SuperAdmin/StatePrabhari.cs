@@ -69,7 +69,7 @@ namespace VidhanSabha.Infrastructure.Repositories.SuperAdmin
             {
                 return await _context.Tbl_StatePrabhari
                     .Where(m => m.StateId == stateId
-                        && m.PrabhariRole == Domain.Enums.PrabhariRole.VidhanSabha)
+                        && m.PrabhariRole == Domain.Enums.PrabhariRole.VidhanSabhaPrabhari)
                     .Select(x => new StatePrabhariResponseDto
                     {
                         Id = x.Id,

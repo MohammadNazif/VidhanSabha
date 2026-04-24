@@ -3,6 +3,7 @@ using VidhanSabha.Application.Common.CredentialMananger;
 using VidhanSabha.Application.Common.UnitOfWork;
 using VidhanSabha.Application.Pannels.Admin.Booth.Interfaces;
 using VidhanSabha.Domain.Entities.Admin;
+using VidhanSabha.Domain.Enums;
 
 namespace VidhanSabha.Application.Pannels.Admin.Booth.Command
 {
@@ -47,7 +48,7 @@ namespace VidhanSabha.Application.Pannels.Admin.Booth.Command
                         userId: userId,
                         mobile: cmd.Sanyojak.PhoneNumber,
                         email: "",
-                        role: "BoothSanyojak"
+                        role:PrabhariRole.BoothSanyojak
                     );
 
                     // Step 2b — Build Sanyojak domain entity with userId
