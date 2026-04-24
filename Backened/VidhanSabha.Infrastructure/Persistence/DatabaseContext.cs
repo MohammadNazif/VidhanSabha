@@ -73,6 +73,8 @@ namespace VidhanSabha.Infrastructure.Persistence
 
         public DbSet<Tbl_BoothVoter> Tbl_BoothVoter => Set<Tbl_BoothVoter>();
 
+        public DbSet<Tbl_CasteVoter> Tbl_CasteVoter => Set<Tbl_CasteVoter>();
+
         #endregion
 
 
