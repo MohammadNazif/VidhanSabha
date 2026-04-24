@@ -17,6 +17,17 @@ namespace VidhanSabha.Domain.Entities.Admin
         public int Other { get; private set; }
         public bool Status { get; private set; } = true;
 
+        private static void Validate(int totalVoter, int male, int female, int other)
+        {
+            if (totalVoter <= 0)
+                throw new ArgumentException("Total Voter must be greater than 0");
+
+            if (male < 0 || female < 0 || other < 0)
+                throw new ArgumentException("Male, Female and Other cannot be negative");
+
+            if (male + female + other > totalVoter)
+                throw new ArgumentException("Sum of Male, Female and Other cannot exceed Total Voter");
+        }
 
         private readonly List<Tbl_BoothVoterVillage> _villages = new();
         public IReadOnlyCollection<Tbl_BoothVoterVillage> Villages => _villages.AsReadOnly();
@@ -32,6 +43,7 @@ namespace VidhanSabha.Domain.Entities.Admin
             List<int> villageIds
             )
         {
+            Validate(TotalVoter, Male, Female, Other);
             var boothvoter = new Tbl_BoothVoter
             {
                 BoothId = BoothId,
@@ -64,14 +76,17 @@ namespace VidhanSabha.Domain.Entities.Admin
             int BoothId, int TotalVoter, int Male,
             int Female, int Other,
             List<int> villageIds
+            
             )
         {
+            Validate(TotalVoter, Male, Female, Other);
             this.BoothId = BoothId;
             this.TotalVoter = TotalVoter;
             this.Male = Male;
             this.Female = Female;
             this.Other = Other;
             SetVillages(villageIds);
+            //ClearCasteVoters(BoothId);
         }
 
         public void Delete()

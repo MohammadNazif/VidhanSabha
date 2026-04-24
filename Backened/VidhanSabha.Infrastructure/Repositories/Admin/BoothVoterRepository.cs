@@ -35,17 +35,31 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
             try
             {
                 _context.Tbl_BoothVoter.Update(boothvoter);
+
+                var casteVoters = _context.Tbl_CasteVoter
+                    .Where(x => x.CasteVoterId == boothvoter.Id)
+                    .ToList();
+
+                _context.Tbl_CasteVoter.RemoveRange(casteVoters);
+
                 return _context.SaveChanges();
             }
             catch (Exception)
             {
                 throw;
             }
-
         }
         public void Delete(Tbl_BoothVoter boothvoter)
         {
-            throw new NotImplementedException();
+            try
+            {
+                _context.Tbl_BoothVoter.Remove(boothvoter);
+                _context.SaveChanges();
+            }
+            catch(Exception)
+            {
+                throw;
+            }
         }
 
         public async Task<List<BoothVoterResponseDto>> GetAllAsync(int? boothId = null, CancellationToken ct = default)

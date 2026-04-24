@@ -21,6 +21,9 @@ using VidhanSabha.Application.Pannels.Admin.BoothSamiti.Queries;
 using VidhanSabha.Application.Pannels.Admin.BoothVoter.Command;
 using VidhanSabha.Application.Pannels.Admin.BoothVoter.DTOs;
 using VidhanSabha.Application.Pannels.Admin.BoothVoter.Queries;
+using VidhanSabha.Application.Pannels.Admin.CasteVoter.Command;
+using VidhanSabha.Application.Pannels.Admin.CasteVoter.DTOs;
+using VidhanSabha.Application.Pannels.Admin.CasteVoter.Queries;
 using VidhanSabha.Application.Pannels.Admin.DoubleVoter.Command;
 using VidhanSabha.Application.Pannels.Admin.DoubleVoter.DTOs;
 using VidhanSabha.Application.Pannels.Admin.DoubleVoter.Queries;
@@ -108,6 +111,9 @@ public static class AdminEndpoints
 
         var boothvoter = app.MapGroup("/api/boothvoter")
                         .WithTags("BoothVoter");
+
+        var castevoter = app.MapGroup("/api/castevoter")
+                        .WithTags("CasteVoter");
 
         #region Mandal
         
@@ -416,6 +422,39 @@ public static class AdminEndpoints
             var result = await mediator.Send(new GetAllBoothVoterQuery());
             return Results.Ok(ApiResponse<List<BoothVoterResponseDto>>.Ok(result));
         }).RequireAuthorization(ModulePermission.BoothVoterDescrition.ToString());
+
+        #endregion
+
+        #region Caste Voter
+
+        castevoter.MapPost("/create", async (CreateCasteVoterReqDto dto, IMediator mediator) =>
+        {
+            var result = await mediator.Send(new CreateCasteVoterCommand(dto));
+            return Results.Ok(ApiResponse<int>.Ok(result, "Caste Voter Created Successfully"));
+        })
+                .WithName("CreateCasteVoter")
+                .Produces<int>(200);
+
+        castevoter.MapPost("/update", async (UpdateCasteVoterReqDto dto, IMediator mediator) =>
+        {
+            var result = await mediator.Send(new UpdateCasteVoterCommand(dto));
+            return Results.Ok(ApiResponse<int>.Ok(result, "Caste Voter Updated Successfully"));
+        })
+                .WithName("UpdateCasteVoter")
+                .Produces<int>(200);
+
+        castevoter.MapPost("/delete", async (int id, IMediator mediator) =>
+        {
+            var result = await mediator.Send(new DeleteCasteVoterCommand(id));
+            return Results.Ok(ApiResponse<int>.Ok(result, "Caste Voter Deleted Successfully"));
+        })
+                .WithName("DeleteCasteVoter")
+                .Produces<int>(200);
+        castevoter.MapGet("/getAll", async (IMediator mediator) =>
+        {
+            var result = await mediator.Send(new GetAllCasteVoterQuery());
+            return Results.Ok(ApiResponse<PagedResult<CasteVoterResponseDto>>.Ok(result));
+        });
 
         #endregion
 
