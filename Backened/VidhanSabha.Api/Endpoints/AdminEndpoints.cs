@@ -2,6 +2,8 @@
 using MediatR;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using System.Security.Claims;
 using VidhanSabha.Api.Responses;
 using VidhanSabha.Application.Common.BoothSamitiDesignation.DTOs;
 using VidhanSabha.Application.Common.BoothSamitiDesignation.Queries;
@@ -235,14 +237,17 @@ public static class AdminEndpoints
         #endregion
 
         #region Booth
-        booth.MapPost("/create", async (BoothRequestDto dto, IMediator mediator, HttpContext http) =>
+        booth.MapPost("/create", async (BoothRequestDto dto,string? UserId, IMediator mediator) =>
         {
+            //UserId = , HttpContext httphttp.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
             //var userId = 1;
             //var userName = "Admin";
 
-            var result = await mediator.Send(new CreateBoothCommand(dto));
+            var result = await mediator.Send(new CreateBoothCommand(dto, UserId));
             return Results.Ok(ApiResponse<int>.Ok(result, "Booth Created Successfully"));
         })
+            //.RequireAuthorization(ModulePermission.BoothVoterDescrition)
         .WithName("CreateBooth")
         .Produces<int>(200);
 
@@ -254,8 +259,14 @@ public static class AdminEndpoints
              bool result = await mediator.Send(new updateBoothCommand(dto));
              return Results.Ok(ApiResponse<bool>.Ok(result, "Booth Updated Successfully"));
          })
-    .WithName("UpdateBooth")
-    .Produces<int>(200);
+            .WithName("UpdateBooth")
+            .Produces<int>(200);
+
+        booth.MapPost("/delete", async (int id, IMediator mediator) =>
+        {
+            await mediator.Send(new DeleteBoothCommand(id));
+            return Results.Ok("Booth Deleted Successfully");
+        });
 
         booth.MapGet("/getAll", async (
             [AsParameters] BoothQueryParams q,
@@ -265,11 +276,6 @@ public static class AdminEndpoints
             return Results.Ok(ApiResponse<PagedResult<BoothResponseDto>>.Ok(result));
         });
 
-        booth.MapPost("/delete", async (int id, IMediator mediator) =>
-        {
-            await mediator.Send(new DeleteBoothCommand(id));
-            return Results.Ok("Booth Deleted Successfully");
-        });
 
         #endregion
 
@@ -521,11 +527,12 @@ public static class AdminEndpoints
           .WithName("DeletePradhan")
           .Produces<int>(200);
         pradhan.MapGet("/getAll", async (
+            [AsParameters] PradhanQueryParams q,
             IMediator mediator) =>
         {
-            var result = await mediator.Send(new GetAllPradhanQuery());
-            return Results.Ok(ApiResponse<List<PradhanResponseDto>>.Ok(result));
-        }).RequireAuthorization();
+            var result = await mediator.Send(new GetAllPradhanQuery(q));
+            return Results.Ok(ApiResponse<PagedResult<PradhanResponseDto>>.Ok(result));
+        });
         #endregion
 
         #region BoothSamiti
@@ -619,11 +626,13 @@ public static class AdminEndpoints
 
         #region Double Voter
 
-        doublevoter.MapPost("/create", async (CreateDoubleVoterReqDto dto, IMediator mediator) =>
+        doublevoter.MapPost("/create", async (CreateDoubleVoterReqDto dto, string? UserId, IMediator mediator, HttpContext http) =>
         {
-            var result = await mediator.Send(new CreateDoubleVoterCommand(dto));
+            UserId = http.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var result = await mediator.Send(new CreateDoubleVoterCommand(dto, UserId));
             return Results.Ok(ApiResponse<int>.Ok(result, "New Voter Created Successfully"));
         })
+            .RequireAuthorization(ModulePermission.DoubleVoter.ToString())
                 .WithName("CreateDoubleVoter")
                 .Produces<int>(200);
 

@@ -9,7 +9,7 @@ using VidhanSabha.Application.Pannels.Admin.Pradhan.DTOs;
 
 namespace VidhanSabha.Application.Pannels.Admin.Pradhan.Queries
 {
-    public class GetAllPradhanQuery:IRequest<List<PradhanResponseDto>>
+    public record GetAllPradhanQuery(PradhanQueryParams QueryParams):IRequest<PagedResult<PradhanResponseDto>>
     {
 
     }

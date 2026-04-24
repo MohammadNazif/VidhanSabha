@@ -22,6 +22,7 @@ namespace VidhanSabha.Domain.Entities.Admin
 
         //Navigations
         public Tbl_AdminDesignation Designation { get; private set; } = null!;
+        //public Tbl_Booth Booth { get; private set; } = null!;
         public Tbl_Pradhan() { }
 
         public static Tbl_Pradhan Create(
