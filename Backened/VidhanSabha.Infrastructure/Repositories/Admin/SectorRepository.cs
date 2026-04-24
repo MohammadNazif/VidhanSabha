@@ -19,13 +19,13 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
     {
         public SectorRepository(DatabaseContext context) : base(context) { }
 
-        public async Task<PagedResult<SectorResponseDto>> GetAllAsync(SectorQueryParams qp,CancellationToken ct)
+        public async Task<PagedResult<SectorResponseDto>> GetAllAsync(SectorQueryParams qp,int? vidhanId,CancellationToken ct)
         {
-            var query = _context.Tbl_Sector
+            var query = _context.Tbl_Sector.Where(x => x.Mandal.VidhanId == vidhanId)
                .AsNoTracking()
                .Where(b =>
-                   (!qp.Id.HasValue || b.Id == qp.Id)
-
+                   (!qp.Id.HasValue || b.Id == qp.Id) 
+                   
                    );
 
             Expression<Func<Tbl_Sector, bool>>? search = null;

@@ -11,7 +11,7 @@ namespace VidhanSabha.Application.Pannels.Admin.Sector.Interface
 {
     public interface ISectorRepository
     {
-        Task<PagedResult<SectorResponseDto>> GetAllAsync(SectorQueryParams qp,CancellationToken ct);
+        Task<PagedResult<SectorResponseDto>> GetAllAsync(SectorQueryParams qp,int? vidhanID,CancellationToken ct);
         Task<PagedResult<SectorReportDto>> GetAllSectorReports(SectorQueryParams qp,CancellationToken ct);
         Task<List<Tbl_Sector>?> GetByMandalIdAsync(int id);
 
