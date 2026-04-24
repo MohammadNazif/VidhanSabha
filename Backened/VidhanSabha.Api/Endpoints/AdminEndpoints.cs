@@ -219,11 +219,14 @@ public static class AdminEndpoints
 
         sector.MapGet("/getAll", async (
             [AsParameters] SectorQueryParams q,
-            IMediator mediator) =>
+            IMediator mediator, HttpContext httpContext) =>
         {
-            var result = await mediator.Send(new GetAllSectorsQuery(q));
+            string userId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var result = await mediator.Send(new GetAllSectorsQuery(q,userId));
             return Results.Ok(ApiResponse<PagedResult<SectorResponseDto>>.Ok(result));
-        }).WithName("GetAll")
+        })
+         .WithName("GetAll")
+        .RequireAuthorization()
         .Produces<List<SectorResponseDto>>(200);
 
         sector.MapGet("/getAllSectorReports", async (

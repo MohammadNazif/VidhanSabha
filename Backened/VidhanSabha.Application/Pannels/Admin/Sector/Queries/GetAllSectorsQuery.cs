@@ -9,5 +9,5 @@ using VidhanSabha.Application.Pannels.Admin.Sector.DTOs;
 
 namespace VidhanSabha.Application.Pannels.Admin.Sector.Queries
 {
-    public record GetAllSectorsQuery(SectorQueryParams QueryParams) : IRequest<PagedResult<SectorResponseDto>> { }
+    public record GetAllSectorsQuery(SectorQueryParams QueryParams,string UserId) : IRequest<PagedResult<SectorResponseDto>> { }
 }

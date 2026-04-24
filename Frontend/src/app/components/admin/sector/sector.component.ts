@@ -78,7 +78,7 @@ export class SectorComponent implements OnInit {
         label: 'Mandal',
         type: 'select',
         placeholder: '--Select Mandal--',
-        apiUrl: `mandal/getAll`,
+        apiUrl: `mandal/getAll?PageNumber=1&PageSize=50&IsDescending=false`,
         apiMapper: (data: any) => {
           const list = Array.isArray(data?.data?.items) ? data.data.items : (Array.isArray(data?.items) ? data.items : (Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : [])));
           return list.map((item: any) => ({
