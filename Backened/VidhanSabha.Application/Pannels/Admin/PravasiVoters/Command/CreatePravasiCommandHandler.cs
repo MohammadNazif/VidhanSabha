@@ -25,7 +25,7 @@ namespace VidhanSabha.Application.Pannels.Admin.PravasiVoters.Command
 
             var data =  Tbl_PravasiVoter.Create(
                 req.BoothId, req.Name, req.Mobile, req.CategoryId, req.CastId, req.OccupationId,
-                req.VoterId, req.CurrentAddress, req.VillageId);
+                req.VoterId, req.CurrentAddress,request.UserId, req.VillageId);
 
             return  await _repo.AddAsync(data,cancellationToken);
             

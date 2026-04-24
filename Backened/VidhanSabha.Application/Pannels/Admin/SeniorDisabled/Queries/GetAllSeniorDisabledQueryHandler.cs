@@ -6,9 +6,6 @@ using System.Text;
 using System.Threading.Tasks;
 using VidhanSabha.Application.Common.Dtos;
 using VidhanSabha.Application.Exceptions;
-using VidhanSabha.Application.Pannels.Admin.PravasiVoters.DTOs;
-using VidhanSabha.Application.Pannels.Admin.PravasiVoters.Interfaces;
-using VidhanSabha.Application.Pannels.Admin.PravasiVoters.Queries;
 using VidhanSabha.Application.Pannels.Admin.SeniorDisabled.DTOs;
 using VidhanSabha.Application.Pannels.Admin.SeniorDisabled.Interfaces;
 

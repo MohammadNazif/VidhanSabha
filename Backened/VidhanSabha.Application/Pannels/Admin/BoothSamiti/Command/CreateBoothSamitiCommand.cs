@@ -11,10 +11,12 @@ namespace VidhanSabha.Application.Pannels.Admin.BoothSamiti.Command
     public class CreateBoothSamitiCommand : IRequest<int>
     {
         public CreateBoothSamitiRequestDto Dto { get; set; }
+        public string UserId { get; set; }
 
-        public CreateBoothSamitiCommand(CreateBoothSamitiRequestDto dto)
+        public CreateBoothSamitiCommand(CreateBoothSamitiRequestDto dto, string? userId)
         {
             Dto = dto;
+            UserId = userId;
         }
     }
 }

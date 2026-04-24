@@ -61,7 +61,7 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
             var query = _context.Tbl_DoubleVoter
                 .AsNoTracking()
                 .Where(b =>
-                    (!qp.Id.HasValue || b.Id == qp.Id) &&
+                    (!qp.Id.HasValue || b.Id == qp.Id) && (b.UserId == qp.UserId) &&
                     (!qp.BoothId.HasValue || b.Booth.Id == qp.BoothId) &&
                     (!qp.SectorId.HasValue || b.Booth.Sector.Id == qp.SectorId) &&
                     (!qp.VillageId.HasValue || b.Villages.Any(v => v.VillageId == qp.VillageId))

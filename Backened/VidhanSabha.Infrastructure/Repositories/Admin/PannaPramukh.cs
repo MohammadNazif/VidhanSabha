@@ -42,6 +42,7 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
               .AsNoTracking()
               .Where(b =>
                   (!qp.Id.HasValue || b.Id == qp.Id) &&
+                  ( b.UserId == qp.UserId) &&
                   (!qp.BoothId.HasValue || b.BoothId == qp.BoothId ));
 
 

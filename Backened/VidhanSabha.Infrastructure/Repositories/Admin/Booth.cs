@@ -64,7 +64,7 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
                 .AsNoTracking()
                 .Where(b => b.Status)
                 .Where(b =>
-                    (!qp.MandalId.HasValue || b.MandalId == qp.MandalId) &&
+                    (!qp.MandalId.HasValue || b.MandalId == qp.MandalId) && (b.UserId == qp.UserId) &&
                     (!qp.SectorId.HasValue || b.SectorId == qp.SectorId));
 
             Expression<Func<Tbl_Booth, bool>>? search = null;

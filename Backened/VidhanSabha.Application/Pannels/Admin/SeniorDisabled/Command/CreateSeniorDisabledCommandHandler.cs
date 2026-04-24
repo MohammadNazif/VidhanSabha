@@ -42,6 +42,7 @@ namespace VidhanSabha.Application.Pannels.Admin.SeniorDisabled.Command
         req.TypeId,
         req.BoothId,
         data,
+        request.UserId,
         req.VillageId
        ))
     .ToList();
