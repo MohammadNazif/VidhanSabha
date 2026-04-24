@@ -14,7 +14,7 @@ using VidhanSabha.Application.Pannels.Admin.Pradhan.Interfaces;
 
 namespace VidhanSabha.Application.Pannels.Admin.Pradhan.Queries
 {
-    public class GetAllPradhanQueryHandler : IRequestHandler<GetAllPradhanQuery, List<PradhanResponseDto>>
+    public class GetAllPradhanQueryHandler : IRequestHandler<GetAllPradhanQuery, PagedResult<PradhanResponseDto>>
     {
         private IPradhanRepository _repo;
 
@@ -22,9 +22,9 @@ namespace VidhanSabha.Application.Pannels.Admin.Pradhan.Queries
         {
             _repo = repo;
         }
-        public async Task<List<PradhanResponseDto>> Handle(GetAllPradhanQuery query, CancellationToken cancellationtoken)
+        public async Task<PagedResult<PradhanResponseDto>> Handle(GetAllPradhanQuery query, CancellationToken cancellationtoken)
         {
-            var res = await _repo.GetAllAsync();
+            var res = await _repo.GetAllAsync(query.QueryParams);
             if (res == null)
             {
                 throw new NotFoundException("New Voter Not Found");

@@ -12,9 +12,11 @@ namespace VidhanSabha.Application.Pannels.Admin.DoubleVoter.Command
     public class CreateDoubleVoterCommand : IRequest<int>
     {
         public CreateDoubleVoterReqDto Dto { get; set; }
-        public CreateDoubleVoterCommand(CreateDoubleVoterReqDto dto)
+        public string UserId { get; set; }
+        public CreateDoubleVoterCommand(CreateDoubleVoterReqDto dto,string? userId)
         {
             Dto = dto;
+            UserId = userId;
         }
     }
 }

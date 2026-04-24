@@ -10,5 +10,8 @@ namespace VidhanSabha.Application.Pannels.Admin.Pradhan.DTOs
     public class PradhanQueryParams:BaseQueryParams
     {
         public int? Id { get; set; }
+        public int? SectorId { get; set; }
+        public int? MandalId { get; set; }
+        public int? BoothId { get; set; }
     }
 }

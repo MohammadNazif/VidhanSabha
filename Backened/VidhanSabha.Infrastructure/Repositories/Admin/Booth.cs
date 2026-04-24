@@ -132,6 +132,75 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
                 .FirstOrDefaultAsync(b => b.Id == id, ct);
         }
 
+        //public async Task<PagedResult<BoothResponseDto>> GetBoothBySectorIdAsync(BoothQueryParams qp CancellationToken ct)
+        //{
+        //    var query = _context.Tbl_Booth
+        //        .AsNoTracking()
+        //        .Where(b => b.Status)
+        //        .Where(b =>
+        //            (!qp.MandalId.HasValue || b.MandalId == qp.MandalId) &&
+        //            (!qp.SectorId.HasValue || b.SectorId == qp.SectorId));
+
+        //    Expression<Func<Tbl_Booth, bool>>? search = null;
+
+        //    if (!string.IsNullOrWhiteSpace(qp.SearchTerm))
+        //    {
+        //        var term = qp.SearchTerm.Trim().ToLower();
+        //        search = b =>
+        //            b.PollingStationName.ToLower().Contains(term) ||
+        //            b.PollingStationLocation.ToLower().Contains(term) ||
+        //            b.Mandal.Name.ToLower().Contains(term) ||
+        //            b.Sector.SectorName.ToLower().Contains(term);
+        //    }
+
+        //    return await query.ToPagedResultAsync(
+        //        queryParams: qp,
+        //        searchPredicate: search,
+        //        defaultSort: b => b.BoothNumber,
+        //        projection: b => new BoothResponseDto
+        //        {
+        //            UserId = b.Sanyojak.UserId,
+        //            Id = b.Id,
+        //            MandalId = b.MandalId,
+        //            MandalName = b.Mandal.Name,
+
+        //            SectorId = b.SectorId,
+        //            SectorName = b.Sector.SectorName,
+
+        //            BoothNumber = b.BoothNumber,
+        //            PollingStationName = b.PollingStationName,
+        //            PollingStationLocation = b.PollingStationLocation,
+        //            IsBoothSanyojak = b.IsBoothSanyojak,
+
+        //            // Villages list
+        //            Villages = b.Villages.Select(v => new VillageResponseDto
+        //            {
+        //                VillageId = v.VillageId,
+        //                VillageName = v.Village.VillageName,
+        //                HasAnshik = v.HasAnshik
+        //            }).ToList(),
+
+        //            // Village names string
+        //            VillageNames = string.Join(", ", b.Villages.Select(v => v.Village.VillageName)),
+
+        //            // Sanyojak (nullable)
+        //            Sanyojak = b.Sanyojak == null ? null : new SanyojakResponseDto
+        //            {
+        //                InchargeName = b.Sanyojak.InchargeName,
+        //                Age = b.Sanyojak.Age,
+        //                FatherName = b.Sanyojak.FatherName,
+        //                CategoryId = b.Sanyojak.CategoryId,
+        //                CastId = b.Sanyojak.CastId,
+        //                CastName = b.Sanyojak.Cast.CastName,
+        //                EducationLevel = b.Sanyojak.EducationLevel,
+        //                PhoneNumber = b.Sanyojak.PhoneNumber,
+        //                Address = b.Sanyojak.Address,
+        //                ProfileImageUrl = b.Sanyojak.ProfileImagePath
+        //            }
+        //        }, ct: ct);
+                
+        //}
+
         public async Task<List<BoothInchargeResponse>> GetInchargeByBoothIdAsync(int? boothId, CancellationToken ct)
         {
             var query = _context.Tbl_BoothSanyojak.AsQueryable();

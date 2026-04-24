@@ -81,30 +81,51 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
             }
         }
 
-        public async Task<List<PradhanResponseDto>> GetAllAsync(int? boothId = null, CancellationToken ct = default)
+        public async Task<PagedResult<PradhanResponseDto>> GetAllAsync(PradhanQueryParams qp, CancellationToken ct = default)
         {
             try
             {
-                return await _context.Tbl_Pradhan
-                    .Include(p => p.Villages)
-                    .Include(p => p.Designation)
-                    .Select(p => new PradhanResponseDto
-                    {
-                        Id = p.Id,
-                        Name = p.Name,
-                        DesignationId = p.DesignationId,
-                        DesignationName = p.Designation.DesignationName,
-                        Contact = p.Contact,
+                var query = _context.Tbl_Pradhan
+               .AsNoTracking()
+               .Where(b =>
+                   (!qp.Id.HasValue || b.Id == qp.Id)
+                   //(!qp.SectorId.HasValue || b.Booth.Sector.Id == qp.SectorId) &&
+                   //(!qp.BoothId.HasValue || b.Booth.Id == qp.BoothId)
+                   );
 
-                        Gender = p.Gender,
-                        GenderValue = ((VidhanSabha.Domain.Enums.Gender)p.Gender).ToString(),
+                Expression<Func<Tbl_Pradhan, bool>>? search = null;
 
-                        Villages = p.Villages.Select(v => new VillageResponseDtos
-                        {
-                            VillageId = v.VillageId,
-                            VillageName = v.Village.VillageName
-                        }).ToList(),
-                    }).ToListAsync();
+                if (!string.IsNullOrWhiteSpace(qp.SearchTerm))
+                {
+                    var term = qp.SearchTerm.Trim().ToLower();
+                    search = b =>
+                        //b.Booth.BoothNumber.Equals(Convert.ToInt32(term)) ||
+                        b.Name.ToLower().Contains(term) ||
+                        b.Villages.Select(v => v.Village.VillageName).FirstOrDefault().ToLower().Contains(term) ||
+                        b.Designation.DesignationName.ToLower().Contains(term);
+                }
+
+                return await query.ToPagedResultAsync(
+               queryParams: qp,
+               searchPredicate: search,
+               defaultSort: b => b.Id,
+               projection: p => new PradhanResponseDto
+               {
+                   Id = p.Id,
+                   Name = p.Name,
+                   DesignationId = p.DesignationId,
+                   DesignationName = p.Designation.DesignationName,
+                   Contact = p.Contact,
+
+                   Gender = p.Gender,
+                   GenderValue = ((VidhanSabha.Domain.Enums.Gender)p.Gender).ToString(),
+
+                   Villages = p.Villages.Select(v => new VillageResponseDtos
+                   {
+                       VillageId = v.VillageId,
+                       VillageName = v.Village.VillageName
+                   }).ToList(),
+               },ct:ct);
             }
             catch (Exception ex)
             {

@@ -11,6 +11,7 @@ namespace VidhanSabha.Domain.Entities.Admin
     public class Tbl_Booth
     {
         public int Id { get; private set; }
+        public string? UserId { get; private set; }
         public int MandalId { get; private set; }
         public int SectorId { get; private set; }
         public int BoothNumber { get; private set; }
@@ -33,13 +34,14 @@ namespace VidhanSabha.Domain.Entities.Admin
         private Tbl_Booth() { }
 
         public static Tbl_Booth Create(
-            int mandalId, int sectorId, int boothNumber,
+            string UserId, int mandalId, int sectorId, int boothNumber,
             string pollingStationName, string pollingStationLocation,
             bool isBoothSanyojak, List<Tbl_BoothVillage> villages,
             Tbl_BoothSanyojak? sanyojak)
         {
             var booth = new Tbl_Booth
             {
+                UserId=UserId,
                 MandalId = mandalId,
                 SectorId = sectorId,
                 BoothNumber = boothNumber,

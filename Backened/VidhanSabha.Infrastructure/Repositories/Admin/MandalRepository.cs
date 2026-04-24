@@ -143,7 +143,7 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
                                     ProfilePath = s.Booth.Sanyojak.ProfileImagePath
                                 }
                                 : null,
-
+                            
                             Villages = s.Booth.Villages != null
                                 ? s.Booth.Villages.Select(v => new VillageDto
                                 {

@@ -26,7 +26,7 @@ namespace VidhanSabha.Application.Pannels.Admin.DoubleVoter.Command
 
             var data = Tbl_DoubleVoter.Create(
                 req.BoothId, req.Name, req.FatherName,
-                req.VoterId,req.PreviousAddress, req.CurrentAddress,req.Description, req.VillageId);
+                req.VoterId,req.PreviousAddress, req.CurrentAddress,req.Description,request.UserId, req.VillageId);
 
 
             return await _repo.AddAsync(data, cancellationToken);

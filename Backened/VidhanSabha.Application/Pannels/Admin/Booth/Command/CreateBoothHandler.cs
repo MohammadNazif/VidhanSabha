@@ -66,6 +66,7 @@ namespace VidhanSabha.Application.Pannels.Admin.Booth.Command
 
                 // ── Step 3: Build Booth aggregate and persist ─────────────────────
                 var booth = Tbl_Booth.Create(
+                    request.UserId,
                     cmd.MandalId,
                     cmd.SectorId,
                     cmd.BoothNumber,
