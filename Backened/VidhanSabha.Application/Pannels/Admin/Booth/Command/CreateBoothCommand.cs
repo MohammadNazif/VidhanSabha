@@ -10,13 +10,13 @@ namespace VidhanSabha.Application.Pannels.Admin.Booth.Command
 {
     public record CreateBoothCommand : IRequest<int>
     {
-        public BoothRequestDto Dto;
-        public string UserId;
+        public BoothRequestDto Dto { get; set; }
+        public string UserId { get; set; }
 
-        public CreateBoothCommand(BoothRequestDto dto,string UserId)
+        public CreateBoothCommand(BoothRequestDto dto,string userId)
         {
             Dto = dto;
-            UserId = UserId;
+            UserId = userId;
         }// null bhejenge jab IsBoothSanyojak = false
     }
 

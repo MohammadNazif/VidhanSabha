@@ -237,9 +237,9 @@ public static class AdminEndpoints
         #endregion
 
         #region Booth
-        booth.MapPost("/create", async (BoothRequestDto dto,string? UserId, IMediator mediator) =>
+        booth.MapPost("/create", async (BoothRequestDto dto, IMediator mediator, HttpContext http) =>
         {
-            //UserId = , HttpContext httphttp.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            string UserId = http.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
             //var userId = 1;
             //var userName = "Admin";
@@ -247,9 +247,9 @@ public static class AdminEndpoints
             var result = await mediator.Send(new CreateBoothCommand(dto, UserId));
             return Results.Ok(ApiResponse<int>.Ok(result, "Booth Created Successfully"));
         })
-            //.RequireAuthorization(ModulePermission.BoothVoterDescrition)
-        .WithName("CreateBooth")
-        .Produces<int>(200);
+            .RequireAuthorization(ModulePermission.Booth.ToString())
+            .WithName("CreateBooth")
+            .Produces<int>(200);
 
         booth.MapPost("/update", async (updateBoothRequestDto dto, IMediator mediator, HttpContext http) =>
          {
@@ -626,9 +626,9 @@ public static class AdminEndpoints
 
         #region Double Voter
 
-        doublevoter.MapPost("/create", async (CreateDoubleVoterReqDto dto, string? UserId, IMediator mediator, HttpContext http) =>
+        doublevoter.MapPost("/create", async (CreateDoubleVoterReqDto dto, IMediator mediator, HttpContext http) =>
         {
-            UserId = http.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            string UserId = http.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var result = await mediator.Send(new CreateDoubleVoterCommand(dto, UserId));
             return Results.Ok(ApiResponse<int>.Ok(result, "New Voter Created Successfully"));
         })
