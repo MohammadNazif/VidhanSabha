@@ -243,7 +243,7 @@ public static class AdminEndpoints
         #region Booth
         booth.MapPost("/create", async (BoothRequestDto dto, IMediator mediator, HttpContext http) =>
         {
-            string UserId = "fmsadfjsdfvdsnf";
+            string UserId = http.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
             //var userId = 1;
             //var userName = "Admin";
