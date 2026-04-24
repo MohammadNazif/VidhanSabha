@@ -12,9 +12,11 @@ namespace VidhanSabha.Application.Pannels.Admin.SeniorDisabled.Command
     public class CreateSeniorDisabledCommand : IRequest<int>
     {
         public CreateSeniorDisabledReqDto Dto { get; set; }
-        public CreateSeniorDisabledCommand(CreateSeniorDisabledReqDto dto)
+        public string UserId { get; set; }
+        public CreateSeniorDisabledCommand(CreateSeniorDisabledReqDto dto, string? userId)
         {
             Dto = dto;
+            UserId = userId;
         }
     }
 }

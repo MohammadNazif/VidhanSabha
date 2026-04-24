@@ -11,9 +11,11 @@ namespace VidhanSabha.Application.Pannels.Admin.PravasiVoters.Command
     public class CreatePravasiCommand : IRequest<int>
     {
         public CreatePravasiVoterRequestDto Dto { get; set; }
-        public CreatePravasiCommand(CreatePravasiVoterRequestDto dto)
+        public string UserId { get; set; }
+        public CreatePravasiCommand(CreatePravasiVoterRequestDto dto,string? userId)
         {
             Dto = dto;
+            UserId = userId;
         }
     }
 }

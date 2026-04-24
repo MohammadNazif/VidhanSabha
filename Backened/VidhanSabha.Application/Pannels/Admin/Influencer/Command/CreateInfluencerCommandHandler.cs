@@ -30,6 +30,7 @@ namespace VidhanSabha.Application.Pannels.Admin.Influencer.Command
                     request.Dto.CastId,
                     request.Dto.Mobile,
                     request.Dto.Description,
+                    request.UserId,
                     request.Dto.VillageIds
                 );
 

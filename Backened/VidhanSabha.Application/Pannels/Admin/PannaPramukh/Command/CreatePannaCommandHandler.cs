@@ -24,7 +24,7 @@ namespace VidhanSabha.Application.Pannels.Admin.PannaPramukh.Command
               request.Dto.BoothId, request.Dto.PannaNumber, 
               request.Dto.PannaPramukhName, request.Dto.CategoryId, 
               request.Dto.CastId, request.Dto.VoterId, 
-              request.Dto.PhoneNumber, request.Dto.Address, 
+              request.Dto.PhoneNumber, request.Dto.Address, request.UserId,
               request.Dto.VillageId);
 
             _repo.AddAsync(pannapramukh,cancellationToken);

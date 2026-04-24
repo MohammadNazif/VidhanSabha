@@ -1,8 +1,8 @@
-﻿using System.Security.Claims;
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using System.Security.Claims;
 using System.Security.Claims;
 using VidhanSabha.Api.Responses;
 using VidhanSabha.Application.Common.BoothSamitiDesignation.DTOs;
@@ -61,6 +61,7 @@ using VidhanSabha.Application.Pannels.Admin.SeniorDisabled.Command;
 using VidhanSabha.Application.Pannels.Admin.SeniorDisabled.DTOs;
 using VidhanSabha.Application.Pannels.Admin.SeniorDisabled.Queries;
 using VidhanSabha.Domain.Enums;
+using static System.Net.WebRequestMethods;
 public static class AdminEndpoints
 {
     public static void MapAdminEndpoints(this WebApplication app)
@@ -273,8 +274,9 @@ public static class AdminEndpoints
 
         booth.MapGet("/getAll", async (
             [AsParameters] BoothQueryParams q,
-           IMediator mediator) =>
+           IMediator mediator,HttpContext httpContext) =>
         {
+            q.UserId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var result = await mediator.Send(new GetAllBoothsQuery(q));
             return Results.Ok(ApiResponse<PagedResult<BoothResponseDto>>.Ok(result));
         });
@@ -289,8 +291,7 @@ public static class AdminEndpoints
             IMediator mediator,
             HttpContext httpContext) =>
          {
-             q.UserId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-             q.Role = httpContext.User.FindFirst(ClaimTypes.Role)?.Value;
+            string UserId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
              var result = await mediator.Send(new GetAllPannaQuery(q));
              return Results.Ok(ApiResponse<PagedResult<PannaPramukhResponseDto>>.Ok(result));
          })
@@ -298,10 +299,10 @@ public static class AdminEndpoints
          .RequireAuthorization(ModulePermission.PannaPramukh.ToString())
          .Produces<ApiResponse<List<PannaPramukhResponseDto>>>(200);
 
-        pannapramukh.MapPost("/create", async (CreatePannaPramukhRequestDto dto, IMediator mediator) =>
+        pannapramukh.MapPost("/create", async (CreatePannaPramukhRequestDto dto, IMediator mediator, HttpContext http) =>
                 {
-
-                    var result = await mediator.Send(new CreatePannaCommand(dto));
+                    string UserId = http.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                    var result = await mediator.Send(new CreatePannaCommand(dto,UserId));
                     return Results.Ok(ApiResponse<int>.Ok(result, "Panna Pramukh Created Successfully"));
                 })
                 .WithName("CreatePannaPramukh")
@@ -327,9 +328,10 @@ public static class AdminEndpoints
 
         #region PravasiVoter
 
-        pravasivoter.MapPost("/create", async (CreatePravasiVoterRequestDto dto, IMediator mediator) =>
+        pravasivoter.MapPost("/create", async (CreatePravasiVoterRequestDto dto, IMediator mediator, HttpContext http) =>
         {
-            var result = await mediator.Send(new CreatePravasiCommand(dto));
+            string UserId = http.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var result = await mediator.Send(new CreatePravasiCommand(dto,UserId));
             return Results.Ok(ApiResponse<int>.Ok(result, "Pravasi Voter Created Successfully"));
         })
                 .WithName("CreatePravasiVoter")
@@ -356,8 +358,9 @@ public static class AdminEndpoints
 
         pravasivoter.MapGet("/getAll", async (
             [AsParameters] PravasiQueryParams q,
-            IMediator mediator) =>
+            IMediator mediator, HttpContext httpContext) =>
         {
+            q.UserId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var result = await mediator.Send(new GetAllPravasiQuery(q));
             return Results.Ok(ApiResponse<PagedResult<PravasiVoterResponseDto>>.Ok(result));
         }).RequireAuthorization(ModulePermission.PravashiVoter.ToString());
@@ -393,8 +396,9 @@ public static class AdminEndpoints
                 .Produces<int>(200);
         newvoter.MapGet("/getAll", async (
             [AsParameters] NewVoterQueryParams q,
-            IMediator mediator) =>
+            IMediator mediator, HttpContext httpContext) =>
         {
+             q.UserId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var result = await mediator.Send(new GetAllNewVoterQuery(q));
             return Results.Ok(ApiResponse<PagedResult<NewVoterResponseDto>>.Ok(result));
         }).RequireAuthorization(ModulePermission.NewVoter.ToString());
@@ -542,9 +546,10 @@ public static class AdminEndpoints
 
         #region BoothSamiti
 
-        boothSamiti.MapPost("/create", async (CreateBoothSamitiRequestDto dto, IMediator mediator) =>
+        boothSamiti.MapPost("/create", async (CreateBoothSamitiRequestDto dto, IMediator mediator, HttpContext http) =>
         {
-            var result = await mediator.Send(new CreateBoothSamitiCommand(dto));
+            string UserId = http.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var result = await mediator.Send(new CreateBoothSamitiCommand(dto, UserId));
             return Results.Ok(ApiResponse<int>.Ok(result, "Booth Samiti Created Successfully"));
         })
         .RequireAuthorization(ModulePermission.BoothSamiti.ToString())
@@ -584,9 +589,10 @@ public static class AdminEndpoints
 
         
 
-        influencer.MapPost("/create", async (CreateInfluencerReqDto dto, IMediator mediator) =>
+        influencer.MapPost("/create", async (CreateInfluencerReqDto dto, IMediator mediator, HttpContext http) =>
         {
-            var result = await mediator.Send(new CreateInfluencerCommand(dto));
+            string UserId = http.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var result = await mediator.Send(new CreateInfluencerCommand(dto, UserId));
             return Results.Ok(ApiResponse<int>.Ok(result, "Influencer Created Successfully"));
         })
                 .WithName("CreateInfluencer")
@@ -659,8 +665,9 @@ public static class AdminEndpoints
 
         doublevoter.MapGet("/getAll", async (
             [AsParameters] DoubleVoterQueryParams q, 
-            IMediator mediator) =>
+            IMediator mediator, HttpContext httpContext) =>
         {
+            q.UserId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var result = await mediator.Send(new GetAllDoubleVoterQuery(q));
             return Results.Ok(ApiResponse<PagedResult<DoubleVoterResponseDto>>.Ok(result));
         });
@@ -793,9 +800,10 @@ public static class AdminEndpoints
 
         #region Senior Disabled
 
-        seniordisabled.MapPost("/create", async (CreateSeniorDisabledReqDto dto, IMediator mediator) =>
+        seniordisabled.MapPost("/create", async (CreateSeniorDisabledReqDto dto, IMediator mediator, HttpContext http) =>
         {
-            var result = await mediator.Send(new CreateSeniorDisabledCommand(dto));
+            string UserId = http.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var result = await mediator.Send(new CreateSeniorDisabledCommand(dto, UserId));
             return Results.Ok(ApiResponse<int>.Ok(result, "SeniorDisabled Created Successfully"));
         })
                 .WithName("CreateSeniorDisabled")
@@ -819,8 +827,9 @@ public static class AdminEndpoints
 
         seniordisabled.MapGet("/getAll", async (
             [AsParameters] SeniorDisabledQueryParams q,
-            IMediator mediator) =>
+            IMediator mediator,HttpContext httpContext) =>
         {
+            q.UserId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var result = await mediator.Send(new GetAllSeniorDisabledQuery(q));
             return Results.Ok(ApiResponse<PagedResult<SeniorDisabledResponseDto>>.Ok(result));
         });

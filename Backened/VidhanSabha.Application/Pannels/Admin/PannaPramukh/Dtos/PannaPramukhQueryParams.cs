@@ -11,7 +11,7 @@ namespace VidhanSabha.Application.Pannels.Admin.PannaPramukh.Dtos
     {
         public int? Id { get; set; }
 
-        public string? UserId { get; set; }
+     
 
         public int? BoothId { get; set; }
 

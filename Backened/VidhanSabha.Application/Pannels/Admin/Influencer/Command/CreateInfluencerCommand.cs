@@ -11,10 +11,12 @@ namespace VidhanSabha.Application.Pannels.Admin.Influencer.Command
     public class CreateInfluencerCommand : IRequest<int>
     {
         public CreateInfluencerReqDto Dto { get; set; }
+        public string UserId { get; set; }
 
-        public CreateInfluencerCommand(CreateInfluencerReqDto dto)
+        public CreateInfluencerCommand(CreateInfluencerReqDto dto, string? userId)
         {
             Dto = dto;
+            UserId = userId;
         }
     }
 }
