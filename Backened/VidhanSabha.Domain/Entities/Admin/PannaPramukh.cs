@@ -19,8 +19,8 @@ namespace VidhanSabha.Domain.Entities.Admin
         public string PhoneNumber { get; private set; }
         public string Address { get; private set; }
         public string? ProfilePicturePath { get; private set; }
-
         public bool Status { get; set; } = true;
+        public string? UserId { get; private set; }
 
         // Multiple villages — ek Panna pramukh ke multiple villages
         private readonly List<Tbl_PannaPramukhVillage> _villages = new();
@@ -42,6 +42,7 @@ namespace VidhanSabha.Domain.Entities.Admin
             string voterId,
             string phoneNumber,
             string address,
+            string UserId,
             List<int> villageIds,
             string? profilePicturePath = null)
         {
@@ -62,7 +63,8 @@ namespace VidhanSabha.Domain.Entities.Admin
                 VoterId = voterId.ToString().Trim(),
                 PhoneNumber = phoneNumber.Trim(),
                 Address = address?.Trim() ?? string.Empty,
-                ProfilePicturePath = profilePicturePath
+                ProfilePicturePath = profilePicturePath,
+                UserId = UserId
             };
 
             panna.SetVillages(villageIds);

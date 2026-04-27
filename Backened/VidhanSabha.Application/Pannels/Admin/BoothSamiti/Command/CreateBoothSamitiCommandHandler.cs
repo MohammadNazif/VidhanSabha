@@ -31,7 +31,8 @@ namespace VidhanSabha.Application.Pannels.Admin.BoothSamiti.Command
                 dto.Age,
                 dto.Contact,
                 dto.Occupation,
-                dto.DesignationId
+                dto.DesignationId,
+                request.UserId
             );
 
             return await _repository.AddAsync(entity, cancellationToken);

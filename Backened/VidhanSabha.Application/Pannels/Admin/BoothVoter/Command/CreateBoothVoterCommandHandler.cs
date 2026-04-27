@@ -23,7 +23,7 @@ namespace VidhanSabha.Application.Pannels.Admin.BoothVoter.Command
             var req = request.Dto;
 
             var data = Tbl_BoothVoter.Create(
-                req.BoothId, req.TotalVoter, req.Male, req.Female, req.Other, req.VillageId);
+                req.BoothId, req.TotalVoter, req.Male, req.Female, req.Other, request.UserId, req.VillageId);
             return await _repo.AddAsync(data, cancellationToken);
         }
     }

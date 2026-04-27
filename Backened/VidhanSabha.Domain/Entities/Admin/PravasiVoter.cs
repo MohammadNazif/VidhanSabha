@@ -20,6 +20,7 @@ namespace VidhanSabha.Domain.Entities.Admin
         public string VoterId { get; private set; }
         public string CurrentAddress { get; private set; }
         public bool Status { get; private set; } = true;
+        public string? UserId { get; private set; }
 
         private readonly List<Tbl_PravasiVillage> _villages = new();
         public IReadOnlyCollection<Tbl_PravasiVillage> Villages => _villages.AsReadOnly();
@@ -36,7 +37,7 @@ namespace VidhanSabha.Domain.Entities.Admin
             int BoothId, string Name,
             string Mobile, int CategoryId,
             int CastId, int OccupationId,
-            string VoterId, string CurrentAddress,
+            string VoterId, string CurrentAddress, string UserId,
             List<int> villageIds
             )
         {
@@ -49,7 +50,8 @@ namespace VidhanSabha.Domain.Entities.Admin
                 CastId = CastId,
                 OccupationId = OccupationId,
                 VoterId = VoterId,
-                CurrentAddress = CurrentAddress
+                CurrentAddress = CurrentAddress,
+                UserId = UserId
             };
             pravasi.SetVillages(villageIds);
             return pravasi;

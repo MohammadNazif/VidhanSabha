@@ -17,9 +17,9 @@ namespace VidhanSabha.Domain.Entities.Admin
         public int Age { get; private set; }
         public string Contact { get; private set; }
         public string Occupation { get; private set; }
-
         public int DesignationId { get; private set; }
         public bool Status { get; private set; } = true;
+        public string? UserId { get; private set; }
 
         // 🔗 Common se aayega
         public Tbl_BoothSamitiDesignation Designation { get; private set; } = null!;
@@ -30,7 +30,7 @@ namespace VidhanSabha.Domain.Entities.Admin
 
         public static Tbl_BoothSamiti Create(
             string name, int category, int caste,
-            int age, string contact, string occupation, int designationId)
+            int age, string contact, string occupation, int designationId,string UserId)
         {
             return new Tbl_BoothSamiti
             {
@@ -40,7 +40,8 @@ namespace VidhanSabha.Domain.Entities.Admin
                 Age = age,
                 Contact = contact,
                 Occupation = occupation,
-                DesignationId = designationId
+                DesignationId = designationId,
+                UserId = UserId
             };
         }
 

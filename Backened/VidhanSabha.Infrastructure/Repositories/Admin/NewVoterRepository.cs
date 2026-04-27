@@ -8,8 +8,6 @@ using System.Threading.Tasks;
 using VidhanSabha.Application.Common.Dtos;
 using VidhanSabha.Application.Pannels.Admin.NewVoter.DTOs;
 using VidhanSabha.Application.Pannels.Admin.NewVoter.Interfaces;
-using VidhanSabha.Application.Pannels.Admin.PravasiVoters.DTOs;
-using VidhanSabha.Application.Pannels.Admin.PravasiVoters.Interfaces;
 using VidhanSabha.Domain.Entities.Admin;
 using VidhanSabha.Infrastructure.Extensions;
 using VidhanSabha.Infrastructure.Persistence;
@@ -58,7 +56,7 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
                .AsNoTracking()
                .Where(b =>
                    (!qp.Id.HasValue || b.Id == qp.Id) &&
-                   (!qp.BoothId.HasValue || b.Booth.Id == qp.BoothId)&&
+                   (!qp.BoothId.HasValue || b.Booth.Id == qp.BoothId) && (b.UserId == qp.UserId) &&
                    (!qp.VillageId.HasValue || b.Villages.Any(v => v.VillageId == qp.VillageId) &&
                    (!qp.CastId.HasValue ||  b.Cast.Id == qp.CastId))
                    

@@ -7,7 +7,6 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using VidhanSabha.Application.Common.Dtos;
-using VidhanSabha.Application.Pannels.Admin.PannaPramukh.Dtos;
 using VidhanSabha.Application.Pannels.Admin.PravasiVoters.DTOs;
 using VidhanSabha.Application.Pannels.Admin.PravasiVoters.Interfaces;
 using VidhanSabha.Domain.Entities.Admin;
@@ -59,7 +58,7 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
             var query = _context.Tbl_PravasiVoter
                .AsNoTracking()
                .Where(b =>
-                   (!qp.Id.HasValue || b.Id == qp.Id) &&
+                   (!qp.Id.HasValue || b.Id == qp.Id) && (b.UserId == qp.UserId) &&
                    (!qp.BoothId.HasValue || b.Booth.Id == qp.BoothId) &&
                    (!qp.CastId.HasValue || b.Cast.Id == qp.CastId) &&
                    (!qp.OccupationId.HasValue || b.OccupationId == qp.OccupationId)

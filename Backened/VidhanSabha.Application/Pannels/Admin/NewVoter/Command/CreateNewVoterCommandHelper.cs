@@ -26,7 +26,7 @@ namespace VidhanSabha.Application.Pannels.Admin.NewVoter.Command
 
             var data = Tbl_NewVoter.Create(
                 req.BoothId, req.Name,req.FatherName, req.Mobile, req.CategoryId, req.CastId, req.DOB,req.Age,
-                req.VoterId,  req.VillageId);
+                req.VoterId, request.UserId,  req.VillageId);
 
 
             return await _repo.AddAsync(data, cancellationToken);
