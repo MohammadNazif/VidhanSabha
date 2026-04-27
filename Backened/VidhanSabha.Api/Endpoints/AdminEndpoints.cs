@@ -60,6 +60,9 @@ using VidhanSabha.Application.Pannels.Admin.Sector.Queries;
 using VidhanSabha.Application.Pannels.Admin.SeniorDisabled.Command;
 using VidhanSabha.Application.Pannels.Admin.SeniorDisabled.DTOs;
 using VidhanSabha.Application.Pannels.Admin.SeniorDisabled.Queries;
+using VidhanSabha.Application.Pannels.Admin.SocialMediaPost.Command;
+using VidhanSabha.Application.Pannels.Admin.SocialMediaPost.DTOs;
+using VidhanSabha.Application.Pannels.Admin.SocialMediaPost.Queries;
 using VidhanSabha.Domain.Enums;
 using static System.Net.WebRequestMethods;
 public static class AdminEndpoints
@@ -118,8 +121,11 @@ public static class AdminEndpoints
         var castevoter = app.MapGroup("/api/castevoter")
                         .WithTags("CasteVoter");
 
+        var socialmedia = app.MapGroup("/api/socialmedia")
+                        .WithTags("SocialMedia");
+
         #region Mandal
-        
+
 
         mandal.MapPost("/create", async (
             CreateMandalRequestDto request,
@@ -834,6 +840,49 @@ public static class AdminEndpoints
             return Results.Ok(ApiResponse<PagedResult<SeniorDisabledResponseDto>>.Ok(result));
         });
 
+
+        #endregion
+
+        #region Social Media
+
+        socialmedia.MapPost("/create", async (CreateSocialMediaPostReqDto dto, IMediator mediator) =>
+        {
+            var result = await mediator.Send(new CreateSocialMediaCommand(dto));
+            return Results.Ok(ApiResponse<int>.Ok(result, "Social Media Post Created Successfully"));
+        })
+                .WithName("CreateSocialMediaPost")
+                .Produces<int>(200);
+
+        socialmedia.MapPost("/update", async (UpdateSocialMediaPostReq dto, IMediator mediator) =>
+        {
+            var result = await mediator.Send(new UpdateSocialMediaCommand(dto));
+            return Results.Ok(ApiResponse<int>.Ok(result, "Social Media Post Updated Successfully"));
+        })
+                .WithName("UpdateSocialMediaPost")
+                .Produces<int>(200);
+
+        socialmedia.MapPost("/delete", async (int id, IMediator mediator) =>
+        {
+            var result = await mediator.Send(new DeleteSocialMediaCommand(id));
+            return Results.Ok(ApiResponse<int>.Ok(result, "Social Media Post Deleted Successfully"));
+        })
+                .WithName("DeleteSocialMediaPost")
+                .Produces<int>(200);
+
+        socialmedia.MapGet("/getAll", async (
+            [AsParameters] SocialMediaQueryParams q,
+            IMediator mediator) =>
+        {
+            var result = await mediator.Send(new GetAllSocialMediaPostQuery(q));
+            return Results.Ok(ApiResponse<PagedResult<SocialMediaPostReponse>>.Ok(result));
+        });
+
+        socialmedia.MapGet("/getAllPlatform", async (
+            IMediator mediator) =>
+        {
+            var result = await mediator.Send(new GetPlatformQuery());
+            return Results.Ok(ApiResponse<List<SocialMediaPlatform>>.Ok(result));
+        });
 
         #endregion
     }
