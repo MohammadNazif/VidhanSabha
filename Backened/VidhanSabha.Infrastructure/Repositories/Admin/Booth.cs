@@ -37,16 +37,29 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
             }
         }
 
-        public Task<List<BoothNumberDto>> BoothNumberExistsAsync()
+        public async Task<List<BoothNumberDto>> BoothNumberExistsAsync(string userId)
         {
-          var res = _context.Tbl_Booth
-             
-               .Select(b => new BoothNumberDto
-             {
-                 BoothId = b.Id,
-                 BoothNumber = b.BoothNumber,
-                 BoothName = b.PollingStationName
-             }).ToListAsync();
+            var vidhanSabhaId = await _context.Tbl_StatePrabhari
+                .Where(u => u.userId == userId)
+                .Select(u => u.VidhansabhaId)
+                .FirstOrDefaultAsync();
+
+            var mandalIds = await _context.Tbl_Mandal
+                .Where(m => m.VidhanId == vidhanSabhaId && m.Status)
+                .Select(m => m.Id)
+                .ToListAsync();
+
+            var res = await _context.Tbl_Booth
+                .Where(b => mandalIds.Contains(b.MandalId) && b.Status)
+                .Select(b => new BoothNumberDto
+                {
+                    BoothId = b.Id,
+                    BoothNumber = b.BoothNumber,
+                    BoothName = b.PollingStationName
+                })
+                .ToListAsync();
+
+   
             return res;
         }
 

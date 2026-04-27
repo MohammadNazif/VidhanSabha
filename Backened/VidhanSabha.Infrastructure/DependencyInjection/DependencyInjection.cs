@@ -25,6 +25,7 @@ using VidhanSabha.Application.Pannels.Admin.Booth.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.BoothSamiti.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.BoothVoter.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.CasteVoter.Interfaces;
+using VidhanSabha.Application.Pannels.Admin.Dashboard.Interface;
 using VidhanSabha.Application.Pannels.Admin.DoubleVoter.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.Influencer.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.Mandal.Interfaces;
@@ -108,7 +109,7 @@ namespace VidhanSabha.Infrastructure.DependencyInjection
             services.AddScoped<ISeniorDisabledTypeRepository,SeniorDisabledTypeRepository>();
             services.AddScoped<ISeniorDisabledRepository,SeniorDisabledRepository>();
             services.AddScoped<IMemberModulePermissionRepository, MemberModulePermissionRepository>();
-
+            services.AddScoped<IDashboard, AdminDashboardCount>();
             services.AddScoped<ISocialMediaRepository,SocialMediaPostRepository>();
 
 

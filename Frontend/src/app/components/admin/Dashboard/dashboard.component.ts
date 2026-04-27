@@ -17,6 +17,7 @@ import {
 
 import { Router } from '@angular/router';
 import { AuthServiceService } from '../../../Services/Auth/auth.service';
+import { DashboardService } from '../../../Services/Admin/dashboard.service';
 
 Chart.register(...registerables);
 
@@ -73,7 +74,11 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     { title: 'Influencer Person', value: 0, icon: 'users', gradient: 'linear-gradient(135deg, #ec4899, #db2777)', change: '+0%', changeType: 'up', route: '/influencer-person' }
   ];
 
-  constructor(private router: Router, private authService: AuthServiceService) { }
+  constructor(
+    private router: Router, 
+    private authService: AuthServiceService,
+    private dashboardService: DashboardService
+  ) { }
 
   navigateTo(route?: string) {
     if (route) {
@@ -137,6 +142,46 @@ export class DashboardComponent implements OnInit, AfterViewInit {
         this.router.navigate(['/state-prabhari/dashboard']);
       }
     });
+
+    this.loadCounts();
+  }
+
+  loadCounts() {
+    this.dashboardService.getGlobalCounts().subscribe({
+      next: (res) => {
+        if (res.isSuccess && res.data) {
+          const counts = res.data;
+          this.statCards = this.statCards.map(card => {
+            const key = this.getMapKey(card.title);
+            if (counts[key] !== undefined) {
+              return { ...card, value: counts[key] };
+            }
+            return card;
+          });
+        }
+      },
+      error: (err) => console.error('Error fetching dashboard counts:', err)
+    });
+  }
+
+  private getMapKey(title: string): string {
+    const mapping: { [key: string]: string } = {
+      'Mandal': 'mandal',
+      'Sector': 'sector',
+      'Booth': 'booth',
+      'PannaPramukh': 'pannaPramukh',
+      'Sahmat': 'sahmat',
+      'Asahmat': 'asahmat',
+      'Activities': 'activities',
+      'Pravasi': 'pravasi',
+      'New Voters': 'newVoters',
+      'Double Voter': 'doubleVoter',
+      'Prabhavshali Vyakti': 'prabhavshaliVyakti',
+      'Block': 'block',
+      'BDC': 'bdc',
+      'Influencer Person': 'influencerPerson'
+    };
+    return mapping[title] || title.toLowerCase();
   }
 
   ngAfterViewInit() {

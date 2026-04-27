@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿using System.Security.Claims;
+using MediatR;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Mvc;
 using VidhanSabha.Api.Responses;
@@ -66,9 +67,10 @@ namespace VidhanSabha.Api.Endpoints
              .WithName("GetAllVillages")
              .Produces<List<Application.Common.Village.DTOs.VillageResponseDto>>(200);
 
-            common.MapGet("/boothNumber", async (IMediator mediator) =>
+            common.MapGet("/boothNumber", async (IMediator mediator,HttpContext httpContext) =>
             {
-                var result = await mediator.Send(new GetAllBoothNumbersQuery());
+                string userId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                var result = await mediator.Send(new GetAllBoothNumbersQuery(userId));
                 return Results.Ok(ApiResponse<List<BoothNumberDto>>.Ok(result));
             })
              .WithName("GetBoothNumbers")

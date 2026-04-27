@@ -10,5 +10,10 @@ namespace VidhanSabha.Application.Common.Booth.Queries
 {
     public class GetAllBoothNumbersQuery : IRequest<List<BoothNumberDto>>
     {
+        public string userId { get; set; }
+        public GetAllBoothNumbersQuery(string userId)
+        {
+            this.userId = userId;
+        }
     }
 }

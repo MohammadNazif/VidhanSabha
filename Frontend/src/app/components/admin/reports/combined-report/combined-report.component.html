@@ -1,151 +1,196 @@
-<div class="h-screen p-4 flex flex-col overflow-hidden bg-slate-50">
-  <app-page-header title="Combined Mandal Report" subtitle="Strategic hierarchy of assembly units and personnel">
-    <div class="flex items-center gap-2">
-      <div *ngIf="reportData && reportData.length > 0" class="relative">
-        <select #exportSelect (change)="handleExport(exportSelect.value); exportSelect.value = ''"
-          class="px-4 py-2 pr-9 rounded-xl text-xs font-bold text-blue-700 bg-white border border-blue-200 hover:border-blue-400 transition-all shadow-sm appearance-none cursor-pointer outline-none focus:ring-2 focus:ring-blue-100">
-          <option value="" disabled selected>Export Data</option>
-          <option value="csv">Download CSV</option>
-          <option value="pdf">Download PDF</option>
-          <option value="excel">Download Excel</option>
-        </select>
-        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-blue-500">
-          <i-lucide name="download" class="w-3 h-3"></i-lucide>
-        </div>
-      </div>
-    </div>
-  </app-page-header>
-
-  <!-- Report Content -->
-  <div class="flex-1 overflow-y-auto space-y-4 pr-1 custom-scrollbar">
-    <!-- Loading -->
-    <div *ngIf="loading" class="flex flex-col items-center justify-center py-12">
-      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mb-2"></div>
-      <p class="text-slate-400 text-xs font-medium">Fetching Records...</p>
-    </div>
-
-    <!-- Mandal Card -->
-    <ng-container *ngIf="!loading && reportData.length > 0">
-      <div *ngFor="let mandal of reportData" class="bg-white rounded-xl border-l-4 border-l-blue-500 border-y border-r border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-        <!-- Minimal Colored Mandal Header -->
-        <div class="bg-blue-50/40 border-b border-blue-100/50 px-4 py-2.5 flex items-center justify-between">
-          <div class="flex items-center gap-2">
-            <i-lucide name="layout" class="w-4 h-4 text-blue-500"></i-lucide>
-            <h3 class="text-sm font-bold text-blue-900 uppercase tracking-tight">{{ mandal.name }}</h3>
+<div class="h-screen flex flex-col overflow-hidden bg-[#fafbfc]">
+  <!-- Clean Header -->
+  <div class="w-full bg-[#fafbfc] z-20">
+    <div class="max-w-6xl mx-auto px-6 pt-6 pb-2">
+      <app-page-header title="Combined Hierarchy Report" subtitle="Strategic overview of organizational structure and personnel">
+        <div class="flex items-center gap-2">
+          <div *ngIf="reportData && reportData.length > 0" class="flex items-center gap-2">
+            <button (click)="handleExport('pdf')" class="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl text-[11px] font-bold text-slate-600 hover:bg-slate-50 transition-all shadow-sm group">
+              <i-lucide name="file-text" class="w-3.5 h-3.5 text-red-500 group-hover:scale-110 transition-transform"></i-lucide>
+              PDF Report
+            </button>
+            <button (click)="handleExport('excel')" class="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl text-[11px] font-bold text-slate-600 hover:bg-slate-50 transition-all shadow-sm group">
+              <i-lucide name="file-spreadsheet" class="w-3.5 h-3.5 text-emerald-500 group-hover:scale-110 transition-transform"></i-lucide>
+              Excel Sheet
+            </button>
           </div>
-          <span class="text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded border border-blue-100">
-            {{ mandal.sectors?.length || 0 }} Units
-          </span>
         </div>
+      </app-page-header>
+    </div>
+  </div>
 
-        <!-- Table -->
-        <div class="p-0 overflow-x-auto">
-          <table *ngIf="mandal.sectors && mandal.sectors.length > 0" class="w-full border-collapse min-w-[1000px]">
-            <thead>
-              <tr class="bg-slate-50/30 border-b border-slate-100 text-left">
-                <th class="px-4 py-2.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider w-1/5">Sector Details</th>
-                <th class="px-4 py-2.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider w-1/5">Booth Info</th>
-                <th class="px-4 py-2.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider w-1/3">Sanyojak Profile</th>
-                <th class="px-4 py-2.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Villages & Scope</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let sector of mandal.sectors" class="border-b border-slate-50 last:border-0 hover:bg-blue-50/10 transition-colors">
-                <!-- Sector Info -->
-                <td class="px-4 py-3 align-top">
-                  <div class="space-y-1">
-                    <div class="font-bold text-slate-800 text-xs">{{ sector.sectorName }}</div>
-                    <div *ngIf="sector.inchargeName" class="p-1.5 bg-blue-50/30 rounded border border-blue-100/50">
-                      <div class="text-[11px] font-bold text-blue-700 leading-tight">{{ sector.inchargeName }}</div>
-                      <div class="text-[10px] text-slate-500 font-medium mt-0.5">{{ sector.phoneNumber }}</div>
-                    </div>
-                  </div>
-                </td>
+  <!-- Scrollable Content Area -->
+  <div class="flex-1 overflow-y-auto report-container custom-scrollbar min-h-0">
+    <div class="max-w-6xl mx-auto px-6 space-y-6 pb-20">
+      
+      <!-- Loading Animation -->
+      <div *ngIf="loading" class="flex flex-col items-center justify-center py-20">
+        <div class="relative w-12 h-12">
+          <div class="absolute inset-0 border-4 border-blue-50 rounded-full"></div>
+          <div class="absolute inset-0 border-4 border-blue-500 rounded-full border-t-transparent animate-spin"></div>
+        </div>
+        <p class="text-slate-400 font-bold text-[10px] uppercase tracking-widest mt-4">Generating Report...</p>
+      </div>
 
-                <!-- Booth Info -->
-                <td class="px-4 py-3 align-top">
-                  <div *ngIf="sector.booth" class="space-y-1.5">
-                    <span class="inline-flex items-center gap-1.5 bg-indigo-50 text-indigo-700 text-[10px] font-bold px-2 py-0.5 rounded border border-indigo-100 shadow-sm">
-                      <span class="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
-                      B-{{ sector.booth.boothNumber }}
-                    </span>
-                    <div class="text-[11px] font-semibold text-slate-600 leading-snug uppercase tracking-tight">
-                      {{ sector.booth.pollingStationName }}
-                    </div>
-                  </div>
-                  <div *ngIf="!sector.booth" class="text-[10px] text-slate-300 italic">Unassigned</div>
-                </td>
+      <!-- Mandal Data -->
+      <ng-container *ngIf="!loading && reportData.length > 0">
+        <section *ngFor="let mandal of reportData" class="mandal-section space-y-3">
+          
+          <!-- Glassmorphism Mandal Header -->
+          <div class="sticky top-0 z-10 mandal-header flex items-center justify-between px-6 py-3 rounded-2xl border border-slate-200/60 shadow-sm">
+            <div class="flex items-center gap-4">
+              <div class="w-9 h-9 bg-blue-50 rounded-xl flex items-center justify-center border border-blue-100 shadow-sm">
+                <i-lucide name="layout" class="w-4 h-4 text-blue-500"></i-lucide>
+              </div>
+              <div>
+                <h2 class="text-sm font-black text-slate-800 uppercase tracking-tight">{{ mandal.name }}</h2>
+                <div class="flex items-center gap-2 mt-0.5">
+                  <span class="w-1 h-1 rounded-full bg-blue-400"></span>
+                  <p class="text-[9px] text-slate-400 font-bold uppercase tracking-widest leading-none">Primary Mandal Structure</p>
+                </div>
+              </div>
+            </div>
+            <div class="px-3 py-1 bg-blue-50 text-blue-600 text-[10px] font-black rounded-lg border border-blue-100 uppercase tracking-tight">
+              {{ mandal.sectors?.length || 0 }} Units
+            </div>
+          </div>
 
-                <!-- Sanyojak Profile -->
-                <td class="px-4 py-3 align-top">
-                  <div *ngIf="sector.booth?.sanyojak" class="flex items-start gap-3">
-                    <div class="w-10 h-10 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center overflow-hidden shadow-sm">
-                      <img *ngIf="sector.booth.sanyojak.profilePath" [src]="sector.booth.sanyojak.profilePath" class="w-full h-full object-cover">
-                      <i-lucide *ngIf="!sector.booth.sanyojak.profilePath" name="user" class="w-5 h-5 text-slate-300"></i-lucide>
-                    </div>
-                    <div class="flex-1 min-w-0">
-                      <div class="text-[11px] font-bold text-slate-900 leading-none">{{ sector.booth.sanyojak.name }}</div>
-                      <div class="text-[10px] text-slate-400 font-bold mt-1 mb-2">{{ sector.booth.sanyojak.phone }}</div>
-                      
-                      <!-- Minimal Grid Details -->
-                      <div class="grid grid-cols-2 gap-2 mt-1">
-                        <div class="p-1.5 bg-slate-50/50 rounded border border-slate-100">
-                          <span class="text-[8px] text-slate-400 font-bold uppercase block mb-0.5">Father</span>
-                          <span class="text-[9px] font-bold text-slate-700 truncate block">{{ sector.booth.sanyojak.fatherName || '-' }}</span>
-                        </div>
-                        <div class="p-1.5 bg-emerald-50/50 rounded border border-emerald-100">
-                          <span class="text-[8px] text-emerald-500 font-bold uppercase block mb-0.5">Caste</span>
-                          <span class="text-[9px] font-bold text-emerald-700 block">{{ sector.booth.sanyojak.castName || '-' }}</span>
-                        </div>
-                        <div class="p-1.5 bg-indigo-50/50 rounded border border-indigo-100">
-                          <span class="text-[8px] text-indigo-500 font-bold uppercase block mb-0.5">Education</span>
-                          <span class="text-[9px] font-bold text-indigo-700 block truncate">{{ sector.booth.sanyojak.education || '-' }}</span>
-                        </div>
-                        <div class="p-1.5 bg-amber-50/50 rounded border border-amber-100">
-                          <span class="text-[8px] text-amber-500 font-bold uppercase block mb-0.5">Age</span>
-                          <span class="text-[9px] font-bold text-amber-700 block">{{ sector.booth.sanyojak.age || '-' }} Yrs</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </td>
-
-                <!-- Villages -->
-                <td class="px-4 py-3 align-top">
+          <!-- Cards List -->
+          <div class="grid grid-cols-1 gap-3 px-1">
+            <div *ngFor="let sector of mandal.sectors" class="sector-card rounded-2xl p-4">
+              <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                
+                <!-- Sector Column -->
+                <div class="lg:col-span-3">
                   <div class="space-y-3">
                     <div>
-                      <div class="text-[9px] font-bold text-slate-400 uppercase mb-1 tracking-wider">Villages</div>
-                      <div class="text-[10px] text-slate-700 font-bold bg-slate-50/50 p-1.5 rounded border border-slate-100 leading-relaxed">
-                        {{ getVillageNames(sector.booth?.villages) }}
+                      <span class="data-label">Administrative Unit</span>
+                      <div class="text-[12px] font-black text-slate-800 border-l-4 border-blue-400 pl-3 leading-none uppercase tracking-tight">
+                        {{ sector.sectorName }}
                       </div>
                     </div>
-                    <div *ngIf="sector.booth?.sanyojak?.address" class="border-t border-slate-100 pt-2">
-                      <div class="text-[9px] font-bold text-slate-400 uppercase mb-1 tracking-wider">Address</div>
-                      <p class="text-[10px] text-slate-500 italic leading-snug">{{ sector.booth.sanyojak.address }}</p>
+                    <div *ngIf="sector.inchargeName" class="p-3 bg-slate-50/50 rounded-xl border border-slate-100/80 group/incharge">
+                      <div class="flex items-center gap-1.5 mb-2">
+                        <i-lucide name="shield" class="w-3.5 h-3.5 text-blue-400"></i-lucide>
+                        <span class="text-[9px] font-black text-slate-400 uppercase tracking-tighter">Incharge</span>
+                      </div>
+                      <div class="text-[11px] font-bold text-slate-700">{{ sector.inchargeName }}</div>
+                      <div class="flex items-center gap-2 mt-2 text-[10px] text-slate-400 font-bold group-hover/incharge:text-blue-500 transition-colors">
+                        <i-lucide name="phone" class="w-3 h-3"></i-lucide>
+                        {{ sector.phoneNumber || 'N/A' }}
+                      </div>
                     </div>
                   </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </ng-container>
+                </div>
 
-    <!-- Refined Pagination -->
-    <div *ngIf="!loading && totalPages > 1" class="flex items-center justify-between pt-4 border-t border-slate-200">
-      <div class="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em]">
-        Set <span class="text-blue-600">{{ pageNumber }}</span> of {{ totalPages }}
-      </div>
-      <div class="flex gap-2">
-        <button (click)="handlePageChange({currentPage: pageNumber - 1, pageSize: pageSize})" [disabled]="pageNumber === 1" 
-          class="px-4 py-1.5 text-[10px] font-bold rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-30 transition-all">
-          Previous
-        </button>
-        <button (click)="handlePageChange({currentPage: pageNumber + 1, pageSize: pageSize})" [disabled]="pageNumber === totalPages" 
-          class="px-4 py-1.5 text-[10px] font-bold rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:bg-slate-200 transition-all shadow-sm">
-          Next Phase
-        </button>
+                <!-- Booth Intelligence -->
+                <div class="lg:col-span-3">
+                  <span class="data-label">Booth Context</span>
+                  <div *ngIf="sector.booth" class="space-y-3">
+                    <div class="inline-flex items-center gap-2 bg-indigo-50 text-indigo-600 text-[10px] font-black px-3 py-1 rounded-lg border border-indigo-100/50">
+                      <i-lucide name="map" class="w-3.5 h-3.5"></i-lucide>
+                      BOOTH {{ sector.booth.boothNumber }}
+                    </div>
+                    <div class="p-3 bg-indigo-50/20 rounded-xl border border-indigo-100/30 border-dashed">
+                      <p class="text-[11px] font-bold text-slate-600 leading-snug uppercase tracking-tight">
+                        {{ sector.booth.pollingStationName }}
+                      </p>
+                    </div>
+                  </div>
+                  <div *ngIf="!sector.booth" class="h-full flex items-center justify-center p-4 bg-slate-50/50 rounded-xl border border-dashed border-slate-200">
+                    <span class="text-[10px] font-bold text-slate-300 uppercase tracking-widest">Unassigned</span>
+                  </div>
+                </div>
+
+                <!-- Personnel Profile -->
+                <div class="lg:col-span-4">
+                  <span class="data-label">Personnel Profile</span>
+                  <div *ngIf="sector.booth?.sanyojak" class="flex items-start gap-4">
+                    <div class="profile-avatar-container flex-shrink-0">
+                      <div class="w-12 h-12 rounded-xl bg-white border-2 border-slate-50 flex items-center justify-center overflow-hidden">
+                        <img *ngIf="sector.booth.sanyojak.profilePath" [src]="sector.booth.sanyojak.profilePath" class="w-full h-full object-cover">
+                        <i-lucide *ngIf="!sector.booth.sanyojak.profilePath" name="user" class="w-6 h-6 text-slate-100"></i-lucide>
+                      </div>
+                    </div>
+                    <div class="flex-1 min-w-0 space-y-2.5">
+                      <div class="flex items-center justify-between">
+                        <div class="text-[13px] font-black text-slate-800 leading-none">{{ sector.booth.sanyojak.name }}</div>
+                        <span class="text-[10px] font-black text-blue-400 bg-blue-50/50 px-2 py-0.5 rounded-md border border-blue-100/30">{{ sector.booth.sanyojak.phone }}</span>
+                      </div>
+                      
+                      <div class="grid grid-cols-2 gap-2">
+                        <div class="grid-detail-item bg-slate-50 border-slate-100">
+                          <span class="text-[8px] text-slate-400 font-black uppercase block mb-0.5">Father</span>
+                          <span class="text-[10px] font-bold text-slate-700 truncate block">{{ sector.booth.sanyojak.fatherName || '-' }}</span>
+                        </div>
+                        <div class="grid-detail-item bg-emerald-50/40 border-emerald-100/40">
+                          <span class="text-[8px] text-emerald-500 font-black uppercase block mb-0.5">Caste</span>
+                          <span class="text-[10px] font-bold text-emerald-700 truncate block">{{ sector.booth.sanyojak.castName || '-' }}</span>
+                        </div>
+                        <div class="grid-detail-item bg-indigo-50/40 border-indigo-100/40">
+                          <span class="text-[8px] text-indigo-500 font-black uppercase block mb-0.5">Education</span>
+                          <span class="text-[10px] font-bold text-indigo-700 truncate block">{{ sector.booth.sanyojak.education || '-' }}</span>
+                        </div>
+                        <div class="grid-detail-item bg-amber-50/40 border-amber-100/40">
+                          <span class="text-[8px] text-amber-500 font-black uppercase block mb-0.5">Age</span>
+                          <span class="text-[10px] font-bold text-amber-700 block">{{ sector.booth.sanyojak.age || '-' }} Yrs</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div *ngIf="!sector.booth?.sanyojak" class="py-4 text-center text-[10px] font-bold text-slate-200 uppercase tracking-widest">No profile linked</div>
+                </div>
+
+                <!-- Geographic Scope -->
+                <div class="lg:col-span-2">
+                  <span class="data-label">Geographic Area</span>
+                  <div class="space-y-4">
+                    <div class="flex items-start gap-2">
+                      <div class="p-1 bg-red-50 rounded-md border border-red-100/50">
+                        <i-lucide name="map-pin" class="w-3 h-3 text-red-400"></i-lucide>
+                      </div>
+                      <div class="min-w-0">
+                        <span class="text-[8px] font-black text-slate-400 uppercase tracking-widest block mb-1">Villages</span>
+                        <p class="text-[10px] text-slate-600 font-bold leading-relaxed line-clamp-2">
+                          {{ getVillageNames(sector.booth?.villages) }}
+                        </p>
+                      </div>
+                    </div>
+                    <div *ngIf="sector.booth?.sanyojak?.address" class="pt-3 border-t border-slate-50 flex items-start gap-2">
+                      <div class="p-1 bg-amber-50 rounded-md border border-amber-100/50">
+                        <i-lucide name="home" class="w-3 h-3 text-amber-400"></i-lucide>
+                      </div>
+                      <div class="min-w-0">
+                        <span class="text-[8px] font-black text-slate-400 uppercase tracking-widest block mb-1">Address</span>
+                        <p class="text-[10px] text-slate-400 font-medium line-clamp-2">
+                          {{ sector.booth.sanyojak.address }}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        </section>
+      </ng-container>
+
+      <!-- Refined Navigation -->
+      <div *ngIf="!loading && totalPages > 1" class="flex items-center justify-between bg-white/80 backdrop-blur-md border border-slate-200 px-6 py-4 rounded-3xl shadow-sm mt-6">
+        <div class="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em]">
+          Operational Set <span class="text-blue-500 font-black">{{ pageNumber }}</span> / {{ totalPages }}
+        </div>
+        <div class="flex gap-2">
+          <button (click)="handlePageChange({currentPage: pageNumber - 1, pageSize: pageSize})" [disabled]="pageNumber === 1" 
+            class="px-5 py-2 text-[10px] font-black uppercase rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-50 disabled:opacity-30 transition-all">
+            Previous
+          </button>
+          <button (click)="handlePageChange({currentPage: pageNumber + 1, pageSize: pageSize})" [disabled]="pageNumber === totalPages" 
+            class="px-5 py-2 text-[10px] font-black uppercase rounded-xl bg-slate-900 text-white hover:bg-slate-800 shadow-md transition-all active:scale-95">
+            Next Phase
+          </button>
+        </div>
       </div>
     </div>
   </div>

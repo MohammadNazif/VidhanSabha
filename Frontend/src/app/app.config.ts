@@ -37,7 +37,11 @@ import {
   Check,
   Home,
   Download,
-  FileText
+  FileText,
+  FileSpreadsheet,
+  SearchX,
+  Shield,
+  AlertCircle
 } from 'lucide-angular';
 
 import { routes } from './app.routes';
@@ -85,7 +89,11 @@ export const appConfig: ApplicationConfig = {
         Check,
         Home,
         Download,
-        FileText
+        FileText,
+        FileSpreadsheet,
+        SearchX,
+        Shield,
+        AlertCircle
       })
     )
   ]
