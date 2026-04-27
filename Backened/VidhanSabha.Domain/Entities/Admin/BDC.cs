@@ -19,6 +19,7 @@ namespace VidhanSabha.Domain.Entities.Admin
         public string Mobile { get; private set; }
         public int PartyId { get; private set; }
         public string Education { get; private set; }
+        public string? Profile { get; private set; }
         public bool Status { get; private set; } = true;
 
         private readonly List<Tbl_BDCVillage> _villages = new();
@@ -32,7 +33,7 @@ namespace VidhanSabha.Domain.Entities.Admin
         public static Tbl_BDC Create(
             string Block, string Name,string WardNumber,
              int CategoryId,int CastId,int Age, string Mobile,
-            int PartyId, string Education,
+            int PartyId, string Education,string profile,
             List<int> villageIds
             )
         {
@@ -47,6 +48,7 @@ namespace VidhanSabha.Domain.Entities.Admin
                 Mobile = Mobile,
                 PartyId=PartyId,
                 Education = Education,
+                Profile=profile
             };
             bdc.SetVillages(villageIds);
             return bdc;
@@ -71,7 +73,7 @@ namespace VidhanSabha.Domain.Entities.Admin
         public void Update(
             string Block, string Name, string WardNumber,
              int CategoryId, int CastId, int Age, string Mobile,
-            int PartyId, string Education,
+            int PartyId, string Education,string profile,
             List<int> villageIds
            )
         {
@@ -84,6 +86,7 @@ namespace VidhanSabha.Domain.Entities.Admin
             this.Mobile = Mobile;
             this.PartyId = PartyId;
             this.Education = Education;
+            this.Profile = profile;
             SetVillages(villageIds);
         }
 

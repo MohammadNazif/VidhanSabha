@@ -17,7 +17,7 @@ namespace VidhanSabha.Application.Pannels.Admin.Booth.Command
         {
             Dto = dto;
             UserId = userId;
-        }// null bhejenge jab IsBoothSanyojak = false
+        }
     }
 
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -19,8 +20,7 @@ namespace VidhanSabha.Application.Pannels.Admin.PannaPramukh.Dtos
         public string VoterId { get; set; } = string.Empty;
         public string PhoneNumber { get; set; } = string.Empty;
         public string Address { get; set; } = string.Empty;
-
-        //public IFormFile? ProfilePicture { get; set; }
+        public IFormFile? ProfilePicture { get; init; }
 
         
     }
