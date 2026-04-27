@@ -285,13 +285,11 @@ public static class AdminEndpoints
             [AsParameters] BoothQueryParams q,
            IMediator mediator,HttpContext httpContext) =>
         {
-<<<<<<< HEAD
-            q.UserId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var result = await mediator.Send(new GetAllBoothsQuery(q));
-=======
+
+
              string userId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var result = await mediator.Send(new GetAllBoothsQuery(q,userId));
->>>>>>> b18d453 (stateprabhari pannel fixes)
+
             return Results.Ok(ApiResponse<PagedResult<BoothResponseDto>>.Ok(result));
         }).RequireAuthorization();
 

@@ -108,12 +108,12 @@ namespace VidhanSabha.Infrastructure.DependencyInjection
             services.AddScoped<ISeniorDisabledTypeRepository,SeniorDisabledTypeRepository>();
             services.AddScoped<ISeniorDisabledRepository,SeniorDisabledRepository>();
             services.AddScoped<IMemberModulePermissionRepository, MemberModulePermissionRepository>();
-<<<<<<< HEAD
+
             services.AddScoped<ISocialMediaRepository,SocialMediaPostRepository>();
 
-=======
+
             services.AddScoped<IImageService, ImageService>();
->>>>>>> b18d453 (stateprabhari pannel fixes)
+
             return services;
         }
     }
