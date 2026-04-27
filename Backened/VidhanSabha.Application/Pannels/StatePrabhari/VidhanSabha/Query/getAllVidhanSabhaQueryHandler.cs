@@ -17,9 +17,12 @@ namespace VidhanSabha.Application.Pannels.StatePrabhari.VidhanSabha.Query
         {
             _repo = repo;
         }
-        public async Task<IReadOnlyList<VidhanSabhaSatewiseResponseDto>> Handle(getAllVidhanSabhaQuery request, CancellationToken cancellationToken)
+            public async Task<IReadOnlyList<VidhanSabhaSatewiseResponseDto>> Handle(getAllVidhanSabhaQuery request, CancellationToken cancellationToken)
         {
-             return  await _repo.GetByIdAsync(request.StateId,request.DistrictId);
+           
+            return await _repo.GetByIdAsync(request.q);
         }
-    } 
+    }
 }
+
+

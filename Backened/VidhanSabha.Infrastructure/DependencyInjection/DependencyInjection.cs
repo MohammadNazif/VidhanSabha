@@ -1,8 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System;
+using System.Reflection;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Reflection;
 using VidhanSabha.Application.Common.AdminDesignation.Interfaces;
 using VidhanSabha.Application.Common.BoothSamitiDesignation.Interfaces;
 using VidhanSabha.Application.Common.Cast.Interfaces;
@@ -11,6 +11,7 @@ using VidhanSabha.Application.Common.CredentialMananger;
 using VidhanSabha.Application.Common.CredentialMananger.Interface;
 using VidhanSabha.Application.Common.DesignatinType.Interface;
 using VidhanSabha.Application.Common.District.Interfaces;
+using VidhanSabha.Application.Common.ImageService.Interface;
 using VidhanSabha.Application.Common.NewFolder.Interface;
 using VidhanSabha.Application.Common.Occupation.Interface;
 using VidhanSabha.Application.Common.Party.Interfaces;
@@ -107,8 +108,12 @@ namespace VidhanSabha.Infrastructure.DependencyInjection
             services.AddScoped<ISeniorDisabledTypeRepository,SeniorDisabledTypeRepository>();
             services.AddScoped<ISeniorDisabledRepository,SeniorDisabledRepository>();
             services.AddScoped<IMemberModulePermissionRepository, MemberModulePermissionRepository>();
+<<<<<<< HEAD
             services.AddScoped<ISocialMediaRepository,SocialMediaPostRepository>();
 
+=======
+            services.AddScoped<IImageService, ImageService>();
+>>>>>>> b18d453 (stateprabhari pannel fixes)
             return services;
         }
     }

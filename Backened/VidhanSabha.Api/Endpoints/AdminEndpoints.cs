@@ -139,6 +139,7 @@ public static class AdminEndpoints
                 ApiResponse<MandalResponseDto>.Ok(result));
         })
         .WithName("CreateMandal")
+        .RequireAuthorization()
         .Produces<ApiResponse<MandalResponseDto>>(201)
         .Produces(400);
 
@@ -153,6 +154,7 @@ public static class AdminEndpoints
             return Results.Ok(ApiResponse<MandalResponseDto>.Ok(result, "Mandal Updated Succesfully"));
         })
        .WithName("UpdateMandal")
+       .RequireAuthorization()
        .Produces<ApiResponse<MandalResponseDto>>(200);
 
         mandal.MapPost("/delete", async (int id, IMediator mediator) =>
@@ -188,23 +190,24 @@ public static class AdminEndpoints
         #endregion
 
         #region Sector
-        sector.MapPost("/create", async (CreateSectorRequestDto dto, IMediator mediator, HttpContext http) =>
+        sector.MapPost("/create", async ([FromForm] CreateSectorRequestDto dto, IMediator mediator, HttpContext http) =>
         {
             var userId = 1;
             var userName = "Admin";
 
             var result = await mediator.Send(new CreateSectorCommand(dto, userId, userName));
             return Results.Ok(ApiResponse<SectorResponseDto>.Ok(result, "Sector Created Successfully"));
-        })
+        }).DisableAntiforgery()
           .WithName("CreateSector")
           .Produces<SectorResponseDto>(200);
 
-        sector.MapPost("/update", async (UpdateSectorRequestDto dto, IMediator mediator) =>
+        sector.MapPost("/update", async ([FromForm] UpdateSectorRequestDto dto, IMediator mediator) =>
         {
             var result = await mediator.Send(new UpdateSectorCommand(dto));
             return Results.Ok(ApiResponse<SectorResponseDto>.Ok(result, "Sector Updated Successfully"));
         })
         .WithName("UpdateSector")
+        .DisableAntiforgery()
         .Produces<SectorResponseDto>(200);
 
         sector.MapPost("/delete", async (int id, IMediator mediator) =>
@@ -282,10 +285,15 @@ public static class AdminEndpoints
             [AsParameters] BoothQueryParams q,
            IMediator mediator,HttpContext httpContext) =>
         {
+<<<<<<< HEAD
             q.UserId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var result = await mediator.Send(new GetAllBoothsQuery(q));
+=======
+             string userId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var result = await mediator.Send(new GetAllBoothsQuery(q,userId));
+>>>>>>> b18d453 (stateprabhari pannel fixes)
             return Results.Ok(ApiResponse<PagedResult<BoothResponseDto>>.Ok(result));
-        });
+        }).RequireAuthorization();
 
 
         #endregion

@@ -1,5 +1,7 @@
 ﻿using MediatR;
 using VidhanSabha.Application.Common.CredentialMananger;
+using VidhanSabha.Application.Common.ImageService;
+using VidhanSabha.Application.Common.ImageService.Interface;
 using VidhanSabha.Application.Pannels.Admin.Sector.DTOs;
 using VidhanSabha.Application.Pannels.Admin.Sector.Interface;
 using VidhanSabha.Domain.Entities.Admin;
@@ -8,19 +10,27 @@ namespace VidhanSabha.Application.Pannels.Admin.Sector.Commands
 {
     public class CreateSectorCommandHandler : IRequestHandler<CreateSectorCommand, SectorResponseDto>
     {
+        private readonly IImageService _imageService;
         private readonly ISectorRepository _sectorRepository;
         private readonly CredentialManagerFunc _credentialManager;
 
         public CreateSectorCommandHandler(
             ISectorRepository sectorRepository,
-            CredentialManagerFunc credentialManager)
+            CredentialManagerFunc credentialManager,
+            IImageService imageService)
         {
+            _imageService = imageService;
             _sectorRepository = sectorRepository;
             _credentialManager = credentialManager;
         }
 
         public async Task<SectorResponseDto> Handle(CreateSectorCommand request, CancellationToken cancellationToken)
         {
+            var imagePath = await request.Dto.ResolveImageAsync(
+            _imageService,
+            subFolder: "profiles/sector",
+            imageSelector: dto => dto.ProfileImage
+        );
             var dto = request.Dto;
 
             Tbl_Sector sector;
@@ -71,7 +81,7 @@ namespace VidhanSabha.Application.Pannels.Admin.Sector.Commands
                     dto.EducationLevel,
                     dto.PhoneNumber,
                     dto.Address,
-                    dto.ProfileImage
+                    imagePath
                 );
             }
 

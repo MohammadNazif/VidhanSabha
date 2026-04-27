@@ -77,14 +77,19 @@ export class BoothComponent implements OnInit {
             // Simplify fields for State Prabhari
             const districtField = this.addBoothConfig.fields.find(f => f.id === 'districtId');
             if (districtField) {
-              delete districtField.dependsOn;
+              delete (districtField as any).dependsOn;
               districtField.apiUrl = () => `district/getAll?stateId=${this.defaultStateId}`;
             }
+            this.loadBooths();
+          } else {
+            this.loadBooths();
           }
-        }
+        },
+        error: () => this.loadBooths()
       });
+    } else {
+      this.loadBooths();
     }
-    this.loadBooths();
   }
 
   loadBooths() {
@@ -130,7 +135,7 @@ export class BoothComponent implements OnInit {
         label: 'Mandal',
         type: 'select',
         placeholder: '--Select Mandal--',
-        apiUrl: `mandal/getAll`,
+        apiUrl: `mandal/getAll?PageNumber=1&PageSize=500000&IsDescending=false`,
         apiMapper: (data: any) => {
           const list = Array.isArray(data?.data?.items) ? data.data.items : (Array.isArray(data?.items) ? data.items : (Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : [])));
           return list.map((item: any) => ({
@@ -478,7 +483,8 @@ export class BoothComponent implements OnInit {
         PhoneNumber: raw.phoneNumber || "",
         Address: raw.address || ""
       } : null,
-      userId: this.authService.getUserId()
+      userId: this.authService.getUserId(),
+      stateId: this.defaultStateId ? Number(this.defaultStateId) : null
     };
 
     // Transform anshikData or villageId to Villages array

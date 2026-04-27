@@ -1,6 +1,8 @@
-﻿using MediatR;
+﻿using System.Security.Claims;
+using MediatR;
 using VidhanSabha.Api.Responses;
 using VidhanSabha.Application.Common.District.Queries;
+using VidhanSabha.Application.Common.Dtos;
 using VidhanSabha.Application.Pannels.StatePrabhari.VidhanSabha.Command;
 using VidhanSabha.Application.Pannels.StatePrabhari.VidhanSabha.Dtos;
 using VidhanSabha.Application.Pannels.StatePrabhari.VidhanSabha.Query;
@@ -82,11 +84,13 @@ namespace VidhanSabha.Api.Endpoints
                 return Results.Ok(ApiResponse<int>.Ok(data, "State Prabhari inserted SuccessFully"));
              });
 
-            stateprabhaari.MapGet("/vidhansabha/getAll", async (IMediator mediator,int? stateId,int? districtId) =>
+            stateprabhaari.MapGet("/vidhansabha/getAll", async (IMediator mediator,HttpContext httpContext,[AsParameters] vidhansabhaparams q) =>
             {
-                var data = await mediator.Send(new getAllVidhanSabhaQuery(stateId,districtId));
+                q.UserId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                var data = await mediator.Send(new getAllVidhanSabhaQuery(q));
                 return Results.Ok(ApiResponse<IReadOnlyList<VidhanSabhaSatewiseResponseDto>>.Ok(data, "VidhanSabha Fetched Successfully"));
             }).WithName("GetAllstatewiseVidhansabha")
+            .RequireAuthorization()
             .Produces<ApiResponse<IReadOnlyList<VidhanSabhaSatewiseResponseDto>>>(200);
 
             stateprabhaari.MapGet("/getAll", async (IMediator mediator) =>

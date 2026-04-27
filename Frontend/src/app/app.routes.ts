@@ -25,10 +25,14 @@ import { BdcComponent } from './components/admin/bdc/bdc.component';
 import { SeniorDisabledComponent } from './components/admin/senior-disabled/senior-disabled.component';
 import { AllowAccessComponent } from './components/admin/access/allow-access.component';
 import { AllowAccessListComponent } from './components/admin/access/allow-access-list.component';
+import { CombinedReportComponent } from './components/admin/reports/combined-report/combined-report.component';
+import { MandalReportComponent } from './components/admin/reports/mandal-report/mandal-report.component';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: '', component: DashboardComponent },
+  { path: 'combined-report', component: CombinedReportComponent },
+  { path: 'mandal-report', component: MandalReportComponent },
   { path: 'members', component: MembersComponent },
   { path: 'mandal', component: MandalComponent },
   { path: 'sector', component: SectorComponent },

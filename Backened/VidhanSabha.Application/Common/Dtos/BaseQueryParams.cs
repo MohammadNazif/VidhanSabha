@@ -21,6 +21,10 @@ namespace VidhanSabha.Application.Common.Dtos
         public string? SortBy { get; set; }
         public string? UserId { get; set; }
 
+<<<<<<< HEAD
+=======
+        public string? UserId { get; set; }
+>>>>>>> b18d453 (stateprabhari pannel fixes)
         public string? Role { get; set; }
         public bool IsDescending { get; set; } = false;
     }

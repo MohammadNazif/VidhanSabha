@@ -1,0 +1,22 @@
+/* Report Component Styles */
+:host {
+  display: block;
+  background-color: #f8fafc;
+  height: 100vh;
+}
+
+::ng-deep .data-table thead th {
+  background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%) !important;
+  color: #1e293b !important;
+  font-weight: 700 !important;
+  border-bottom: 2px solid #3b82f6 !important;
+}
+
+::ng-deep .generic-table-wrapper {
+  border: none !important;
+  box-shadow: none !important;
+}
+
+::ng-deep .data-table tbody tr:hover td {
+  background-color: #f0f7ff !important;
+}

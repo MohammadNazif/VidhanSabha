@@ -15,7 +15,7 @@ namespace VidhanSabha.Application.Pannels.Admin.Booth.Interfaces
         Task<Tbl_Booth?> GetByIdAsync(int id, CancellationToken ct = default);
         Task<Tbl_BoothSanyojak?> GetByBoothIdAsync(int boothId, CancellationToken ct);
         Task<List<BoothInchargeResponse>> GetInchargeByBoothIdAsync(int? boothId, CancellationToken ct);
-        Task<PagedResult<BoothResponseDto>> GetAllAsync(BoothQueryParams qp, CancellationToken ct = default);
+        Task<PagedResult<BoothResponseDto>> GetAllAsync(BoothQueryParams qp,int? vidhanId, CancellationToken ct = default);
         Task<List<BoothNumberDto>> BoothNumberExistsAsync();
         Task<int> AddAsync(Tbl_Booth booth, CancellationToken ct = default);
         Task UpdateAsync(Tbl_Booth booth, CancellationToken ct);
