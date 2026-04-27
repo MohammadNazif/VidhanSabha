@@ -88,7 +88,8 @@ namespace VidhanSabha.Domain.Entities.Admin
                         sanyojak.CastId,
                         sanyojak.EducationLevel,
                         sanyojak.PhoneNumber,
-                        sanyojak.Address
+                        sanyojak.Address,
+                        sanyojak.ProfileImagePath
                     );
                 }
             }
@@ -167,7 +168,7 @@ namespace VidhanSabha.Domain.Entities.Admin
         public static Tbl_BoothSanyojak Create(string userId,
             string inchargeName, int age, string fatherName,
             int categoryId, int castId, string? educationLevel,
-            string phoneNumber, string? address)
+            string phoneNumber, string? address,string? profileimagepath)
             => new()
             {
                 UserId = userId,
@@ -179,7 +180,7 @@ namespace VidhanSabha.Domain.Entities.Admin
                 EducationLevel = educationLevel,
                 PhoneNumber = phoneNumber,
                 Address = address,
-                //ProfileImagePath = profileImagePath
+                ProfileImagePath = profileimagepath
             };
 
         public void SetImage(string path) => ProfileImagePath = path;
@@ -192,7 +193,8 @@ namespace VidhanSabha.Domain.Entities.Admin
         int castId,
         string? educationLevel,
          string phoneNumber,
-        string? address)
+        string? address,
+            string? profileimagepath)
         {
             // validation (important)
             if (string.IsNullOrWhiteSpace(inchargeName))
@@ -209,6 +211,7 @@ namespace VidhanSabha.Domain.Entities.Admin
             EducationLevel = educationLevel;
             PhoneNumber = phoneNumber;
             Address = address;
+            ProfileImagePath = profileimagepath;
         }
 
         public void Delete()

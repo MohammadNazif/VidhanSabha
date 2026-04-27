@@ -60,6 +60,7 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
                .AsNoTracking()
                .Where(b =>
                    (!qp.Id.HasValue || b.Id == qp.Id) && (b.UserId == qp.UserId) &&
+                   (!qp.TypeId.HasValue || b.TypeId == qp.TypeId) && (b.UserId == qp.UserId) &&
                    (!qp.BoothId.HasValue || b.Booth.Id == qp.BoothId) &&
                    (!qp.VillageId.HasValue || b.Villages.Any(v => v.VillageId == qp.VillageId) &&
                    (!qp.CastId.HasValue || b.Cast.Id == qp.CastId))

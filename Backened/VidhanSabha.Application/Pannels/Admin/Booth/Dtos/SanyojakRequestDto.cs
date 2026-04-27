@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -16,7 +17,7 @@ namespace VidhanSabha.Application.Pannels.Admin.Booth.Dtos
         public string? EducationLevel { get; set; }
         public string PhoneNumber { get; set; } = string.Empty;
         public string? Address { get; set; }
-        //public IFormFile? ProfileImage { get; set; }
+        public IFormFile? ProfileImagePath { get; init; }
     }
 
     public class SanyojakResponseDto

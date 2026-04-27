@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -16,6 +17,8 @@ namespace VidhanSabha.Application.Pannels.Admin.Block.DTOs
         public int CategoryId { get; set; }
         public int CastId { get; set; }
         public int OccupationId { get; set; }
+        public IFormFile? Profile { get; init; }
+
     }
     public class BlockResponseDto
     {
@@ -32,6 +35,7 @@ namespace VidhanSabha.Application.Pannels.Admin.Block.DTOs
         public string CastName { get; set; }
         public int OccupationId { get; set; }
         public string Occupation { get; set; }
+        public string Profile { get; set; }
     }
     public class BlockNameResponse
     {
