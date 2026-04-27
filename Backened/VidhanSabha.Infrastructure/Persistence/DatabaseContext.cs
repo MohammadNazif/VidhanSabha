@@ -41,13 +41,21 @@ namespace VidhanSabha.Infrastructure.Persistence
 
 
         public DbSet<Tbl_VidhansabhaStatewiseCount> Tbl_VidhansabhaStatewiseCount => Set<Tbl_VidhansabhaStatewiseCount>();
+
+        public DbSet<Tbl_StatePrabhari> Tbl_StatePrabhari => Set<Tbl_StatePrabhari>();
+
+        public DbSet<Tbl_LoginCredential> Tbl_LoginCredential => Set<Tbl_LoginCredential>();
+
+        public DbSet<Tbl_DistrictWiseCount> Tbl_DistrictWiseCount => Set<Tbl_DistrictWiseCount>();
+
+        #region Shivansh
         public DbSet<Tbl_Occupation> Tbl_Occupation => Set<Tbl_Occupation>();
         public DbSet<Tbl_PravasiVoter> Tbl_PravasiVoter => Set<Tbl_PravasiVoter>();
         public DbSet<Tbl_PravasiVillage> Tbl_PravasiVillage => Set<Tbl_PravasiVillage>();
         public DbSet<Tbl_NewVoter> Tbl_NewVoter => Set<Tbl_NewVoter>();
         public DbSet<Tbl_NewVoterVillage> Tbl_NewVoterVillage => Set<Tbl_NewVoterVillage>();
         public DbSet<Tbl_Party> Tbl_Party => Set<Tbl_Party>();
-        public DbSet<Tbl_SahmatType> Tbl_SahmatType =>Set<Tbl_SahmatType>();
+        public DbSet<Tbl_SahmatType> Tbl_SahmatType => Set<Tbl_SahmatType>();
         public DbSet<Tbl_SahmatAsahmat> Tbl_SahmatAsahmat => Set<Tbl_SahmatAsahmat>();
         public DbSet<Tbl_SahmatAsahmatVillage> Tbl_SahmatAsahmatVillage => Set<Tbl_SahmatAsahmatVillage>();
         public DbSet<Tbl_DoubleVoter> Tbl_DoubleVoter => Set<Tbl_DoubleVoter>();
@@ -55,12 +63,18 @@ namespace VidhanSabha.Infrastructure.Persistence
         public DbSet<Tbl_PrabhavshaliVyakti> Tbl_PrabhavshaliVyakti => Set<Tbl_PrabhavshaliVyakti>();
         public DbSet<Tbl_PrabhavshaliVillage> Tbl_PrabhavshaliVillage => Set<Tbl_PrabhavshaliVillage>();
         public DbSet<Tbl_Block> Tbl_Block => Set<Tbl_Block>();
+        public DbSet<Tbl_BDC> Tbl_BDC => Set<Tbl_BDC>();
+        public DbSet<Tbl_BDCVillage> Tbl_BDCVillage => Set<Tbl_BDCVillage>();
+        public DbSet<Tbl_SeniorDisabledType> Tbl_SeniorDisabledType => Set<Tbl_SeniorDisabledType>();
+        public DbSet<Tbl_SeniorDisabled> Tbl_SeniorDisabled => Set<Tbl_SeniorDisabled>();
+        public DbSet<Tbl_SocialMediaPost> Tbl_SocialMediaPost => Set<Tbl_SocialMediaPost>();
+        public DbSet<Tbl_SocialMediaBooth> Tbl_SocialMediaBooth => Set<Tbl_SocialMediaBooth>();
+        public DbSet<Tbl_SocialMediaSector> Tbl_SocialMediaSector => Set<Tbl_SocialMediaSector>();
+        public DbSet<Tbl_SocialMediaPlatform> Tbl_SocialMediaPlatform => Set<Tbl_SocialMediaPlatform>();
 
-        public DbSet<Tbl_StatePrabhari> Tbl_StatePrabhari => Set<Tbl_StatePrabhari>();
 
-        public DbSet<Tbl_LoginCredential> Tbl_LoginCredential => Set<Tbl_LoginCredential>();
+        #endregion
 
-        public DbSet<Tbl_DistrictWiseCount> Tbl_DistrictWiseCount => Set<Tbl_DistrictWiseCount>();
         #region Gaurav
 
         public DbSet<Tbl_Pradhan> Tbl_Pradhan => Set<Tbl_Pradhan>();
@@ -80,10 +94,6 @@ namespace VidhanSabha.Infrastructure.Persistence
 
         public DbSet<Tbl_VidhanSabha> Tbl_VidhanSabha => Set<Tbl_VidhanSabha>();
 
-        public DbSet<Tbl_BDC> Tbl_BDC => Set<Tbl_BDC>();
-        public DbSet<Tbl_BDCVillage> Tbl_BDCVillage => Set<Tbl_BDCVillage>();
-        public DbSet<Tbl_SeniorDisabledType> Tbl_SeniorDisabledType => Set<Tbl_SeniorDisabledType>();
-        public DbSet<Tbl_SeniorDisabled> Tbl_SeniorDisabled => Set<Tbl_SeniorDisabled>();
 
         public DbSet<Tbl_MemberModulePermissions> Tbl_MemberModulePermissions => Set<Tbl_MemberModulePermissions>();
         protected override void OnModelCreating(ModelBuilder modelBuilder)

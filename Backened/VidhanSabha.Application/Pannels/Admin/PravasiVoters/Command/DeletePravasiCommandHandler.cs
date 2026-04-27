@@ -9,7 +9,7 @@ using VidhanSabha.Application.Pannels.Admin.PravasiVoters.Interfaces;
 
 namespace VidhanSabha.Application.Pannels.Admin.PravasiVoters.Command
 {
-    public class DeletePravasiCommandHandler:IRequestHandler<DeletePravasiCommand, int>
+    public class DeletePravasiCommandHandler : IRequestHandler<DeletePravasiCommand, int>
     {
         private IPravasiVoterRepository _repo;
 

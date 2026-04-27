@@ -35,6 +35,7 @@ using VidhanSabha.Application.Pannels.Admin.PravasiVoters.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.SahmatAsahmat.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.Sector.Interface;
 using VidhanSabha.Application.Pannels.Admin.SeniorDisabled.Interfaces;
+using VidhanSabha.Application.Pannels.Admin.SocialMediaPost.Interfaces;
 using VidhanSabha.Application.Pannels.Auth.Commands.Login;
 using VidhanSabha.Application.Pannels.Auth.Interfaces;
 using VidhanSabha.Application.Pannels.Auth.Queries.GetMobileNumber;
@@ -106,6 +107,7 @@ namespace VidhanSabha.Infrastructure.DependencyInjection
             services.AddScoped<ISeniorDisabledTypeRepository,SeniorDisabledTypeRepository>();
             services.AddScoped<ISeniorDisabledRepository,SeniorDisabledRepository>();
             services.AddScoped<IMemberModulePermissionRepository, MemberModulePermissionRepository>();
+            services.AddScoped<ISocialMediaRepository,SocialMediaPostRepository>();
 
             return services;
         }
