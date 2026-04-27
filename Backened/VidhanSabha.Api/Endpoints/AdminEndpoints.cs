@@ -346,18 +346,18 @@ public static class AdminEndpoints
             .RequireAuthorization(ModulePermission.PannaPramukh.ToString())
             .Produces(200);
 
-        pannapramukh.MapGet("/getAll", async (
-            [AsParameters] PannaPramukhQueryParams q,
-            IMediator mediator,
-            HttpContext httpContext) =>
-        {
-            string UserId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var result = await mediator.Send(new GetAllPannaQuery(q));
-            return Results.Ok(ApiResponse<PagedResult<PannaPramukhResponseDto>>.Ok(result));
-        })
-         .WithName("GetAllPannaPramukh")
-         .RequireAuthorization(ModulePermission.PannaPramukh.ToString())
-         .Produces<ApiResponse<List<PannaPramukhResponseDto>>>(200);
+        //pannapramukh.MapGet("/getAll", async (
+        //    [AsParameters] PannaPramukhQueryParams q,
+        //    IMediator mediator,
+        //    HttpContext httpContext) =>
+        //{
+        //    string UserId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        //    var result = await mediator.Send(new GetAllPannaQuery(q));
+        //    return Results.Ok(ApiResponse<PagedResult<PannaPramukhResponseDto>>.Ok(result));
+        //})
+        // .WithName("GetAllPannaPramukh")
+        // .RequireAuthorization(ModulePermission.PannaPramukh.ToString())
+        // .Produces<ApiResponse<List<PannaPramukhResponseDto>>>(200);
         #endregion
 
         #region PravasiVoter
@@ -539,7 +539,8 @@ public static class AdminEndpoints
            {
                var result = await mediator.Send(new GetAllSahmatAsahmatQuery(q));
                return Results.Ok(ApiResponse<PagedResult<SahmatAsahmatResponseDto>>.Ok(result));
-           }).RequireAuthorization();
+           }).WithName("getAllsahmatasahmat")
+           .RequireAuthorization();
 
         #endregion
 
@@ -574,7 +575,7 @@ public static class AdminEndpoints
         {
             var result = await mediator.Send(new GetAllPradhanQuery(q));
             return Results.Ok(ApiResponse<PagedResult<PradhanResponseDto>>.Ok(result));
-        });
+        }).WithName("getAllPradhan");
         #endregion
 
         #region BoothSamiti
@@ -906,14 +907,14 @@ public static class AdminEndpoints
         {
             var result = await mediator.Send(new GetAllSocialMediaPostQuery(q));
             return Results.Ok(ApiResponse<PagedResult<SocialMediaPostReponse>>.Ok(result));
-        });
+        }).WithName("getallSocailMediaPost");
 
         socialmedia.MapGet("/getAllPlatform", async (
             IMediator mediator) =>
         {
             var result = await mediator.Send(new GetPlatformQuery());
             return Results.Ok(ApiResponse<List<SocialMediaPlatform>>.Ok(result));
-        });
+        }).WithName("getgetAllPlatform");
 
         #endregion
 
@@ -922,6 +923,7 @@ public static class AdminEndpoints
             string userId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var result = await mediator.Send(new GetDashboardCountsQuery(userId));
             return Results.Ok(ApiResponse<DashboardCountsDto>.Ok(result));
-        }).RequireAuthorization();
+        }).WithName("getAlldashboardCounts")
+            .RequireAuthorization();
 }
 }
