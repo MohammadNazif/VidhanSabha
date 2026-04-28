@@ -21,6 +21,7 @@ namespace VidhanSabha.Application.Common.Dtos
         public string? SortBy { get; set; }
         public string? UserId { get; set; }
 
+
         public string? Role { get; set; }
         public bool IsDescending { get; set; } = false;
     }

@@ -9,7 +9,7 @@ import { environment } from '../../../../environments/environment';
   providedIn: 'root'
 })
 export class FormDataService {
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   /**
    * Fetches dropdown options from a given URL and maps them using a mapper function.
@@ -20,10 +20,10 @@ export class FormDataService {
    */
   getOptionsFromApi(url: string, mapper?: (data: any, formValues?: any) => DropdownOption[], formValues?: any): Observable<DropdownOption[]> {
     if (!url) return of([]);
-    
+
     // Prefix relative URLs with base API URL
     const finalUrl = url.startsWith('http') ? url : `${environment.apiUrl}${url.startsWith('/') ? '' : '/'}${url}`;
-    
+
     const headers = { 'X-Skip-Loader': 'true' };
     return this.http.get<any>(finalUrl, { headers }).pipe(
       map(response => {

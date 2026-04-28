@@ -252,14 +252,19 @@ export class SectorComponent implements OnInit {
             // Simplify fields for State Prabhari
             const districtField = this.addSectorConfig.fields.find(f => f.id === 'districtId');
             if (districtField) {
-              delete districtField.dependsOn;
+              delete (districtField as any).dependsOn;
               districtField.apiUrl = () => `district/getAll?stateId=${this.defaultStateId}`;
             }
+            this.loadSectors();
+          } else {
+            this.loadSectors();
           }
-        }
+        },
+        error: () => this.loadSectors()
       });
+    } else {
+      this.loadSectors();
     }
-    this.loadSectors();
   }
 
   loadSectors() {
@@ -311,29 +316,42 @@ export class SectorComponent implements OnInit {
     const isUpdate = !!(raw.id || (this.sectorModal.initialData && this.sectorModal.initialData.id));
     const isSanyojak = raw.isSectorSanyojak === 'Yes';
 
-    const submitData: any = {
-      MandalId: Number(raw.mandalId),
-      VillageId: Number(raw.villageId),
-      SectorName: raw.sectorName || "",
-      IsSectorSanyojak: isSanyojak,
-      InchargeName: isSanyojak ? (raw.inchargeName || "") : null,
-      Age: isSanyojak ? (raw.age ? Number(raw.age) : 0) : null,
-      FatherName: isSanyojak ? (raw.fatherName || "") : null,
-      CategoryId: isSanyojak ? (raw.categoryId ? Number(raw.categoryId) : 0) : null,
-      CastId: isSanyojak ? (raw.castId ? Number(raw.castId) : 0) : null,
-      EducationLevel: isSanyojak ? (raw.educationLevel || "") : null,
-      PhoneNumber: isSanyojak ? (raw.phoneNumber || "") : null,
-      Address: isSanyojak ? (raw.address || "") : null,
-      ProfileImage: isSanyojak ? (raw.profileImage || "") : null
-    };
+    const formData = new FormData();
+    formData.append('MandalId', String(raw.mandalId));
+    formData.append('VillageId', String(raw.villageId));
+    formData.append('SectorName', raw.sectorName || "");
+    formData.append('IsSectorSanyojak', String(isSanyojak));
+    
+    const userId = this.authService.getUserId();
+    if (userId) {
+      formData.append('userId', String(userId));
+    }
+    if (this.defaultStateId) {
+      formData.append('stateId', String(this.defaultStateId));
+    }
+
+    if (isSanyojak) {
+      formData.append('InchargeName', raw.inchargeName || "");
+      formData.append('Age', String(raw.age || 0));
+      formData.append('FatherName', raw.fatherName || "");
+      formData.append('CategoryId', String(raw.categoryId || 0));
+      formData.append('CastId', String(raw.castId || 0));
+      formData.append('EducationLevel', raw.educationLevel || "");
+      formData.append('PhoneNumber', raw.phoneNumber || "");
+      formData.append('Address', raw.address || "");
+
+      if (result.files && result.files['profileImage']) {
+        formData.append('ProfileImage', result.files['profileImage']);
+      }
+    }
 
     if (isUpdate) {
-      submitData.Id = Number(raw.id || this.sectorModal.initialData.id);
+      formData.append('Id', String(raw.id || this.sectorModal.initialData.id));
     }
 
     const request = isUpdate
-      ? this.sectorService.updateSector(submitData)
-      : this.sectorService.createSector(submitData);
+      ? this.sectorService.updateSector(formData)
+      : this.sectorService.createSector(formData);
 
     this.crudHandler.handleRequest(
       request,

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using VidhanSabha.Application.Common.Dtos;
 using VidhanSabha.Application.Pannels.StatePrabhari.VidhanSabha.Dtos;
 using VidhanSabha.Application.Pannels.StatePrabhari.VidhanSabha.Interface;
 using VidhanSabha.Domain.Entities.StatePrabhari;
@@ -47,9 +48,10 @@ namespace VidhanSabha.Infrastructure.Repositories.StatePrabhari
             throw new NotImplementedException();
         }
 
-        public async Task<IReadOnlyList<VidhanSabhaSatewiseResponseDto?>> GetByIdAsync(int? statetId, int? districtId)
+        public async Task<IReadOnlyList<VidhanSabhaSatewiseResponseDto?>> GetByIdAsync(vidhansabhaparams
+         qp)
         {
-            return await _context.Tbl_VidhanSabha.Where(x => x.StateId == statetId || x.DistrictId == districtId).Select(b => new VidhanSabhaSatewiseResponseDto
+            return await _context.Tbl_VidhanSabha.Where(x => x.UserId == qp.UserId).Select(b => new VidhanSabhaSatewiseResponseDto
             {
                 Id = b.Id,
                 DistrictId = b.DistrictId,

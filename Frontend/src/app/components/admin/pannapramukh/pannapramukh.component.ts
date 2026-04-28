@@ -204,8 +204,8 @@ export class PannapramukhComponent implements OnInit {
         gridColSpan: 12
       },
       {
-        id: 'profilePicture',
-        name: 'profilePicture',
+        id: 'ProfilePicture',
+        name: 'ProfilePicture',
         label: 'Profile Picture',
         type: 'file',
         placeholder: 'Upload profile picture',
@@ -321,22 +321,43 @@ export class PannapramukhComponent implements OnInit {
     if (!result.status) return;
 
     const raw = result.data;
-    const submitData: any = {
-      ...raw,
-      id: raw.id ? Number(raw.id) : null,
-      boothId: Number(raw.boothId),
-      categoryId: Number(raw.categoryId),
-      castId: Number(raw.castId),
-      pannaNumber: Number(raw.pannaNumber),
-      voterId: String(raw.voterId), // voterId is string in response JSON
-      villageId: Array.isArray(raw.villageId) ? raw.villageId.map((v: any) => Number(v)) : Number(raw.villageId),
-      userId: this.authService.getUserId()
-    };
+    console.log("raw", result)
+    const formData = new FormData();
 
-    const isUpdate = !!submitData.id;
+    // Standard fields for [FromForm]
+    formData.append('id', raw.id ? String(raw.id) : '0');
+    formData.append('boothId', String(raw.boothId));
+    formData.append('pannaPramukhName', raw.pannaPramukhName);
+    formData.append('pannaNumber', String(raw.pannaNumber));
+    formData.append('categoryId', String(raw.categoryId));
+    formData.append('castId', String(raw.castId));
+    formData.append('voterId', String(raw.voterId));
+    formData.append('phoneNumber', raw.phoneNumber);
+    formData.append('address', raw.address);
+    formData.append('userId', this.authService.getUserId() || '');
+
+    // Append file if exists in result.files
+    if (result.files && result.files['ProfilePicture']) {
+      formData.append('ProfilePicture', result.files['ProfilePicture']);
+    }
+
+
+    // Handle array fields (e.g., multiple village selection)
+    if (Array.isArray(raw.villageId)) {
+      raw.villageId.forEach((v: any) => formData.append('villageId', String(v)));
+    } else if (raw.villageId) {
+      formData.append('villageId', String(raw.villageId));
+    }
+
+    // Append file if exists
+    if (result.files && result.files['profile']) {
+      formData.append('profile', result.files['profile']);
+    }
+
+    const isUpdate = !!raw.id && raw.id !== '0';
     const request = isUpdate
-      ? this.pannaService.updatePannapramukh(submitData)
-      : this.pannaService.createPannapramukh(submitData);
+      ? this.pannaService.updatePannapramukh(formData)
+      : this.pannaService.createPannapramukh(formData);
 
     this.crudHandler.handleRequest(
       request,

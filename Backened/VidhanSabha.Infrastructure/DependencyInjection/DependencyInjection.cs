@@ -1,8 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System;
+using System.Reflection;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Reflection;
 using VidhanSabha.Application.Common.AdminDesignation.Interfaces;
 using VidhanSabha.Application.Common.BoothSamitiDesignation.Interfaces;
 using VidhanSabha.Application.Common.Cast.Interfaces;
@@ -11,6 +11,7 @@ using VidhanSabha.Application.Common.CredentialMananger;
 using VidhanSabha.Application.Common.CredentialMananger.Interface;
 using VidhanSabha.Application.Common.DesignatinType.Interface;
 using VidhanSabha.Application.Common.District.Interfaces;
+using VidhanSabha.Application.Common.ImageService.Interface;
 using VidhanSabha.Application.Common.NewFolder.Interface;
 using VidhanSabha.Application.Common.Occupation.Interface;
 using VidhanSabha.Application.Common.Party.Interfaces;
@@ -24,6 +25,7 @@ using VidhanSabha.Application.Pannels.Admin.Booth.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.BoothSamiti.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.BoothVoter.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.CasteVoter.Interfaces;
+using VidhanSabha.Application.Pannels.Admin.Dashboard.Interface;
 using VidhanSabha.Application.Pannels.Admin.DoubleVoter.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.Influencer.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.Mandal.Interfaces;
@@ -35,6 +37,7 @@ using VidhanSabha.Application.Pannels.Admin.PravasiVoters.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.SahmatAsahmat.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.Sector.Interface;
 using VidhanSabha.Application.Pannels.Admin.SeniorDisabled.Interfaces;
+using VidhanSabha.Application.Pannels.Admin.SocialMediaPost.Interfaces;
 using VidhanSabha.Application.Pannels.Auth.Commands.Login;
 using VidhanSabha.Application.Pannels.Auth.Interfaces;
 using VidhanSabha.Application.Pannels.Auth.Queries.GetMobileNumber;
@@ -106,6 +109,11 @@ namespace VidhanSabha.Infrastructure.DependencyInjection
             services.AddScoped<ISeniorDisabledTypeRepository,SeniorDisabledTypeRepository>();
             services.AddScoped<ISeniorDisabledRepository,SeniorDisabledRepository>();
             services.AddScoped<IMemberModulePermissionRepository, MemberModulePermissionRepository>();
+            services.AddScoped<IDashboard, AdminDashboardCount>();
+            services.AddScoped<ISocialMediaRepository,SocialMediaPostRepository>();
+
+
+            services.AddScoped<IImageService, ImageService>();
 
             return services;
         }

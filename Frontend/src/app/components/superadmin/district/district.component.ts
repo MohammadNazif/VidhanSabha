@@ -37,7 +37,7 @@ export class DistrictComponent implements OnInit {
   }
 
   columns: TableColumn[] = [
-    { key: 'dsitrictName', label: 'District Name', sortable: true },
+    { key: 'districtName', label: 'District Name', sortable: true },
     { key: 'vidhanSabhaCount', label: 'VS Count', sortable: true },
     { key: 'remainingCount', label: 'Remaining Count', sortable: true }
   ];
@@ -71,7 +71,7 @@ export class DistrictComponent implements OnInit {
         label: 'Select State',
         type: 'select',
         apiUrl: () => `state/getAll`,
-        apiMapper: (list: any[]) => list.map(item => ({ value: String(item.id), label: item.name })),
+        apiMapper: (list: any[]) => list.map(item => ({ value: String(item.id || item.stateId), label: item.name || item.stateName })),
         validations: [Validators.required],
         gridColSpan: 6
       },
@@ -255,6 +255,12 @@ export class DistrictComponent implements OnInit {
         type: 'file',
         visibleIf: { field: 'assignPrabhari', operator: '==', value: 'Yes' },
         gridColSpan: 12
+      },
+      {
+        id: 'stateId',
+        name: 'stateId',
+        label: 'State ID',
+        type: 'hidden'
       }
     ]
   };
@@ -305,11 +311,17 @@ export class DistrictComponent implements OnInit {
                 }));
               };
             }
+            // Load districts after we have the defaultStateId
+            this.loadDistricts();
+          } else {
+            this.loadDistricts();
           }
-        }
+        },
+        error: () => this.loadDistricts()
       });
+    } else {
+      this.loadDistricts();
     }
-    this.loadDistricts();
   }
 
   loadDistricts() {
@@ -322,10 +334,15 @@ export class DistrictComponent implements OnInit {
 
     request.subscribe({
       next: (response) => {
-        if (response && response.isSuccess) {
-          this.districtList = response.data;
-        } else if (Array.isArray(response)) {
-          this.districtList = response;
+        const rawList = response?.data || response || [];
+        if (Array.isArray(rawList)) {
+          this.districtList = rawList.map((item: any) => ({
+            ...item,
+            // Standardize district name key if typo exists in data
+            districtName: item.districtName || item.dsitrictName || item.name,
+            // Ensure stateId is present, falling back to multiple possible naming conventions
+            stateId: item.stateId || item.stateID || item.StateId || (item.state ? (item.state.id || item.state.stateId) : null) || (isPrabhari ? this.defaultStateId : null)
+          }));
         } else {
           this.districtList = [];
         }
@@ -344,14 +361,16 @@ export class DistrictComponent implements OnInit {
         () => this.loadDistricts()
       );
     } else if (action.id === 'edit') {
+      const stateId = row.stateId || row.stateID || row.StateId || this.defaultStateId;
       this.districtModal.openModal({
         ...row,
-        stateId: String(row.stateId)
+        stateId: String(stateId || '')
       });
     } else if (action.id === 'add_vidhansabha') {
+      const stateId = row.stateId || row.stateID || row.StateId || this.defaultStateId;
       this.vidhanSabhaModal.openModal({
         districtId: row.districtId || row.id,
-        stateId: row.stateId
+        stateId: stateId
       });
     }
   }
@@ -367,7 +386,7 @@ export class DistrictComponent implements OnInit {
       ...raw,
       id: rowId ? Number(rowId) : null,
       userId: this.authService.getUserId(),
-      stateId: Number(raw.stateId || this.defaultStateId),
+      stateId: Number(raw.stateId || this.districtModal.initialData?.stateId || this.defaultStateId),
       districtId: Number(raw.districtId || raw.id),
       vidhanSabhaCount: Number(raw.vidhanSabhaCount)
     };
@@ -397,19 +416,25 @@ export class DistrictComponent implements OnInit {
       return;
     }
 
+    const stateId = Number(raw.stateId || initial?.stateId || this.defaultStateId);
+    if (!stateId) {
+      this.toastService.showError('Error', 'State ID missing');
+      return;
+    }
+
     const isPrabhari = raw.assignPrabhari === 'Yes';
     const submitData: any = {
       userId: this.authService.getUserId(),
       vidhanSabhaName: raw.name,
       vidhanSabhaCount: Number(raw.vidhanSabhaNumber),
       districtId: Number(districtId),
-      stateId: Number(initial?.stateId || this.defaultStateId),
+      stateId: stateId,
       isPrabhari: isPrabhari
     };
 
     if (isPrabhari) {
       submitData.prabhari = {
-        stateId: Number(initial?.stateId || this.defaultStateId),
+        stateId: stateId,
         vidhanSanhaId: 0, // Assigned by backend during creation
         prabhariRole: 2,  // Hardcoded as per specification for VS Prabhari
         prabhariName: raw.prabhariName,

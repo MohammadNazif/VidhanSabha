@@ -96,9 +96,10 @@ export class DynamicFormModalComponent implements OnInit, OnDestroy {
       fields.forEach(field => {
         if (field.type === 'select') {
           const apiUrl = field.apiUrl;
-          if (apiUrl && typeof apiUrl === 'string') {
+          if (apiUrl) {
+            const url = typeof apiUrl === 'function' ? apiUrl(this.form.value) : apiUrl;
             this.subscriptions.add(
-              this.formDataService.getOptionsFromApi(apiUrl, field.apiMapper, this.form.value).subscribe(options => {
+              this.formDataService.getOptionsFromApi(url, field.apiMapper, this.form.value).subscribe(options => {
                 this.fieldOptions[field.id] = options;
               })
             );

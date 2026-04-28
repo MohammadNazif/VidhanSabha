@@ -25,14 +25,22 @@ import { BdcComponent } from './components/admin/bdc/bdc.component';
 import { SeniorDisabledComponent } from './components/admin/senior-disabled/senior-disabled.component';
 import { AllowAccessComponent } from './components/admin/access/allow-access.component';
 import { AllowAccessListComponent } from './components/admin/access/allow-access-list.component';
+import { CombinedReportComponent } from './components/admin/reports/combined-report/combined-report.component';
+import { MandalReportComponent } from './components/admin/reports/mandal-report/mandal-report.component';
+import { BoothVoterDescriptionComponent } from './components/admin/booth-voter-description/booth-voter-description.component';
+import { BoothSamitiComponent } from './components/admin/booth-samiti/booth-samiti.component';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: '', component: DashboardComponent },
+  { path: 'combined-report', component: CombinedReportComponent },
+  { path: 'mandal-report', component: MandalReportComponent },
+  { path: 'booth-voter-description', component: BoothVoterDescriptionComponent },
   { path: 'members', component: MembersComponent },
   { path: 'mandal', component: MandalComponent },
   { path: 'sector', component: SectorComponent },
   { path: 'booth', component: BoothComponent },
+  { path: 'booth-samiti', component: BoothSamitiComponent },
   { path: 'booth-list', component: BoothComponent },
   { path: 'panna-pramukh', component: PannapramukhComponent },
   { path: 'panna-pramukh-list', component: PannapramukhComponent },

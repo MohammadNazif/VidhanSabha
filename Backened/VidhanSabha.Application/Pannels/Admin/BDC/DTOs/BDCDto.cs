@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -18,6 +19,7 @@ namespace VidhanSabha.Application.Pannels.Admin.BDC.DTOs
         public string Mobile { get; set; }
         public int PartyId { get; set; }
         public string Education { get; set; }
+        public IFormFile? Profile { get; init; }
     }
     public class BDCResponseDto
     {

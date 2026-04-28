@@ -1,6 +1,9 @@
 ﻿using MediatR;
 using VidhanSabha.Application.Common.CredentialMananger;
+using VidhanSabha.Application.Common.ImageService;
+using VidhanSabha.Application.Common.ImageService.Interface;
 using VidhanSabha.Application.Common.UnitOfWork;
+using VidhanSabha.Application.Pannels.Admin.Booth.Dtos;
 using VidhanSabha.Application.Pannels.Admin.Booth.Interfaces;
 using VidhanSabha.Domain.Entities.Admin;
 using VidhanSabha.Domain.Enums;
@@ -12,19 +15,28 @@ namespace VidhanSabha.Application.Pannels.Admin.Booth.Command
         private readonly IBoothRepository _repo;
         private readonly CredentialManagerFunc _credentialManager;
         private readonly IUnitOfWork _uow;
+        private readonly IImageService _imageService;
 
         public CreateBoothHandler(
             IBoothRepository repo,
             CredentialManagerFunc credentialManager,
-            IUnitOfWork uow)
+            IUnitOfWork uow,
+            IImageService imageService)
         {
             _repo = repo;
             _credentialManager = credentialManager;
             _uow = uow;
+            _imageService = imageService;
         }
 
         public async Task<int> Handle(CreateBoothCommand request, CancellationToken ct)
         {
+            var imagePath = await request.Dto.ResolveImageAsync(
+            _imageService,
+            subFolder: "profiles/booth",
+            imageSelector: dto => dto.Sanyojak.ProfileImagePath
+        );
+
             var cmd = request.Dto;
 
             // Generate userId the same way as StatePrabhari
@@ -61,7 +73,8 @@ namespace VidhanSabha.Application.Pannels.Admin.Booth.Command
                         cmd.Sanyojak.CastId,
                         cmd.Sanyojak.EducationLevel,
                         cmd.Sanyojak.PhoneNumber,
-                        cmd.Sanyojak.Address
+                        cmd.Sanyojak.Address,
+                        imagePath   
                     );
                 }
 

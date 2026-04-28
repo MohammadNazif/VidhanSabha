@@ -19,7 +19,8 @@ namespace VidhanSabha.Application.Common.Booth.Queries
         }
         public Task<List<BoothNumberDto>> Handle(GetAllBoothNumbersQuery request, CancellationToken cancellationToken)
         {
-            return _repo.BoothNumberExistsAsync();
+
+            return _repo.BoothNumberExistsAsync(request.userId);
              
         }
     }

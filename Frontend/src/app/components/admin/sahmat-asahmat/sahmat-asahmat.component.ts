@@ -25,7 +25,7 @@ export class SahmatAsahmatComponent implements OnInit {
 
   voterList: any[] = [];
   totalCount = 0;
-  
+
   // Server-side state
   pageNumber = 1;
   pageSize = 50;
@@ -243,6 +243,10 @@ export class SahmatAsahmatComponent implements OnInit {
       isDescending: this.isDescending
     };
 
+    if (this.isListView) {
+      params.id = this.isAsahmatView ? 2 : 1;
+    }
+
     const userId = this.authService.getUserId();
     if (userId) {
       params.userId = userId;
@@ -260,7 +264,7 @@ export class SahmatAsahmatComponent implements OnInit {
       next: (response) => {
         const dataWrap = response.data;
         const items = dataWrap?.items || (Array.isArray(dataWrap) ? dataWrap : []);
-        
+
         this.voterList = items.map((item: any) => ({
           ...item,
           isAsahmat: item.typeId === 2,
@@ -294,13 +298,13 @@ export class SahmatAsahmatComponent implements OnInit {
   handleSortChange(event: any) {
     this.sortBy = event.column;
     this.isDescending = event.direction === 'desc';
-    this.pageNumber = 1; 
+    this.pageNumber = 1;
     this.loadVoters();
   }
 
   handleSearchChange(term: string) {
     this.searchTerm = term;
-    this.pageNumber = 1; 
+    this.pageNumber = 1;
     this.loadVoters();
   }
 

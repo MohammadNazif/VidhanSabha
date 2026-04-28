@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿
+using Microsoft.AspNetCore.Http;
 
 namespace VidhanSabha.Application.Pannels.Admin.Sector.DTOs
 {
@@ -22,7 +19,7 @@ namespace VidhanSabha.Application.Pannels.Admin.Sector.DTOs
         public string? EducationLevel { get; set; }
         public string? PhoneNumber { get; set; }
         public string? Address { get; set; }
-        public string? ProfileImage { get; set; }
+        public IFormFile? ProfileImage { get; init; }
     }
 
     public class UpdateSectorRequestDto : CreateSectorRequestDto

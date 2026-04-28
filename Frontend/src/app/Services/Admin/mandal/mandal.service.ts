@@ -35,4 +35,11 @@ export class MandalService extends BaseApiService {
   updateMandal(mandalData: any): Observable<any> {
     return this.update(this.entity, mandalData);
   }
+
+  /**
+   * Fetches the combined report (Mandals -> Sectors -> Booths).
+   */
+  getAllCombinedReports(params: any = {}): Observable<any> {
+    return this.getWithParams(`${this.apiUrl}/${this.entity}/getAllCombinedReports`, params);
+  }
 }
