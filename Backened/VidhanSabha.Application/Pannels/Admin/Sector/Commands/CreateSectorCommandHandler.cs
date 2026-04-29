@@ -8,7 +8,7 @@ using VidhanSabha.Domain.Entities.Admin;
 
 namespace VidhanSabha.Application.Pannels.Admin.Sector.Commands
 {
-    public class CreateSectorCommandHandler : IRequestHandler<CreateSectorCommand, SectorResponseDto>
+    public class CreateSectorCommandHandler : IRequestHandler<CreateSectorCommand, int>
     {
         private readonly IImageService _imageService;
         private readonly ISectorRepository _sectorRepository;
@@ -24,7 +24,7 @@ namespace VidhanSabha.Application.Pannels.Admin.Sector.Commands
             _credentialManager = credentialManager;
         }
 
-        public async Task<SectorResponseDto> Handle(CreateSectorCommand request, CancellationToken cancellationToken)
+        public async Task<int> Handle(CreateSectorCommand request, CancellationToken cancellationToken)
         {
             var imagePath = await request.Dto.ResolveImageAsync(
             _imageService,
@@ -85,30 +85,9 @@ namespace VidhanSabha.Application.Pannels.Admin.Sector.Commands
                 );
             }
 
-            await _sectorRepository.AddAsync(sector);
+            return await _sectorRepository.AddAsync(sector);
 
-            return MapToDto(sector);
+            
         }
-
-        private static SectorResponseDto MapToDto(Tbl_Sector s) => new()
-        {
-            Id = s.Id,
-            MandalId = s.MandalId,
-            VillageId = s.VillageId,
-            SectorName = s.SectorName,
-            IsSectorSanyojak = s.IsSectorSanyojak,
-            InchargeName = s.InchargeName,
-            Age = s.Age,
-            FatherName = s.FatherName,
-            CategoryId = s.CategoryId,
-            CastId = s.CastId,
-            EducationLevel = s.EducationLevel,
-            PhoneNumber = s.PhoneNumber,
-            Address = s.Address,
-            ProfileImage = s.ProfileImage,
-            Status = s.Status,
-            CreatedAt = s.CreatedAt,
-            UpdatedAt = s.UpdatedAt
-        };
     }
 }

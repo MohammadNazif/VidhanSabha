@@ -47,8 +47,11 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
                    Id = s.Id,
                    MandalId = s.MandalId,
                    MandalName = s.Mandal.Name,
-                   VillageId = s.VillageId,
-                   VillageName = s.Village.VillageName,
+                   Villages = s.Villages.Select(v => new VillageResponseDto
+                   {
+                       VillageId = v.VillageId,
+                       VillageName = v.Village.VillageName
+                   }).ToList(),
                    SectorName = s.SectorName,
                    IsSectorSanyojak = s.IsSectorSanyojak,
                    InchargeName = s.InchargeName,
@@ -80,7 +83,7 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
                     (!qp.VillageId.HasValue ||
                         (
                             // Sector Village (single)
-                            (s.VillageId.HasValue && s.VillageId == qp.VillageId) ||
+                            (s.Villages.Any(v => v.VillageId == qp.VillageId)) ||
 
                             // Booth Villages
                             (s.Booth != null &&
@@ -148,13 +151,13 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
                     ProfileImage = s.ProfileImage,
 
                     // 🔥 Sector Village (single case)
-                    SectorVillages = s.Village != null
+                    SectorVillages = s.Villages != null
                         ? new List<VillageDto>
                         {
                     new VillageDto
                     {
-                        Id = s.VillageId.Value,
-                        Name = s.Village.VillageName
+                        Id = s.Villages.Select(v=>v.VillageId).FirstOrDefault(),
+                        Name = s.Villages.Select(v=>v.Village.VillageName).FirstOrDefault()
                     }
                         }
                         : new List<VillageDto>(),
@@ -199,11 +202,79 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
                 ct: ct
             );
         }
+        public async Task<PagedResult<AdminSectorReportsDto>> GetAllAdminSectorReports(SectorQueryParams qp,CancellationToken ct = default)
+        {
+            var query = _context.Tbl_Sector
+                .AsNoTracking()
+                .Where(s =>
+                   
+                    (!qp.SectorId.HasValue || s.Id == qp.SectorId) &&
+                    (!qp.CastId.HasValue || s.CastId == qp.CastId) 
+                );
+
+            // 🔍 SEARCH
+            Expression<Func<Tbl_Sector, bool>>? search = null;
+
+            if (!string.IsNullOrWhiteSpace(qp.SearchTerm))
+            {
+                var term = qp.SearchTerm.Trim().ToLower();
+
+                search = s =>
+                    s.SectorName.ToLower().Contains(term) ||
+                    s.InchargeName.ToLower().Contains(term) ||
+                    s.PhoneNumber.Contains(term)
+                    ;
+            }
+
+            // 🚀 PAGINATION + PROJECTION (same pattern)
+            return await query.ToPagedResultAsync(
+                queryParams: qp,
+                searchPredicate: search,
+                defaultSort: s => s.Id,
+                projection: s => new AdminSectorReportsDto
+                {
+                   SectorId=s.Id,
+                   SectorName=s.SectorName,
+                   SectorSanyojak=s.InchargeName,
+                   Mobile=s.PhoneNumber,
+                   Cast=s.Cast.CastName,
+                   Villages = s.Villages != null
+                        ? new List<VillageDto>
+                        {
+                    new VillageDto
+                    {
+                         Id = s.Villages.Select(v=>v.VillageId).FirstOrDefault(),
+                        Name = s.Villages.Select(v=>v.Village.VillageName).FirstOrDefault()
+                    }
+                        }
+                        : new List<VillageDto>(),
+                   TotalBooth=_context.Tbl_Booth.Count(x=>x.SectorId==s.Id && x.Status),
+                    TotaVotes =
+                    _context.Tbl_SeniorDisabled.Count(x => x.Booth.SectorId == s.Id && x.TypeId == 1 && x.Status) +
+                    _context.Tbl_SeniorDisabled.Count(x => x.Booth.SectorId == s.Id && x.TypeId == 2 && x.Status) +
+                    _context.Tbl_DoubleVoter.Count(x => x.Booth.SectorId == s.Id && x.Status) +
+                    _context.Tbl_PravasiVoter.Count(x => x.Booth.SectorId == s.Id && x.Status),
+
+                    SeniorCitizen = _context.Tbl_SeniorDisabled
+                    .Count(x => x.Booth.SectorId == s.Id && x.TypeId == 1 && x.Status),
+
+                    Handicap = _context.Tbl_SeniorDisabled
+                    .Count(x => x.Booth.SectorId == s.Id && x.TypeId == 2 && x.Status),
+
+                    DoubleVoter = _context.Tbl_DoubleVoter
+                    .Count(x => x.Booth.SectorId == s.Id && x.Status),
+
+                    PravasiVoter = _context.Tbl_PravasiVoter
+                    .Count(x => x.Booth.SectorId == s.Id && x.Status)
+                },
+                ct: ct
+            );
+        }
 
         public async Task<Tbl_Sector?> GetByIdAsync(int id)
             => await _context.Tbl_Sector
                 .Include(s => s.Mandal)
-                .Include(s => s.Village)
+                .Include(s => s.Villages)
                 .Include(s => s.Category)
                 .Include(s => s.Cast)
                 .FirstOrDefaultAsync(s => s.Id == id && s.Status);
@@ -211,21 +282,29 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
       => await _context.Tbl_Sector
           .Where(s => s.MandalId == id && s.Status)
            .Include(s => s.Mandal)
-           .Include(s => s.Village)
+           .Include(s => s.Villages)
            .Include(s => s.Category)
            .Include(s => s.Cast)
            .ToListAsync();
         
-        public async Task AddAsync(Tbl_Sector sector)
+        public async Task<int> AddAsync(Tbl_Sector sector)
         {
-            await _context.Tbl_Sector.AddAsync(sector);
-            await _context.SaveChangesAsync();
+            try
+            {
+                await _context.Tbl_Sector.AddAsync(sector);
+                return await _context.SaveChangesAsync();
+            }
+            catch(Exception)
+            {
+                throw;
+            }
+            
         }
 
-        public async Task UpdateAsync(Tbl_Sector sector)
+        public async Task<int> UpdateAsync(Tbl_Sector sector)
         {
             _context.Tbl_Sector.Update(sector);
-            await _context.SaveChangesAsync();
+            return await _context.SaveChangesAsync();
         }
 
         public async Task DeleteAsync(Tbl_Sector sector)

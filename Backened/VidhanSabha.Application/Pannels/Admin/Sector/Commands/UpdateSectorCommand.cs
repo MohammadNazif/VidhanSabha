@@ -8,7 +8,7 @@ using VidhanSabha.Application.Pannels.Admin.Sector.DTOs;
 
 namespace VidhanSabha.Application.Pannels.Admin.Sector.Commands
 {
-    public class UpdateSectorCommand : IRequest<SectorResponseDto>
+    public class UpdateSectorCommand : IRequest<int>
     {
         public UpdateSectorRequestDto Dto { get; set; }
 

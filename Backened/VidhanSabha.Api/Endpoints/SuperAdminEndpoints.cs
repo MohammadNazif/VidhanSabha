@@ -1,14 +1,21 @@
-﻿using System.Security.Claims;
-using MediatR;
+﻿using MediatR;
+using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using VidhanSabha.Api.Responses;
 using VidhanSabha.Application.Common.District.Queries;
 using VidhanSabha.Application.Common.Dtos;
+using VidhanSabha.Application.Pannels.Admin.PannaPramukh.Command;
+using VidhanSabha.Application.Pannels.Admin.PannaPramukh.Dtos;
+using VidhanSabha.Application.Pannels.Admin.PannaPramukh.Queries;
 using VidhanSabha.Application.Pannels.StatePrabhari.VidhanSabha.Command;
 using VidhanSabha.Application.Pannels.StatePrabhari.VidhanSabha.Dtos;
 using VidhanSabha.Application.Pannels.StatePrabhari.VidhanSabha.Query;
 using VidhanSabha.Application.Pannels.SuperAdmin.designation.Commands;
 using VidhanSabha.Application.Pannels.SuperAdmin.designation.DTOs;
 using VidhanSabha.Application.Pannels.SuperAdmin.designation.Queries;
+using VidhanSabha.Application.Pannels.SuperAdmin.StateMembers.Commands;
+using VidhanSabha.Application.Pannels.SuperAdmin.StateMembers.DTOs;
+using VidhanSabha.Application.Pannels.SuperAdmin.StateMembers.Queries;
 using VidhanSabha.Application.Pannels.SuperAdmin.StatePrabhari.Command;
 using VidhanSabha.Application.Pannels.SuperAdmin.StatePrabhari.Dtos;
 using VidhanSabha.Application.Pannels.SuperAdmin.StatePrabhari.Query;
@@ -16,6 +23,8 @@ using VidhanSabha.Application.Pannels.SuperAdmin.TotalStateWiseVidhansabhaCount.
 using VidhanSabha.Application.Pannels.SuperAdmin.TotalStateWiseVidhansabhaCount.Query;
 using VidhanSabha.Domain.Entities.StatePrabhari.DistrictWiseCount.Command;
 using VidhanSabha.Domain.Entities.StatePrabhari.DistrictWiseCount.Query;
+using VidhanSabha.Domain.Enums;
+using VidhanSabha.Infrastructure.Repositories.Admin;
 using static VidhanSabha.Application.Pannels.StatePrabhari.DistrictWiseCount.Dtos.DistrictWiseCount;
 using static VidhanSabha.Application.Pannels.SuperAdmin.TotalStateWiseVidhansabhaCount.Dtos.VidhanshabhaStateWiseCount;
 
@@ -32,6 +41,10 @@ namespace VidhanSabha.Api.Endpoints
 
             var stateprabhaari = app.MapGroup("/api/stateprabhari")
                                     .WithTags("Stateprabhari");
+
+            var statemembers = app.MapGroup("/api/statemembers")
+                                    .WithTags("StateMembers");
+
             designation.MapPost
                ("/create", async (
                CreateDesignationDto request,
@@ -150,6 +163,46 @@ namespace VidhanSabha.Api.Endpoints
                 return Results.Ok(ApiResponse<IReadOnlyList<VidhansabhaDistrictResponseDto>>.Ok(data, "Count fetched Successfully"));
             }).WithName("getallDistrictwisecount")
             .Produces(200);
+
+            #region State Members
+
+            statemembers.MapPost("/create", async ([FromForm] CreateStateMembersReqDto dto, IMediator mediator) =>
+            {
+                var result = await mediator.Send(new CreateStateMembersCommand(dto));
+                return Results.Ok(ApiResponse<int>.Ok(result, "State Member Created Successfully"));
+            })
+                .WithName("CreateStateMember")
+                .DisableAntiforgery()
+                .Produces<int>(200);
+
+            statemembers.MapPost("/update", async ([FromForm] UpdateStateMembersReqDto dto, IMediator mediator) =>
+            {
+                int result = await mediator.Send(new UpdateStateMembersCommand(dto));
+                return Results.Ok(ApiResponse<int>.Ok(result, "State Member Updated Successfully"));
+            })
+                .WithName("UpdateStateMember")
+                 .DisableAntiforgery()
+                .Produces<int>(200);
+
+            statemembers.MapPost("/delete", async (int id, IMediator mediator) =>
+            {
+                var res = await mediator.Send(new DeleteStateMembersCommand(id));
+                return Results.Ok("State Member Deleted Successfully");
+            }).WithName("DeleteStateMember")
+                .Produces(200);
+
+            statemembers.MapGet("/getAll", async (
+                [AsParameters] StateMembersQueryParams q,
+                IMediator mediator
+               ) =>
+            {
+                var result = await mediator.Send(new GetAllStateMembersQuery(q));
+                return Results.Ok(ApiResponse<PagedResult<StateMembersResponseDto>>.Ok(result));
+            })
+             .WithName("GetAllStateMember")
+             .Produces<ApiResponse<List<StateMembersResponseDto>>>(200);
+
+            #endregion
         }
     }
 }

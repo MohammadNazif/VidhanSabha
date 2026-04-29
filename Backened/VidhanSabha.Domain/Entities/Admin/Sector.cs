@@ -11,9 +11,12 @@ namespace VidhanSabha.Domain.Entities.Admin
     {
         public int Id { get; private set; }
         public int MandalId { get; private set; }
-        public int? VillageId { get; private set; }
+        //public int? VillageId { get; private set; }
         public string SectorName { get; private set; }
         public bool IsSectorSanyojak { get; private set; }
+
+        private readonly List<Tbl_SectorVillage> _villages = new();
+        public IReadOnlyCollection<Tbl_SectorVillage> Villages => _villages.AsReadOnly();
 
         public string? UserId { get; set; }
         public string CreatedBy { get; set; }
@@ -35,7 +38,7 @@ namespace VidhanSabha.Domain.Entities.Admin
 
         // Navigation
         public Tbl_Mandal? Mandal { get; private set; }
-        public Tbl_Village? Village { get; private set; }
+        //public Tbl_Village? Village { get; private set; }
         public Tbl_Booth? Booth { get; private set; }
         public Tbl_Category? Category { get; private set; }
         public Tbl_Cast? Cast { get; private set; }
@@ -47,23 +50,24 @@ namespace VidhanSabha.Domain.Entities.Admin
             int createdById,
             string? createdBy,
             int mandalId,
-            int villageId,
+            List<int>? villageIds,
             string sectorName)
         {
             if (string.IsNullOrWhiteSpace(sectorName))
                 throw new ArgumentException("Sector name is required.");
 
-            return new Tbl_Sector
+            var sector= new Tbl_Sector
             {
                 CreatedById = createdById,
                 CreatedBy = createdBy,
                 MandalId = mandalId,
-                VillageId = villageId,
                 SectorName = sectorName,
                 IsSectorSanyojak = false,
                 Status = true,
                 CreatedAt = DateTime.UtcNow
             };
+            sector.SetVillages(villageIds);
+            return sector;
         }
 
         // Factory - With Sanyojak
@@ -71,7 +75,7 @@ namespace VidhanSabha.Domain.Entities.Admin
             int createdById,
             string? createdBy,
             int mandalId,
-            int villageId,
+            List<int>? villageIds,
             string sectorName,
             string userId,
             string inchargeName,
@@ -93,13 +97,13 @@ namespace VidhanSabha.Domain.Entities.Admin
             if (string.IsNullOrWhiteSpace(phoneNumber) || phoneNumber.Length != 10)
                 throw new ArgumentException("Invalid phone number.");
 
-            return new Tbl_Sector
+            var sector= new Tbl_Sector
             {
                 UserId =userId,
                 CreatedById = createdById,
                 CreatedBy = createdBy,
                 MandalId = mandalId,
-                VillageId = villageId,
+                
                 SectorName = sectorName,
                 IsSectorSanyojak = true,
                 InchargeName = inchargeName,
@@ -114,13 +118,15 @@ namespace VidhanSabha.Domain.Entities.Admin
                 Status = true,
                 CreatedAt = DateTime.UtcNow
             };
+            sector.SetVillages(villageIds);
+            return sector;
         }
 
         // Update - No Sanyojak
-        public void UpdateBasic(int mandalId, int villageId, string sectorName)
+        public void UpdateBasic(int mandalId, List<int>? villageIds, string sectorName)
         {
             MandalId = mandalId;
-            VillageId = villageId;
+            SetVillages(villageIds);
             SectorName = sectorName;
             IsSectorSanyojak = false;
             InchargeName = null;
@@ -138,7 +144,7 @@ namespace VidhanSabha.Domain.Entities.Admin
         // Update - With Sanyojak
         public void UpdateWithSanyojak(
             int mandalId,
-            int villageId,
+            List<int>? villageIds,
             string sectorName,
             string inchargeName,
             int age,
@@ -151,7 +157,7 @@ namespace VidhanSabha.Domain.Entities.Admin
             string? profileImage)
         {
             MandalId = mandalId;
-            VillageId = villageId;
+            SetVillages(villageIds);
             SectorName = sectorName;
             IsSectorSanyojak = true;
             InchargeName = inchargeName;
@@ -166,6 +172,48 @@ namespace VidhanSabha.Domain.Entities.Admin
             UpdatedAt = DateTime.UtcNow;
         }
 
+        private void SetVillages(List<int> villageIds)
+        {
+            // Step 1: Remove villages that are no longer in the new list
+            var toRemove = _villages
+                .Where(v => !villageIds.Contains(v.VillageId))
+                .ToList();
+
+            foreach (var v in toRemove)
+                _villages.Remove(v); // ✅ EF sees this as DELETE
+
+            // Step 2: Add only new villages not already present
+            var existingIds = _villages.Select(v => v.VillageId).ToHashSet();
+
+            foreach (var vid in villageIds.Where(id => !existingIds.Contains(id)))
+                _villages.Add(Tbl_SectorVillage.Create(vid)); // ✅ EF sees this as INSERT
+        }
+
+
         public void Delete() => Status = false;
+    }
+
+    public class Tbl_SectorVillage
+    {
+        public int Id { get; private set; }
+        public int VillageId { get; private set; }
+        public int SectorId { get; private set; }
+        public bool Status { get; private set; } = true;
+
+        //Navigations
+        public Tbl_Village? Village { get; private set; }
+        public Tbl_Sector Sector { get; set; }
+        private Tbl_SectorVillage() { }
+
+        public static Tbl_SectorVillage Create(int villageId) => new()
+        {
+            VillageId = villageId
+        };
+        public void Delete()
+        {
+            Status = false;
+        }
+
+
     }
 }

@@ -54,4 +54,7 @@ namespace VidhanSabha.Domain.Entities.SuperAdmin
             // ── Restore (agar kabhi chahiye) ─────────────────────────
             public void Restore() => Status = true;
         }
-    }
+
+
+   
+}

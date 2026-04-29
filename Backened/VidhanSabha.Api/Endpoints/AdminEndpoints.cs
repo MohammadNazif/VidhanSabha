@@ -200,19 +200,19 @@ public static class AdminEndpoints
             var userName = "Admin";
 
             var result = await mediator.Send(new CreateSectorCommand(dto, userId, userName));
-            return Results.Ok(ApiResponse<SectorResponseDto>.Ok(result, "Sector Created Successfully"));
+            return Results.Ok(ApiResponse<int>.Ok(result, "Sector Created Successfully"));
         }).DisableAntiforgery()
           .WithName("CreateSector")
-          .Produces<SectorResponseDto>(200);
+          .Produces<int>(200);
 
         sector.MapPost("/update", async ([FromForm] UpdateSectorRequestDto dto, IMediator mediator) =>
         {
             var result = await mediator.Send(new UpdateSectorCommand(dto));
-            return Results.Ok(ApiResponse<SectorResponseDto>.Ok(result, "Sector Updated Successfully"));
+            return Results.Ok(ApiResponse<int>.Ok(result, "Sector Updated Successfully"));
         })
         .WithName("UpdateSector")
         .DisableAntiforgery()
-        .Produces<SectorResponseDto>(200);
+        .Produces<int>(200);
 
         sector.MapPost("/delete", async (int id, IMediator mediator) =>
         {
@@ -238,10 +238,8 @@ public static class AdminEndpoints
             string userId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var result = await mediator.Send(new GetAllSectorsQuery(q, userId));
             return Results.Ok(ApiResponse<PagedResult<SectorResponseDto>>.Ok(result));
-        })
-         .WithName("GetAll")
-        .RequireAuthorization()
-        .Produces<List<SectorResponseDto>>(200);
+        });
+         
 
         sector.MapGet("/getAllSectorReports", async (
             [AsParameters] SectorQueryParams q,
@@ -250,6 +248,15 @@ public static class AdminEndpoints
             var result = await mediator.Send(new GetAllSectorReportsQuery(q));
             return Results.Ok(ApiResponse<PagedResult<SectorReportDto>>.Ok(result));
         });
+
+        sector.MapGet("/getAllAdminSectorReports", async (
+            [AsParameters] SectorQueryParams q,
+            IMediator mediator) =>
+        {
+            var result = await mediator.Send(new GetAllAdminSectorReportsQuery(q));
+            return Results.Ok(ApiResponse<PagedResult<AdminSectorReportsDto>>.Ok(result));
+        });
+        
 
         #endregion
 
@@ -291,31 +298,39 @@ public static class AdminEndpoints
             [AsParameters] BoothQueryParams q,
            IMediator mediator, HttpContext httpContext) =>
         {
-
-
             string userId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var result = await mediator.Send(new GetAllBoothsQuery(q, userId));
 
             return Results.Ok(ApiResponse<PagedResult<BoothResponseDto>>.Ok(result));
         }).RequireAuthorization();
 
+        booth.MapGet("/getAllBoothReports", async (
+            [AsParameters] BoothQueryParams q,
+           IMediator mediator, HttpContext httpContext) =>
+        {
+            string userId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var result = await mediator.Send(new GetAllBoothReportsQuery(q,userId));
+
+            return Results.Ok(ApiResponse<PagedResult<BoothReportsDto>>.Ok(result));
+        });
+
 
         #endregion
 
         #region PannaPramukh
 
-        pannapramukh.MapGet("/getAll", async (
-           [AsParameters] PannaPramukhQueryParams q,
-           IMediator mediator,
-           HttpContext httpContext) =>
-        {
-            string UserId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var result = await mediator.Send(new GetAllPannaQuery(q));
-            return Results.Ok(ApiResponse<PagedResult<PannaPramukhResponseDto>>.Ok(result));
-        })
-        .WithName("GetAllPannaPramukh")
-        .RequireAuthorization(ModulePermission.PannaPramukh.ToString())
-        .Produces<ApiResponse<List<PannaPramukhResponseDto>>>(200);
+        //pannapramukh.MapGet("/getAll", async (
+        //   [AsParameters] PannaPramukhQueryParams q,
+        //   IMediator mediator,
+        //   HttpContext httpContext) =>
+        //{
+        //    string UserId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        //    var result = await mediator.Send(new GetAllPannaQuery(q));
+        //    return Results.Ok(ApiResponse<PagedResult<PannaPramukhResponseDto>>.Ok(result));
+        //})
+        //.WithName("GetAllPannaPramukh")
+        //.RequireAuthorization(ModulePermission.PannaPramukh.ToString())
+        //.Produces<ApiResponse<List<PannaPramukhResponseDto>>>(200);
 
         pannapramukh.MapPost("/create", async ([FromForm]CreatePannaPramukhRequestDto dto, IMediator mediator, HttpContext http) =>
                 {
@@ -870,7 +885,7 @@ public static class AdminEndpoints
             q.UserId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var result = await mediator.Send(new GetAllSeniorDisabledQuery(q));
             return Results.Ok(ApiResponse<PagedResult<SeniorDisabledResponseDto>>.Ok(result));
-        });
+        }).WithName("getAllSeniorDisabled");
 
 
         #endregion
