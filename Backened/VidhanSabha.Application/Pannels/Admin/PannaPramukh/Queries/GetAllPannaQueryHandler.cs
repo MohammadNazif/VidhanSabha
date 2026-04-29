@@ -24,7 +24,6 @@ namespace VidhanSabha.Application.Pannels.Admin.PannaPramukh.Queries
         }
         public async Task<PagedResult<PannaPramukhResponseDto>> Handle(GetAllPannaQuery request, CancellationToken cancellationToken)
         {
-            
 
              var res =  await _repo.GetAllAsync(request.QueryParams);
             if(res == null)

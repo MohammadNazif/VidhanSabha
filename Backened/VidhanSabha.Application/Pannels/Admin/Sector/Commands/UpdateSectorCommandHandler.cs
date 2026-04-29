@@ -15,22 +15,20 @@ using VidhanSabha.Domain.Entities.Admin;
 
 namespace VidhanSabha.Application.Pannels.Admin.Sector.Commands
 {
-    public class UpdateSectorCommandHandler : IRequestHandler<UpdateSectorCommand, SectorResponseDto>
+    public class UpdateSectorCommandHandler : IRequestHandler<UpdateSectorCommand, int>
     {
         private readonly ISectorRepository _sectorRepository;
         private readonly CredentialManagerFunc _credentialManager;
-        private readonly IImageService _imageService;
+        private readonly IImageService _imageService; 
 
         public UpdateSectorCommandHandler(ISectorRepository sectorRepository, CredentialManagerFunc credentialManager,IImageService imageService)
         {
             _sectorRepository = sectorRepository;
             _credentialManager = credentialManager;
             _imageService = imageService;
-
-
         }
 
-        public async Task<SectorResponseDto> Handle(UpdateSectorCommand request, CancellationToken cancellationToken)
+        public async Task<int> Handle(UpdateSectorCommand request, CancellationToken cancellationToken)
         {
             var dto = request.Dto;
 
@@ -93,28 +91,32 @@ namespace VidhanSabha.Application.Pannels.Admin.Sector.Commands
                 }
             }
 
-            await _sectorRepository.UpdateAsync(sector);
-            return MapToDto(sector);
+            return await _sectorRepository.UpdateAsync(sector);
+           
         }
-        private static SectorResponseDto MapToDto(Domain.Entities.Admin.Tbl_Sector s) => new()
-        {
-            Id = s.Id,
-            MandalId = s.MandalId,
-            VillageId = s.VillageId,
-            SectorName = s.SectorName,
-            IsSectorSanyojak = s.IsSectorSanyojak,
-            InchargeName = s.InchargeName,
-            Age = s.Age,
-            FatherName = s.FatherName,
-            CategoryId = s.CategoryId,
-            CastId = s.CastId,
-            EducationLevel = s.EducationLevel,
-            PhoneNumber = s.PhoneNumber,
-            Address = s.Address,
-            ProfileImage = s.ProfileImage,
-            Status = s.Status,
-            CreatedAt = s.CreatedAt,
-            UpdatedAt = s.UpdatedAt
-        };
+        //private static SectorResponseDto MapToDto(Domain.Entities.Admin.Tbl_Sector s) => new()
+        //{
+        //    Id = s.Id,
+        //    MandalId = s.MandalId,
+        //    Villages = s.Villages.Select(v => new VillageResponseDto
+        //    {
+        //        VillageId = v.VillageId,
+        //        VillageName = v.Village.VillageName
+        //    }).ToList(),
+        //    SectorName = s.SectorName,
+        //    IsSectorSanyojak = s.IsSectorSanyojak,
+        //    InchargeName = s.InchargeName,
+        //    Age = s.Age,
+        //    FatherName = s.FatherName,
+        //    CategoryId = s.CategoryId,
+        //    CastId = s.CastId,
+        //    EducationLevel = s.EducationLevel,
+        //    PhoneNumber = s.PhoneNumber,
+        //    Address = s.Address,
+        //    ProfileImage = s.ProfileImage,
+        //    Status = s.Status,
+        //    CreatedAt = s.CreatedAt,
+        //    UpdatedAt = s.UpdatedAt
+        //};
     }
 }

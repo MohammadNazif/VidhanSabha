@@ -42,4 +42,24 @@ namespace VidhanSabha.Infrastructure.Persistence.Configurations.Admin
                   .OnDelete(DeleteBehavior.Restrict);
         }
     }
+    public class Tbl_SectorVillageConfiguration : IEntityTypeConfiguration<Tbl_SectorVillage>
+    {
+        public void Configure(EntityTypeBuilder<Tbl_SectorVillage> entity)
+        {
+            entity.ToTable("Tbl_SectorVillage");
+            entity.HasKey(e => e.Id);
+            entity.HasQueryFilter(e => e.Status);
+            entity.Property(e => e.Status).HasDefaultValue(true);
+
+            entity.HasOne(e => e.Village)
+                .WithMany()
+                .HasForeignKey(e => e.VillageId);
+
+            entity.HasOne(e => e.Sector)
+                .WithMany(p => p.Villages)
+                .HasForeignKey(e => e.SectorId)
+                .OnDelete(DeleteBehavior.Cascade);
+        }
+    }
+
 }

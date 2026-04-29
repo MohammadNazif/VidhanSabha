@@ -9,6 +9,7 @@ namespace VidhanSabha.Application.Pannels.Admin.Booth.Dtos
 {
     public class BoothQueryParams : BaseQueryParams
     {
+        public int? BoothId { get; set; }
         public int? MandalId { get; set; }
         public int? SectorId { get; set; }
     }

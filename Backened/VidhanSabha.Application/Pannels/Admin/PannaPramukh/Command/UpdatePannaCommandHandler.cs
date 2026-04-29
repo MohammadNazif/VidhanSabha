@@ -13,7 +13,7 @@ using VidhanSabha.Application.Pannels.Admin.Sector.Interface;
 
 namespace VidhanSabha.Application.Pannels.Admin.PannaPramukh.Command
 {
-    internal class UpdatePannaCommandHandler : IRequestHandler<UpdatePannaCommand, int>
+    public class UpdatePannaCommandHandler : IRequestHandler<UpdatePannaCommand, int>
     {
         private readonly IImageService _imageService;
         private IPannaPramukhRepository _repo;
@@ -25,8 +25,6 @@ namespace VidhanSabha.Application.Pannels.Admin.PannaPramukh.Command
         }
         public async Task<int> Handle(UpdatePannaCommand request, CancellationToken cancellationToken)
         {
-            
-
             var dto = request.Dto;
 
             var panna = await _repo.GetByIdAsync(dto.Id)

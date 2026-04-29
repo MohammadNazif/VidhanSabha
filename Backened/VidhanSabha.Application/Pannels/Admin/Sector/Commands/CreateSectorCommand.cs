@@ -8,7 +8,7 @@ using VidhanSabha.Application.Pannels.Admin.Sector.DTOs;
 
 namespace VidhanSabha.Application.Pannels.Admin.Sector.Commands
 {
-    public class CreateSectorCommand : IRequest<SectorResponseDto>
+    public class CreateSectorCommand : IRequest<int>
     {
         public CreateSectorRequestDto Dto { get; set; }
         public int CreatedById { get; set; }

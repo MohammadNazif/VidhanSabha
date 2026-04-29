@@ -44,6 +44,7 @@ using VidhanSabha.Application.Pannels.Auth.Queries.GetMobileNumber;
 using VidhanSabha.Application.Pannels.StatePrabhari.DistrictWiseCount.Interface;
 using VidhanSabha.Application.Pannels.StatePrabhari.VidhanSabha.Interface;
 using VidhanSabha.Application.Pannels.SuperAdmin.designation.Interfaces;
+using VidhanSabha.Application.Pannels.SuperAdmin.StateMembers.Interfaces;
 using VidhanSabha.Application.Pannels.SuperAdmin.StatePrabhari.Interfaces;
 using VidhanSabha.Application.Pannels.SuperAdmin.TotalStateWiseVidhansabhaCount.Interfaces;
 using VidhanSabha.Infrastructure.Persistence;
@@ -111,7 +112,7 @@ namespace VidhanSabha.Infrastructure.DependencyInjection
             services.AddScoped<IMemberModulePermissionRepository, MemberModulePermissionRepository>();
             services.AddScoped<IDashboard, AdminDashboardCount>();
             services.AddScoped<ISocialMediaRepository,SocialMediaPostRepository>();
-
+            services.AddScoped<IStateMembersRepository, StateMembersRepository>();
 
             services.AddScoped<IImageService, ImageService>();
 
