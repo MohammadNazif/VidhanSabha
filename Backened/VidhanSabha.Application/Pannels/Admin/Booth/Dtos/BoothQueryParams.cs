@@ -3,14 +3,25 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
 using VidhanSabha.Application.Common.Dtos;
+using VidhanSabha.Application.Common.multiplefilterparse;
 
 namespace VidhanSabha.Application.Pannels.Admin.Booth.Dtos
 {
     public class BoothQueryParams : BaseQueryParams
     {
-        public int? BoothId { get; set; }
-        public int? MandalId { get; set; }
-        public int? SectorId { get; set; }
+        // ✅ string lo — comma separated "1,2,3"
+        [FromQuery(Name = "mandalIds")]
+        public string? MandalIds { get; set; }
+
+        [FromQuery(Name = "sectorIds")]
+        public string? SectorIds { get; set; }
+
+        // Helper — string ko List<int> mein convert karo
+        public List<int> GetMandalIds() => FilterParse.ParseIds(MandalIds);
+        public List<int> GetSectorIds() => FilterParse.ParseIds(SectorIds);
+
+
     }
 }

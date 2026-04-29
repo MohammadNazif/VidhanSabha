@@ -10,7 +10,8 @@ import {
   ContentChild,
   TrackByFunction,
   inject,
-  OnDestroy
+  OnDestroy,
+  HostListener
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -82,6 +83,7 @@ export class GenericTableComponent implements OnInit, OnChanges, OnDestroy {
   @Output() sortChange = new EventEmitter<SortState>();
   @Output() pageChange = new EventEmitter<PageState>();
   @Output() searchChange = new EventEmitter<string>();
+  @Output() filterChange = new EventEmitter<Record<string, any>>();
 
   // ── Internal State ──
   processedData: any[] = [];
@@ -92,6 +94,7 @@ export class GenericTableComponent implements OnInit, OnChanges, OnDestroy {
   sortState: SortState = { column: '', direction: null };
   selectedRows: Set<number> = new Set();
   allSelected = false;
+  activeFilterDropdown: string | null = null;
 
   pageState: PageState = {
     currentPage: 1,
@@ -300,6 +303,79 @@ export class GenericTableComponent implements OnInit, OnChanges, OnDestroy {
     this.processData();
     // Also push to subject to avoid the next debounced emission from overwriting this
     this.searchSubject.next('');
+  }
+
+  // ── Filters ──
+  onFilterChange(filter: any, event: any) {
+    const value = event && event.target ? event.target.value : event;
+    filter.value = value;
+    
+    // Build filter map to emit
+    const filterState: Record<string, any> = {};
+    if (this.mergedConfig.filters) {
+      this.mergedConfig.filters.forEach(f => {
+        if (f.value !== undefined && f.value !== null && f.value !== '') {
+          filterState[f.key] = f.value;
+        }
+      });
+    }
+    
+    // Reset to page 1
+    this.pageState.currentPage = 1;
+    this.filterChange.emit(filterState);
+    
+    if (!this.mergedConfig.serverSide) {
+      // Local filtering logic could be implemented here in the future
+      this.processData();
+    }
+  }
+
+  // ── Multi-Select Filters ──
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    if (this.activeFilterDropdown) {
+      this.activeFilterDropdown = null;
+    }
+  }
+
+  toggleFilterDropdown(key: string, event: Event): void {
+    event.stopPropagation();
+    if (this.activeFilterDropdown === key) {
+      this.activeFilterDropdown = null;
+    } else {
+      this.activeFilterDropdown = key;
+    }
+  }
+
+  toggleMultiFilterOption(filter: any, value: any, event?: Event): void {
+    if (event) event.stopPropagation();
+    
+    if (!Array.isArray(filter.value)) {
+      filter.value = filter.value ? [filter.value] : [];
+    }
+    
+    const index = filter.value.findIndex((v: any) => String(v) === String(value));
+    if (index > -1) {
+      filter.value.splice(index, 1);
+    } else {
+      filter.value.push(value);
+    }
+    
+    // Create new array reference for change detection
+    filter.value = [...filter.value];
+    
+    this.onFilterChange(filter, filter.value);
+  }
+
+  isFilterOptionSelected(filter: any, value: any): boolean {
+    if (!Array.isArray(filter.value)) return false;
+    return filter.value.some((v: any) => String(v) === String(value));
+  }
+
+  getFilterOptionLabel(filter: any, value: any): string {
+    const options = filter.options || [];
+    const option = options.find((o: any) => String(o.value) === String(value));
+    return option ? option.label : '...';
   }
 
   // ── Pagination ──

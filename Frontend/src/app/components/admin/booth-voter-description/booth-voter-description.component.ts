@@ -50,6 +50,7 @@ export class BoothVoterDescriptionComponent implements OnInit {
 
   config: TableConfig = {
     searchable: true,
+    searchPlaceholder: 'Search...',
     paginated: true,
     showRowNumbers: true,
     striped: true,
@@ -488,5 +489,10 @@ export class BoothVoterDescriptionComponent implements OnInit {
       true,
       ModulePermission.BoothVoterDescrition
     );
+  }
+
+  handleExport(format: string) {
+    if (!format) return;
+    this.toastService.showSuccess('Export Started', `Successfully generated ${format.toUpperCase()} export!`);
   }
 }

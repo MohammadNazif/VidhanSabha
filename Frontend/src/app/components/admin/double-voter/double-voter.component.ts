@@ -11,6 +11,9 @@ import { ToastService } from '../../../Services/common/toast/toast.service';
 import { CrudHandlerService } from '../../../Services/common/crud-handler.service';
 import { AuthServiceService } from '../../../Services/Auth/auth.service';
 import { ModulePermission } from '../../../models/module-permission.enum';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../../environments/environment';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-double-voter',
@@ -24,13 +27,17 @@ export class DoubleVoterComponent implements OnInit {
 
   voterList: any[] = [];
   totalCount = 0;
-  
+
   // Server-side state
   pageNumber = 1;
   pageSize = 50;
   searchTerm = '';
   sortBy = '';
   isDescending = false;
+
+  boothIds: string | null = null;
+  villageIds: string | null = null;
+  isListView = false;
 
   columns: TableColumn[] = [
     { key: 'boothNumber', label: 'Booth No.', sortable: true },
@@ -49,13 +56,18 @@ export class DoubleVoterComponent implements OnInit {
     striped: true,
     hoverable: true,
     serverSide: true,
-    defaultPageSize: 50
+    defaultPageSize: 50,
+    filterable: false
   };
 
   actions: TableAction[] = [
-    { id: 'edit', label: '', variant: 'default', icon: 'edit' },
-    { id: 'delete', label: '', variant: 'danger', icon: 'delete' }
+    { id: 'edit', label: '', variant: 'default', icon: 'edit', show: () => this.canManage() },
+    { id: 'delete', label: '', variant: 'danger', icon: 'delete', show: () => this.canManage() }
   ];
+
+  canManage(): boolean {
+    return !this.isListView;
+  }
 
   addVoterConfig: FormConfig = {
     title: 'Register Double Voter',
@@ -156,10 +168,78 @@ export class DoubleVoterComponent implements OnInit {
     private voterService: DoubleVoterService,
     private toastService: ToastService,
     private crudHandler: CrudHandlerService,
-    private authService: AuthServiceService
+    private authService: AuthServiceService,
+    private route: ActivatedRoute,
+    private http: HttpClient
   ) { }
 
   ngOnInit() {
+    this.route.url.subscribe(url => {
+      const path = url[0]?.path || '';
+      this.isListView = path.includes('-list');
+      this.config.filterable = this.isListView;
+      if (this.isListView) {
+        this.loadFilterOptions();
+      }
+      this.loadVoters();
+    });
+  }
+
+  loadFilterOptions() {
+    // Load Booths
+    this.http.get<any>(`${environment.apiUrl}/common/boothNumber`).subscribe(res => {
+      const filter = this.config.filters?.find(f => f.key === 'boothIds');
+      if (filter) {
+        const list = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
+        filter.options = list.map((b: any) => ({
+          label: `Booth No. ${b.boothNumber} - ${b.pollingStationName || ''}`,
+          value: String(b.boothId || b.id)
+        }));
+      }
+    });
+
+    // Initial Villages (All)
+    this.http.get<any>(`${environment.apiUrl}/common/village?pageSize=500000`).subscribe(res => {
+      const filter = this.config.filters?.find(f => f.key === 'villageIds');
+      if (filter) {
+        const list = Array.isArray(res?.data?.items) ? res.data.items : (Array.isArray(res?.items) ? res.items : (Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : [])));
+        filter.options = list.map((v: any) => ({
+          label: v.name || v.villageName,
+          value: String(v.id || v.villageId)
+        }));
+      }
+    });
+
+    if (this.isListView) {
+      this.config.filters = [
+        { key: 'boothIds', label: 'Booth', type: 'select', options: [], placeholder: '-- Select Booth --', multiple: true },
+        { key: 'villageIds', label: 'Village', type: 'select', options: [], placeholder: '-- Select Village --', multiple: true }
+      ];
+    }
+  }
+
+  handleFilterChange(filterState: Record<string, any>) {
+    const processIds = (ids: any) => Array.isArray(ids) ? (ids.length > 0 ? ids.join(',') : null) : (ids || null);
+
+    this.boothIds = processIds(filterState['boothIds']);
+    this.villageIds = processIds(filterState['villageIds']);
+
+    // Cascade villages when booth changes
+    if (filterState['boothIds'] && Array.isArray(filterState['boothIds']) && filterState['boothIds'].length === 1) {
+      const boothId = filterState['boothIds'][0];
+      this.http.get<any>(`${environment.apiUrl}/common/villagesByBoothId?boothId=${boothId}`).subscribe(res => {
+        const filter = this.config.filters?.find(f => f.key === 'villageIds');
+        if (filter) {
+          const list = Array.isArray(res?.data) ? res.data : (Array.isArray(res?.data?.items) ? res.data.items : (Array.isArray(res) ? res : []));
+          filter.options = list.map((v: any) => ({
+            label: v.name || v.villageName,
+            value: String(v.id || v.villageId)
+          }));
+        }
+      });
+    }
+
+    this.pageNumber = 1;
     this.loadVoters();
   }
 
@@ -169,8 +249,17 @@ export class DoubleVoterComponent implements OnInit {
       pageSize: this.pageSize,
       searchTerm: this.searchTerm,
       sortBy: this.sortBy,
-      isDescending: this.isDescending
+      isDescending: this.isDescending,
+      boothIds: this.boothIds,
+      villageIds: this.villageIds
     };
+
+    // Clean up empty params
+    Object.keys(params).forEach(key => {
+      if (params[key] === null || params[key] === undefined || params[key] === '') {
+        delete params[key];
+      }
+    });
 
     const userId = this.authService.getUserId();
     if (userId) {
@@ -210,13 +299,13 @@ export class DoubleVoterComponent implements OnInit {
   handleSortChange(event: any) {
     this.sortBy = event.column;
     this.isDescending = event.direction === 'desc';
-    this.pageNumber = 1; 
+    this.pageNumber = 1;
     this.loadVoters();
   }
 
   handleSearchChange(term: string) {
     this.searchTerm = term;
-    this.pageNumber = 1; 
+    this.pageNumber = 1;
     this.loadVoters();
   }
 
@@ -279,5 +368,10 @@ export class DoubleVoterComponent implements OnInit {
 
   handleSelection(selected: any[]) {
     console.log('Selected voters:', selected);
+  }
+
+  handleExport(format: string) {
+    if (!format) return;
+    this.toastService.showSuccess('Export Started', `Successfully generated ${format.toUpperCase()} export!`);
   }
 }

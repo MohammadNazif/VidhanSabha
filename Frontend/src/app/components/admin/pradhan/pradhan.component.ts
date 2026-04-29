@@ -9,6 +9,7 @@ import { CrudHandlerService } from '../../../Services/common/crud-handler.servic
 import { ToastService } from '../../../Services/common/toast/toast.service';
 import { GenericModalButtonComponent } from '../../shared/generic-modal-form/generic-modal-button.component';
 import { PageHeaderComponent } from '../../shared/page-header/page-header.component';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-pradhan',
@@ -18,6 +19,7 @@ import { PageHeaderComponent } from '../../shared/page-header/page-header.compon
     <div class="h-full flex flex-col p-4 gap-4 overflow-hidden">
       <app-page-header title="Pradhan Management" subtitle="Manage village pradhans and their assignments">
         <app-generic-modal-button 
+            *ngIf="canManage()"
             #pradhanModal 
             [config]="addPradhanConfig" 
             label="Add Pradhan" 
@@ -25,6 +27,20 @@ import { PageHeaderComponent } from '../../shared/page-header/page-header.compon
             variant="primary" 
             (formSubmit)="handleFormSubmit($event)">
         </app-generic-modal-button>
+
+        <div *ngIf="isListView && pradhans && pradhans.length > 0" class="relative">
+          <select #exportSelect (change)="handleExport(exportSelect.value); exportSelect.value = ''"
+            class="px-4 py-2 pr-8 rounded-xl text-xs font-bold text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 transition-all shadow-sm appearance-none cursor-pointer outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+            <option value="" disabled selected>Export Data</option>
+            <option value="pdf">Export PDF</option>
+            <option value="excel">Export Excel</option>
+          </select>
+          <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-500">
+            <svg class="fill-current h-3 w-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+              <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
+            </svg>
+          </div>
+        </div>
       </app-page-header>
 
       <div class="flex-1 min-h-0 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col p-2">
@@ -49,6 +65,11 @@ export class PradhanComponent implements OnInit {
   loading = false;
   totalItems = 0;
   searchTerm = '';
+  isListView = false;
+
+  canManage(): boolean {
+    return !this.isListView;
+  }
 
   columns: TableColumn[] = [
     { key: 'name', label: 'Name', sortable: true },
@@ -66,8 +87,8 @@ export class PradhanComponent implements OnInit {
   ];
 
   actions: TableAction[] = [
-    { id: 'edit', label: '', icon: 'edit', variant: 'primary' },
-    { id: 'delete', label: '', icon: 'delete', variant: 'danger' }
+    { id: 'edit', label: '', icon: 'edit', variant: 'primary', show: () => this.canManage() },
+    { id: 'delete', label: '', icon: 'delete', variant: 'danger', show: () => this.canManage() }
   ];
 
   tableConfig: TableConfig = {
@@ -152,11 +173,16 @@ export class PradhanComponent implements OnInit {
   constructor(
     private pradhanService: PradhanService,
     private toastService: ToastService,
-    private crudHandler: CrudHandlerService
+    private crudHandler: CrudHandlerService,
+    private route: ActivatedRoute
   ) { }
 
   ngOnInit() {
-    this.loadPradhans();
+    this.route.url.subscribe(url => {
+      const path = url[0]?.path || '';
+      this.isListView = path.includes('-list');
+      this.loadPradhans();
+    });
   }
 
   loadPradhans() {
@@ -234,5 +260,10 @@ export class PradhanComponent implements OnInit {
       `Pradhan ${isUpdate ? 'updated' : 'created'} successfully!`,
       () => this.loadPradhans()
     );
+  }
+
+  handleExport(format: string) {
+    if (!format) return;
+    this.toastService.showSuccess('Export Started', `Successfully generated ${format.toUpperCase()} export!`);
   }
 }

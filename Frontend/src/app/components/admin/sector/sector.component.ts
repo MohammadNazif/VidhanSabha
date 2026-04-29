@@ -51,7 +51,7 @@ export class SectorComponent implements OnInit {
 
   config: TableConfig = {
     selectable: false,
-    filterable: true,
+    filterable: false,
     paginated: true,
     defaultPageSize: 50,
     pageSizeOptions: [10, 20, 50],

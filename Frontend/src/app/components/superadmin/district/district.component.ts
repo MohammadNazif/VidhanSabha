@@ -44,7 +44,7 @@ export class DistrictComponent implements OnInit {
 
   config: TableConfig = {
     selectable: false,
-    filterable: true,
+    filterable: false,
     paginated: true,
     defaultPageSize: 10,
     pageSizeOptions: [10, 20, 50],

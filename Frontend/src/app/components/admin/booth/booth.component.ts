@@ -14,6 +14,8 @@ import { ToastService } from '../../../Services/common/toast/toast.service';
 import { CrudHandlerService } from '../../../Services/common/crud-handler.service';
 import { ActivatedRoute } from '@angular/router';
 import { ModulePermission } from '../../../models/module-permission.enum';
+import { MandalService } from '../../../Services/Admin/mandal/mandal.service';
+import { SectorService } from '../../../Services/Admin/sector/sector.service';
 
 
 @Component({
@@ -32,7 +34,9 @@ export class BoothComponent implements OnInit {
     private authService: AuthServiceService,
     private toastService: ToastService,
     private crudHandler: CrudHandlerService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private mandalService: MandalService,
+    private sectorService: SectorService
   ) { }
 
   isListView = false;
@@ -44,8 +48,8 @@ export class BoothComponent implements OnInit {
   searchTerm = '';
   sortBy = '';
   isDescending = true;
-  mandalId: number | null = null;
-  sectorId: number | null = null;
+  mandalId: string | number | null = null;
+  sectorId: string | number | null = null;
 
   canManage(): boolean {
     if (this.isListView) return false;
@@ -60,9 +64,13 @@ export class BoothComponent implements OnInit {
   defaultStateId: string | null = null;
 
   ngOnInit() {
-    this.route.url.subscribe(url => {
+    this.route.url.subscribe((url: any) => {
       const path = url[0]?.path || '';
       this.isListView = path.includes('-list');
+      this.config.filterable = this.isListView;
+      if (this.isListView) {
+        this.loadFilterOptions();
+      }
       this.loadBooths();
     });
 
@@ -90,6 +98,84 @@ export class BoothComponent implements OnInit {
     } else {
       this.loadBooths();
     }
+
+  }
+
+  loadFilterOptions() {
+    // Load Mandals
+    this.mandalService.getAllMandals({ pageSize: 500000 }).subscribe({
+      next: (res) => {
+        const list = res?.data?.items || res?.data || res || [];
+        const options = list.map((m: any) => ({ label: m.name, value: m.id }));
+
+        // Setup initial filters
+        this.config = {
+          ...this.config,
+          filters: [
+            { key: 'mandalId', label: 'Mandal', type: 'select', options: options, placeholder: '-- Select Mandal --', multiple: true },
+            { key: 'sectorId', label: 'Sector', type: 'select', options: [], placeholder: '-- Select Sector --', multiple: true },
+            { key: 'boothNumber', label: 'Booth No', type: 'text', placeholder: 'Enter Booth No...' }
+          ]
+        };
+      }
+    });
+  }
+
+  handleFilterChange(filterState: Record<string, any>) {
+    // filterState for multiple selects is an array. Convert to comma separated string if backend expects string.
+    // If backend expects numeric ID, and we pass array of IDs, it might fail if backend doesn't support array.
+    // Assuming backend might take comma separated for mandalId/sectorId if we pass multiple. 
+    // Wait, the API for booths takes mandalId as int usually? Let's check Booth API. 
+    // Usually, list APIs support CSV or we send the first one. Let's send CSV.
+    const mIds = filterState['mandalId'];
+    if (Array.isArray(mIds)) {
+      this.mandalId = mIds.length > 0 ? mIds.join(',') : null;
+    } else {
+      this.mandalId = mIds || null;
+    }
+
+    const sIds = filterState['sectorId'];
+    if (Array.isArray(sIds)) {
+      this.sectorId = sIds.length > 0 ? sIds.join(',') : null;
+    } else {
+      this.sectorId = sIds || null;
+    }
+
+    // Check if boothNumber/boothName search is needed
+    const boothNoFilter = this.config.filters?.find(f => f.key === 'boothNumber');
+    const boothNameFilter = this.config.filters?.find(f => f.key === 'boothName');
+
+    if (boothNoFilter?.value) {
+      this.searchTerm = String(boothNoFilter.value);
+    } else if (boothNameFilter?.value) {
+      this.searchTerm = String(boothNameFilter.value);
+    } else {
+      this.searchTerm = '';
+    }
+
+    // Load sectors if Mandal changed (fetch sectors for first selected mandal, or all if backend supports CSV)
+    if (this.mandalId && this.config.filters) {
+      const sectorFilter = this.config.filters.find(f => f.key === 'sectorId');
+      if (sectorFilter) {
+        // Sector API takes mandalId. We'll pass the first or CSV
+        this.sectorService.getAllSectors({ mandalId: Array.isArray(mIds) ? mIds[0] : this.mandalId, pageSize: 500000 }).subscribe(res => {
+          const list = res?.data?.items || res?.data || res || [];
+          sectorFilter.options = list.map((s: any) => ({ label: s.name || s.sectorName, value: s.sectorId || s.id }));
+        });
+      }
+    } else if (!this.mandalId && this.config.filters) {
+      // Clear sector options
+      const sectorFilter = this.config.filters.find(f => f.key === 'sectorId');
+      if (sectorFilter) {
+        sectorFilter.options = [];
+        filterState['sectorId'] = null;
+        this.sectorId = null;
+        sectorFilter.value = null;
+      }
+    }
+
+    this.pageNumber = 1;
+    this.loadBooths();
   }
 
   loadBooths() {
@@ -99,14 +185,21 @@ export class BoothComponent implements OnInit {
       searchTerm: this.searchTerm,
       sortBy: this.sortBy,
       isDescending: this.isDescending,
-      mandalId: this.mandalId,
-      sectorId: this.sectorId
+      mandalIds: this.mandalId,
+      sectorIds: this.sectorId
     };
 
     const userId = this.authService.getUserId();
     if (userId) {
       params.userId = userId;
     }
+
+    // Clean up empty params to prevent URL clutter (e.g. sectorId=)
+    Object.keys(params).forEach(key => {
+      if (params[key] === null || params[key] === undefined || params[key] === '') {
+        delete params[key];
+      }
+    });
 
     this.boothService.getAllBooths(params).subscribe({
       next: (response) => {
@@ -376,12 +469,12 @@ export class BoothComponent implements OnInit {
 
   config: TableConfig = {
     selectable: false,
-    filterable: true,
+    filterable: false,
     paginated: true,
     defaultPageSize: 10,
     pageSizeOptions: [10, 20, 50],
     searchable: true,
-    searchPlaceholder: 'Search booths...',
+    searchPlaceholder: 'Search...',
     showRowNumbers: true,
     striped: true,
     hoverable: true,
@@ -525,6 +618,37 @@ export class BoothComponent implements OnInit {
 
   handleExport(format: string) {
     if (!format) return;
-    this.toastService.showSuccess('Export Started', `Successfully generated ${format.toUpperCase()} export!`);
+
+    this.toastService.showInfo('Exporting...', `Generating ${format.toUpperCase()} file...`);
+
+    let fileName = `booths_${new Date().getTime()}`;
+    let exportObs;
+
+    if (format === 'excel') {
+      exportObs = this.boothService.exportToExcel();
+      fileName += '.xlsx';
+    } else if (format === 'pdf') {
+      exportObs = this.boothService.exportToPdf();
+      fileName += '.pdf';
+    } else {
+      this.toastService.showError('Error', 'Unsupported export format');
+      return;
+    }
+
+    exportObs.subscribe({
+      next: (blob: Blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = fileName;
+        link.click();
+        window.URL.revokeObjectURL(url);
+        this.toastService.showSuccess('Export Success', `${format.toUpperCase()} file downloaded!`);
+      },
+      error: (err) => {
+        console.error('Export error:', err);
+        this.toastService.showError('Export Failed', 'An error occurred while generating the file.');
+      }
+    });
   }
 }

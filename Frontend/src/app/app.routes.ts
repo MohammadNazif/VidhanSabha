@@ -29,10 +29,12 @@ import { CombinedReportComponent } from './components/admin/reports/combined-rep
 import { MandalReportComponent } from './components/admin/reports/mandal-report/mandal-report.component';
 import { BoothVoterDescriptionComponent } from './components/admin/booth-voter-description/booth-voter-description.component';
 import { BoothSamitiComponent } from './components/admin/booth-samiti/booth-samiti.component';
+import { SocialMediaComponent } from './components/admin/socialmedia/socialmedia.component'; // trigger rebuild
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
-  { path: '', component: DashboardComponent },
+  { path: 'dashboard', component: DashboardComponent },
+  { path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: 'combined-report', component: CombinedReportComponent },
   { path: 'mandal-report', component: MandalReportComponent },
   { path: 'booth-voter-description', component: BoothVoterDescriptionComponent },
@@ -67,6 +69,7 @@ export const routes: Routes = [
   { path: 'disabled-list', component: SeniorDisabledComponent },
   { path: 'allow-access', component: AllowAccessComponent },
   { path: 'allow-access-list', component: AllowAccessListComponent },
+  { path: 'social-media', component: SocialMediaComponent },
   { path: 'superadmin/dashboard', component: SuperDashboardComponent },
   { path: 'superadmin/designation', component: DesignationComponent },
   { path: 'superadmin/state', component: StateComponent },

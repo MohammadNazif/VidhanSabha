@@ -9,8 +9,8 @@ using VidhanSabha.Application.Pannels.Admin.Booth.Dtos;
 
 namespace VidhanSabha.Application.Pannels.Admin.Booth.Queries
 {
-   
-    public record GetAllBoothsQuery(BoothQueryParams QueryParams,string userId)
+
+    public record GetAllBoothsQuery(BoothQueryParams QueryParams, string userId)
         : IRequest<PagedResult<BoothResponseDto>>;
 }
 

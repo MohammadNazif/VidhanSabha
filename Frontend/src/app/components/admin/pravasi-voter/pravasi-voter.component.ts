@@ -12,6 +12,8 @@ import { CrudHandlerService } from '../../../Services/common/crud-handler.servic
 import { AuthServiceService } from '../../../Services/Auth/auth.service';
 import { ActivatedRoute } from '@angular/router';
 import { ModulePermission } from '../../../models/module-permission.enum';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-pravasi-voter',
@@ -25,13 +27,17 @@ export class PravasiVoterComponent implements OnInit {
 
   voterList: any[] = [];
   totalCount = 0;
-  
+
   // Server-side state
   pageNumber = 1;
   pageSize = 50;
   searchTerm = '';
   sortBy = '';
   isDescending = false;
+
+  boothIds: string | null = null;
+  castIds: string | null = null;
+  occupationIds: string | null = null;
 
   isListView = false;
 
@@ -48,6 +54,7 @@ export class PravasiVoterComponent implements OnInit {
 
   config: TableConfig = {
     searchable: true,
+    searchPlaceholder: 'Search...',
     paginated: true,
     showRowNumbers: true,
     striped: true,
@@ -77,12 +84,12 @@ export class PravasiVoterComponent implements OnInit {
         label: 'Booth No',
         type: 'select',
         placeholder: '-- Select Booth No --',
-        apiUrl: 'booth/getall',
+        apiUrl: 'common/boothNumber',
         apiMapper: (data: any) => {
           const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
           return list.map((item: any) => ({
-            value: String(item.id),
-            label: `${item.boothNumber} - ${item.pollingStationName || ''}`
+            value: String(item.boothId),
+            label: ` Booth -${item.boothNumber}`
           }));
         },
         validations: [Validators.required],
@@ -203,15 +210,83 @@ export class PravasiVoterComponent implements OnInit {
     private toastService: ToastService,
     private crudHandler: CrudHandlerService,
     private authService: AuthServiceService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private http: HttpClient
   ) { }
 
   ngOnInit() {
     this.route.url.subscribe(url => {
       const path = url[0]?.path || '';
       this.isListView = path.includes('-list');
+      this.loadFilterOptions();
       this.loadVoters();
     });
+  }
+
+  loadFilterOptions() {
+    if (!this.isListView) {
+      this.config.filters = [];
+      return;
+    }
+
+    this.config.filters = [
+      { key: 'boothIds', label: 'Booth', type: 'select', options: [], placeholder: '-- Select Booth --', multiple: true },
+      { key: 'castIds', label: 'Caste', type: 'select', options: [], placeholder: '-- Select Caste --', multiple: true },
+      { key: 'occupationIds', label: 'Occupation', type: 'select', options: [], placeholder: '-- Select Occupation --', multiple: true }
+    ];
+
+    // Load Booths
+    this.http.get<any>(`${environment.apiUrl}/common/boothnumber`).subscribe({
+      next: (res) => {
+        const filter = this.config.filters?.find(f => f.key === 'boothIds');
+        if (filter) {
+          const list = Array.isArray(res?.data?.items) ? res.data.items : (Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []));
+          filter.options = list.map((item: any) => ({
+            value: String(item.boothId),
+            label: ` Booth -${item.boothNumber}`
+          }));
+        }
+      }
+    });
+
+    // Load Castes
+    this.http.get<any>(`${environment.apiUrl}/common/cast?id=`).subscribe({
+      next: (res) => {
+        const filter = this.config.filters?.find(f => f.key === 'castIds');
+        if (filter) {
+          const list = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
+          filter.options = list.map((item: any) => ({
+            value: String(item.id),
+            label: item.name
+          }));
+        }
+      }
+    });
+
+    // Load Occupations
+    this.http.get<any>(`${environment.apiUrl}/common/getoccupation`).subscribe({
+      next: (res) => {
+        const filter = this.config.filters?.find(f => f.key === 'occupationIds');
+        if (filter) {
+          const list = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
+          filter.options = list.map((item: any) => ({
+            value: String(item.id),
+            label: item.occupation
+          }));
+        }
+      }
+    });
+  }
+
+  handleFilterChange(filterState: Record<string, any>) {
+    const processIds = (ids: any) => Array.isArray(ids) ? (ids.length > 0 ? ids.join(',') : null) : (ids || null);
+
+    this.boothIds = processIds(filterState['boothIds']);
+    this.castIds = processIds(filterState['castIds']);
+    this.occupationIds = processIds(filterState['occupationIds']);
+
+    this.pageNumber = 1;
+    this.loadVoters();
   }
 
   loadVoters() {
@@ -220,13 +295,23 @@ export class PravasiVoterComponent implements OnInit {
       pageSize: this.pageSize,
       searchTerm: this.searchTerm,
       sortBy: this.sortBy,
-      isDescending: this.isDescending
+      isDescending: this.isDescending,
+      boothIds: this.boothIds,
+      castIds: this.castIds,
+      occupationIds: this.occupationIds
     };
 
     const userId = this.authService.getUserId();
     if (userId) {
       params.userId = userId;
     }
+
+    // Clean up empty params
+    Object.keys(params).forEach(key => {
+      if (params[key] === null || params[key] === undefined || params[key] === '') {
+        delete params[key];
+      }
+    });
 
     this.voterService.getAllPravasivoters(params).subscribe({
       next: (response) => {
@@ -263,13 +348,13 @@ export class PravasiVoterComponent implements OnInit {
   handleSortChange(event: any) {
     this.sortBy = event.column;
     this.isDescending = event.direction === 'desc';
-    this.pageNumber = 1; 
+    this.pageNumber = 1;
     this.loadVoters();
   }
 
   handleSearchChange(term: string) {
     this.searchTerm = term;
-    this.pageNumber = 1; 
+    this.pageNumber = 1;
     this.loadVoters();
   }
 
@@ -333,5 +418,41 @@ export class PravasiVoterComponent implements OnInit {
       true,
       ModulePermission.PravashiVoter
     );
+  }
+
+  handleExport(format: string) {
+    if (!format) return;
+    
+    this.toastService.showInfo('Exporting...', `Generating ${format.toUpperCase()} file...`);
+
+    let fileName = `pravasi_voters_${new Date().getTime()}`;
+    let exportObs;
+
+    if (format === 'excel') {
+      exportObs = this.voterService.exportToExcel();
+      fileName += '.xlsx';
+    } else if (format === 'pdf') {
+      exportObs = this.voterService.exportToPdf();
+      fileName += '.pdf';
+    } else {
+      this.toastService.showError('Error', 'Unsupported export format');
+      return;
+    }
+
+    exportObs.subscribe({
+      next: (blob: Blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = fileName;
+        link.click();
+        window.URL.revokeObjectURL(url);
+        this.toastService.showSuccess('Export Success', `${format.toUpperCase()} file downloaded!`);
+      },
+      error: (err) => {
+        console.error('Export error:', err);
+        this.toastService.showError('Export Failed', 'An error occurred while generating the file.');
+      }
+    });
   }
 }

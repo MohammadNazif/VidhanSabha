@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using VidhanSabha.Application.Common.Booth.Dtos;
 using VidhanSabha.Application.Common.Dtos;
+using VidhanSabha.Application.Common.ExportPdfExcel.Dtos;
 using VidhanSabha.Application.Pannels.Admin.Booth.Dtos;
 using VidhanSabha.Domain.Entities.Admin;
 
@@ -12,6 +13,9 @@ namespace VidhanSabha.Application.Pannels.Admin.Booth.Interfaces
 {
     public interface IBoothRepository
     {
+         Task<List<BoothExportRow>> GetAllForExportAsync(
+         BoothQueryParams qp,
+          CancellationToken ct = default);
         Task<Tbl_Booth?> GetByIdAsync(int id, CancellationToken ct = default);
         Task<Tbl_BoothSanyojak?> GetByBoothIdAsync(int boothId, CancellationToken ct);
         Task<List<BoothInchargeResponse>> GetInchargeByBoothIdAsync(int? boothId, CancellationToken ct);

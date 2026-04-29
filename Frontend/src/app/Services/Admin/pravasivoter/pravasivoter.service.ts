@@ -23,4 +23,12 @@ export class PravasivoterService extends BaseApiService {
   deletePravasivoter(id: number): Observable<any> {
     return this.delete(this.entity, id);
   }
+  
+  exportToExcel(): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/${this.entity}/export/excel`, { responseType: 'blob' });
+  }
+
+  exportToPdf(): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/${this.entity}/export/pdf`, { responseType: 'blob' });
+  }
 }

@@ -94,7 +94,7 @@ export class LoginComponent {
     } else if (r === 'STATEPRABHARI') {
       this.router.navigate(['/state-prabhari/dashboard']);
     } else {
-      this.router.navigate(['/']);
+      this.router.navigate(['/dashboard']);
     }
   }
 }

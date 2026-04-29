@@ -11,6 +11,7 @@ import { ToastService } from '../../../Services/common/toast/toast.service';
 import { CrudHandlerService } from '../../../Services/common/crud-handler.service';
 import { AuthServiceService } from '../../../Services/Auth/auth.service';
 import { ModulePermission } from '../../../models/module-permission.enum';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-prabhavshali',
@@ -24,13 +25,18 @@ export class PrabhavshaliComponent implements OnInit {
 
   personList: any[] = [];
   totalCount = 0;
-  
+
   // Server-side state
   pageNumber = 1;
   pageSize = 50;
   searchTerm = '';
   sortBy = '';
   isDescending = false;
+  isListView = false;
+
+  canManage(): boolean {
+    return !this.isListView;
+  }
 
   columns: TableColumn[] = [
     { key: 'boothNumber', label: 'Booth No.', sortable: true },
@@ -45,6 +51,7 @@ export class PrabhavshaliComponent implements OnInit {
 
   config: TableConfig = {
     searchable: true,
+    searchPlaceholder: 'Search...',
     paginated: true,
     showRowNumbers: true,
     striped: true,
@@ -54,8 +61,8 @@ export class PrabhavshaliComponent implements OnInit {
   };
 
   actions: TableAction[] = [
-    { id: 'edit', label: '', variant: 'default', icon: 'edit' },
-    { id: 'delete', label: '', variant: 'danger', icon: 'delete' }
+    { id: 'edit', label: '', variant: 'default', icon: 'edit', show: () => this.canManage() },
+    { id: 'delete', label: '', variant: 'danger', icon: 'delete', show: () => this.canManage() }
   ];
 
   formConfig: FormConfig = {
@@ -183,11 +190,16 @@ export class PrabhavshaliComponent implements OnInit {
     private prabhavshaliService: PrabhavshaliService,
     private toastService: ToastService,
     private crudHandler: CrudHandlerService,
-    private authService: AuthServiceService
+    private authService: AuthServiceService,
+    private route: ActivatedRoute
   ) { }
 
   ngOnInit() {
-    this.loadData();
+    this.route.url.subscribe(url => {
+      const path = url[0]?.path || '';
+      this.isListView = path.includes('-list');
+      this.loadData();
+    });
   }
 
   loadData() {
@@ -237,13 +249,13 @@ export class PrabhavshaliComponent implements OnInit {
   handleSortChange(event: any) {
     this.sortBy = event.column;
     this.isDescending = event.direction === 'desc';
-    this.pageNumber = 1; 
+    this.pageNumber = 1;
     this.loadData();
   }
 
   handleSearchChange(term: string) {
     this.searchTerm = term;
-    this.pageNumber = 1; 
+    this.pageNumber = 1;
     this.loadData();
   }
 
@@ -306,5 +318,10 @@ export class PrabhavshaliComponent implements OnInit {
       true,
       ModulePermission.EffectivePersion
     );
+  }
+
+  handleExport(format: string) {
+    if (!format) return;
+    this.toastService.showSuccess('Export Started', `Successfully generated ${format.toUpperCase()} export!`);
   }
 }

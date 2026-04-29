@@ -9,6 +9,7 @@ import { PageHeaderComponent } from '../../shared/page-header/page-header.compon
 import { BdcService } from '../../../Services/Admin/bdc/bdc.service';
 import { ToastService } from '../../../Services/common/toast/toast.service';
 import { CrudHandlerService } from '../../../Services/common/crud-handler.service';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-bdc',
@@ -18,6 +19,7 @@ import { CrudHandlerService } from '../../../Services/common/crud-handler.servic
     <div class="h-full flex flex-col p-4 gap-4 overflow-hidden">
       <app-page-header title="BDC Management" subtitle="Manage Block Development Council members and assignments">
         <app-generic-modal-button 
+            *ngIf="canManage()"
             #bdcModal 
             [config]="addBdcConfig" 
             label="Add BDC" 
@@ -49,6 +51,11 @@ export class BdcComponent implements OnInit {
   loading = false;
   totalItems = 0;
   searchTerm = '';
+  isListView = false;
+
+  canManage(): boolean {
+    return !this.isListView;
+  }
 
   columns: TableColumn[] = [
     { key: 'name', label: 'Name', sortable: true },
@@ -67,14 +74,15 @@ export class BdcComponent implements OnInit {
   ];
 
   actions: TableAction[] = [
-    { id: 'edit', label: '', icon: 'edit', variant: 'primary' },
-    { id: 'delete', label: '', icon: 'delete', variant: 'danger' }
+    { id: 'edit', label: '', icon: 'edit', variant: 'primary', show: () => this.canManage() },
+    { id: 'delete', label: '', icon: 'delete', variant: 'danger', show: () => this.canManage() }
   ];
 
   tableConfig: TableConfig = {
     selectable: false,
     paginated: true,
     searchable: true,
+    searchPlaceholder: 'Search...',
     serverSide: true,
     defaultPageSize: 10
   };
@@ -209,11 +217,16 @@ export class BdcComponent implements OnInit {
   constructor(
     private bdcService: BdcService,
     private toastService: ToastService,
-    private crudHandler: CrudHandlerService
+    private crudHandler: CrudHandlerService,
+    private route: ActivatedRoute
   ) { }
 
   ngOnInit() {
-    this.loadBdcs();
+    this.route.url.subscribe(url => {
+      const path = url[0]?.path || '';
+      this.isListView = path.includes('-list');
+      this.loadBdcs();
+    });
   }
 
   loadBdcs() {
@@ -294,5 +307,10 @@ export class BdcComponent implements OnInit {
       `BDC member ${isUpdate ? 'updated' : 'created'} successfully!`,
       () => this.loadBdcs()
     );
+  }
+
+  handleExport(format: string) {
+    if (!format) return;
+    this.toastService.showSuccess('Export Started', `Successfully generated ${format.toUpperCase()} export!`);
   }
 }

@@ -121,12 +121,12 @@ export class MandalComponent implements OnInit {
 
   config: TableConfig = {
     selectable: false,
-    filterable: true,
+    filterable: false,
     paginated: true,
     defaultPageSize: 50,
     pageSizeOptions: [10, 20, 50],
     searchable: true,
-    searchPlaceholder: 'Search mandals...',
+    searchPlaceholder: 'Search...',
     showRowNumbers: true,
     striped: true,
     hoverable: true,

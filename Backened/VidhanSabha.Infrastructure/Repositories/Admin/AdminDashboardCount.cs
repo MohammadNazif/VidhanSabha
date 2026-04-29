@@ -55,8 +55,6 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
                  Block = await _context.Tbl_Block.CountAsync( x => x.Status),
                  BDC  = await _context.Tbl_Block.CountAsync(x => x.Status)
 
-
-
             };
         }
     }

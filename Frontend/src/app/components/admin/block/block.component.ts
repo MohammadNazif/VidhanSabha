@@ -9,6 +9,7 @@ import { PageHeaderComponent } from '../../shared/page-header/page-header.compon
 import { BlockService } from '../../../Services/Admin/block/block.service';
 import { ToastService } from '../../../Services/common/toast/toast.service';
 import { CrudHandlerService } from '../../../Services/common/crud-handler.service';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-block',
@@ -29,6 +30,11 @@ export class BlockComponent implements OnInit {
   searchTerm = '';
   sortBy = '';
   isDescending = false;
+  isListView = false;
+
+  canManage(): boolean {
+    return !this.isListView;
+  }
 
   columns: TableColumn[] = [
     { key: 'blockName', label: 'Block Name', sortable: true },
@@ -42,6 +48,7 @@ export class BlockComponent implements OnInit {
 
   config: TableConfig = {
     searchable: true,
+    filterable: false,
     paginated: true,
     showRowNumbers: true,
     striped: true,
@@ -51,8 +58,8 @@ export class BlockComponent implements OnInit {
   };
 
   actions: TableAction[] = [
-    { id: 'edit', label: '', variant: 'default', icon: 'edit' },
-    { id: 'delete', label: '', variant: 'danger', icon: 'delete' }
+    { id: 'edit', label: '', variant: 'default', icon: 'edit', show: () => this.canManage() },
+    { id: 'delete', label: '', variant: 'danger', icon: 'delete', show: () => this.canManage() }
   ];
 
   formConfig: FormConfig = {
@@ -169,11 +176,16 @@ export class BlockComponent implements OnInit {
   constructor(
     private blockService: BlockService,
     private toastService: ToastService,
-    private crudHandler: CrudHandlerService
+    private crudHandler: CrudHandlerService,
+    private route: ActivatedRoute
   ) { }
 
   ngOnInit() {
-    this.loadData();
+    this.route.url.subscribe(url => {
+      const path = url[0]?.path || '';
+      this.isListView = path.includes('-list');
+      this.loadData();
+    });
   }
 
   loadData() {

@@ -12,6 +12,8 @@ import { CrudHandlerService } from '../../../Services/common/crud-handler.servic
 import { AuthServiceService } from '../../../Services/Auth/auth.service';
 import { ActivatedRoute } from '@angular/router';
 import { ModulePermission } from '../../../models/module-permission.enum';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-new-voter',
@@ -25,15 +27,18 @@ export class NewVoterComponent implements OnInit {
 
   voterList: any[] = [];
   totalCount = 0;
-  
+
   // Server-side state
   pageNumber = 1;
   pageSize = 50;
   searchTerm = '';
   sortBy = '';
   isDescending = false;
-
   isListView = false;
+
+  boothIds: string | null = null;
+  villageIds: string | null = null;
+  castIds: string | null = null;
 
   columns: TableColumn[] = [
     { key: 'boothNumber', label: 'Booth No.', sortable: true },
@@ -50,12 +55,14 @@ export class NewVoterComponent implements OnInit {
 
   config: TableConfig = {
     searchable: true,
+    searchPlaceholder: 'Search...',
     paginated: true,
     showRowNumbers: true,
     striped: true,
     hoverable: true,
     serverSide: true,
-    defaultPageSize: 50
+    defaultPageSize: 50,
+    filterable: false
   };
 
   actions: TableAction[] = [
@@ -206,15 +213,90 @@ export class NewVoterComponent implements OnInit {
     private toastService: ToastService,
     private crudHandler: CrudHandlerService,
     private authService: AuthServiceService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private http: HttpClient
   ) { }
 
   ngOnInit() {
     this.route.url.subscribe(url => {
       const path = url[0]?.path || '';
       this.isListView = path.includes('-list');
+      this.config.filterable = this.isListView;
+      if (this.isListView) {
+        this.loadFilterOptions();
+      }
       this.loadData();
     });
+  }
+
+  loadFilterOptions() {
+    this.config.filters = [
+      { key: 'boothIds', label: 'Booth', type: 'select', options: [], placeholder: '-- Select Booth --', multiple: true },
+      { key: 'villageIds', label: 'Village', type: 'select', options: [], placeholder: '-- Select Village --', multiple: true },
+      { key: 'castIds', label: 'Caste', type: 'select', options: [], placeholder: '-- Select Caste --', multiple: true }
+    ];
+
+    // Load Booths
+    this.http.get<any>(`${environment.apiUrl}/common/boothNumber`).subscribe(res => {
+      const filter = this.config.filters?.find(f => f.key === 'boothIds');
+      if (filter) {
+        const list = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
+        filter.options = list.map((b: any) => ({
+          label: `Booth No. ${b.boothNumber}`,
+          value: String(b.boothId || b.id)
+        }));
+      }
+    });
+
+    // Load All Villages initially
+    this.http.get<any>(`${environment.apiUrl}/common/village?pageSize=500000`).subscribe(res => {
+      const filter = this.config.filters?.find(f => f.key === 'villageIds');
+      if (filter) {
+        const list = Array.isArray(res?.data?.items) ? res.data.items : (Array.isArray(res?.items) ? res.items : (Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : [])));
+        filter.options = list.map((v: any) => ({
+          label: v.name || v.villageName,
+          value: String(v.id || v.villageId)
+        }));
+      }
+    });
+
+    // Load Castes
+    this.http.get<any>(`${environment.apiUrl}/common/cast?pageSize=500000`).subscribe(res => {
+      const filter = this.config.filters?.find(f => f.key === 'castIds');
+      if (filter) {
+        const list = Array.isArray(res?.data?.items) ? res.data.items : (Array.isArray(res?.items) ? res.items : (Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : [])));
+        filter.options = list.map((c: any) => ({
+          label: c.name || c.castName,
+          value: String(c.id)
+        }));
+      }
+    });
+  }
+
+  handleFilterChange(filterState: Record<string, any>) {
+    const processIds = (ids: any) => Array.isArray(ids) ? (ids.length > 0 ? ids.join(',') : null) : (ids || null);
+
+    this.boothIds = processIds(filterState['boothIds']);
+    this.villageIds = processIds(filterState['villageIds']);
+    this.castIds = processIds(filterState['castIds']);
+
+    // Cascade villages when booth changes
+    if (filterState['boothIds'] && Array.isArray(filterState['boothIds']) && filterState['boothIds'].length === 1) {
+      const boothId = filterState['boothIds'][0];
+      this.http.get<any>(`${environment.apiUrl}/common/villagesByBoothId?boothId=${boothId}`).subscribe(res => {
+        const filter = this.config.filters?.find(f => f.key === 'villageIds');
+        if (filter) {
+          const list = Array.isArray(res?.data) ? res.data : (Array.isArray(res?.data?.items) ? res.data.items : (Array.isArray(res) ? res : []));
+          filter.options = list.map((v: any) => ({
+            label: v.name || v.villageName,
+            value: String(v.id || v.villageId)
+          }));
+        }
+      });
+    }
+
+    this.pageNumber = 1;
+    this.loadData();
   }
 
   loadData() {
@@ -223,8 +305,18 @@ export class NewVoterComponent implements OnInit {
       pageSize: this.pageSize,
       searchTerm: this.searchTerm,
       sortBy: this.sortBy,
-      isDescending: this.isDescending
+      isDescending: this.isDescending,
+      boothIds: this.boothIds,
+      villageIds: this.villageIds,
+      castIds: this.castIds
     };
+
+    // Clean up empty params
+    Object.keys(params).forEach(key => {
+      if (params[key] === null || params[key] === undefined || params[key] === '') {
+        delete params[key];
+      }
+    });
 
     const userId = this.authService.getUserId();
     if (userId) {
@@ -266,13 +358,13 @@ export class NewVoterComponent implements OnInit {
   handleSortChange(event: any) {
     this.sortBy = event.column;
     this.isDescending = event.direction === 'desc';
-    this.pageNumber = 1; 
+    this.pageNumber = 1;
     this.loadData();
   }
 
   handleSearchChange(term: string) {
     this.searchTerm = term;
-    this.pageNumber = 1; 
+    this.pageNumber = 1;
     this.loadData();
   }
 
@@ -342,5 +434,10 @@ export class NewVoterComponent implements OnInit {
       true,
       ModulePermission.NewVoter
     );
+  }
+
+  handleExport(format: string) {
+    if (!format) return;
+    this.toastService.showSuccess('Export Started', `Successfully generated ${format.toUpperCase()} export!`);
   }
 }

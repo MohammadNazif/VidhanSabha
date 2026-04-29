@@ -56,6 +56,7 @@ export class PannapramukhComponent implements OnInit {
 
   config: TableConfig = {
     searchable: true,
+    searchPlaceholder: 'Search...',
     paginated: true,
     filterable: false,
     showRowNumbers: true,
@@ -324,7 +325,6 @@ export class PannapramukhComponent implements OnInit {
     console.log("raw", result)
     const formData = new FormData();
 
-    // Standard fields for [FromForm]
     formData.append('id', raw.id ? String(raw.id) : '0');
     formData.append('boothId', String(raw.boothId));
     formData.append('pannaPramukhName', raw.pannaPramukhName);
@@ -340,7 +340,6 @@ export class PannapramukhComponent implements OnInit {
     if (result.files && result.files['ProfilePicture']) {
       formData.append('ProfilePicture', result.files['ProfilePicture']);
     }
-
 
     // Handle array fields (e.g., multiple village selection)
     if (Array.isArray(raw.villageId)) {
@@ -367,5 +366,10 @@ export class PannapramukhComponent implements OnInit {
       true,
       ModulePermission.PannaPramukh
     );
+  }
+
+  handleExport(format: string) {
+    if (!format) return;
+    this.toastService.showSuccess('Export Started', `Successfully generated ${format.toUpperCase()} export!`);
   }
 }

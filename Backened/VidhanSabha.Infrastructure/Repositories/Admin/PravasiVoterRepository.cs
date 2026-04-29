@@ -53,59 +53,130 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
             throw new NotImplementedException();
         }
 
-        public async Task<PagedResult<PravasiVoterResponseDto>> GetAllAsync(PravasiQueryParams qp,CancellationToken ct=default)
+        public async Task<PagedResult<PravasiVoterResponseDto>> GetAllAsync(
+     PravasiQueryParams qp, CancellationToken ct = default)
         {
             var query = _context.Tbl_PravasiVoter
-               .AsNoTracking()
-               .Where(b =>
-                   (!qp.Id.HasValue || b.Id == qp.Id) && (b.UserId == qp.UserId) &&
-                   (!qp.BoothId.HasValue || b.Booth.Id == qp.BoothId) &&
-                   (!qp.CastId.HasValue || b.Cast.Id == qp.CastId) &&
-                   (!qp.OccupationId.HasValue || b.OccupationId == qp.OccupationId)
-                   );
+                .AsNoTracking()
+                .AsQueryable();
+
+            var boothIds = qp.GetBoothIds();
+            var castIds = qp.GetCastIds();
+            var occupationIds = qp.GetOccupationIds();
+
+            // ✅ FIX 1: query = assign karo, sirf query.Where nahi
+            query = query.Where(b =>
+                (!qp.Id.HasValue || b.Id == qp.  Id) &&
+                b.UserId == qp.UserId);                 // ✅ FIX 2: closing brace sahi jagah
+
+            if (boothIds.Any())
+                query = query.Where(b => boothIds.Contains(b.BoothId));
+
+            if (castIds.Any())
+                query = query.Where(b => castIds.Contains(b.CastId));
+
+            if (occupationIds.Any())
+                query = query.Where(b => occupationIds.Contains(b.OccupationId));
 
             Expression<Func<Tbl_PravasiVoter, bool>>? search = null;
-
             if (!string.IsNullOrWhiteSpace(qp.SearchTerm))
             {
                 var term = qp.SearchTerm.Trim().ToLower();
+                // ✅ FIX 3: BoothNumber int hai — Convert crash kar sakta hai
+                // string match ke liye ToString() use karo
                 search = b =>
-                    b.Booth.BoothNumber.Equals(Convert.ToInt32(term)) ||
+                    b.Booth.BoothNumber.ToString().Contains(term) ||
                     b.Name.ToLower().Contains(term) ||
                     b.Cast.CastName.ToLower().Contains(term) ||
-                    //b.Village.VillageName.ToLower().Contains(term) ||
                     b.VoterId.ToLower().Contains(term);
             }
 
             return await query.ToPagedResultAsync(
-               queryParams: qp,
-               searchPredicate: search,
-               defaultSort: b => b.Booth.BoothNumber,
-               projection: m => new PravasiVoterResponseDto
-               {
-                   Id = m.Id,
-                   BoothId = m.BoothId,
-                   BoothNumber = m.Booth.BoothNumber,
-                   Name = m.Name,
-                   Mobile = m.Mobile,
-                   CategoryId = m.CategoryId,
-                   CategoryName = m.Category.Name,
-                   CastId = m.CastId,
-                   CastName = m.Cast.CastName,
-                   OccupationId = m.OccupationId,
-                   Occupation = m.Occupation.Occupation,
-                   VoterId = m.VoterId,
-                   CurrentAddress = m.CurrentAddress,
-                   Villages = m.Villages.Select(v => new VillageResponseDto
-                   {
-                       VillageId = v.VillageId,
-                       VillageName = v.Village.VillageName
-                   }).ToList(),
-               },
-               ct:ct
-               );
+                queryParams: qp,
+                searchPredicate: search,
+                defaultSort: b => b.Booth.BoothNumber,
+                projection: m => new PravasiVoterResponseDto
+                {
+                    Id = m.Id,
+                    BoothId = m.BoothId,
+                    BoothNumber = m.Booth.BoothNumber,
+                    Name = m.Name,
+                    Mobile = m.Mobile,
+                    CategoryId = m.CategoryId,
+                    CategoryName = m.Category.Name,
+                    CastId = m.CastId,
+                    CastName = m.Cast.CastName,
+                    OccupationId = m.OccupationId,
+                    Occupation = m.Occupation.Occupation,
+                    VoterId = m.VoterId,
+                    CurrentAddress = m.CurrentAddress,
+                    Villages = m.Villages.Select(v => new VillageResponseDto
+                    {
+                        VillageId = v.VillageId,
+                        VillageName = v.Village.VillageName
+                    }).ToList()
+                },
+                ct: ct);
         }
+        public async Task<List<PravasiVoterResponseDto>> GetAllForExportAsync(
+         PravasiQueryParams qp, CancellationToken ct = default)
+        {
+            var query = _context.Tbl_PravasiVoter
+                .AsNoTracking()
+                .AsQueryable();
 
+            var boothIds = qp.GetBoothIds();
+            var castIds = qp.GetCastIds();
+            var occupationIds = qp.GetOccupationIds();
+
+            query = query.Where(b =>
+                (!qp.Id.HasValue || b.Id == qp.Id) &&
+                b.UserId == qp.UserId);
+
+            if (boothIds.Any())
+                query = query.Where(b => boothIds.Contains(b.BoothId));
+
+            if (castIds.Any())
+                query = query.Where(b => castIds.Contains(b.CastId));
+
+            if (occupationIds.Any())
+                query = query.Where(b => occupationIds.Contains(b.OccupationId));
+
+            if (!string.IsNullOrWhiteSpace(qp.SearchTerm))
+            {
+                var term = qp.SearchTerm.Trim().ToLower();
+                query = query.Where(b =>
+                    b.Booth.BoothNumber.ToString().Contains(term) ||
+                    b.Name.ToLower().Contains(term) ||
+                    b.Cast.CastName.ToLower().Contains(term) ||
+                    b.VoterId.ToLower().Contains(term));
+            }
+
+            return await query
+                .OrderBy(b => b.Booth.BoothNumber)
+                .Select(m => new PravasiVoterResponseDto
+                {
+                    Id = m.Id,
+                    BoothId = m.BoothId,
+                    BoothNumber = m.Booth.BoothNumber,
+                    Name = m.Name,
+                    Mobile = m.Mobile,
+                    CategoryId = m.CategoryId,
+                    CategoryName = m.Category.Name,
+                    CastId = m.CastId,
+                    CastName = m.Cast.CastName,
+                    OccupationId = m.OccupationId,
+                    Occupation = m.Occupation.Occupation,
+                    VoterId = m.VoterId,
+                    CurrentAddress = m.CurrentAddress,
+                    Villages = m.Villages.Select(v => new VillageResponseDto
+                    {
+                        VillageId = v.VillageId,
+                        VillageName = v.Village.VillageName
+                    }).ToList()
+                })
+                .ToListAsync(ct);
+        }
         public async Task<Tbl_PravasiVoter?> GetByIdAsync(int id)
         {
             try

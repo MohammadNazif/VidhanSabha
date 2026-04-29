@@ -27,4 +27,12 @@ export class BoothService extends BaseApiService {
   getBoothIncharge(): Observable<any> {
     return this.http.get(`${this.apiUrl}/common/getboothincharge?pageSize=1000`);
   }
+
+  exportToExcel(): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/${this.entity}/export/excel`, { responseType: 'blob' });
+  }
+
+  exportToPdf(): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/${this.entity}/export/pdf`, { responseType: 'blob' });
+  }
 }

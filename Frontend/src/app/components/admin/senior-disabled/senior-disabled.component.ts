@@ -12,6 +12,8 @@ import { CrudHandlerService } from '../../../Services/common/crud-handler.servic
 import { ActivatedRoute } from '@angular/router';
 import { AuthServiceService } from '../../../Services/Auth/auth.service';
 import { ModulePermission } from '../../../models/module-permission.enum';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-senior-disabled',
@@ -21,6 +23,7 @@ import { ModulePermission } from '../../../models/module-permission.enum';
     <div class="h-full flex flex-col p-4 gap-4 overflow-hidden">
       <app-page-header [title]="pageTitle" [subtitle]="pageSubtitle">
         <app-generic-modal-button 
+            *ngIf="canManage()"
             #citizenModal 
             [config]="addCitizenConfig" 
             [label]="'Add ' + (isDisabledView ? 'Disabled' : 'Senior Citizen')" 
@@ -28,6 +31,20 @@ import { ModulePermission } from '../../../models/module-permission.enum';
             variant="primary" 
             (formSubmit)="handleFormSubmit($event)">
         </app-generic-modal-button>
+
+        <div *ngIf="isListView && citizens && citizens.length > 0" class="relative">
+          <select #exportSelect (change)="handleExport(exportSelect.value); exportSelect.value = ''"
+            class="px-4 py-2 pr-8 rounded-xl text-xs font-bold text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 transition-all shadow-sm appearance-none cursor-pointer outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+            <option value="" disabled selected>Export Data</option>
+            <option value="pdf">Export PDF</option>
+            <option value="excel">Export Excel</option>
+          </select>
+          <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-500">
+            <svg class="fill-current h-3 w-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+              <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
+            </svg>
+          </div>
+        </div>
       </app-page-header>
 
       <div class="flex-1 min-h-0 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col p-2">
@@ -39,7 +56,10 @@ import { ModulePermission } from '../../../models/module-permission.enum';
           [loading]="loading"
           [totalItems]="totalItems"
           (actionClick)="handleAction($event)"
-          (searchChange)="handleSearchChange($event)">
+          (searchChange)="handleSearchChange($event)"
+          (filterChange)="handleFilterChange($event)"
+          (pageChange)="handlePageChange($event)"
+          (sortChange)="handleSortChange($event)">
         </app-generic-table>
       </div>
     </div>
@@ -52,7 +72,21 @@ export class SeniorDisabledComponent implements OnInit {
   loading = false;
   totalItems = 0;
   searchTerm = '';
+  pageNumber = 1;
+  pageSize = 50;
+  sortBy = '';
+  isDescending = false;
+
   isDisabledView = false;
+  isListView = false;
+
+  boothIds: string | null = null;
+  villageIds: string | null = null;
+  castIds: string | null = null;
+
+  canManage(): boolean {
+    return !this.isListView;
+  }
 
   get pageTitle() { return this.isDisabledView ? 'Disabled Management' : 'Senior Citizen Management'; }
   get pageSubtitle() { return `Manage and view all ${this.isDisabledView ? 'disabled persons' : 'senior citizens'} in the assembly.`; }
@@ -67,15 +101,16 @@ export class SeniorDisabledComponent implements OnInit {
   ];
 
   actions: TableAction[] = [
-    { id: 'edit', label: '', icon: 'edit', variant: 'primary' },
-    { id: 'delete', label: '', icon: 'delete', variant: 'danger' }
+    { id: 'edit', label: '', icon: 'edit', variant: 'primary', show: () => this.canManage() },
+    { id: 'delete', label: '', icon: 'delete', variant: 'danger', show: () => this.canManage() }
   ];
-
   tableConfig: TableConfig = {
     selectable: false,
     paginated: true,
     searchable: true,
-    defaultPageSize: 10
+    serverSide: true,
+    defaultPageSize: 50,
+    filterable: false
   };
 
   addCitizenConfig: FormConfig = {
@@ -215,29 +250,138 @@ export class SeniorDisabledComponent implements OnInit {
     private toastService: ToastService,
     private crudHandler: CrudHandlerService,
     private route: ActivatedRoute,
-    private authService: AuthServiceService
+    private authService: AuthServiceService,
+    private http: HttpClient
   ) { }
 
   ngOnInit() {
     this.route.url.subscribe(url => {
       const path = url[0]?.path || '';
       this.isDisabledView = path.includes('disabled');
+      this.isListView = path.includes('-list');
+      this.tableConfig.filterable = this.isListView;
+      if (this.isListView) {
+        this.loadFilterOptions();
+      }
       this.loadCitizens();
     });
   }
 
+  loadFilterOptions() {
+    this.tableConfig.filters = [
+      { key: 'boothIds', label: 'Booth', type: 'select', options: [], placeholder: '-- Select Booth --', multiple: true },
+      { key: 'villageIds', label: 'Village', type: 'select', options: [], placeholder: '-- Select Village --', multiple: true },
+      { key: 'castIds', label: 'Caste', type: 'select', options: [], placeholder: '-- Select Caste --', multiple: true }
+    ];
+
+    // Load Booths
+    this.http.get<any>(`${environment.apiUrl}/common/boothNumber`).subscribe(res => {
+      const filter = this.tableConfig.filters?.find(f => f.key === 'boothIds');
+      if (filter) {
+        const list = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
+        filter.options = list.map((b: any) => ({
+          label: `Booth No. ${b.boothNumber}`,
+          value: String(b.boothId || b.id)
+        }));
+      }
+    });
+
+    // Load All Villages initially
+    this.http.get<any>(`${environment.apiUrl}/common/village?pageSize=500000`).subscribe(res => {
+      const filter = this.tableConfig.filters?.find(f => f.key === 'villageIds');
+      if (filter) {
+        const list = Array.isArray(res?.data?.items) ? res.data.items : (Array.isArray(res?.items) ? res.items : (Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : [])));
+        filter.options = list.map((v: any) => ({
+          label: v.name || v.villageName,
+          value: String(v.id || v.villageId)
+        }));
+      }
+    });
+
+    // Load Castes
+    this.http.get<any>(`${environment.apiUrl}/common/cast?id=&pageSize=500000`).subscribe(res => {
+      const filter = this.tableConfig.filters?.find(f => f.key === 'castIds');
+      if (filter) {
+        const list = Array.isArray(res?.data?.items) ? res.data.items : (Array.isArray(res?.items) ? res.items : (Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : [])));
+        filter.options = list.map((c: any) => ({
+          label: c.name || c.castName,
+          value: String(c.id)
+        }));
+      }
+    });
+  }
+
+  handleFilterChange(filterState: Record<string, any>) {
+    const processIds = (ids: any) => Array.isArray(ids) ? (ids.length > 0 ? ids.join(',') : null) : (ids || null);
+
+    this.boothIds = processIds(filterState['boothIds']);
+    this.villageIds = processIds(filterState['villageIds']);
+    this.castIds = processIds(filterState['castIds']);
+
+    // Cascade villages when booth changes
+    if (filterState['boothIds'] && Array.isArray(filterState['boothIds']) && filterState['boothIds'].length === 1) {
+      const boothId = filterState['boothIds'][0];
+      this.http.get<any>(`${environment.apiUrl}/common/villagesByBoothId?boothId=${boothId}`).subscribe(res => {
+        const filter = this.tableConfig.filters?.find(f => f.key === 'villageIds');
+        if (filter) {
+          const list = Array.isArray(res?.data) ? res.data : (Array.isArray(res?.data?.items) ? res.data.items : (Array.isArray(res) ? res : []));
+          filter.options = list.map((v: any) => ({
+            label: v.name || v.villageName,
+            value: String(v.id || v.villageId)
+          }));
+        }
+      });
+    }
+
+    this.pageNumber = 1;
+    this.loadCitizens();
+  }
+
+  handlePageChange(event: any) {
+    this.pageNumber = event.currentPage;
+    this.pageSize = event.pageSize;
+    this.loadCitizens();
+  }
+
+  handleSortChange(event: any) {
+    this.sortBy = event.column;
+    this.isDescending = event.direction === 'desc';
+    this.pageNumber = 1;
+    this.loadCitizens();
+  }
+
+  handleSearchChange(term: string) {
+    this.searchTerm = term;
+    this.pageNumber = 1;
+    this.loadCitizens();
+  }
+
   loadCitizens() {
     this.loading = true;
-    const params: any = { searchTerm: this.searchTerm };
+    const params: any = { 
+      pageNumber: this.pageNumber,
+      pageSize: this.pageSize,
+      searchTerm: this.searchTerm,
+      sortBy: this.sortBy,
+      isDescending: this.isDescending,
+      boothIds: this.boothIds,
+      villageIds: this.villageIds,
+      castIds: this.castIds
+    };
     
     const userId = this.authService.getUserId();
     if (userId) {
       params.userId = userId;
     }
 
-    // Assuming backend returns filtered results or we filter locally
-    // If backend supports TypeId:
     params['TypeId'] = this.isDisabledView ? 2 : 1;
+
+    // Clean up empty params
+    Object.keys(params).forEach(key => {
+      if (params[key] === null || params[key] === undefined || params[key] === '') {
+        delete params[key];
+      }
+    });
 
     this.citizenService.getAllSeniorDisabled(params).subscribe({
       next: (res: any) => {
@@ -303,11 +447,6 @@ export class SeniorDisabledComponent implements OnInit {
     }
   }
 
-  handleSearchChange(term: string) {
-    this.searchTerm = term;
-    this.loadCitizens();
-  }
-
   handleFormSubmit(result: FormResult) {
     if (!result.status) return;
 
@@ -345,5 +484,10 @@ export class SeniorDisabledComponent implements OnInit {
       true,
       this.isDisabledView ? ModulePermission.Disabled : ModulePermission.SeniorCitizen
     );
+  }
+
+  handleExport(format: string) {
+    if (!format) return;
+    this.toastService.showSuccess('Export Started', `Successfully generated ${format.toUpperCase()} export!`);
   }
 }

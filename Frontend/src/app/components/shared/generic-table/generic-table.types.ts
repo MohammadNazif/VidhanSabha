@@ -7,6 +7,21 @@ export type ColumnType = 'text' | 'number' | 'date' | 'badge' | 'avatar' | 'prog
 export type SortDirection = 'asc' | 'desc' | null;
 export type BadgeVariant = 'success' | 'warning' | 'danger' | 'info' | 'default';
 
+export interface TableFilterOption {
+  label: string;
+  value: any;
+}
+
+export interface TableFilter {
+  key: string;
+  label: string;
+  type: 'select' | 'text';
+  options?: TableFilterOption[]; // For select types
+  placeholder?: string;
+  value?: any; // Current selected value
+  multiple?: boolean; // Enable multi-select for select type
+}
+
 export interface TableColumn {
   /** Unique key matching the data property */
   key: string;
@@ -88,6 +103,8 @@ export interface TableConfig {
   compact?: boolean;
   /** Enable advanced filtering */
   filterable?: boolean;
+  /** Custom generic filters to render */
+  filters?: TableFilter[];
   /** Enable server-side pagination, sorting, and filtering */
   serverSide?: boolean;
   /** Debounce time for search input in milliseconds (default: 400) */

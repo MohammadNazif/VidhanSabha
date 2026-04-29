@@ -445,6 +445,7 @@ public static class AdminEndpoints
                 .WithName("DeleteNewVoter")
                 .RequireAuthorization(ModulePermission.NewVoter.ToString())
                 .Produces<int>(200);
+
         newvoter.MapGet("/getAll", async (
             [AsParameters] NewVoterQueryParams q,
             IMediator mediator, HttpContext httpContext) =>
@@ -940,27 +941,29 @@ public static class AdminEndpoints
             var result = await mediator.Send(new GetAllSeniorDisabledQuery(q));
             return Results.Ok(ApiResponse<PagedResult<SeniorDisabledResponseDto>>.Ok(result));
         }).WithName("getAllSeniorDisabled");
+        }).RequireAuthorization();
 
 
         #endregion
 
         #region Social Media
 
-        socialmedia.MapPost("/create", async (CreateSocialMediaPostReqDto dto, IMediator mediator) =>
+        socialmedia.MapPost("/create", async ([FromForm] CreateSocialMediaPostReqDto dto, IMediator mediator) =>
         {
             var result = await mediator.Send(new CreateSocialMediaCommand(dto));
             return Results.Ok(ApiResponse<int>.Ok(result, "Social Media Post Created Successfully"));
         })
-                .WithName("CreateSocialMediaPost")
-                .Produces<int>(200);
+         .DisableAntiforgery()
+         .WithName("CreateSocialMediaPost")
+         .Produces<int>(200);
 
-        socialmedia.MapPost("/update", async (UpdateSocialMediaPostReq dto, IMediator mediator) =>
+        socialmedia.MapPost("/update", async ([FromForm] UpdateSocialMediaPostReq dto, IMediator mediator) =>
         {
             var result = await mediator.Send(new UpdateSocialMediaCommand(dto));
             return Results.Ok(ApiResponse<int>.Ok(result, "Social Media Post Updated Successfully"));
-        })
-                .WithName("UpdateSocialMediaPost")
-                .Produces<int>(200);
+        }).DisableAntiforgery()
+          .WithName("UpdateSocialMediaPost")
+          .Produces<int>(200);
 
         socialmedia.MapPost("/delete", async (int id, IMediator mediator) =>
         {

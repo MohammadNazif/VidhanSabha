@@ -87,11 +87,25 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
             {
                 var query = _context.Tbl_Pradhan
                .AsNoTracking()
-               .Where(b =>
-                   (!qp.Id.HasValue || b.Id == qp.Id) && (b.UserId == qp.UserId)
-                   //(!qp.SectorId.HasValue || b.Booth.Sector.Id == qp.SectorId) &&
-                   //(!qp.BoothId.HasValue || b.Booth.Id == qp.BoothId)
-                   );
+               .AsQueryable();
+
+                var boothIds = qp.GetBoothIds();
+                var SectorIds = qp.GetSectorIds();
+                var mandalIds = qp.GetMandalIds();
+
+                // ✅ FIX 1: query = assign karo, sirf query.Where nahi
+                query = query.Where(b =>
+                    (!qp.Id.HasValue || b.Id == qp.Id));
+                    //b.UserId == qp.UserId);                 // ✅ FIX 2: closing brace sahi jagah
+
+                //if (boothIds.Any())
+                //    query = query.Where(b => boothIds.Contains(b.));
+
+                //if (SectorIds.Any())
+                //    query = query.Where(b => b.sec);
+
+                //if (villageIds.Any())
+                //    query = query.Where(b => b.Villages.Any(v => villageIds.Contains(v.VillageId)));
 
                 Expression<Func<Tbl_Pradhan, bool>>? search = null;
 

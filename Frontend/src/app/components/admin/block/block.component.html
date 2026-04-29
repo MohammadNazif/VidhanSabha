@@ -1,7 +1,7 @@
 <div class="h-screen p-6 flex flex-col overflow-hidden bg-slate-50/50">
     <app-page-header title="Block Management" subtitle="Manage blocks and block pramukhs.">
         <div class="flex items-center gap-3">
-            <app-generic-modal-button #blockModal [config]="formConfig" label="Add Block" icon="+" variant="primary"
+            <app-generic-modal-button *ngIf="canManage()" #blockModal [config]="formConfig" label="Add Block" icon="+" variant="primary"
                 (formSubmit)="handleFormSubmit($event)">
             </app-generic-modal-button>
         </div>

@@ -60,12 +60,25 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
 
             var query = _context.Tbl_DoubleVoter
                 .AsNoTracking()
-                .Where(b =>
-                    (!qp.Id.HasValue || b.Id == qp.Id) && (b.UserId == qp.UserId) &&
-                    (!qp.BoothId.HasValue || b.Booth.Id == qp.BoothId) &&
-                    (!qp.SectorId.HasValue || b.Booth.Sector.Id == qp.SectorId) &&
-                    (!qp.VillageId.HasValue || b.Villages.Any(v => v.VillageId == qp.VillageId))
-                    );
+                .AsQueryable();
+
+            var boothIds = qp.GetBoothIds();
+            var SectorIds = qp.GetSectorIds();
+            var villageIds = qp.GetVillageIds();
+
+            // ✅ FIX 1: query = assign karo, sirf query.Where nahi
+            query = query.Where(b =>
+                (!qp.Id.HasValue || b.Id == qp.Id) &&
+                b.UserId == qp.UserId);                 
+
+            if (boothIds.Any())
+                query = query.Where(b => boothIds.Contains(b.BoothId));
+
+            //if (SectorIds.Any())
+            //    query = query.Where(b => b.sec);
+
+            if (villageIds.Any())
+                query = query.Where(b => b.Villages.Any(v => villageIds.Contains(v.VillageId)));
 
             Expression<Func<Tbl_DoubleVoter, bool>>? search = null;
 

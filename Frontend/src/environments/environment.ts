@@ -1,4 +1,5 @@
 export const environment = {
-  production: false,
+  production: true,
+  // apiUrl: 'https://macreel.in/api'
   apiUrl: 'https://localhost:7093/api'
 };

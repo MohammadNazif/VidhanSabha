@@ -10,6 +10,7 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using VidhanSabha.Application.Common.Booth.Dtos;
 using VidhanSabha.Application.Common.Dtos;
+using VidhanSabha.Application.Common.ExportPdfExcel.Dtos;
 using VidhanSabha.Application.Pannels.Admin.Booth.Dtos;
 using VidhanSabha.Application.Pannels.Admin.Booth.Interfaces;
 using VidhanSabha.Domain.Entities.Admin;
@@ -74,18 +75,29 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
           BoothQueryParams qp,int? vidhanId, CancellationToken ct = default)
         {
             var query = _context.Tbl_Booth
-                .AsNoTracking()
-                .Where(b => b.Mandal.VidhanId == vidhanId)
-                .Where(b =>
-                    (!qp.MandalId.HasValue || b.MandalId == qp.MandalId) && (b.UserId == qp.UserId) &&
-                    (!qp.SectorId.HasValue || b.SectorId == qp.SectorId));
+           .AsNoTracking()
+        .Where(b => b.Mandal.VidhanId == vidhanId);
 
+            var mandalIds = qp.GetMandalIds();
+            var sectorIds = qp.GetSectorIds();
+
+            if (mandalIds.Any())
+            {
+                query = query.Where(b => mandalIds.Contains(b.MandalId));
+            }
+
+            if (sectorIds.Any())
+                query = query.Where(b => sectorIds.Contains(b.SectorId));
+
+            if (!string.IsNullOrEmpty(qp.UserId))
+                query = query.Where(b => b.UserId == qp.UserId);
             Expression<Func<Tbl_Booth, bool>>? search = null;
 
             if (!string.IsNullOrWhiteSpace(qp.SearchTerm))
             {
                 var term = qp.SearchTerm.Trim().ToLower();
                 search = b =>
+                   b.BoothNumber.ToString().Contains(term) || 
                     b.PollingStationName.ToLower().Contains(term) ||
                     b.PollingStationLocation.ToLower().Contains(term) ||
                     b.Mandal.Name.ToLower().Contains(term) ||
@@ -131,6 +143,36 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
                 ct: ct
             );
         }
+
+        public async Task<List<BoothExportRow>> GetAllForExportAsync(
+      BoothQueryParams qp,
+      CancellationToken ct = default)
+        {
+            var query = _context.Tbl_Booth
+                .AsNoTracking()
+                .Include(b => b.Mandal)
+                .Include(b => b.Sector)
+                .Include(b => b.Villages)
+                    .ThenInclude(v => v.Village)
+                .Include(b => b.Sanyojak)
+                    .ThenInclude(s => s.Cast)
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(qp.UserId))
+                query = query.Where(b => b.UserId == qp.UserId);
+
+            if (!string.IsNullOrWhiteSpace(qp.SearchTerm))
+            {
+                var term = qp.SearchTerm.Trim();
+
+                query = query.Where(b =>
+                    EF.Functions.Like(b.PollingStationName, $"%{term}%") ||
+                    EF.Functions.Like(b.PollingStationLocation, $"%{term}%") ||
+                    EF.Functions.Like(b.Mandal.Name, $"%{term}%") ||
+                    EF.Functions.Like(b.Sector.SectorName, $"%{term}%") ||
+                    EF.Functions.Like(b.BoothNumber.ToString(), $"%{term}%")
+                );
+            }
 
 
         public async Task<PagedResult<BoothReportsDto>> GetAllBoothReports(

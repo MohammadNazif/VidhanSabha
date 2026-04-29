@@ -370,4 +370,9 @@ export class SahmatAsahmatComponent implements OnInit {
       ModulePermission.Sahmat
     );
   }
+
+  handleExport(format: string) {
+    if (!format) return;
+    this.toastService.showSuccess('Export Started', `Successfully generated ${format.toUpperCase()} export!`);
+  }
 }

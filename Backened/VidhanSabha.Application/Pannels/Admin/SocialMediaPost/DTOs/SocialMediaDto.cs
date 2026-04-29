@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using VidhanSabha.Application.Pannels.Admin.Booth.Dtos;
 using VidhanSabha.Application.Pannels.Admin.Sector.DTOs;
 
@@ -11,7 +12,7 @@ namespace VidhanSabha.Application.Pannels.Admin.SocialMediaPost.DTOs
     public class CreateSocialMediaPostReqDto
     {
         public string Title { get; set; }
-        public string? PostImagePath { get; set; }
+        public IFormFile? PostImagePath { get; set; }
         public string Description { get; set; }
         public List<int> PlatformIds { get; set; } = new();
         public List<int> BoothIds { get; set; } = new();

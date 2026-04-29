@@ -14,6 +14,9 @@ namespace VidhanSabha.Application.Pannels.Admin.PravasiVoters.Interfaces
     {
         Task<Tbl_PravasiVoter?> GetByIdAsync(int id);
         Task<PagedResult<PravasiVoterResponseDto>> GetAllAsync(PravasiQueryParams qp, CancellationToken ct = default);
+
+        Task<List<PravasiVoterResponseDto>> GetAllForExportAsync(
+    PravasiQueryParams qp, CancellationToken ct = default);
         Task<int> AddAsync(Tbl_PravasiVoter pravasi, CancellationToken ct = default);
         int Update(Tbl_PravasiVoter pravasi);
         void Delete(Tbl_PravasiVoter pravasi);

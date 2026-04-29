@@ -112,6 +112,12 @@
 .card.warning .icon { color: #db970e; }
 .card.warning .message-text { color: #db970e; }
 
+/* INFO */
+.card.info .wave { fill: #3b82f63a; }
+.card.info .icon-container { background-color: #3b82f648; }
+.card.info .icon { color: #2563eb; }
+.card.info .message-text { color: #2563eb; }
+
 
 @keyframes slideIn {
   from {

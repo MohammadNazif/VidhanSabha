@@ -58,14 +58,30 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
         {
             var query = _context.Tbl_SeniorDisabled
                .AsNoTracking()
-               .Where(b =>
-                   (!qp.Id.HasValue || b.Id == qp.Id) && (b.UserId == qp.UserId) &&
-                   (!qp.TypeId.HasValue || b.TypeId == qp.TypeId) && (b.UserId == qp.UserId) &&
-                   (!qp.BoothId.HasValue || b.Booth.Id == qp.BoothId) &&
-                   (!qp.VillageId.HasValue || b.Villages.Any(v => v.VillageId == qp.VillageId) &&
-                   (!qp.CastId.HasValue || b.Cast.Id == qp.CastId))
+               .AsQueryable();
 
-                   );
+            var boothIds = qp.GetBoothIds();
+            var CastIds = qp.GetCastIds();
+            var villageIds = qp.GetVillageIds();
+
+            // ✅ FIX 1: query = assign karo, sirf query.Where nahi
+            query = query.Where(b =>
+             
+                (!qp.Id.HasValue || b.Id == qp.Id) &&
+                 (!qp.TypeId.HasValue || b.TypeId == qp.TypeId) &&
+                
+                b.UserId == qp.UserId && b.Status);            
+
+            if (boothIds.Any())
+                query = query.Where(b => boothIds.Contains(b.BoothId));
+
+            if (CastIds.Any())
+                query = query.Where(b => CastIds.Contains(b.CastId));
+
+            if (villageIds.Any())
+                query = query.Where(b => b.Villages.Any(v => villageIds.Contains(v.VillageId)));
+
+              
 
             Expression<Func<Tbl_SeniorDisabled, bool>>? search = null;
 

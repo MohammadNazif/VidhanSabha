@@ -48,7 +48,7 @@ export class SidebarComponent implements OnInit {
   }
 
   navItems: NavItem[] = [
-    { icon: 'layout-dashboard', label: 'Dashboard', route: '/', roles: ['VidhanSabhaPrabhari', 'BoothSanyojak'] },
+    { icon: 'layout-dashboard', label: 'Dashboard', route: '/dashboard', roles: ['VidhanSabhaPrabhari', 'BoothSanyojak'] },
     {
       icon: 'database', label: 'Master Data',
       badge: 543,
@@ -129,7 +129,7 @@ export class SidebarComponent implements OnInit {
         { label: 'Influencer Person List', route: '/influencer-person-list' },
       ]
     },
-    { icon: 'share-2', label: 'Social Media', route: '/socail-media', roles: ['VidhanSabhaPrabhari', 'BoothSanyojak'], moduleId: ModulePermission.SocialMedia },
+    { icon: 'share-2', label: 'Social Media', route: '/social-media', roles: ['VidhanSabhaPrabhari', 'BoothSanyojak'], moduleId: ModulePermission.SocialMedia },
     { icon: 'calendar', label: 'Activity', route: '/activity', roles: ['VidhanSabhaPrabhari', 'BoothSanyojak'], moduleId: ModulePermission.Activity },
 
     {
@@ -150,7 +150,7 @@ export class SidebarComponent implements OnInit {
         { label: 'Prabhavshali Vyakti', route: '/influencer-person-list' },
         { label: 'Varishth Nagrik', route: '/senior-citizen-list' },
         { label: 'Viklaang', route: '/disabled-list' },
-        { label: 'Social Media', route: '/socail-media' },
+        { label: 'Social Media', route: '/social-media' },
       ]
     }
   ];

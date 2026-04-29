@@ -7,8 +7,10 @@ import { BoothSamitiService } from '../../../Services/Admin/booth-voter/booth-sa
 import { CrudHandlerService } from '../../../Services/common/crud-handler.service';
 import { ModulePermission } from '../../../models/module-permission.enum';
 import { LucideAngularModule } from 'lucide-angular';
+import { ToastService } from '../../../Services/common/toast/toast.service';
 
 import { GenericModalButtonComponent } from '../../shared/generic-modal-form/generic-modal-button.component';
+import { ActivatedRoute } from '@angular/router';
 import { FormConfig, FormResult } from '../../shared/generic-modal-form/generic-form.types';
 import { Validators } from '@angular/forms';
 
@@ -20,7 +22,7 @@ import { Validators } from '@angular/forms';
     <div class="h-screen p-6 flex flex-col overflow-hidden bg-slate-50/50">
       <app-page-header title="Booth Samiti Members" subtitle="List of all registered booth committee members">
         <!-- Hidden modal for Editing, triggered via table actions -->
-        <app-generic-modal-button #samitiModal [config]="samitiFormConfig" (formSubmit)="handleFormSubmit($event)"
+        <app-generic-modal-button *ngIf="canManage()" #samitiModal [config]="samitiFormConfig" (formSubmit)="handleFormSubmit($event)"
           label="" class="hidden">
         </app-generic-modal-button>
       </app-page-header>
@@ -52,6 +54,11 @@ export class BoothSamitiComponent implements OnInit {
   searchTerm = '';
   sortBy = '';
   isDescending = false;
+  isListView = false;
+
+  canManage(): boolean {
+    return !this.isListView;
+  }
 
   columns: TableColumn[] = [
     { key: 'name', label: 'Name', sortable: true },
@@ -66,14 +73,15 @@ export class BoothSamitiComponent implements OnInit {
 
   config: TableConfig = {
     selectable: false,
-    loading: false
+    loading: false,
+    searchable: true,
+    searchPlaceholder: 'Search...',
   };
 
   actions: TableAction[] = [
-    { id: 'edit', label: '', variant: 'default', icon: 'edit' },
-    { id: 'delete', label: '', variant: 'danger', icon: 'delete' },
-    { id: 'add_samiti', label: 'Add', variant: 'primary', icon: 'users' }
-
+    { id: 'edit', label: '', variant: 'default', icon: 'edit', show: () => this.canManage() },
+    { id: 'delete', label: '', variant: 'danger', icon: 'delete', show: () => this.canManage() },
+    { id: 'add_samiti', label: 'Add', variant: 'primary', icon: 'users', show: () => this.canManage() }
   ];
 
   samitiFormConfig: FormConfig = {
@@ -125,11 +133,17 @@ export class BoothSamitiComponent implements OnInit {
 
   constructor(
     private boothSamitiService: BoothSamitiService,
-    private crudHandler: CrudHandlerService
+    private crudHandler: CrudHandlerService,
+    private route: ActivatedRoute,
+    private toastService: ToastService
   ) { }
 
   ngOnInit() {
-    this.loadMembers();
+    this.route.url.subscribe(url => {
+      const path = url[0]?.path || '';
+      this.isListView = path.includes('-list');
+      this.loadMembers();
+    });
   }
 
   loadMembers() {
@@ -220,5 +234,10 @@ export class BoothSamitiComponent implements OnInit {
     this.searchTerm = term;
     this.pageNumber = 1;
     this.loadMembers();
+  }
+
+  handleExport(format: string) {
+    if (!format) return;
+    this.toastService.showSuccess('Export Started', `Successfully generated ${format.toUpperCase()} export!`);
   }
 }

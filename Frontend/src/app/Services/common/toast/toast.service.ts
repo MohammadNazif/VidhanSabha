@@ -3,7 +3,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 
 export interface Toast {
   id: number;
-  type: 'success' | 'error' | 'warning';
+  type: 'success' | 'error' | 'warning' | 'info';
   title: string;
   message: string;
 }
@@ -28,7 +28,11 @@ export class ToastService {
     this.addToast('warning', title, message);
   }
 
-  private addToast(type: 'success' | 'error' | 'warning', title: string, message: string) {
+  showInfo(title: string, message: string) {
+    this.addToast('info', title, message);
+  }
+
+  private addToast(type: 'success' | 'error' | 'warning' | 'info', title: string, message: string) {
     const id = ++this.nextId;
     const newToast: Toast = { id, type, title, message };
     

@@ -1,11 +1,14 @@
-using System.Data;
+﻿using System.Data;
 using System.Text;
+using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using VidhanSabha.Api.Endpoints;
+using VidhanSabha.Application.Common.ExportPdfExcel.Dtos;
+using VidhanSabha.Application.Common.ExportPdfExcel.Query;
 using VidhanSabha.Application.Common.MemberModulePermission.Command;
 using VidhanSabha.Application.Pannels.Auth.DTOs;
 using VidhanSabha.Application.Pannels.Auth.Interfaces;
@@ -91,16 +94,22 @@ builder.Services.AddSwaggerGen(options =>
         }
     });
 });
+
+
+// Open generic explicit registration
+builder.Services.AddAllExportHandlers(
+    typeof(GenericExportQuery<,>).Assembly,  
+    typeof(Program).Assembly);
+
 var app = builder.Build();
 app.UseCors("AllowAngular");
 app.UseExceptionHandler();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
+
+
     app.UseSwagger();
     app.UseSwaggerUI();
-}
+
 
 app.UseHttpsRedirection();
 app.UseRouting();
@@ -109,7 +118,11 @@ app.UseAuthorization();
 app.MapSuperAdminEndpoints();
 app.MapAdminEndpoints();
 app.MapCommonEndpoints();
+app.AllExportEndpoints();
 app.MapAuthEndpoints();
-app.MapControllers();
 
+app.MapControllers();
+app.UseStaticFiles();
+
+app.MapFallbackToFile("index.html");
 app.Run();
