@@ -1,12 +1,25 @@
 ﻿
 using Microsoft.AspNetCore.Http;
+using System.Text.Json.Serialization;
 
 namespace VidhanSabha.Application.Pannels.Admin.Sector.DTOs
 {
     public class CreateSectorRequestDto
     {
         public int MandalId { get; set; }
-        public int VillageId { get; set; }
+        public string VillageIds { get; set; }  // Send as "1,2,3" from client
+
+        [JsonIgnore]
+        public List<int> VillageId => VillageIds?
+    .Split(',', StringSplitOptions.RemoveEmptyEntries)
+    .Select(x => {
+        if (int.TryParse(x.Trim(), out var id))
+            return (int?)id;
+        return null;
+    })
+    .Where(x => x.HasValue)
+    .Select(x => x.Value)
+    .ToList() ?? new List<int>();
         public string SectorName { get; set; }
         public bool IsSectorSanyojak { get; set; }
 
@@ -41,10 +54,10 @@ namespace VidhanSabha.Application.Pannels.Admin.Sector.DTOs
         public int MandalId { get; set; }
 
         public string MandalName { get; set; }
-        public string VillageName { get; set; }
+        //public string VillageName { get; set; }
         public string CategoryName { get; set; }
         public string CastName { get; set; }
-        public int? VillageId { get; set; }
+        public List<VillageResponseDto>? Villages { get; set; }
         public string SectorName { get; set; }
         public bool IsSectorSanyojak { get; set; }
         public string? InchargeName { get; set; }
@@ -60,6 +73,12 @@ namespace VidhanSabha.Application.Pannels.Admin.Sector.DTOs
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
     }
+    public class VillageResponseDto
+    {
+        public int VillageId { get; set; }
+        public string VillageName { get; set; }
+    }
+
 
 
 }

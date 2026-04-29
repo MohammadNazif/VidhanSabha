@@ -132,6 +132,72 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
             );
         }
 
+
+        public async Task<PagedResult<BoothReportsDto>> GetAllBoothReports(
+          BoothQueryParams qp,int? vidhanId, CancellationToken ct = default)
+        {
+            var query = _context.Tbl_Booth
+                .AsNoTracking()
+                //.Where(b => b.Mandal.VidhanId == vidhanId)
+                .Where(b =>
+                    (!qp.BoothId.HasValue || b.Id == qp.BoothId) && (b.UserId == qp.UserId) &&
+                    (!qp.MandalId.HasValue || b.MandalId == qp.MandalId) && (b.UserId == qp.UserId) &&
+                    (!qp.SectorId.HasValue || b.SectorId == qp.SectorId));
+
+            Expression<Func<Tbl_Booth, bool>>? search = null;
+
+            if (!string.IsNullOrWhiteSpace(qp.SearchTerm))
+            {
+                var term = qp.SearchTerm.Trim().ToLower();
+                search = b =>
+                    b.PollingStationName.ToLower().Contains(term) ||
+                    b.PollingStationLocation.ToLower().Contains(term) ||
+                    b.Mandal.Name.ToLower().Contains(term) ||
+                    b.Sector.SectorName.ToLower().Contains(term);
+            }
+
+            return await query.ToPagedResultAsync(
+                queryParams: qp,
+                searchPredicate: search,
+                defaultSort: b => b.BoothNumber,
+                projection: b => new BoothReportsDto
+                {
+
+                    BoothId = b.Id,
+                    BoothNo = b.BoothNumber,
+                    PollingStation = b.PollingStationName,
+                    BoothAdhyaksh=b.Sanyojak.InchargeName,
+                    Mobile=b.Sanyojak.PhoneNumber,
+                    Villages = b.Villages.Select(v => new VillageResponseDto
+                    {
+                        VillageId = v.VillageId,
+                        VillageName = v.Village.VillageName,
+                        HasAnshik = v.HasAnshik
+                    }).ToList(),
+                    Cast=b.Sanyojak.Cast.CastName,
+
+                    TotalVotes =
+                    _context.Tbl_SeniorDisabled.Count(x => x.BoothId == b.Id && x.TypeId == 1 && x.Status) +
+                    _context.Tbl_SeniorDisabled.Count(x => x.BoothId == b.Id && x.TypeId == 2 && x.Status) +
+                    _context.Tbl_DoubleVoter.Count(x => x.BoothId == b.Id && x.Status) +
+                    _context.Tbl_PravasiVoter.Count(x => x.BoothId == b.Id && x.Status),
+
+                    SeniorCitizen = _context.Tbl_SeniorDisabled
+                    .Count(x => x.BoothId == b.Id && x.TypeId==1 && x.Status),
+
+                    Handicap = _context.Tbl_SeniorDisabled
+                    .Count(x => x.BoothId == b.Id && x.TypeId==2 && x.Status),
+
+                    DoubleVotes = _context.Tbl_DoubleVoter
+                    .Count(x => x.BoothId == b.Id && x.Status),
+
+                    Pravasi = _context.Tbl_PravasiVoter
+                    .Count(x => x.BoothId == b.Id && x.Status)
+                },
+                ct: ct
+            );
+        }
+
         public Task<Tbl_BoothSanyojak?> GetByBoothIdAsync(int boothId, CancellationToken ct)
         {
             throw new NotImplementedException();

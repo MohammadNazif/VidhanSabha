@@ -71,7 +71,8 @@ namespace VidhanSabha.Infrastructure.Persistence
         public DbSet<Tbl_SocialMediaBooth> Tbl_SocialMediaBooth => Set<Tbl_SocialMediaBooth>();
         public DbSet<Tbl_SocialMediaSector> Tbl_SocialMediaSector => Set<Tbl_SocialMediaSector>();
         public DbSet<Tbl_SocialMediaPlatform> Tbl_SocialMediaPlatform => Set<Tbl_SocialMediaPlatform>();
-
+        public DbSet<Tbl_StateMembers> Tbl_StateMembers => Set<Tbl_StateMembers>();
+        public DbSet<Tbl_SectorVillage> Tbl_SectorVillage => Set<Tbl_SectorVillage>();
 
         #endregion
 

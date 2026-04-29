@@ -13,11 +13,12 @@ namespace VidhanSabha.Application.Pannels.Admin.Sector.Interface
     {
         Task<PagedResult<SectorResponseDto>> GetAllAsync(SectorQueryParams qp,int? vidhanID,CancellationToken ct);
         Task<PagedResult<SectorReportDto>> GetAllSectorReports(SectorQueryParams qp,CancellationToken ct);
+        Task<PagedResult<AdminSectorReportsDto>> GetAllAdminSectorReports(SectorQueryParams qp,CancellationToken ct);
         Task<List<Tbl_Sector>?> GetByMandalIdAsync(int id);
 
         Task<Tbl_Sector> GetByIdAsync(int id);
-        Task AddAsync(Tbl_Sector sector);
-        Task UpdateAsync(Tbl_Sector sector);
+        Task<int> AddAsync(Tbl_Sector sector);
+        Task<int> UpdateAsync(Tbl_Sector sector);
         Task DeleteAsync(Tbl_Sector sector);
     }
 }
