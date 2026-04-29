@@ -2,11 +2,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
+using VidhanSabha.Application.Common.Dtos;
 using VidhanSabha.Application.Pannels.Admin.BoothVoter.DTOs;
 using VidhanSabha.Application.Pannels.Admin.BoothVoter.Interfaces;
 using VidhanSabha.Domain.Entities.Admin;
+using VidhanSabha.Infrastructure.Extensions;
 using VidhanSabha.Infrastructure.Persistence;
 using VidhanSabha.Infrastructure.Repositories.Common;
 
@@ -62,26 +65,51 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
             }
         }
 
-        public async Task<List<BoothVoterResponseDto>> GetAllAsync(int? boothId = null, CancellationToken ct = default)
+        public async Task<PagedResult<BoothVoterResponseDto>> GetAllAsync(BoothVoterQueryParams qp, CancellationToken ct = default)
         {
-            var result = await _context.Tbl_BoothVoter
-                .Select(m => new BoothVoterResponseDto
-                {
-                    Id = m.Id,
-                    BoothId = m.BoothId,
-                    BoothNumber = m.Booth.BoothNumber,
-                    PollingStation = m.Booth.PollingStationName,
-                    TotalVoter = m.TotalVoter,
-                    Male = m.Male,
-                    Female = m.Female,
-                    Other = m.Other,
-                    Villages = m.Villages.Select(v => new BoothVoterVillageResponseDtos
-                    {
-                        VillageId = v.VillageId,
-                        VillageName = v.Village.VillageName
-                    }).ToList(),
-                }).ToListAsync();
-            return result;
+            var query = _context.Tbl_BoothVoter
+    .AsNoTracking()
+    .Where(b =>
+        (!qp.Id.HasValue || b.Id == qp.Id) &&
+        (b.UserId == qp.UserId) &&
+        (!qp.BoothId.HasValue || b.BoothId == qp.BoothId) &&
+        (!qp.SectorId.HasValue || b.Booth.SectorId == qp.SectorId)
+    );
+
+            Expression<Func<Tbl_BoothVoter, bool>>? search = null;
+
+            if (!string.IsNullOrWhiteSpace(qp.SearchTerm))
+            {
+                var term = qp.SearchTerm.Trim().ToLower();
+                search = b =>
+                    b.Booth.BoothNumber.Equals(Convert.ToInt32(term)) ||
+                    b.Booth.PollingStationName.ToLower().Contains(term) ||
+                    b.Villages.Select(v=>v.Village.VillageName).FirstOrDefault().ToLower().Contains(term)
+                    ;
+            }
+
+            return await query.ToPagedResultAsync(
+               queryParams: qp,
+               searchPredicate: search,
+               defaultSort: b => b.Booth.BoothNumber,
+               projection: m => new BoothVoterResponseDto
+               {
+                   Id = m.Id,
+                   BoothId = m.BoothId,
+                   BoothNumber = m.Booth.BoothNumber,
+                   PollingStation = m.Booth.PollingStationName,
+                   TotalVoter = m.TotalVoter,
+                   Male = m.Male,
+                   Female = m.Female,
+                   Other = m.Other,
+                   Villages = m.Villages.Select(v => new BoothVoterVillageResponseDtos
+                   {
+                       VillageId = v.VillageId,
+                       VillageName = v.Village.VillageName
+                   }).ToList(),
+               },
+               ct:ct
+               );
         }
 
 

@@ -19,6 +19,8 @@ namespace VidhanSabha.Domain.Entities.Admin
         public string Mobile { get; private set; }
         public string Description { get; private set; }
         public bool Status { get; private set; } = true;
+        public string? UserId { get; private set; }
+
 
         private readonly List<Tbl_PrabhavshaliVillage> _villages = new();
         public IReadOnlyCollection<Tbl_PrabhavshaliVillage> Villages => _villages.AsReadOnly();
@@ -34,7 +36,7 @@ namespace VidhanSabha.Domain.Entities.Admin
         public static Tbl_PrabhavshaliVyakti Create(
             int BoothId,int DesignationId, string Name,
             int CategoryId, int CastId,
-            string Mobile,string Description,
+            string Mobile,string Description,string userId,
             List<int> villageIds
             )
         {
@@ -47,6 +49,7 @@ namespace VidhanSabha.Domain.Entities.Admin
                 CastId = CastId,
                 Mobile = Mobile,
                 Description=Description,
+                UserId = userId
             };
             prabhav.SetVillages(villageIds);
             return prabhav;

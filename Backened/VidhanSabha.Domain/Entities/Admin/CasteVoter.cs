@@ -29,7 +29,8 @@ namespace VidhanSabha.Domain.Entities.Admin
             {
                 CasteVoterId  = CasteVoterId ,
                 SubCasteId = SubCasteId,
-                Number = Number
+                Number = Number,
+
             };
             return castevoter;
         }

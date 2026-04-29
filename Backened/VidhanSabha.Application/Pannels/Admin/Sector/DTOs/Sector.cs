@@ -11,8 +11,8 @@ namespace VidhanSabha.Application.Pannels.Admin.Sector.DTOs
 
         [JsonIgnore]
         public List<int> VillageId => VillageIds?
-    .Split(',', StringSplitOptions.RemoveEmptyEntries)
-    .Select(x => {
+       .Split(',', StringSplitOptions.RemoveEmptyEntries)
+      .Select(x => {
         if (int.TryParse(x.Trim(), out var id))
             return (int?)id;
         return null;

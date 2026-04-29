@@ -12,9 +12,11 @@ namespace VidhanSabha.Application.Pannels.Admin.Pradhan.Command
     public class CreatePradhanCommand:IRequest<int>
     {
         public CreatePradhanRequestDto Dto { get; set; }
-        public CreatePradhanCommand(CreatePradhanRequestDto dto)
+        public string UserId { get; set; }
+        public CreatePradhanCommand(CreatePradhanRequestDto dto, string? userId)
         {
             Dto = dto;
+            UserId = userId;
         }
     }
 }

@@ -16,6 +16,7 @@ namespace VidhanSabha.Application.Pannels.Admin.BoothSamiti.Dtos
         public string Contact { get; set; }
         public string Occupation { get; set; }
         public int DesignationId { get; set; }
+        public int BoothIdMem { get; set; }
     }
 
     // 🔹 RESPONSE (GET ke liye)
@@ -35,9 +36,34 @@ namespace VidhanSabha.Application.Pannels.Admin.BoothSamiti.Dtos
         public string DesignationName { get; set; }
     }
 
-    // 🔹 UPDATE (Pradhan jaisa inherit karega)
-    public class UpdateBoothSamitiRequestDto : CreateBoothSamitiRequestDto
+    public class UpdateBoothSamitiRequestDto
     {
         public int Id { get; set; }
+
+        public string Name { get; set; }
+        public int CategoryId { get; set; }
+        public int CasteId { get; set; }
+        public int Age { get; set; }
+        public string Contact { get; set; }
+        public string Occupation { get; set; }
+        public int DesignationId { get; set; }
+    }
+
+
+    public class CreateBoothSamitiMemRequestDto
+    {
+        public int BoothId { get; set; }
+    }
+
+    public class BoothSamitiMemResponseDto
+    {
+        public int Id { get; set; }
+        public int BoothId { get; set; }
+        public int BoothNo { get; set; }
+        public string Village { get; set; }
+        public string PollingStation { get; set; }
+        public string BoothAdhayaksh { get; set; }
+        public int TotalMember { get; set; }
+        public string Contact { get; set; } 
     }
 }

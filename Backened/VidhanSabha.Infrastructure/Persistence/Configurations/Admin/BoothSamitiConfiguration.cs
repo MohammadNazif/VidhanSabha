@@ -45,10 +45,53 @@ namespace VidhanSabha.Infrastructure.Persistence.Configurations.Admin
                    .HasDefaultValue(true);
 
             // 🔗 Designation FK 
+            builder.HasOne(x => x.BoothSamitiMem)
+                   .WithMany()
+                   .HasForeignKey(x => x.BoothIdMem)
+                   .OnDelete(DeleteBehavior.Restrict);
+
             builder.HasOne(x => x.Designation)
        .WithMany()
        .HasForeignKey(x => x.DesignationId)
        .OnDelete(DeleteBehavior.Restrict);
+        }
+    }
+    public class BoothSamitiMemConfiguration : IEntityTypeConfiguration<Tbl_BoothSamitiMem>
+    {
+        public void Configure(EntityTypeBuilder<Tbl_BoothSamitiMem> builder)
+        {
+            builder.ToTable("Tbl_BoothSamitiMem");
+
+            // Primary Key
+            builder.HasKey(x => x.Id);
+            builder.Property(x => x.BoothId)
+               .IsRequired();
+
+            // Soft Delete Filter
+            builder.HasQueryFilter(e => e.Status);
+
+
+            builder.HasOne(x => x.Booth)
+        .WithMany()
+        .HasForeignKey(x => x.BoothId)
+        .OnDelete(DeleteBehavior.Restrict);
+
+            //builder.HasOne(x => x.BoothSanyojak)
+            //               .WithMany()
+            //               .HasForeignKey(x => x.BoothId)
+            //               .OnDelete(DeleteBehavior.Restrict);
+
+            //builder.HasOne(x => x.BoothVillage)
+            //               .WithMany()
+            //               .HasForeignKey(x => x.BoothId)
+            //               .OnDelete(DeleteBehavior.Restrict);
+            // Properties
+
+            builder.Property(x => x.TotalMembers)
+                   .HasMaxLength(50);
+
+            builder.Property(x => x.Status)
+                   .HasDefaultValue(true);
         }
     }
 }

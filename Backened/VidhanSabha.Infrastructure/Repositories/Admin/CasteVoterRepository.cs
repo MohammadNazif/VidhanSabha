@@ -2,12 +2,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using VidhanSabha.Application.Common.Dtos;
 using VidhanSabha.Application.Pannels.Admin.CasteVoter.DTOs;
 using VidhanSabha.Application.Pannels.Admin.CasteVoter.Interfaces;
 using VidhanSabha.Domain.Entities.Admin;
+using VidhanSabha.Infrastructure.Extensions;
 using VidhanSabha.Infrastructure.Persistence;
 using VidhanSabha.Infrastructure.Repositories.Common;
 
@@ -31,30 +33,70 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
             return await _context.SaveChangesAsync(ct);
         }
 
-        public async Task<PagedResult<CasteVoterResponseDto>> GetAllAsync(CancellationToken ct = default)
+        public async Task<PagedResult<CasteVoterResponseDto>> GetAllAsync(CasteVoterQueryParams qp, CancellationToken ct = default)
         {
+            //var query = _context.Tbl_CasteVoter
+            //    .Where(x => x.Status)
+            //    .Select(x => new CasteVoterResponseDto
+            //    {
+            //        Id = x.Id,
+            //        CasteVoterId = x.CasteVoterId,
+
+            //        BoothNumber = x.BoothVoter.Booth.BoothNumber,
+            //        PollingStationName = x.BoothVoter.Booth.PollingStationName,
+
+            //        SubCasteId = x.SubCasteId,
+            //        SubCasteName = x.Cast != null ? x.Cast.CastName : "",
+            //        Number = x.Number
+            //    });
+
+            //var data = await query.ToListAsync(ct);
+
+            //return new PagedResult<CasteVoterResponseDto>
+            //{
+            //    Items = data,
+            //    TotalCount = data.Count
+            //};
+
             var query = _context.Tbl_CasteVoter
-                .Where(x => x.Status)
-                .Select(x => new CasteVoterResponseDto
-                {
-                    Id = x.Id,
-                    CasteVoterId = x.CasteVoterId,
+    .AsNoTracking()
+    .Where(b =>
+    (!qp.Id.HasValue || b.Id == qp.Id) &&
+    (!qp.BoothId.HasValue || b.CasteVoterId == qp.BoothId) &&
+    (!qp.SectorId.HasValue ||
+        _context.Tbl_Booth
+            .Where(x => x.Id == b.BoothVoter.BoothId)
+            .Select(x => x.SectorId)
+            .FirstOrDefault() == qp.SectorId
+    )
+);
 
-                    BoothNumber = x.BoothVoter.Booth.BoothNumber,
-                    PollingStationName = x.BoothVoter.Booth.PollingStationName,
+            Expression<Func<Tbl_CasteVoter, bool>>? search = null;
 
-                    SubCasteId = x.SubCasteId,
-                    SubCasteName = x.Cast != null ? x.Cast.CastName : "",
-                    Number = x.Number
-                });
-
-            var data = await query.ToListAsync(ct);
-
-            return new PagedResult<CasteVoterResponseDto>
+            if (!string.IsNullOrWhiteSpace(qp.SearchTerm))
             {
-                Items = data,
-                TotalCount = data.Count
-            };
+                var term = qp.SearchTerm.Trim().ToLower();
+                search = b =>
+                    b.SubCasteId.Equals(Convert.ToInt32(term)) ||
+                    b.CasteVoterId.Equals(Convert.ToInt32(term));
+            }
+
+            return await query.ToPagedResultAsync(
+               queryParams: qp,
+               searchPredicate: search,
+               defaultSort: b => b.BoothVoter.Booth.BoothNumber,
+               projection: m => new CasteVoterResponseDto
+               {
+                   Id = m.Id,
+                   CasteVoterId = m.CasteVoterId,
+                   BoothNumber = m.BoothVoter.Booth.BoothNumber,
+                   PollingStationName = m.BoothVoter.Booth.PollingStationName,
+                   SubCasteId = m.SubCasteId,
+                   SubCasteName = m.Cast != null ? m.Cast.CastName : "",
+                   Number = m.Number
+               },
+               ct: ct
+               );
         }
 
         public async Task<List<Tbl_CasteVoter>> GetByCasteVoterIdAsync(int boothId, CancellationToken ct = default)

@@ -80,8 +80,9 @@ namespace VidhanSabha.Infrastructure.Persistence
 
         public DbSet<Tbl_Pradhan> Tbl_Pradhan => Set<Tbl_Pradhan>();
         public DbSet<Tbl_PradhanVillage> Tbl_PradhanVillage => Set<Tbl_PradhanVillage>();
-        public DbSet<Tbl_BoothSamiti> Tbl_BoothSamitis { get; set; }
-        public DbSet<Tbl_BoothSamitiDesignation> Tbl_BoothSamitiDesignations { get; set; }
+        public DbSet<Tbl_BoothSamiti> Tbl_BoothSamitis =>Set<Tbl_BoothSamiti>();
+        public DbSet<Tbl_BoothSamitiDesignation> Tbl_BoothSamitiDesignations => Set<Tbl_BoothSamitiDesignation>();
+        public DbSet<Tbl_BoothSamitiMem> Tbl_BoothSamitiMem => Set<Tbl_BoothSamitiMem>();
 
         public DbSet<Tbl_Influencer> Tbl_Influencer => Set<Tbl_Influencer>();
         public DbSet<Tbl_InfluencerVillage> Tbl_InfluencerVillage => Set<Tbl_InfluencerVillage>();

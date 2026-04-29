@@ -12,9 +12,11 @@ namespace VidhanSabha.Application.Pannels.Admin.PrabhavshaliVyakti.Command
     public class CreatePrabhavCommand : IRequest<int>
     {
         public CreatePrabhavshaliReqDto Dto { get; set; }
-        public CreatePrabhavCommand(CreatePrabhavshaliReqDto dto)
+        public string UserId { get; set; }
+        public CreatePrabhavCommand(CreatePrabhavshaliReqDto dto, string? userId)
         {
             Dto = dto;
+            UserId = userId;
         }
     }
 }
