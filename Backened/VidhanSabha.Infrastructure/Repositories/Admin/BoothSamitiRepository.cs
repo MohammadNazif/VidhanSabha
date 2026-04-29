@@ -1,13 +1,17 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
+using VidhanSabha.Application.Common.Dtos;
 using VidhanSabha.Application.Pannels.Admin.BoothSamiti.Dtos;
 using VidhanSabha.Application.Pannels.Admin.BoothSamiti.Interfaces;
 using VidhanSabha.Domain.Entities.Admin;
-using Microsoft.EntityFrameworkCore;
+using VidhanSabha.Infrastructure.Extensions;
 using VidhanSabha.Infrastructure.Persistence;
+using VidhanSabha.Infrastructure.Repositories.Common;
 
 namespace VidhanSabha.Infrastructure.Repositories.Admin
 {
@@ -24,11 +28,94 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
         {
             try
             {
+                using var transaction = await _context.Database.BeginTransactionAsync(ct);
                 await _context.Tbl_BoothSamitis.AddAsync(boothSamiti, ct);
+                var boothId = boothSamiti.BoothIdMem;
+                var mem = await _context.Tbl_BoothSamitiMem
+                    .FirstOrDefaultAsync(x => x.Id == boothId, ct);
+                if (mem != null)
+                {
+                    mem.Increment();
+                }
+                else
+                {
+                    var newMem = Tbl_BoothSamitiMem.Create(boothId, boothSamiti.UserId);
+                    newMem.Increment();
+                    await _context.Tbl_BoothSamitiMem.AddAsync(newMem, ct);
+                }
+
                 await _context.SaveChangesAsync(ct);
+                await transaction.CommitAsync(ct);
+
                 return boothSamiti.Id;
             }
+            catch(Exception)
+            {
+                throw;
+            }
+        }
+        public async Task<int> AddAsync(Tbl_BoothSamitiMem boothSamitimem, CancellationToken ct = default)
+        {
+            try
+            {
+                await _context.Tbl_BoothSamitiMem.AddAsync(boothSamitimem, ct);
+                await _context.SaveChangesAsync(ct);
+                return boothSamitimem.Id;
+
+            }
             catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<BoothSamitiMemResponseDto?> GetBoothByIdAsync(
+    int boothId,
+    CancellationToken ct = default)
+        {
+            try
+            {
+                return await _context.Tbl_BoothSamitiMem
+                    .AsNoTracking()
+                    .Where(m => m.BoothId == boothId)
+                    .Select(m => new BoothSamitiMemResponseDto
+                    {
+                        Id = m.Id,
+                        BoothNo = m.Booth.BoothNumber,
+                        PollingStation = m.Booth.PollingStationName,
+
+                        TotalMember = m.TotalMembers,
+
+                        // 🔥 Booth Sanyojak (separate table)
+                        BoothAdhayaksh = _context.Tbl_BoothSanyojak
+                            .Where(s => s.BoothId == m.BoothId)
+                            .Select(s => s.InchargeName)
+                            .FirstOrDefault(),
+
+                        Contact = _context.Tbl_BoothSanyojak
+                            .Where(s => s.BoothId == m.BoothId)
+                            .Select(s => s.PhoneNumber)
+                            .FirstOrDefault(),
+
+                        // 🔥 Village (via BoothVillage + Village table)
+                        Village = _context.Tbl_BoothVillage
+                            .Where(v => v.BoothId == m.BoothId)
+                            .Select(v => v.VillageId) // pehle ID
+                            .FirstOrDefault() != 0
+                            ? _context.Tbl_Village
+                                .Where(x => x.Id ==
+                                    _context.Tbl_BoothVillage
+                                        .Where(v => v.BoothId == m.BoothId)
+                                        .Select(v => v.VillageId)
+                                        .FirstOrDefault()
+                                )
+                                .Select(x => x.VillageName)
+                                .FirstOrDefault()
+                            : null
+                    })
+                    .FirstOrDefaultAsync(ct);
+            }
+            catch (Exception)
             {
                 throw;
             }
@@ -99,6 +186,13 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
         {
             try
             {
+                var boothId = boothSamiti.BoothIdMem;
+                var mem = _context.Tbl_BoothSamitiMem.FirstOrDefault(x => x.Id == boothId);
+                if (mem != null)
+                {
+                    mem.Decrement();
+                    _context.Tbl_BoothSamitiMem.Update(mem);
+                }
                 boothSamiti.Delete();
                 _context.Tbl_BoothSamitis.Update(boothSamiti);
                 _context.SaveChanges();
@@ -106,6 +200,70 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
             catch (Exception ex)
             {
                 Console.WriteLine("Delete Error: " + ex.InnerException?.Message ?? ex.Message);
+                throw;
+            }
+        }
+
+        public async Task<PagedResult<BoothSamitiMemResponseDto>> GetAllMem(BoothSamitiQueryParams qp, CancellationToken ct = default)
+        {
+            try
+            {
+                var query = _context.Tbl_BoothSamitiMem
+               .AsNoTracking()
+               .Where(b =>
+                   (!qp.Id.HasValue || b.Id == qp.Id) && (b.UserId == qp.UserId) &&
+                   (!qp.BoothId.HasValue || b.Booth.Id == qp.BoothId) &&
+                   (qp.UserId == b.UserId)
+                   );
+
+                Expression<Func<Tbl_BoothSamitiMem, bool>>? search = null;
+
+                if (!string.IsNullOrWhiteSpace(qp.SearchTerm))
+                {
+                    var term = qp.SearchTerm.Trim().ToLower();
+                    search = b =>
+                        b.Booth.BoothNumber.Equals(Convert.ToInt32(term)) || b.Id.Equals(Convert.ToInt32(term));
+                }
+
+
+                return await query.ToPagedResultAsync(
+               queryParams: qp,
+               searchPredicate: search,
+               defaultSort: b => b.Booth.BoothNumber,
+               projection: m => new BoothSamitiMemResponseDto
+               {
+                   Id = m.Id,
+                   BoothId = m.BoothId,
+
+                   // ✅ Booth details
+                   BoothNo = m.Booth.BoothNumber,
+                   PollingStation = m.Booth.PollingStationName,
+
+                   TotalMember = m.TotalMembers,
+
+                   // ✅ Booth Sanyojak
+                   BoothAdhayaksh = _context.Tbl_BoothSanyojak
+                        .Where(s => s.BoothId == m.BoothId)
+                        .Select(s => s.InchargeName)
+                        .FirstOrDefault(),
+
+                   Contact = _context.Tbl_BoothSanyojak
+                        .Where(s => s.BoothId == m.BoothId)
+                        .Select(s => s.PhoneNumber)
+                        .FirstOrDefault(),
+
+                   // ✅ Village
+                   Village = _context.Tbl_BoothVillage
+                        .Where(v => v.BoothId == m.BoothId)
+                        .Select(v => v.Village.VillageName)
+                        .FirstOrDefault()
+               },
+               ct: ct
+               );
+                
+            }
+            catch (Exception)
+            {
                 throw;
             }
         }

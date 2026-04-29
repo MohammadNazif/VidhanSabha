@@ -56,50 +56,57 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
 
         public async Task<PagedResult<PrabhavshaliResponseDto>> GetAllAsync(PrabhavshaliQueryParams qp, CancellationToken ct = default)
         {
-            var query = _context.Tbl_PrabhavshaliVyakti
-               .AsNoTracking()
-               .Where(b =>
-                   (!qp.Id.HasValue || b.Id == qp.Id) &&
-                   (!qp.BoothId.HasValue || b.Booth.Id == qp.BoothId) &&
-                   (!qp.VillageId.HasValue || b.Villages.Any(v => v.VillageId == qp.VillageId) &&
-                   (!qp.CastId.HasValue || b.Cast.Id == qp.CastId))
-
-                   );
-
-            Expression<Func<Tbl_PrabhavshaliVyakti, bool>>? search = null;
-
-            if (!string.IsNullOrWhiteSpace(qp.SearchTerm))
+            try
             {
-                var term = qp.SearchTerm.Trim().ToLower();
-                search = b =>
-                    b.Booth.BoothNumber.Equals(Convert.ToInt32(term)) ||
-                    b.Name.ToLower().Contains(term);
-            }
+                var query = _context.Tbl_PrabhavshaliVyakti
+                .AsNoTracking()
+                .Where(b =>
+                    (b.UserId == qp.UserId) &&
+                    (!qp.Id.HasValue || b.Id == qp.Id) &&
+                    (!qp.BoothId.HasValue || b.BoothId == qp.BoothId) &&
+                    (!qp.VillageId.HasValue || b.Villages.Any(v => v.VillageId == qp.VillageId)) &&
+                    (!qp.CastId.HasValue || b.CastId == qp.CastId)
+                );
 
-            return await query.ToPagedResultAsync(
-               queryParams: qp,
-               searchPredicate: search,
-               defaultSort: b => b.Booth.BoothNumber,
-               projection: m => new PrabhavshaliResponseDto
-               {
-                   Id = m.Id,
-                   BoothId = m.BoothId,
-                   BoothNumber = m.Booth.BoothNumber,
-                   DesignationId = m.DesignationId,
-                   DesignationName = m.Designation.DesignationName,
-                   Name = m.Name,
-                   CategoryId = m.CategoryId,
-                   CategoryName = m.Category.Name,
-                   CastId = m.CastId,
-                   CastName = m.Cast.CastName,
-                   Mobile = m.Mobile,
-                   Description = m.Description,
-                   Villages = m.Villages.Select(v => new VillageResponseDtos
+                Expression<Func<Tbl_PrabhavshaliVyakti, bool>>? search = null;
+
+                if (!string.IsNullOrWhiteSpace(qp.SearchTerm))
+                {
+                    var term = qp.SearchTerm.Trim().ToLower();
+                    search = b =>
+                        b.Booth.BoothNumber.Equals(Convert.ToInt32(term)) ||
+                        b.Name.ToLower().Contains(term);
+                }
+
+                return await query.ToPagedResultAsync(
+                   queryParams: qp,
+                   searchPredicate: search,
+                   defaultSort: b => b.Booth.BoothNumber,
+                   projection: m => new PrabhavshaliResponseDto
                    {
-                       VillageId = v.VillageId,
-                       VillageName = v.Village.VillageName
-                   }).ToList(),
-               },ct:ct);
+                       Id = m.Id,
+                       BoothId = m.BoothId,
+                       BoothNumber = m.Booth.BoothNumber,
+                       DesignationId = m.DesignationId,
+                       DesignationName = m.Designation.DesignationName,
+                       Name = m.Name,
+                       CategoryId = m.CategoryId,
+                       CategoryName = m.Category.Name,
+                       CastId = m.CastId,
+                       CastName = m.Cast.CastName,
+                       Mobile = m.Mobile,
+                       Description = m.Description,
+                       Villages = m.Villages.Select(v => new VillageResponseDtos
+                       {
+                           VillageId = v.VillageId,
+                           VillageName = v.Village.VillageName
+                       }).ToList(),
+                   }, ct: ct);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
 

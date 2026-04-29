@@ -12,9 +12,11 @@ namespace VidhanSabha.Application.Pannels.Admin.SahmatAsahmat.Command
     public class CreateSahmatAsahmatCommand : IRequest<int>
     {
         public CreateSahmatAsahmatReqDto Dto { get; set; }
-        public CreateSahmatAsahmatCommand(CreateSahmatAsahmatReqDto dto)
+        public string UserId { get; set; }
+        public CreateSahmatAsahmatCommand(CreateSahmatAsahmatReqDto dto, string? userId)
         {
             Dto = dto;
+            UserId = userId;
         }
     }
 }

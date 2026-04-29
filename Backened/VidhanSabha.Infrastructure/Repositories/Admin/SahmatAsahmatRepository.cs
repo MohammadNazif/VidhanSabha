@@ -73,15 +73,9 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
         public async Task<PagedResult<SahmatAsahmatResponseDto>> GetAllAsync(SahmatAsahmatQueryParams qp, CancellationToken ct = default)
         {
             var query = _context.Tbl_SahmatAsahmat
-              .AsNoTracking();
-
-              if (qp.Id != null)
-            {
-                query = query.Where(x => x.TypeId == qp.Id);
-            };
-               query.Where(b =>
+              .AsNoTracking().Where(b =>
                  
-                  (!qp.BoothId.HasValue || b.Booth.Id == qp.BoothId) &&
+                  (!qp.BoothId.HasValue || b.Booth.Id == qp.BoothId) && (b.UserId == qp.UserId) &&
                   (!qp.VillageId.HasValue || b.Villages.Any(v => v.VillageId == qp.VillageId) &&
                   (!qp.OccupationId.HasValue || b.Occupation.Id == qp.OccupationId))
 

@@ -27,7 +27,7 @@ namespace VidhanSabha.Application.Pannels.Admin.SahmatAsahmat.Command
             var data = Tbl_SahmatAsahmat.Create(
                 req.BoothId,req.TypeId,
                 req.Name,req.Age,req.Mobile,req.PartyId,
-                req.OccupationId,req.Reason,req.VoterId,
+                req.OccupationId,req.Reason,req.VoterId, request.UserId,
                 req.VillageId
                 );
 

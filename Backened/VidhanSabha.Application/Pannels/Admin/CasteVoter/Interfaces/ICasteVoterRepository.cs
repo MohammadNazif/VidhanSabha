@@ -16,7 +16,7 @@ namespace VidhanSabha.Application.Pannels.Admin.CasteVoter.Interfaces
 
         Task<List<Tbl_CasteVoter>> GetByCasteVoterIdAsync(int CasteVoterId , CancellationToken ct = default);
 
-        Task<PagedResult<CasteVoterResponseDto>> GetAllAsync(CancellationToken ct = default);
+        Task<PagedResult<CasteVoterResponseDto>> GetAllAsync(CasteVoterQueryParams qp, CancellationToken ct = default);
 
         Task<int> AddRangeAsync(List<Tbl_CasteVoter> castevoters, CancellationToken ct = default);
 

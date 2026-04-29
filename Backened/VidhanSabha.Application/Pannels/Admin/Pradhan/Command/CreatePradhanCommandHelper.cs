@@ -27,7 +27,7 @@ namespace VidhanSabha.Application.Pannels.Admin.Pradhan.Command
             
 
             var data = Tbl_Pradhan.Create(
-                req.Name, req.DesignationId, req.Contact, req.Gender, req.VillageId);
+                req.Name, req.DesignationId, req.Contact, req.Gender,request.UserId, req.VillageId);
 
             return await _repo.AddAsync(data, cancellationToken);
         }

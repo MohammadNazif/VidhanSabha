@@ -25,7 +25,7 @@ namespace VidhanSabha.Application.Pannels.Admin.PrabhavshaliVyakti.Command
             var req = request.Dto;
 
             var data = Tbl_PrabhavshaliVyakti.Create(
-                req.BoothId,req.DesignationId, req.Name, req.CategoryId, req.CastId, req.Mobile,req.Description,
+                req.BoothId,req.DesignationId, req.Name, req.CategoryId, req.CastId, req.Mobile,req.Description,request.UserId,
                 req.VillageId);
 
             return await _repo.AddAsync(data, cancellationToken);

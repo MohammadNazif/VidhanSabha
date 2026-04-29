@@ -88,7 +88,7 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
                 var query = _context.Tbl_Pradhan
                .AsNoTracking()
                .Where(b =>
-                   (!qp.Id.HasValue || b.Id == qp.Id)
+                   (!qp.Id.HasValue || b.Id == qp.Id) && (b.UserId == qp.UserId)
                    //(!qp.SectorId.HasValue || b.Booth.Sector.Id == qp.SectorId) &&
                    //(!qp.BoothId.HasValue || b.Booth.Id == qp.BoothId)
                    );

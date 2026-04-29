@@ -24,7 +24,7 @@ namespace VidhanSabha.Application.Pannels.Admin.CasteVoter.Queries
             GetAllCasteVoterQuery request,
             CancellationToken cancellationToken)
         {
-            return await _repo.GetAllAsync(cancellationToken);
+            return await _repo.GetAllAsync(request.QueryParams);
         }
     }
 }
