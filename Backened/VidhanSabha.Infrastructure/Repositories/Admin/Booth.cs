@@ -144,35 +144,7 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
             );
         }
 
-        public async Task<List<BoothExportRow>> GetAllForExportAsync(
-      BoothQueryParams qp,
-      CancellationToken ct = default)
-        {
-            var query = _context.Tbl_Booth
-                .AsNoTracking()
-                .Include(b => b.Mandal)
-                .Include(b => b.Sector)
-                .Include(b => b.Villages)
-                    .ThenInclude(v => v.Village)
-                .Include(b => b.Sanyojak)
-                    .ThenInclude(s => s.Cast)
-                .AsQueryable();
-
-            if (!string.IsNullOrWhiteSpace(qp.UserId))
-                query = query.Where(b => b.UserId == qp.UserId);
-
-            if (!string.IsNullOrWhiteSpace(qp.SearchTerm))
-            {
-                var term = qp.SearchTerm.Trim();
-
-                query = query.Where(b =>
-                    EF.Functions.Like(b.PollingStationName, $"%{term}%") ||
-                    EF.Functions.Like(b.PollingStationLocation, $"%{term}%") ||
-                    EF.Functions.Like(b.Mandal.Name, $"%{term}%") ||
-                    EF.Functions.Like(b.Sector.SectorName, $"%{term}%") ||
-                    EF.Functions.Like(b.BoothNumber.ToString(), $"%{term}%")
-                );
-            }
+        
 
 
         public async Task<PagedResult<BoothReportsDto>> GetAllBoothReports(
@@ -182,9 +154,10 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
                 .AsNoTracking()
                 //.Where(b => b.Mandal.VidhanId == vidhanId)
                 .Where(b =>
-                    (!qp.BoothId.HasValue || b.Id == qp.BoothId) && (b.UserId == qp.UserId) &&
-                    (!qp.MandalId.HasValue || b.MandalId == qp.MandalId) && (b.UserId == qp.UserId) &&
-                    (!qp.SectorId.HasValue || b.SectorId == qp.SectorId));
+                    //(!qp.BoothId.HasValue || b.Id == qp.BoothId) && 
+                    (b.UserId == qp.UserId));
+                    //(!qp.MandalId.HasValue || b.MandalId == qp.MandalId) && (b.UserId == qp.UserId) &&
+                    //(!qp.SectorId.HasValue || b.SectorId == qp.SectorId));
 
             Expression<Func<Tbl_Booth, bool>>? search = null;
 
@@ -238,6 +211,11 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
                 },
                 ct: ct
             );
+        }
+
+        public Task<List<BoothExportRow>> GetAllForExportAsync(BoothQueryParams qp, CancellationToken ct = default)
+        {
+            throw new NotImplementedException();
         }
 
         public Task<Tbl_BoothSanyojak?> GetByBoothIdAsync(int boothId, CancellationToken ct)
