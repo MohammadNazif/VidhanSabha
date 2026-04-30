@@ -14,11 +14,12 @@ import { ModulePermission } from '../../../models/module-permission.enum';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
 import { ActivatedRoute } from '@angular/router';
+import { GenericExportComponent } from '../../shared/generic-export/generic-export.component';
 
 @Component({
   selector: 'app-double-voter',
   standalone: true,
-  imports: [CommonModule, PageHeaderComponent, GenericTableComponent, GenericModalButtonComponent],
+  imports: [CommonModule, PageHeaderComponent, GenericTableComponent, GenericModalButtonComponent, GenericExportComponent],
   templateUrl: './double-voter.component.html',
   styleUrl: './double-voter.component.css'
 })
@@ -27,6 +28,8 @@ export class DoubleVoterComponent implements OnInit {
 
   voterList: any[] = [];
   totalCount = 0;
+  loading = false;
+  isExporting = false;
 
   // Server-side state
   pageNumber = 1;
@@ -178,6 +181,7 @@ export class DoubleVoterComponent implements OnInit {
       const path = url[0]?.path || '';
       this.isListView = path.includes('-list');
       this.config.filterable = this.isListView;
+      this.loading = true;
       if (this.isListView) {
         this.loadFilterOptions();
       }
@@ -240,10 +244,12 @@ export class DoubleVoterComponent implements OnInit {
     }
 
     this.pageNumber = 1;
+    this.loading = true;
     this.loadVoters();
   }
 
   loadVoters() {
+    this.loading = true;
     const params: any = {
       pageNumber: this.pageNumber,
       pageSize: this.pageSize,
@@ -285,8 +291,12 @@ export class DoubleVoterComponent implements OnInit {
           }));
           this.totalCount = this.voterList.length;
         }
+        this.loading = false;
       },
-      error: (err) => console.error('Error fetching double voters:', err)
+      error: (err) => {
+        console.error('Error fetching double voters:', err);
+        this.loading = false;
+      }
     });
   }
 
@@ -372,6 +382,27 @@ export class DoubleVoterComponent implements OnInit {
 
   handleExport(format: string) {
     if (!format) return;
-    this.toastService.showSuccess('Export Started', `Successfully generated ${format.toUpperCase()} export!`);
+    this.isExporting = true;
+    const request = format === 'excel' ? this.voterService.exportToExcel() : this.voterService.exportToPdf();
+
+    request.subscribe({
+      next: (blob: Blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Double_Voter_List.${format === 'excel' ? 'xlsx' : 'pdf'}`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        this.isExporting = false;
+        this.toastService.showSuccess('Success', `Double Voter list exported to ${format.toUpperCase()} successfully!`);
+      },
+      error: (err) => {
+        console.error(`Error exporting to ${format}:`, err);
+        this.toastService.showError('Error', `Failed to export Double Voter list to ${format.toUpperCase()}`);
+        this.isExporting = false;
+      }
+    });
   }
 }

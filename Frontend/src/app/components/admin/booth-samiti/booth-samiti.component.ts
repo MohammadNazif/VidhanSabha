@@ -34,6 +34,7 @@ import { Validators } from '@angular/forms';
           [config]="config" 
           [actions]="actions" 
           [totalItems]="totalCount" 
+          [loading]="loading"
           (actionClick)="handleAction($event)"
           (pageChange)="handlePageChange($event)"
           (sortChange)="handleSortChange($event)"
@@ -48,6 +49,7 @@ export class BoothSamitiComponent implements OnInit {
 
   memberList: any[] = [];
   totalCount = 0;
+  loading = false;
 
   pageNumber = 1;
   pageSize = 50;
@@ -147,7 +149,7 @@ export class BoothSamitiComponent implements OnInit {
   }
 
   loadMembers() {
-    this.config.loading = true;
+    this.loading = true;
     const params = {
       PageNumber: this.pageNumber,
       PageSize: this.pageSize,
@@ -160,10 +162,10 @@ export class BoothSamitiComponent implements OnInit {
       next: (res) => {
         this.memberList = Array.isArray(res.data) ? res.data : [];
         this.totalCount = this.memberList.length;
-        this.config.loading = false;
+        this.loading = false;
       },
       error: () => {
-        this.config.loading = false;
+        this.loading = false;
       }
     });
   }

@@ -15,6 +15,7 @@ import { ToastService } from '../../../../Services/common/toast/toast.service';
 export class MandalReportComponent implements OnInit {
   reportData: any[] = [];
   loading = false;
+  exporting = false;
   totalCount = 0;
 
   // Pagination
@@ -77,7 +78,30 @@ export class MandalReportComponent implements OnInit {
 
   handleExport(format: string) {
     if (!format) return;
-    this.toastService.showSuccess('Export Started', `Successfully generated ${format.toUpperCase()} export!`);
+    this.exporting = true;
+    const request = format === 'excel' 
+      ? this.mandalService.exportCombinedReportExcel() 
+      : this.mandalService.exportCombinedReportPdf();
+
+    request.subscribe({
+      next: (blob: Blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Mandal_Combined_Report.${format === 'excel' ? 'xlsx' : 'pdf'}`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        this.exporting = false;
+        this.toastService.showSuccess('Success', `Mandal report exported to ${format.toUpperCase()} successfully!`);
+      },
+      error: (err) => {
+        console.error(`Error exporting to ${format}:`, err);
+        this.toastService.showError('Error', `Failed to export Mandal report to ${format.toUpperCase()}`);
+        this.exporting = false;
+      }
+    });
   }
 
   getVillageNames(villages: any[]): string {

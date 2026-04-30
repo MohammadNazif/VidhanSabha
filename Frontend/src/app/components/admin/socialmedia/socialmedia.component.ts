@@ -25,6 +25,7 @@ export class SocialMediaComponent implements OnInit {
 
   socialMediaList: any[] = [];
   totalCount = 0;
+  loading = false;
 
   // Server-side state
   pageNumber = 1;
@@ -177,6 +178,7 @@ export class SocialMediaComponent implements OnInit {
   }
 
   loadData() {
+    this.loading = true;
     const params: any = {
       pageNumber: this.pageNumber,
       pageSize: this.pageSize,
@@ -185,8 +187,6 @@ export class SocialMediaComponent implements OnInit {
       isDescending: this.isDescending
     };
 
-    // If an endpoint exists for getting social media, we use it here.
-    // Assuming getAllSocialMedia returns similar structure to others.
     this.socialMediaService.getAllSocialMedia(params).subscribe({
       next: (response) => {
         const dataWrap = response.data;
@@ -194,12 +194,13 @@ export class SocialMediaComponent implements OnInit {
 
         this.socialMediaList = items;
         this.totalCount = dataWrap?.totalCount || this.socialMediaList.length;
+        this.loading = false;
       },
       error: (err) => {
-        // If it fails, likely endpoint doesn't exist yet, that's fine, we will just show an empty table
-        console.warn('Error fetching social media list (maybe endpoint does not exist yet):', err);
+        console.warn('Error fetching social media list:', err);
         this.socialMediaList = [];
         this.totalCount = 0;
+        this.loading = false;
       }
     });
   }

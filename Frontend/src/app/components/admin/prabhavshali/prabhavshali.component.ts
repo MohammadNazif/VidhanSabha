@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Validators } from '@angular/forms';
+import { ReactiveFormsModule, Validators } from '@angular/forms';
 import { GenericTableComponent } from '../../shared/generic-table/generic-table.component';
 import { TableAction, TableColumn, TableConfig } from '../../shared/generic-table/generic-table.types';
 import { GenericModalButtonComponent } from '../../shared/generic-modal-form/generic-modal-button.component';
@@ -12,11 +12,12 @@ import { CrudHandlerService } from '../../../Services/common/crud-handler.servic
 import { AuthServiceService } from '../../../Services/Auth/auth.service';
 import { ModulePermission } from '../../../models/module-permission.enum';
 import { ActivatedRoute } from '@angular/router';
+import { GenericExportComponent } from '../../shared/generic-export/generic-export.component';
 
 @Component({
   selector: 'app-prabhavshali',
   standalone: true,
-  imports: [CommonModule, PageHeaderComponent, GenericTableComponent, GenericModalButtonComponent],
+  imports: [CommonModule, GenericTableComponent, GenericModalButtonComponent, PageHeaderComponent, ReactiveFormsModule, GenericExportComponent],
   templateUrl: './prabhavshali.component.html',
   styleUrl: './prabhavshali.component.css'
 })
@@ -25,6 +26,8 @@ export class PrabhavshaliComponent implements OnInit {
 
   personList: any[] = [];
   totalCount = 0;
+  loading = false;
+  isExporting = false;
 
   // Server-side state
   pageNumber = 1;
@@ -33,6 +36,12 @@ export class PrabhavshaliComponent implements OnInit {
   sortBy = '';
   isDescending = false;
   isListView = false;
+  isDoctorView = false;
+  isAdvocateView = false;
+  isGovtEmployeeView = false;
+  isPradhanView = false;
+  pageTitle = 'Prabhavshali Vyakt Management';
+  pageSubtitle = 'Manage influential people across booths and villages';
 
   canManage(): boolean {
     return !this.isListView;
@@ -57,7 +66,8 @@ export class PrabhavshaliComponent implements OnInit {
     striped: true,
     hoverable: true,
     serverSide: true,
-    defaultPageSize: 50
+    defaultPageSize: 50,
+    filterable: false
   };
 
   actions: TableAction[] = [
@@ -198,25 +208,147 @@ export class PrabhavshaliComponent implements OnInit {
     this.route.url.subscribe(url => {
       const path = url[0]?.path || '';
       this.isListView = path.includes('-list');
+      this.isDoctorView = path === 'doctor-list';
+      this.isAdvocateView = path === 'advocate-list';
+      this.isGovtEmployeeView = path === 'government-employee-list';
+      this.isPradhanView = path === 'pradhan-list';
+
+      if (this.isDoctorView) {
+        this.pageTitle = 'Doctor List';
+        this.pageSubtitle = 'Manage registered doctors across the assembly';
+      } else if (this.isAdvocateView) {
+        this.pageTitle = 'Advocate List';
+        this.pageSubtitle = 'Manage registered advocates across the assembly';
+      } else if (this.isGovtEmployeeView) {
+        this.pageTitle = 'Government Employee List';
+        this.pageSubtitle = 'Manage registered government employees';
+      } else if (this.isPradhanView) {
+        this.pageTitle = 'Pradhan List';
+        this.pageSubtitle = 'Manage registered pradhans across the assembly';
+      } else {
+        this.pageTitle = 'Prabhavshali Vyakt Management';
+        this.pageSubtitle = 'Manage influential people across booths and villages';
+      }
+
+      this.config.filterable = this.isListView;
+      this.loading = true;
+      if (this.isListView) {
+        this.loadFilterOptions();
+      }
       this.loadData();
     });
   }
 
+  loadFilterOptions() {
+    this.config.filters = [
+      { key: 'boothIds', label: 'Booth', type: 'select', options: [], placeholder: '-- Select Booth --', multiple: true },
+      { key: 'villageIds', label: 'Village', type: 'select', options: [], placeholder: '-- Select Village --', multiple: true }
+    ];
+
+    const isSpecialView = this.isDoctorView || this.isAdvocateView || this.isGovtEmployeeView || this.isPradhanView;
+    if (!isSpecialView) {
+      this.config.filters.push({ key: 'designationIds', label: 'Designation', type: 'select', options: [], placeholder: '-- Select Designation --', multiple: true });
+    }
+
+    const userId = this.authService.getUserId();
+    // Load Booths
+    this.prabhavshaliService.getCommonData('boothNumber', userId).subscribe(res => {
+      const filter = this.config.filters?.find(f => f.key === 'boothIds');
+      if (filter) {
+        const list = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
+        filter.options = list.map((b: any) => ({
+          label: `Booth No. ${b.boothNumber}`,
+          value: String(b.boothId || b.id)
+        }));
+      }
+    });
+
+    // Load All Villages initially
+    this.prabhavshaliService.getCommonData('village', null, 500000).subscribe(res => {
+      const filter = this.config.filters?.find(f => f.key === 'villageIds');
+      if (filter) {
+        const list = Array.isArray(res?.data?.items) ? res.data.items : (Array.isArray(res?.items) ? res.items : (Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : [])));
+        filter.options = list.map((v: any) => ({
+          label: v.name || v.villageName,
+          value: String(v.id || v.villageId)
+        }));
+      }
+    });
+
+    // Load Designations
+    if (!isSpecialView) {
+      this.prabhavshaliService.getDesignations().subscribe(res => {
+        const filter = this.config.filters?.find(f => f.key === 'designationIds');
+        if (filter) {
+          const list = Array.isArray(res?.data?.items) ? res.data.items : (Array.isArray(res?.items) ? res.items : (Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : [])));
+          filter.options = list.map((d: any) => ({
+            label: d.designationName || d.name,
+            value: String(d.id)
+          }));
+        }
+      });
+    }
+  }
+
+  boothIds: string | null = null;
+  villageIds: string | null = null;
+  designationIds: string | null = null;
+
+  handleFilterChange(filterState: Record<string, any>) {
+    const processIds = (ids: any) => Array.isArray(ids) ? (ids.length > 0 ? ids.join(',') : null) : (ids || null);
+
+    this.boothIds = processIds(filterState['boothIds']);
+    this.villageIds = processIds(filterState['villageIds']);
+    this.designationIds = processIds(filterState['designationIds']);
+
+    // Cascade villages when booth changes
+    if (filterState['boothIds'] && Array.isArray(filterState['boothIds']) && filterState['boothIds'].length === 1) {
+      const boothId = filterState['boothIds'][0];
+      this.prabhavshaliService.getCommonData(`villagesByBoothId?boothId=${boothId}`).subscribe(res => {
+        const filter = this.config.filters?.find(f => f.key === 'villageIds');
+        if (filter) {
+          const list = Array.isArray(res?.data) ? res.data : (Array.isArray(res?.data?.items) ? res.data.items : (Array.isArray(res) ? res : []));
+          filter.options = list.map((v: any) => ({
+            label: v.name || v.villageName,
+            value: String(v.id || v.villageId)
+          }));
+        }
+      });
+    }
+
+    this.pageNumber = 1;
+    this.loading = true;
+    this.loadData();
+  }
+
   loadData() {
+    this.loading = true;
     const params: any = {
       pageNumber: this.pageNumber,
       pageSize: this.pageSize,
       searchTerm: this.searchTerm,
       sortBy: this.sortBy,
-      isDescending: this.isDescending
+      isDescending: this.isDescending,
+      boothIds: this.boothIds,
+      villageIds: this.villageIds,
+      designationIds: this.designationIds
     };
+
+    if (this.isDoctorView) params.designationId = 8;
+    if (this.isAdvocateView) params.designationId = 9;
+    if (this.isGovtEmployeeView) params.designationId = 10;
+    if (this.isPradhanView) params.designationId = 1;
 
     const userId = this.authService.getUserId();
     if (userId) {
       params.userId = userId;
     }
 
-    this.prabhavshaliService.getAllPrabhavshali(params).subscribe({
+    const request = (this.isDoctorView || this.isAdvocateView || this.isGovtEmployeeView || this.isPradhanView)
+      ? this.prabhavshaliService.getPrabhavshaliByDesignation(params)
+      : this.prabhavshaliService.getAllPrabhavshali(params);
+
+    request.subscribe({
       next: (response) => {
         const dataWrap = response.data;
         if (dataWrap && dataWrap.items) {
@@ -235,8 +367,12 @@ export class PrabhavshaliComponent implements OnInit {
           }));
           this.totalCount = this.personList.length;
         }
+        this.loading = false;
       },
-      error: (err) => console.error('Error fetching Prabhavshali list:', err)
+      error: (err) => {
+        console.error('Error fetching Prabhavshali list:', err);
+        this.loading = false;
+      }
     });
   }
 
@@ -322,6 +458,27 @@ export class PrabhavshaliComponent implements OnInit {
 
   handleExport(format: string) {
     if (!format) return;
-    this.toastService.showSuccess('Export Started', `Successfully generated ${format.toUpperCase()} export!`);
+    this.isExporting = true;
+    const request = format === 'excel' ? this.prabhavshaliService.exportToExcel() : this.prabhavshaliService.exportToPdf();
+
+    request.subscribe({
+      next: (blob: Blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Prabhavshali_List.${format === 'excel' ? 'xlsx' : 'pdf'}`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        this.isExporting = false;
+        this.toastService.showSuccess('Success', `Prabhavshali list exported to ${format.toUpperCase()} successfully!`);
+      },
+      error: (err: any) => {
+        console.error(`Error exporting to ${format}:`, err);
+        this.toastService.showError('Error', `Failed to export Prabhavshali list to ${format.toUpperCase()}`);
+        this.isExporting = false;
+      }
+    });
   }
 }

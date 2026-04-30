@@ -940,8 +940,8 @@ public static class AdminEndpoints
             q.UserId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var result = await mediator.Send(new GetAllSeniorDisabledQuery(q));
             return Results.Ok(ApiResponse<PagedResult<SeniorDisabledResponseDto>>.Ok(result));
-        }).WithName("getAllSeniorDisabled");
-        }).RequireAuthorization();
+        }).WithName("getAllSeniorDisabled")
+        .RequireAuthorization();
 
 
         #endregion

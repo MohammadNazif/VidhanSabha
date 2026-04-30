@@ -1,33 +1,24 @@
-<div class="h-screen p-6 flex flex-col overflow-hidden bg-slate-50/50">
+<div class="h-screen p-4 flex flex-col overflow-hidden bg-slate-50/50">
   <app-page-header [title]="isAsahmatView ? 'Asahmat Voters' : 'Sahmat Voters'" 
     [subtitle]="isAsahmatView ? 'Manage voters who are asahmat' : 'Manage voters who are sahmat'">
     <div class="flex items-center gap-3">
       <app-generic-modal-button *ngIf="canManageVoters()" #voterModal [config]="addVoterConfig" (formSubmit)="handleFormSubmit($event)"
-        [label]="isAsahmatView ? 'Add Asahmat Voter' : 'Add Sahmat Voter'" icon="+">
+        [label]="isAsahmatView ? 'Add Asahmat Voter' : 'Add Sahmat Voter'" icon="+" variant="primary">
       </app-generic-modal-button>
 
-      <div *ngIf="isListView && voterList && voterList.length > 0" class="relative">
-        <select #exportSelect (change)="handleExport(exportSelect.value); exportSelect.value = ''"
-          class="px-4 py-2 pr-8 rounded-xl text-xs font-bold text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 transition-all shadow-sm appearance-none cursor-pointer outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
-          <option value="" disabled selected>Export Data</option>
-          <option value="pdf">Export PDF</option>
-          <option value="excel">Export Excel</option>
-        </select>
-        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-500">
-          <svg class="fill-current h-3 w-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-            <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
-          </svg>
-        </div>
-      </div>
+      <app-generic-export [show]="isListView && voterList && voterList.length > 0" 
+        [isExporting]="isExporting" (export)="handleExport($event)">
+      </app-generic-export>
     </div>
   </app-page-header>
 
-  <div class="flex-1 min-h-0 mt-6 bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
+  <div class="flex-1 min-h-0 mt-4 bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
     <app-generic-table class="flex-1 min-h-0" [columns]="columns" [data]="voterList" [config]="config" 
-      [actions]="actions" [totalItems]="totalCount" (actionClick)="handleAction($event)"
+      [actions]="actions" [totalItems]="totalCount" [loading]="loading" (actionClick)="handleAction($event)"
       (pageChange)="handlePageChange($event)"
       (sortChange)="handleSortChange($event)"
       (searchChange)="handleSearchChange($event)"
+      (filterChange)="handleFilterChange($event)"
       (selectionChange)="handleSelection($event)">
     </app-generic-table>
   </div>

@@ -1,11 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using VidhanSabha.Application.Common.Dtos;
+using VidhanSabha.Application.Common.ExportPdfExcel.Dtos;
 using VidhanSabha.Application.Pannels.Admin.Booth.Dtos;
 using VidhanSabha.Application.Pannels.Admin.DoubleVoter.DTOs;
 using VidhanSabha.Application.Pannels.Admin.DoubleVoter.Interfaces;
@@ -127,7 +128,78 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
             }
             
             }
+        public async Task<List<doublevoterExportRow>> GetAllForExportAsync(
+    DoubleVoterQueryParams qp,
+    CancellationToken ct = default)
+        {
+            var query = _context.Tbl_DoubleVoter
+                .AsNoTracking()
+                .Include(d => d.Booth)
+                    .ThenInclude(b => b.Sector)
+                .Include(d => d.Booth)
+                    .ThenInclude(b => b.Sanyojak)
+                .Include(d => d.Villages)
+                    .ThenInclude(v => v.Village)
+                .AsQueryable();
 
+            // ✅ Filters
+            var boothIds = qp.GetBoothIds();
+            var villageIds = qp.GetVillageIds();
+
+            query = query.Where(b =>
+                (!qp.Id.HasValue || b.Id == qp.Id) &&
+                b.UserId == qp.UserId);
+
+            if (boothIds?.Count > 0)
+                query = query.Where(b => boothIds.Contains(b.BoothId));
+
+            if (villageIds?.Count > 0)
+                query = query.Where(b =>
+                    b.Villages.Any(v => villageIds.Contains(v.VillageId)));
+
+            // ✅ Search (safe)
+            if (!string.IsNullOrWhiteSpace(qp.SearchTerm))
+            {
+                var term = qp.SearchTerm.Trim();
+
+                query = query.Where(b =>
+                    EF.Functions.Like(b.Name, $"%{term}%") ||
+                    EF.Functions.Like(b.FatherName, $"%{term}%") ||
+                    EF.Functions.Like(b.VoterId, $"%{term}%") ||
+                    EF.Functions.Like(b.Booth.BoothNumber.ToString(), $"%{term}%")
+                );
+            }
+
+            // ✅ Fetch minimal data
+            var data = await query
+                .OrderBy(b => b.Booth.BoothNumber)
+                .Select(m => new
+                {
+                    m.Booth.BoothNumber,
+                    m.Name,
+                    m.FatherName,
+                    m.VoterId,
+                    m.CurrentAddress,
+                    m.Description,
+
+                    Villages = m.Villages
+                        .Select(v => v.Village.VillageName)
+                        .ToList()
+                })
+                .ToListAsync(ct);
+
+            // ✅ Final mapping (string.Join here)
+            return data.Select(m => new doublevoterExportRow
+            {
+                BoothNumber = m.BoothNumber,
+                Village = string.Join(", ", m.Villages),
+                VoterName = m.Name,
+                FatherName = m.FatherName,
+                VoterId = m.VoterId,
+                CurrentAddress = m.CurrentAddress,
+                Description = m.Description
+            }).ToList();
+        }
         public async Task<Tbl_DoubleVoter?> GetByIdAsync(int id)
         {
             try

@@ -26,6 +26,7 @@ export class SectorComponent implements OnInit {
 
   sectorList: any[] = [];
   totalCount = 0;
+  loading = false;
 
   // Server-side state
   pageNumber = 1;
@@ -268,6 +269,7 @@ export class SectorComponent implements OnInit {
   }
 
   loadSectors() {
+    this.loading = true;
     const params = {
       pageNumber: this.pageNumber,
       pageSize: this.pageSize,
@@ -286,8 +288,12 @@ export class SectorComponent implements OnInit {
           this.sectorList = Array.isArray(dataWrap) ? dataWrap : [];
           this.totalCount = this.sectorList.length;
         }
+        this.loading = false;
       },
-      error: (err) => console.error('Error loading sectors:', err)
+      error: (err) => {
+        console.error('Error loading sectors:', err);
+        this.loading = false;
+      }
     });
   }
 

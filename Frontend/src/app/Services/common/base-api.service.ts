@@ -91,4 +91,25 @@ export class BaseApiService {
   getById<T>(entity: string, id: number | string): Observable<T> {
     return this.http.get<T>(`${this.apiUrl}/${entity}/getById/${id}`);
   }
+
+  /**
+   * Generic Export request.
+   */
+  export(entity: string, format: 'excel' | 'pdf', params: any = {}): Observable<Blob> {
+    const url = `${this.apiUrl}/${entity}/export/${format}`;
+    let httpParams = new HttpParams();
+    Object.keys(params).forEach(key => {
+      if (params[key] !== undefined && params[key] !== null) {
+        httpParams = httpParams.set(key, String(params[key]));
+      }
+    });
+    return this.http.get(url, { params: httpParams, responseType: 'blob' });
+  }
+
+  /**
+   * Generic GET request for custom endpoints.
+   */
+  getCustom<T>(endpoint: string): Observable<T> {
+    return this.http.get<T>(`${this.apiUrl}/${endpoint}`);
+  }
 }

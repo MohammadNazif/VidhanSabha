@@ -145,8 +145,8 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
         }
 
         public async Task<List<BoothExportRow>> GetAllForExportAsync(
-      BoothQueryParams qp,
-      CancellationToken ct = default)
+     BoothQueryParams qp,
+     CancellationToken ct = default)
         {
             var query = _context.Tbl_Booth
                 .AsNoTracking()
@@ -174,6 +174,32 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
                 );
             }
 
+            var data = await query
+                .OrderBy(b => b.BoothNumber)
+                .Select(b => new
+                {
+                    b.BoothNumber,
+                    MandalName = b.Mandal.Name,
+                    SectorName = b.Sector.SectorName,
+                    b.PollingStationName,
+                    Villages = b.Villages.Select(v => v.Village.VillageName).ToList(),
+                    Sanyojak = b.Sanyojak
+                })
+                .ToListAsync(ct);
+
+            return data.Select(b => new BoothExportRow
+            {
+                MandalName = b.MandalName,
+                SectorName = b.SectorName,
+                BoothNumber = b.BoothNumber,
+                Village = string.Join(", ", b.Villages),
+                PollingStationName = b.PollingStationName,
+                BoothAathyaksh = b.Sanyojak?.InchargeName ?? "N/A",
+                ContactNumber = b.Sanyojak?.PhoneNumber ?? "N/A",
+                CastName = b.Sanyojak?.Cast?.CastName ?? "N/A"
+            }).ToList();
+        }
+
 
         public async Task<PagedResult<BoothReportsDto>> GetAllBoothReports(
           BoothQueryParams qp,int? vidhanId, CancellationToken ct = default)
@@ -182,14 +208,14 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
                 .AsNoTracking()
                 //.Where(b => b.Mandal.VidhanId == vidhanId)
                 .Where(b =>
-                    (!qp.BoothId.HasValue || b.Id == qp.BoothId) && (b.UserId == qp.UserId) &&
-                    (!qp.MandalId.HasValue || b.MandalId == qp.MandalId) && (b.UserId == qp.UserId) &&
-                    (!qp.SectorId.HasValue || b.SectorId == qp.SectorId));
+                   (b.UserId == qp.UserId));
+                    //(!qp.MandalId.HasValue || b.MandalId == qp.MandalId) && (b.UserId == qp.UserId) &&
+                    //(!qp.SectorId.HasValue || b.SectorId == qp.SectorId));
 
             Expression<Func<Tbl_Booth, bool>>? search = null;
 
             if (!string.IsNullOrWhiteSpace(qp.SearchTerm))
-            {
+            {;
                 var term = qp.SearchTerm.Trim().ToLower();
                 search = b =>
                     b.PollingStationName.ToLower().Contains(term) ||
