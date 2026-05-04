@@ -13,5 +13,8 @@ namespace VidhanSabha.Application.Pannels.Admin.SahmatAsahmat.DTOs
         public int? BoothId { get; set; }
         public int? VillageId { get; set; }
         public int? OccupationId { get; set; }
+
+        public string? Type { get; set; }
+        public int? TypeId { get; set; }
     }
 }

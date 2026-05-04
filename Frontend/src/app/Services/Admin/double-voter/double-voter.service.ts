@@ -23,4 +23,12 @@ export class DoubleVoterService extends BaseApiService {
   updateDoubleVoter(data: any): Observable<any> {
     return this.update(this.entity, data);
   }
+
+  exportToExcel(): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/${this.entity}/export/excel`, { responseType: 'blob' });
+  }
+
+  exportToPdf(): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/${this.entity}/export/pdf`, { responseType: 'blob' });
+  }
 }

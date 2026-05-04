@@ -12,11 +12,12 @@ import { CrudHandlerService } from '../../../Services/common/crud-handler.servic
 import { ActivatedRoute } from '@angular/router';
 import { AuthServiceService } from '../../../Services/Auth/auth.service';
 import { ModulePermission } from '../../../models/module-permission.enum';
+import { GenericExportComponent } from '../../shared/generic-export/generic-export.component';
 
 @Component({
   selector: 'app-sahmat-asahmat',
   standalone: true,
-  imports: [CommonModule, PageHeaderComponent, GenericTableComponent, GenericModalButtonComponent],
+  imports: [CommonModule, PageHeaderComponent, GenericTableComponent, GenericModalButtonComponent, GenericExportComponent],
   templateUrl: './sahmat-asahmat.component.html',
   styleUrl: './sahmat-asahmat.component.css'
 })
@@ -25,6 +26,8 @@ export class SahmatAsahmatComponent implements OnInit {
 
   voterList: any[] = [];
   totalCount = 0;
+  loading = false;
+  isExporting = false;
 
   // Server-side state
   pageNumber = 1;
@@ -61,7 +64,8 @@ export class SahmatAsahmatComponent implements OnInit {
     striped: true,
     hoverable: true,
     serverSide: true,
-    defaultPageSize: 50
+    defaultPageSize: 50,
+    filterable: false
   };
 
   actions: TableAction[] = [
@@ -230,34 +234,117 @@ export class SahmatAsahmatComponent implements OnInit {
       const path = url[0]?.path || '';
       this.isAsahmatView = path === 'asahmat-list';
       this.isListView = path.includes('-list');
+      this.config.filterable = this.isListView;
+      this.loading = true;
+      if (this.isListView) {
+        this.loadFilterOptions();
+      }
       this.loadVoters();
     });
   }
 
+  loadFilterOptions() {
+    this.config.filters = [
+      { key: 'boothIds', label: 'Booth', type: 'select', options: [], placeholder: '-- Select Booth --', multiple: true },
+      { key: 'villageIds', label: 'Village', type: 'select', options: [], placeholder: '-- Select Village --', multiple: true },
+      { key: 'partyIds', label: 'Party', type: 'select', options: [], placeholder: '-- Select Party --', multiple: true }
+    ];
+
+    const userId = this.authService.getUserId();
+    // Load Booths
+    // Using a manual http call for filters to avoid global loader if common/ is not in interceptor yet (it is)
+    // But we need to make sure we don't block.
+
+    // Load Booths
+    this.voterService.getCommonData('boothNumber', userId).subscribe((res: any) => {
+      const filter = this.config.filters?.find(f => f.key === 'boothIds');
+      if (filter) {
+        const list = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
+        filter.options = list.map((b: any) => ({
+          label: `Booth No. ${b.boothNumber}`,
+          value: String(b.boothId || b.id)
+        }));
+      }
+    });
+
+    // Load All Villages initially
+    this.voterService.getCommonData('village', null, 500000).subscribe((res: any) => {
+      const filter = this.config.filters?.find(f => f.key === 'villageIds');
+      if (filter) {
+        const list = Array.isArray(res?.data?.items) ? res.data.items : (Array.isArray(res?.items) ? res.items : (Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : [])));
+        filter.options = list.map((v: any) => ({
+          label: v.name || v.villageName,
+          value: String(v.id || v.villageId)
+        }));
+      }
+    });
+
+    // Load Parties
+    this.voterService.getCommonData('getparty', null, 500000).subscribe((res: any) => {
+      const filter = this.config.filters?.find(f => f.key === 'partyIds');
+      if (filter) {
+        const list = Array.isArray(res?.data?.items) ? res.data.items : (Array.isArray(res?.items) ? res.items : (Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : [])));
+        filter.options = list.map((p: any) => ({
+          label: p.partyName || p.party || p.name,
+          value: String(p.id)
+        }));
+      }
+    });
+  }
+
+  boothIds: string | null = null;
+  villageIds: string | null = null;
+  partyIds: string | null = null;
+
+  handleFilterChange(filterState: Record<string, any>) {
+    const processIds = (ids: any) => Array.isArray(ids) ? (ids.length > 0 ? ids.join(',') : null) : (ids || null);
+
+    this.boothIds = processIds(filterState['boothIds']);
+    this.villageIds = processIds(filterState['villageIds']);
+    this.partyIds = processIds(filterState['partyIds']);
+
+    // Cascade villages when booth changes
+    if (filterState['boothIds'] && Array.isArray(filterState['boothIds']) && filterState['boothIds'].length === 1) {
+      const boothId = filterState['boothIds'][0];
+      this.voterService.getCommonData(`villagesByBoothId?boothId=${boothId}`).subscribe((res: any) => {
+        const filter = this.config.filters?.find(f => f.key === 'villageIds');
+        if (filter) {
+          const list = Array.isArray(res?.data) ? res.data : (Array.isArray(res?.data?.items) ? res.data.items : (Array.isArray(res) ? res : []));
+          filter.options = list.map((v: any) => ({
+            label: v.name || v.villageName,
+            value: String(v.id || v.villageId)
+          }));
+        }
+      });
+    }
+
+    this.pageNumber = 1;
+    this.loading = true;
+    this.loadVoters();
+  }
+
   loadVoters() {
+    this.loading = true;
     const params: any = {
       pageNumber: this.pageNumber,
       pageSize: this.pageSize,
       searchTerm: this.searchTerm,
       sortBy: this.sortBy,
-      isDescending: this.isDescending
+      isDescending: this.isDescending,
+      boothIds: this.boothIds,
+      villageIds: this.villageIds,
+      partyIds: this.partyIds
     };
 
+    // Set id and TypeId parameters only if we are in a specific list view
     if (this.isListView) {
       params.id = this.isAsahmatView ? 2 : 1;
+      params['TypeId'] = this.isAsahmatView ? 2 : 1;
     }
 
     const userId = this.authService.getUserId();
     if (userId) {
       params.userId = userId;
-    }
-
-    // Filter by type on server if possible, or handle locally if backend doesn't support TypeId filter
-    // For now, we'll assume we want the full list and we can filter locally or pass type if supported
-    if (this.isAsahmatView) {
-      params['TypeId'] = 2;
-    } else if (this.route.snapshot.url[0]?.path === 'sahmat-list') {
-      params['TypeId'] = 1;
     }
 
     this.voterService.getAllSahmatAsahmat(params).subscribe({
@@ -268,23 +355,41 @@ export class SahmatAsahmatComponent implements OnInit {
         this.voterList = items.map((item: any) => ({
           ...item,
           isAsahmat: item.typeId === 2,
+          type: item.typeId === 2 ? 'Asahmat' : 'Sahmat',
           villageName: Array.isArray(item.villages) ? item.villages.map((v: any) => v.villageName).join(', ') : '',
           villageId: Array.isArray(item.villages) ? item.villages.map((v: any) => v.villageId) : []
         }));
 
         this.totalCount = dataWrap?.totalCount || this.voterList.length;
 
-        // Visibility adjustments for reason column
+        // Visibility adjustments
         if (this.isAsahmatView) {
-          this.columns = this.columns.map(col => col.key === 'reason' ? { ...col, visible: true } : col);
+          // Asahmat only
+          this.columns = this.columns.map(col => {
+            if (col.key === 'reason') return { ...col, visible: true };
+            if (col.key === 'type') return { ...col, visible: false };
+            return col;
+          });
         } else if (this.route.snapshot.url[0]?.path === 'sahmat-list') {
-          this.columns = this.columns.map(col => col.key === 'reason' ? { ...col, visible: false } : col);
+          // Sahmat only
+          this.columns = this.columns.map(col => {
+            if (col.key === 'reason') return { ...col, visible: false };
+            if (col.key === 'type') return { ...col, visible: false };
+            return col;
+          });
         } else {
-          this.columns = this.columns.map(col => col.key === 'reason' ? { ...col, visible: true } : col);
+          // Master view (both)
+          this.columns = this.columns.map(col => {
+            if (col.key === 'reason') return { ...col, visible: true };
+            if (col.key === 'type') return { ...col, visible: true };
+            return col;
+          });
         }
+        this.loading = false;
       },
       error: (err) => {
         console.error('Error fetching voters:', err);
+        this.loading = false;
       }
     });
   }
@@ -373,6 +478,31 @@ export class SahmatAsahmatComponent implements OnInit {
 
   handleExport(format: string) {
     if (!format) return;
-    this.toastService.showSuccess('Export Started', `Successfully generated ${format.toUpperCase()} export!`);
+    this.isExporting = true;
+    const request = format === 'excel' 
+      ? this.voterService.exportToExcel(this.isAsahmatView) 
+      : this.voterService.exportToPdf(this.isAsahmatView);
+
+    const viewName = this.isAsahmatView ? 'Asahmat' : 'Sahmat';
+
+    request.subscribe({
+      next: (blob: Blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${viewName}_List.${format === 'excel' ? 'xlsx' : 'pdf'}`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        this.isExporting = false;
+        this.toastService.showSuccess('Success', `${viewName} list exported to ${format.toUpperCase()} successfully!`);
+      },
+      error: (err: any) => {
+        console.error(`Error exporting to ${format}:`, err);
+        this.toastService.showError('Error', `Failed to export Sahmat/Asahmat list to ${format.toUpperCase()}`);
+        this.isExporting = false;
+      }
+    });
   }
 }

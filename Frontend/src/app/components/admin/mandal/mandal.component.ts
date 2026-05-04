@@ -33,6 +33,7 @@ export class MandalComponent implements OnInit {
   ) { }
 
   totalCount = 0;
+  loading = false;
 
   // Server-side state
   pageNumber = 1;
@@ -52,6 +53,7 @@ export class MandalComponent implements OnInit {
   }
 
   loadMandals() {
+    this.loading = true;
     const params = {
       pageNumber: this.pageNumber,
       pageSize: this.pageSize,
@@ -70,9 +72,11 @@ export class MandalComponent implements OnInit {
           this.mandalList = Array.isArray(dataWrap) ? dataWrap : [];
           this.totalCount = this.mandalList.length;
         }
+        this.loading = false;
       },
       error: (err) => {
         console.error('Error fetching mandals:', err);
+        this.loading = false;
       }
     });
   }

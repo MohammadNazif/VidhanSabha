@@ -18,10 +18,12 @@ import { MandalService } from '../../../Services/Admin/mandal/mandal.service';
 import { SectorService } from '../../../Services/Admin/sector/sector.service';
 
 
+import { GenericExportComponent } from '../../shared/generic-export/generic-export.component';
+
 @Component({
   selector: 'app-booth',
   standalone: true,
-  imports: [CommonModule, PageHeaderComponent, GenericTableComponent, GenericModalButtonComponent],
+  imports: [CommonModule, PageHeaderComponent, GenericTableComponent, GenericModalButtonComponent, GenericExportComponent],
   templateUrl: './booth.component.html',
   styleUrl: './booth.component.css'
 })
@@ -41,6 +43,7 @@ export class BoothComponent implements OnInit {
 
   isListView = false;
   totalCount = 0;
+  loading = false;
 
   // Server-side state
   pageNumber = 1;
@@ -68,6 +71,7 @@ export class BoothComponent implements OnInit {
       const path = url[0]?.path || '';
       this.isListView = path.includes('-list');
       this.config.filterable = this.isListView;
+      this.loading = true;
       if (this.isListView) {
         this.loadFilterOptions();
       }
@@ -175,10 +179,12 @@ export class BoothComponent implements OnInit {
     }
 
     this.pageNumber = 1;
+    this.loading = true;
     this.loadBooths();
   }
 
   loadBooths() {
+    this.loading = true;
     const params: any = {
       pageNumber: this.pageNumber,
       pageSize: this.pageSize,
@@ -202,18 +208,20 @@ export class BoothComponent implements OnInit {
     });
 
     this.boothService.getAllBooths(params).subscribe({
-      next: (response) => {
-        const dataWrap = response.data;
-        if (dataWrap && dataWrap.items) {
-          this.boothList = dataWrap.items;
-          this.totalCount = dataWrap.totalCount || 0;
+      next: (res: any) => {
+        if (res.isSuccess && res.data) {
+          this.boothList = res.data.items || [];
+          this.totalCount = res.data.totalCount || 0;
         } else {
-          this.boothList = Array.isArray(dataWrap) ? dataWrap : [];
+          this.boothList = Array.isArray(res?.data) ? res.data : [];
           this.totalCount = this.boothList.length;
         }
+        this.loading = false;
       },
       error: (err) => {
         console.error('Error fetching booths:', err);
+        this.toastService.showError('Error', 'Failed to load booths');
+        this.loading = false;
       }
     });
   }
@@ -616,10 +624,12 @@ export class BoothComponent implements OnInit {
     console.log('Selected rows:', selected);
   }
 
-  handleExport(format: string) {
-    if (!format) return;
+  isExporting = false;
 
-    this.toastService.showInfo('Exporting...', `Generating ${format.toUpperCase()} file...`);
+  handleExport(format: string) {
+    if (!format || this.isExporting) return;
+
+    this.isExporting = true;
 
     let fileName = `booths_${new Date().getTime()}`;
     let exportObs;
@@ -631,6 +641,7 @@ export class BoothComponent implements OnInit {
       exportObs = this.boothService.exportToPdf();
       fileName += '.pdf';
     } else {
+      this.isExporting = false;
       this.toastService.showError('Error', 'Unsupported export format');
       return;
     }
@@ -643,10 +654,12 @@ export class BoothComponent implements OnInit {
         link.download = fileName;
         link.click();
         window.URL.revokeObjectURL(url);
+        this.isExporting = false;
         this.toastService.showSuccess('Export Success', `${format.toUpperCase()} file downloaded!`);
       },
-      error: (err) => {
+      error: (err: any) => {
         console.error('Export error:', err);
+        this.isExporting = false;
         this.toastService.showError('Export Failed', 'An error occurred while generating the file.');
       }
     });

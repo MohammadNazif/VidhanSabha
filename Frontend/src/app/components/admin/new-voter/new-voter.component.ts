@@ -14,11 +14,12 @@ import { ActivatedRoute } from '@angular/router';
 import { ModulePermission } from '../../../models/module-permission.enum';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
+import { GenericExportComponent } from '../../shared/generic-export/generic-export.component';
 
 @Component({
   selector: 'app-new-voter',
   standalone: true,
-  imports: [CommonModule, PageHeaderComponent, GenericTableComponent, GenericModalButtonComponent],
+  imports: [CommonModule, PageHeaderComponent, GenericTableComponent, GenericModalButtonComponent, GenericExportComponent],
   templateUrl: './new-voter.component.html',
   styleUrl: './new-voter.component.css'
 })
@@ -27,6 +28,8 @@ export class NewVoterComponent implements OnInit {
 
   voterList: any[] = [];
   totalCount = 0;
+  loading = false;
+  isExporting = false;
 
   // Server-side state
   pageNumber = 1;
@@ -223,6 +226,7 @@ export class NewVoterComponent implements OnInit {
       this.isListView = path.includes('-list');
       this.config.filterable = this.isListView;
       if (this.isListView) {
+        this.loading = true;
         this.loadFilterOptions();
       }
       this.loadData();
@@ -296,10 +300,12 @@ export class NewVoterComponent implements OnInit {
     }
 
     this.pageNumber = 1;
+    this.loading = true;
     this.loadData();
   }
 
   loadData() {
+    this.loading = true;
     const params: any = {
       pageNumber: this.pageNumber,
       pageSize: this.pageSize,
@@ -342,9 +348,11 @@ export class NewVoterComponent implements OnInit {
           }));
           this.totalCount = this.voterList.length;
         }
+        this.loading = false;
       },
       error: (err) => {
         console.error('Error fetching new voters:', err);
+        this.loading = false;
       }
     });
   }
@@ -438,6 +446,27 @@ export class NewVoterComponent implements OnInit {
 
   handleExport(format: string) {
     if (!format) return;
-    this.toastService.showSuccess('Export Started', `Successfully generated ${format.toUpperCase()} export!`);
+    this.isExporting = true;
+    const request = format === 'excel' ? this.voterService.exportToExcel() : this.voterService.exportToPdf();
+
+    request.subscribe({
+      next: (blob: Blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `New_Voter_List.${format === 'excel' ? 'xlsx' : 'pdf'}`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        this.isExporting = false;
+        this.toastService.showSuccess('Success', `New Voter list exported to ${format.toUpperCase()} successfully!`);
+      },
+      error: (err) => {
+        console.error(`Error exporting to ${format}:`, err);
+        this.toastService.showError('Error', `Failed to export New Voter list to ${format.toUpperCase()}`);
+        this.isExporting = false;
+      }
+    });
   }
 }

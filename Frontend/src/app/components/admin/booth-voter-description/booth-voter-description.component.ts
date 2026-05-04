@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Validators } from '@angular/forms';
+import { ReactiveFormsModule, Validators } from '@angular/forms';
 import { GenericTableComponent } from '../../shared/generic-table/generic-table.component';
 import { TableAction, TableColumn, TableConfig } from '../../shared/generic-table/generic-table.types';
 import { GenericModalButtonComponent } from '../../shared/generic-modal-form/generic-modal-button.component';
@@ -14,11 +14,12 @@ import { CrudHandlerService } from '../../../Services/common/crud-handler.servic
 import { AuthServiceService } from '../../../Services/Auth/auth.service';
 import { ActivatedRoute } from '@angular/router';
 import { ModulePermission } from '../../../models/module-permission.enum';
+import { GenericExportComponent } from '../../shared/generic-export/generic-export.component';
 
 @Component({
   selector: 'app-booth-voter-description',
   standalone: true,
-  imports: [CommonModule, PageHeaderComponent, GenericTableComponent, GenericModalButtonComponent],
+  imports: [CommonModule, GenericTableComponent, GenericModalButtonComponent, PageHeaderComponent, ReactiveFormsModule, GenericExportComponent],
   templateUrl: './booth-voter-description.component.html',
   styleUrl: './booth-voter-description.component.css'
 })
@@ -29,6 +30,8 @@ export class BoothVoterDescriptionComponent implements OnInit {
 
   voterList: any[] = [];
   totalCount = 0;
+  loading = false;
+  isExporting = false;
 
   // Server-side state
   pageNumber = 1;
@@ -56,7 +59,8 @@ export class BoothVoterDescriptionComponent implements OnInit {
     striped: true,
     hoverable: true,
     serverSide: true,
-    defaultPageSize: 50
+    defaultPageSize: 50,
+    filterable: false
   };
 
   actions: TableAction[] = [
@@ -314,17 +318,86 @@ export class BoothVoterDescriptionComponent implements OnInit {
     this.route.url.subscribe(url => {
       const path = url[0]?.path || '';
       this.isListView = path.includes('-list');
+      this.config.filterable = this.isListView;
+      this.loading = true;
+      if (this.isListView) {
+        this.loadFilterOptions();
+      }
       this.loadVoters();
     });
   }
 
+  loadFilterOptions() {
+    this.config.filters = [
+      { key: 'boothIds', label: 'Booth', type: 'select', options: [], placeholder: '-- Select Booth --', multiple: true },
+      { key: 'villageIds', label: 'Village', type: 'select', options: [], placeholder: '-- Select Village --', multiple: true }
+    ];
+
+    const userId = this.authService.getUserId();
+    // Load Booths
+    this.boothVoterService.getCommonData('boothNumber', userId).subscribe((res: any) => {
+      const filter = this.config.filters?.find(f => f.key === 'boothIds');
+      if (filter) {
+        const list = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
+        filter.options = list.map((b: any) => ({
+          label: `Booth No. ${b.boothNumber}`,
+          value: String(b.boothId || b.id)
+        }));
+      }
+    });
+
+    // Load All Villages initially
+    this.boothVoterService.getCommonData('village', null, 500000).subscribe((res: any) => {
+      const filter = this.config.filters?.find(f => f.key === 'villageIds');
+      if (filter) {
+        const list = Array.isArray(res?.data?.items) ? res.data.items : (Array.isArray(res?.items) ? res.items : (Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : [])));
+        filter.options = list.map((v: any) => ({
+          label: v.name || v.villageName,
+          value: String(v.id || v.villageId)
+        }));
+      }
+    });
+  }
+
+  boothIds: string | null = null;
+  villageIds: string | null = null;
+
+  handleFilterChange(filterState: Record<string, any>) {
+    const processIds = (ids: any) => Array.isArray(ids) ? (ids.length > 0 ? ids.join(',') : null) : (ids || null);
+
+    this.boothIds = processIds(filterState['boothIds']);
+    this.villageIds = processIds(filterState['villageIds']);
+
+    // Cascade villages when booth changes
+    if (filterState['boothIds'] && Array.isArray(filterState['boothIds']) && filterState['boothIds'].length === 1) {
+      const boothId = filterState['boothIds'][0];
+      this.boothVoterService.getCommonData(`villagesByBoothId?boothId=${boothId}`).subscribe((res: any) => {
+        const filter = this.config.filters?.find(f => f.key === 'villageIds');
+        if (filter) {
+          const list = Array.isArray(res?.data) ? res.data : (Array.isArray(res?.data?.items) ? res.data.items : (Array.isArray(res) ? res : []));
+          filter.options = list.map((v: any) => ({
+            label: v.name || v.villageName,
+            value: String(v.id || v.villageId)
+          }));
+        }
+      });
+    }
+
+    this.pageNumber = 1;
+    this.loading = true;
+    this.loadVoters();
+  }
+
   loadVoters() {
+    this.loading = true;
     const params: any = {
       pageNumber: this.pageNumber,
       pageSize: this.pageSize,
       searchTerm: this.searchTerm,
       sortBy: this.sortBy,
-      isDescending: this.isDescending
+      isDescending: this.isDescending,
+      boothIds: this.boothIds,
+      villageIds: this.villageIds
     };
 
     const userId = this.authService.getUserId();
@@ -333,7 +406,7 @@ export class BoothVoterDescriptionComponent implements OnInit {
     }
 
     this.boothVoterService.getAllBoothVoters(params).subscribe({
-      next: (response) => {
+      next: (response: any) => {
         const dataWrap = response.data;
         if (dataWrap && dataWrap.items) {
           this.voterList = dataWrap.items.map((item: any) => ({
@@ -351,9 +424,11 @@ export class BoothVoterDescriptionComponent implements OnInit {
           }));
           this.totalCount = this.voterList.length;
         }
+        this.loading = false;
       },
       error: (err) => {
         console.error('Error fetching booth voters:', err);
+        this.loading = false;
       }
     });
   }
@@ -493,6 +568,27 @@ export class BoothVoterDescriptionComponent implements OnInit {
 
   handleExport(format: string) {
     if (!format) return;
-    this.toastService.showSuccess('Export Started', `Successfully generated ${format.toUpperCase()} export!`);
+    this.isExporting = true;
+    const request = format === 'excel' ? this.boothVoterService.exportToExcel() : this.boothVoterService.exportToPdf();
+
+    request.subscribe({
+      next: (blob: Blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Booth_Voter_Description.${format === 'excel' ? 'xlsx' : 'pdf'}`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        this.isExporting = false;
+        this.toastService.showSuccess('Success', `Booth Voter Description exported to ${format.toUpperCase()} successfully!`);
+      },
+      error: (err) => {
+        console.error(`Error exporting to ${format}:`, err);
+        this.toastService.showError('Error', `Failed to export Booth Voter Description to ${format.toUpperCase()}`);
+        this.isExporting = false;
+      }
+    });
   }
 }

@@ -14,11 +14,12 @@ import { ActivatedRoute } from '@angular/router';
 import { ModulePermission } from '../../../models/module-permission.enum';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
+import { GenericExportComponent } from '../../shared/generic-export/generic-export.component';
 
 @Component({
   selector: 'app-pravasi-voter',
   standalone: true,
-  imports: [CommonModule, PageHeaderComponent, GenericTableComponent, GenericModalButtonComponent],
+  imports: [CommonModule, PageHeaderComponent, GenericTableComponent, GenericModalButtonComponent, GenericExportComponent],
   templateUrl: './pravasi-voter.component.html',
   styleUrl: './pravasi-voter.component.css'
 })
@@ -40,6 +41,7 @@ export class PravasiVoterComponent implements OnInit {
   occupationIds: string | null = null;
 
   isListView = false;
+  loading = false;
 
   columns: TableColumn[] = [
     { key: 'boothNumber', label: 'Booth No.', sortable: true },
@@ -218,6 +220,7 @@ export class PravasiVoterComponent implements OnInit {
     this.route.url.subscribe(url => {
       const path = url[0]?.path || '';
       this.isListView = path.includes('-list');
+      this.loading = true;
       this.loadFilterOptions();
       this.loadVoters();
     });
@@ -286,10 +289,12 @@ export class PravasiVoterComponent implements OnInit {
     this.occupationIds = processIds(filterState['occupationIds']);
 
     this.pageNumber = 1;
+    this.loading = true;
     this.loadVoters();
   }
 
   loadVoters() {
+    this.loading = true;
     const params: any = {
       pageNumber: this.pageNumber,
       pageSize: this.pageSize,
@@ -314,8 +319,8 @@ export class PravasiVoterComponent implements OnInit {
     });
 
     this.voterService.getAllPravasivoters(params).subscribe({
-      next: (response) => {
-        const dataWrap = response.data;
+      next: (response: any) => {
+        const dataWrap = response?.data;
         if (dataWrap && dataWrap.items) {
           this.voterList = dataWrap.items.map((item: any) => ({
             ...item,
@@ -324,7 +329,7 @@ export class PravasiVoterComponent implements OnInit {
           }));
           this.totalCount = dataWrap.totalCount || 0;
         } else {
-          const rawList = Array.isArray(dataWrap) ? dataWrap : [];
+          const rawList = Array.isArray(dataWrap) ? dataWrap : (Array.isArray(response) ? response : []);
           this.voterList = rawList.map((item: any) => ({
             ...item,
             villageName: Array.isArray(item.villages) ? item.villages.map((v: any) => v.villageName).join(', ') : '',
@@ -332,9 +337,12 @@ export class PravasiVoterComponent implements OnInit {
           }));
           this.totalCount = this.voterList.length;
         }
+        this.loading = false;
       },
       error: (err) => {
         console.error('Error fetching pravasi voters:', err);
+        this.toastService.showError('Error', 'Failed to load pravasi voters');
+        this.loading = false;
       }
     });
   }
@@ -420,10 +428,12 @@ export class PravasiVoterComponent implements OnInit {
     );
   }
 
+  isExporting = false;
+
   handleExport(format: string) {
-    if (!format) return;
+    if (!format || this.isExporting) return;
     
-    this.toastService.showInfo('Exporting...', `Generating ${format.toUpperCase()} file...`);
+    this.isExporting = true;
 
     let fileName = `pravasi_voters_${new Date().getTime()}`;
     let exportObs;
@@ -435,6 +445,7 @@ export class PravasiVoterComponent implements OnInit {
       exportObs = this.voterService.exportToPdf();
       fileName += '.pdf';
     } else {
+      this.isExporting = false;
       this.toastService.showError('Error', 'Unsupported export format');
       return;
     }
@@ -447,10 +458,12 @@ export class PravasiVoterComponent implements OnInit {
         link.download = fileName;
         link.click();
         window.URL.revokeObjectURL(url);
+        this.isExporting = false;
         this.toastService.showSuccess('Export Success', `${format.toUpperCase()} file downloaded!`);
       },
       error: (err) => {
         console.error('Export error:', err);
+        this.isExporting = false;
         this.toastService.showError('Export Failed', 'An error occurred while generating the file.');
       }
     });

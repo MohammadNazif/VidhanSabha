@@ -4,15 +4,22 @@
     <div class="max-w-6xl mx-auto px-6 pt-6 pb-2">
       <app-page-header title="Combined Hierarchy Report" subtitle="Strategic overview of organizational structure and personnel">
         <div class="flex items-center gap-2">
-          <div *ngIf="reportData && reportData.length > 0" class="flex items-center gap-2">
-            <button (click)="handleExport('pdf')" class="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl text-[11px] font-bold text-slate-600 hover:bg-slate-50 transition-all shadow-sm group">
-              <i-lucide name="file-text" class="w-3.5 h-3.5 text-red-500 group-hover:scale-110 transition-transform"></i-lucide>
-              PDF Report
-            </button>
-            <button (click)="handleExport('excel')" class="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl text-[11px] font-bold text-slate-600 hover:bg-slate-50 transition-all shadow-sm group">
-              <i-lucide name="file-spreadsheet" class="w-3.5 h-3.5 text-emerald-500 group-hover:scale-110 transition-transform"></i-lucide>
-              Excel Sheet
-            </button>
+          <div *ngIf="reportData && reportData.length > 0" class="relative group">
+            <select #exportSelect (change)="handleExport(exportSelect.value); exportSelect.value = ''" [disabled]="exporting"
+              class="px-5 py-2.5 pr-10 rounded-xl text-sm font-bold text-slate-600 bg-white border-2 border-slate-100 hover:border-blue-200 hover:bg-slate-50 transition-all shadow-sm appearance-none cursor-pointer outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 disabled:opacity-50 disabled:cursor-not-allowed">
+              <option value="" disabled selected>{{ exporting ? 'Generating...' : 'Export Report' }}</option>
+              <option value="pdf">📄 Export PDF</option>
+              <option value="excel">📊 Export Excel</option>
+            </select>
+            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3.5 text-slate-400 group-hover:text-blue-500 transition-colors">
+              <svg *ngIf="!exporting" class="h-4 w-4 stroke-[3]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+              </svg>
+              <svg *ngIf="exporting" class="animate-spin h-4 w-4 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            </div>
           </div>
         </div>
       </app-page-header>

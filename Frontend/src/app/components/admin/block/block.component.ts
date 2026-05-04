@@ -23,6 +23,7 @@ export class BlockComponent implements OnInit {
 
   blockList: any[] = [];
   totalCount = 0;
+  loading = false;
 
   // Server-side state
   pageNumber = 1;
@@ -189,6 +190,7 @@ export class BlockComponent implements OnInit {
   }
 
   loadData() {
+    this.loading = true;
     const params = {
       pageNumber: this.pageNumber,
       pageSize: this.pageSize,
@@ -207,8 +209,12 @@ export class BlockComponent implements OnInit {
           this.blockList = Array.isArray(dataWrap) ? dataWrap : [];
           this.totalCount = this.blockList.length;
         }
+        this.loading = false;
       },
-      error: (err) => console.error('Error fetching block list:', err)
+      error: (err) => {
+        console.error('Error fetching block list:', err);
+        this.loading = false;
+      }
     });
   }
 

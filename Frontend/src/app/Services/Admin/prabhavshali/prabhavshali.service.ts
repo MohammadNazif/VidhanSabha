@@ -16,11 +16,36 @@ export class PrabhavshaliService extends BaseApiService {
     return this.getAllByParams(this.entity, params);
   }
 
+  // Specialized method for category-based lists (Doctor, Advocate, etc.)
+  getPrabhavshaliByDesignation(params: any = {}): Observable<any> {
+    const desgId = params.designationId;
+    delete params.designationId; // Remove from params to avoid duplication in query string if needed
+    return this.getWithParams(`${this.apiUrl}/${this.entity}/getDesgById?desgId=${desgId}`, params);
+  }
+
   deletePrabhavshali(id: number): Observable<any> {
     return this.delete(this.entity, id);
   }
 
   updatePrabhavshali(data: any): Observable<any> {
     return this.update(this.entity, data);
+  }
+
+  exportToExcel(): Observable<Blob> {
+    return this.export(this.entity, 'excel');
+  }
+
+  exportToPdf(): Observable<Blob> {
+    return this.export(this.entity, 'pdf');
+  }
+
+  getDesignations(): Observable<any> {
+    return this.getCustom('common/getadmindesignation');
+  }
+
+  getCommonData(path: string, userId?: string | null, pageSize: number = 1000): Observable<any> {
+    let url = `common/${path}?PageNumber=1&PageSize=${pageSize}`;
+    if (userId) url += `&userId=${userId}`;
+    return this.getCustom(url);
   }
 }

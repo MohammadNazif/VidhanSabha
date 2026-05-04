@@ -23,4 +23,20 @@ export class SahmatAsahmatService extends BaseApiService {
   deleteSahmatAsahmat(id: number): Observable<any> {
     return this.delete(this.entity, id);
   }
+
+  exportToExcel(isAsahmat: boolean = false): Observable<Blob> {
+    const entityName = isAsahmat ? 'asahmat' : 'sahmat';
+    return this.export(entityName, 'excel');
+  }
+
+  exportToPdf(isAsahmat: boolean = false): Observable<Blob> {
+    const entityName = isAsahmat ? 'asahmat' : 'sahmat';
+    return this.export(entityName, 'pdf');
+  }
+
+  getCommonData(path: string, userId?: string | null, pageSize: number = 1000): Observable<any> {
+    let url = `common/${path}?PageNumber=1&PageSize=${pageSize}`;
+    if (userId) url += `&userId=${userId}`;
+    return this.getCustom(url);
+  }
 }

@@ -14,13 +14,14 @@ import { AuthServiceService } from '../../../Services/Auth/auth.service';
 import { ModulePermission } from '../../../models/module-permission.enum';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
+import { GenericExportComponent } from '../../shared/generic-export/generic-export.component';
 
 @Component({
   selector: 'app-senior-disabled',
   standalone: true,
-  imports: [CommonModule, FormsModule, GenericTableComponent, GenericModalButtonComponent, PageHeaderComponent],
+  imports: [CommonModule, FormsModule, GenericTableComponent, GenericModalButtonComponent, PageHeaderComponent, GenericExportComponent],
   template: `
-    <div class="h-full flex flex-col p-4 gap-4 overflow-hidden">
+    <div class="h-full flex flex-col p-4 gap-2 overflow-hidden">
       <app-page-header [title]="pageTitle" [subtitle]="pageSubtitle">
         <app-generic-modal-button 
             *ngIf="canManage()"
@@ -32,22 +33,12 @@ import { environment } from '../../../../environments/environment';
             (formSubmit)="handleFormSubmit($event)">
         </app-generic-modal-button>
 
-        <div *ngIf="isListView && citizens && citizens.length > 0" class="relative">
-          <select #exportSelect (change)="handleExport(exportSelect.value); exportSelect.value = ''"
-            class="px-4 py-2 pr-8 rounded-xl text-xs font-bold text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 transition-all shadow-sm appearance-none cursor-pointer outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
-            <option value="" disabled selected>Export Data</option>
-            <option value="pdf">Export PDF</option>
-            <option value="excel">Export Excel</option>
-          </select>
-          <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-500">
-            <svg class="fill-current h-3 w-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-              <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
-            </svg>
-          </div>
-        </div>
+        <app-generic-export [show]="isListView && citizens && citizens.length > 0" 
+            [isExporting]="isExporting" (export)="handleExport($event)">
+        </app-generic-export>
       </app-page-header>
 
-      <div class="flex-1 min-h-0 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col p-2">
+      <div class="flex-1 min-h-0 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col mt-2">
         <app-generic-table
           [config]="tableConfig"
           [columns]="columns"
@@ -71,6 +62,7 @@ export class SeniorDisabledComponent implements OnInit {
   citizens: any[] = [];
   loading = false;
   totalItems = 0;
+  isExporting = false;
   searchTerm = '';
   pageNumber = 1;
   pageSize = 50;
@@ -260,6 +252,7 @@ export class SeniorDisabledComponent implements OnInit {
       this.isDisabledView = path.includes('disabled');
       this.isListView = path.includes('-list');
       this.tableConfig.filterable = this.isListView;
+      this.loading = true;
       if (this.isListView) {
         this.loadFilterOptions();
       }
@@ -334,6 +327,7 @@ export class SeniorDisabledComponent implements OnInit {
     }
 
     this.pageNumber = 1;
+    this.loading = true;
     this.loadCitizens();
   }
 
@@ -488,6 +482,27 @@ export class SeniorDisabledComponent implements OnInit {
 
   handleExport(format: string) {
     if (!format) return;
-    this.toastService.showSuccess('Export Started', `Successfully generated ${format.toUpperCase()} export!`);
+    this.isExporting = true;
+    const request = format === 'excel' ? this.citizenService.exportToExcel() : this.citizenService.exportToPdf();
+
+    request.subscribe({
+      next: (blob: Blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${this.isDisabledView ? 'Disabled' : 'Senior_Citizen'}_List.${format === 'excel' ? 'xlsx' : 'pdf'}`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        this.isExporting = false;
+        this.toastService.showSuccess('Success', `${this.isDisabledView ? 'Disabled' : 'Senior Citizen'} list exported to ${format.toUpperCase()} successfully!`);
+      },
+      error: (err) => {
+        console.error(`Error exporting to ${format}:`, err);
+        this.toastService.showError('Error', `Failed to export ${this.isDisabledView ? 'Disabled' : 'Senior Citizen'} list to ${format.toUpperCase()}`);
+        this.isExporting = false;
+      }
+    });
   }
 }

@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Validators } from '@angular/forms';
+import { ReactiveFormsModule, Validators } from '@angular/forms';
 import { GenericTableComponent } from '../../shared/generic-table/generic-table.component';
 import { TableAction, TableColumn, TableConfig } from '../../shared/generic-table/generic-table.types';
 import { GenericModalButtonComponent } from '../../shared/generic-modal-form/generic-modal-button.component';
@@ -13,10 +13,12 @@ import { AuthServiceService } from '../../../Services/Auth/auth.service';
 import { ActivatedRoute } from '@angular/router';
 import { ModulePermission } from '../../../models/module-permission.enum';
 
+import { GenericExportComponent } from '../../shared/generic-export/generic-export.component';
+
 @Component({
   selector: 'app-pannapramukh',
   standalone: true,
-  imports: [CommonModule, PageHeaderComponent, GenericTableComponent, GenericModalButtonComponent],
+  imports: [CommonModule, GenericTableComponent, GenericModalButtonComponent, PageHeaderComponent, ReactiveFormsModule, GenericExportComponent],
   templateUrl: './pannapramukh.component.html',
   styleUrl: './pannapramukh.component.css'
 })
@@ -25,6 +27,8 @@ export class PannapramukhComponent implements OnInit {
 
   pannaList: any[] = [];
   totalCount = 0;
+  loading = false;
+  isExporting = false;
 
   // Server-side state
   pageNumber = 1;
@@ -228,27 +232,111 @@ export class PannapramukhComponent implements OnInit {
     this.route.url.subscribe(url => {
       const path = url[0]?.path || '';
       this.isListView = path.includes('-list');
+      this.config.filterable = this.isListView;
+      this.loading = true;
+      if (this.isListView) {
+        this.loadFilterOptions();
+      }
       this.loadData();
     });
   }
 
+  loadFilterOptions() {
+    this.config.filters = [
+      { key: 'boothIds', label: 'Booth', type: 'select', options: [], placeholder: '-- Select Booth --', multiple: true },
+      { key: 'villageIds', label: 'Village', type: 'select', options: [], placeholder: '-- Select Village --', multiple: true },
+      { key: 'castIds', label: 'Caste', type: 'select', options: [], placeholder: '-- Select Caste --', multiple: true }
+    ];
+
+    const userId = this.authService.getUserId();
+    // Load Booths
+    this.pannaService.getCommonData('boothNumber', userId).subscribe((res: any) => {
+      const filter = this.config.filters?.find(f => f.key === 'boothIds');
+      if (filter) {
+        const list = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
+        filter.options = list.map((b: any) => ({
+          label: `Booth No. ${b.boothNumber}`,
+          value: String(b.boothId || b.id)
+        }));
+      }
+    });
+
+    // Load All Villages initially
+    this.pannaService.getCommonData('village', null, 500000).subscribe((res: any) => {
+      const filter = this.config.filters?.find(f => f.key === 'villageIds');
+      if (filter) {
+        const list = Array.isArray(res?.data?.items) ? res.data.items : (Array.isArray(res?.items) ? res.items : (Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : [])));
+        filter.options = list.map((v: any) => ({
+          label: v.name || v.villageName,
+          value: String(v.id || v.villageId)
+        }));
+      }
+    });
+
+    // Load Castes
+    this.pannaService.getCommonData('cast?id=', null, 500000).subscribe((res: any) => {
+      const filter = this.config.filters?.find(f => f.key === 'castIds');
+      if (filter) {
+        const list = Array.isArray(res?.data?.items) ? res.data.items : (Array.isArray(res?.items) ? res.items : (Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : [])));
+        filter.options = list.map((c: any) => ({
+          label: c.name || c.castName,
+          value: String(c.id)
+        }));
+      }
+    });
+  }
+
+  boothIds: string | null = null;
+  villageIds: string | null = null;
+  castIds: string | null = null;
+
+  handleFilterChange(filterState: Record<string, any>) {
+    const processIds = (ids: any) => Array.isArray(ids) ? (ids.length > 0 ? ids.join(',') : null) : (ids || null);
+
+    this.boothIds = processIds(filterState['boothIds']);
+    this.villageIds = processIds(filterState['villageIds']);
+    this.castIds = processIds(filterState['castIds']);
+
+    // Cascade villages when booth changes
+    if (filterState['boothIds'] && Array.isArray(filterState['boothIds']) && filterState['boothIds'].length === 1) {
+      const boothId = filterState['boothIds'][0];
+      this.pannaService.getCommonData(`villagesByBoothId?boothId=${boothId}`).subscribe((res: any) => {
+        const filter = this.config.filters?.find(f => f.key === 'villageIds');
+        if (filter) {
+          const list = Array.isArray(res?.data) ? res.data : (Array.isArray(res?.data?.items) ? res.data.items : (Array.isArray(res) ? res : []));
+          filter.options = list.map((v: any) => ({
+            label: v.name || v.villageName,
+            value: String(v.id || v.villageId)
+          }));
+        }
+      });
+    }
+
+    this.pageNumber = 1;
+    this.loading = true;
+    this.loadData();
+  }
+
   loadData() {
+    this.loading = true;
     const params: any = {
       pageNumber: this.pageNumber,
       pageSize: this.pageSize,
       searchTerm: this.searchTerm,
       sortBy: this.sortBy,
-      isDescending: this.isDescending
+      isDescending: this.isDescending,
+      boothIds: this.boothIds,
+      villageIds: this.villageIds,
+      castIds: this.castIds
     };
 
-    // Filter by userId for BoothSanyojak or as requested
     const userId = this.authService.getUserId();
     if (userId) {
       params.userId = userId;
     }
 
     this.pannaService.getAllPannapramukhs(params).subscribe({
-      next: (response) => {
+      next: (response: any) => {
         const dataWrap = response.data;
         const items = dataWrap?.items || (Array.isArray(dataWrap) ? dataWrap : []);
 
@@ -259,9 +347,11 @@ export class PannapramukhComponent implements OnInit {
         }));
 
         this.totalCount = dataWrap?.totalCount || this.pannaList.length;
+        this.loading = false;
       },
-      error: (err) => {
+      error: (err: any) => {
         console.error('Error fetching panna pramukhs:', err);
+        this.loading = false;
       }
     });
   }
@@ -370,6 +460,27 @@ export class PannapramukhComponent implements OnInit {
 
   handleExport(format: string) {
     if (!format) return;
-    this.toastService.showSuccess('Export Started', `Successfully generated ${format.toUpperCase()} export!`);
+    this.isExporting = true;
+    const request = format === 'excel' ? this.pannaService.exportToExcel() : this.pannaService.exportToPdf();
+
+    request.subscribe({
+      next: (blob: Blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Panna_Pramukh_List.${format === 'excel' ? 'xlsx' : 'pdf'}`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        this.isExporting = false;
+        this.toastService.showSuccess('Success', `Panna Pramukh list exported to ${format.toUpperCase()} successfully!`);
+      },
+      error: (err: any) => {
+        console.error(`Error exporting to ${format}:`, err);
+        this.toastService.showError('Error', `Failed to export Panna Pramukh list to ${format.toUpperCase()}`);
+        this.isExporting = false;
+      }
+    });
   }
 }

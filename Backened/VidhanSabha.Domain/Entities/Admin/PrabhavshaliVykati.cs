@@ -27,7 +27,7 @@ namespace VidhanSabha.Domain.Entities.Admin
 
         //Navigations
         public Tbl_Booth Booth { get; private set; } = null!;
-        public Tbl_Designation Designation { get; private set; } = null!;
+        public Tbl_AdminDesignation Designation { get; private set; } = null!;
         public Tbl_Cast? Cast { get; private set; }
         public Tbl_Category? Category { get; private set; }
 

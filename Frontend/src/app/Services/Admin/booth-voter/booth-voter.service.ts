@@ -23,4 +23,18 @@ export class BoothVoterService extends BaseApiService {
   deleteBoothVoter(id: number | string): Observable<any> {
     return this.delete(this.entity, id);
   }
+
+  exportToExcel(): Observable<Blob> {
+    return this.export(this.entity, 'excel');
+  }
+
+  exportToPdf(): Observable<Blob> {
+    return this.export(this.entity, 'pdf');
+  }
+
+  getCommonData(path: string, userId?: string | null, pageSize: number = 1000): Observable<any> {
+    let url = `common/${path}?PageNumber=1&PageSize=${pageSize}`;
+    if (userId) url += `&userId=${userId}`;
+    return this.getCustom(url);
+  }
 }
