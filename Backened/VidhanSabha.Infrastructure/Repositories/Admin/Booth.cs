@@ -266,10 +266,7 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
             );
         }
 
-        public Task<List<BoothExportRow>> GetAllForExportAsync(BoothQueryParams qp, CancellationToken ct = default)
-        {
-            throw new NotImplementedException();
-        }
+       
 
         public Task<Tbl_BoothSanyojak?> GetByBoothIdAsync(int boothId, CancellationToken ct)
         {
