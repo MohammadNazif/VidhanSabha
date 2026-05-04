@@ -63,12 +63,12 @@ namespace VidhanSabha.Infrastructure.Repositories.SuperAdmin
             return await _context.Tbl_StatePrabhari.Where(m => m.Id == id).FirstOrDefaultAsync();
         }
 
-        public async Task<IReadOnlyList<StatePrabhariResponseDto>> GetByStateIdAsync(int stateId, CancellationToken ct = default)
+        public async Task<IReadOnlyList<StatePrabhariResponseDto>> GetByStateIdAsync(int stateId,string userId, CancellationToken ct = default)
         {
             try
             {
                 return await _context.Tbl_StatePrabhari
-                    .Where(m => m.StateId == stateId
+                    .Where(m => m.StateId == stateId && m.CreatedByUserId == userId
                         && m.PrabhariRole == Domain.Enums.PrabhariRole.VidhanSabhaPrabhari)
                     .Select(x => new StatePrabhariResponseDto
                     {

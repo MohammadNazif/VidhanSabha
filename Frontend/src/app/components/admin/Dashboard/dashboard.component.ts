@@ -1,18 +1,19 @@
 import { Component, OnInit, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Chart, registerables } from 'chart.js';
-import { 
-  LucideAngularModule, 
-  Building, 
-  Map, 
-  Vote, 
-  BookOpen, 
-  ShieldCheck, 
-  ShieldAlert, 
-  Calendar, 
-  Users, 
-  Plus, 
-  Database 
+import {
+  LucideAngularModule,
+  Building,
+  Map,
+  Vote,
+  BookOpen,
+  ShieldCheck,
+  ShieldAlert,
+  Calendar,
+  Users,
+  Plus,
+  Database,
+  Share2
 } from 'lucide-angular';
 
 import { Router } from '@angular/router';
@@ -43,7 +44,7 @@ interface RecentActivity {
   selector: 'app-dashboard',
   standalone: true,
   imports: [
-    CommonModule, 
+    CommonModule,
     LucideAngularModule
   ],
   templateUrl: './dashboard.component.html',
@@ -56,26 +57,35 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   @ViewChild('attendanceChart') attendanceChartRef!: ElementRef<HTMLCanvasElement>;
 
   currentDate = new Date();
+  isRestrictedRole = false;
+  statCards: StatCard[] = [];
+  loadingCounts = true;
 
-  statCards: StatCard[] = [
-    { title: 'Mandal', value: 5, icon: 'building', gradient: 'linear-gradient(135deg, #6366f1, #4f46e5)', change: '+0%', changeType: 'up', route: '/mandal' },
-    { title: 'Sector', value: 83, icon: 'map', gradient: 'linear-gradient(135deg, #0ea5e9, #0284c7)', change: '+0%', changeType: 'up', route: '/sector' },
-    { title: 'Booth', value: 419, icon: 'vote', gradient: 'linear-gradient(135deg, #22c55e, #16a34a)', change: '+0%', changeType: 'up', route: '/booth' },
-    { title: 'PannaPramukh', value: 2, icon: 'book-open', gradient: 'linear-gradient(135deg, #f59e0b, #d97706)', change: '+0%', changeType: 'up', route: '/panna-pramukh' },
+  // All available cards with their default configurations
+  private allCards: StatCard[] = [
+    { title: 'Mandal', value: 0, icon: 'building', gradient: 'linear-gradient(135deg, #6366f1, #4f46e5)', change: '+0%', changeType: 'up', route: '/mandal-list' },
+    { title: 'Sector', value: 0, icon: 'map', gradient: 'linear-gradient(135deg, #0ea5e9, #0284c7)', change: '+0%', changeType: 'up', route: '/sector-list' },
+    { title: 'Booth', value: 0, icon: 'vote', gradient: 'linear-gradient(135deg, #22c55e, #16a34a)', change: '+0%', changeType: 'up', route: '/booth-list' },
+    { title: 'PannaPramukh', value: 0, icon: 'book-open', gradient: 'linear-gradient(135deg, #f59e0b, #d97706)', change: '+0%', changeType: 'up', route: '/panna-pramukh-list' },
     { title: 'Sahmat', value: 0, icon: 'shield-check', gradient: 'linear-gradient(135deg, #10b981, #059669)', change: '+0%', changeType: 'up', route: '/sahmat-list' },
     { title: 'Asahmat', value: 0, icon: 'shield-alert', gradient: 'linear-gradient(135deg, #ef4444, #dc2626)', change: '+0%', changeType: 'down', route: '/asahmat-list' },
-    { title: 'Activities', value: 1, icon: 'calendar', gradient: 'linear-gradient(135deg, #8b5cf6, #7c3aed)', change: '+0%', changeType: 'up', route: '/activity' },
-    { title: 'Pravasi', value: 3, icon: 'users', gradient: 'linear-gradient(135deg, #06b6d4, #0891b2)', change: '+0%', changeType: 'up', route: '/pravasi-voter' },
-    { title: 'New Voters', value: 1, icon: 'plus', gradient: 'linear-gradient(135deg, #84cc16, #65a30d)', change: '+0%', changeType: 'up', route: '/new-voter-list' },
-    { title: 'Double Voter', value: 1, icon: 'shield-alert', gradient: 'linear-gradient(135deg, #f97316, #ea580c)', change: '+0%', changeType: 'down', route: '/double-voter-list' },
-    { title: 'Prabhavshali Vyakti', value: 1, icon: 'users', gradient: 'linear-gradient(135deg, #eab308, #ca8a04)', change: '+0%', changeType: 'up', route: '/prabhavshali-vyakt' },
-    { title: 'Block', value: 1, icon: 'building', gradient: 'linear-gradient(135deg, #64748b, #475569)', change: '+0%', changeType: 'up', route: '/block' },
-    { title: 'BDC', value: 126, icon: 'database', gradient: 'linear-gradient(135deg, #14b8a6, #0f766e)', change: '+0%', changeType: 'up', route: '/bdc' },
-    { title: 'Influencer Person', value: 0, icon: 'users', gradient: 'linear-gradient(135deg, #ec4899, #db2777)', change: '+0%', changeType: 'up', route: '/influencer-person' }
+    { title: 'Activities', value: 0, icon: 'calendar', gradient: 'linear-gradient(135deg, #8b5cf6, #7c3aed)', change: '+0%', changeType: 'up', route: '/activity' },
+    { title: 'Pravasi', value: 0, icon: 'users', gradient: 'linear-gradient(135deg, #06b6d4, #0891b2)', change: '+0%', changeType: 'up', route: '/pravasi-voter-list' },
+    { title: 'New Voters', value: 0, icon: 'plus', gradient: 'linear-gradient(135deg, #84cc16, #65a30d)', change: '+0%', changeType: 'up', route: '/new-voter-list' },
+    { title: 'Double Voters', value: 0, icon: 'shield-alert', gradient: 'linear-gradient(135deg, #f97316, #ea580c)', change: '+0%', changeType: 'down', route: '/double-voter-list' },
+    { title: 'Prabhavsali Vyakti', value: 0, icon: 'users', gradient: 'linear-gradient(135deg, #eab308, #ca8a04)', change: '+0%', changeType: 'up', route: '/prabhavshali-vyakt-list' },
+    { title: 'Block', value: 0, icon: 'building', gradient: 'linear-gradient(135deg, #64748b, #475569)', change: '+0%', changeType: 'up', route: '/block-list' },
+    { title: 'BDC', value: 0, icon: 'database', gradient: 'linear-gradient(135deg, #14b8a6, #0f766e)', change: '+0%', changeType: 'up', route: '/bdc-list' },
+    { title: 'Influencer Person', value: 0, icon: 'users', gradient: 'linear-gradient(135deg, #ec4899, #db2777)', change: '+0%', changeType: 'up', route: '/influencer-person-list' },
+    { title: 'Booth Voter', value: 0, icon: 'vote', gradient: 'linear-gradient(135deg, #22c55e, #16a34a)', change: '+0%', changeType: 'up', route: '/booth-voter-description-list' },
+    { title: 'Booth Samiti', value: 0, icon: 'building', gradient: 'linear-gradient(135deg, #6366f1, #4f46e5)', change: '+0%', changeType: 'up', route: '/booth-samiti-list' },
+    { title: 'Senior Citizen', value: 0, icon: 'users', gradient: 'linear-gradient(135deg, #f59e0b, #d97706)', change: '+0%', changeType: 'up', route: '/senior-citizen-list' },
+    { title: 'Vikalaang', value: 0, icon: 'users', gradient: 'linear-gradient(135deg, #ef4444, #dc2626)', change: '+0%', changeType: 'up', route: '/disabled-list' },
+    { title: 'Post', value: 0, icon: 'share-2', gradient: 'linear-gradient(135deg, #8b5cf6, #7c3aed)', change: '+0%', changeType: 'up' }
   ];
 
   constructor(
-    private router: Router, 
+    private router: Router,
     private authService: AuthServiceService,
     private dashboardService: DashboardService
   ) { }
@@ -135,22 +145,61 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   ngOnInit() {
     this.authService.userRole$.subscribe(role => {
       const r = (role || '').toUpperCase().trim();
+      this.isRestrictedRole = r === 'BOOTHSANYOJAK' || r === 'SECTORSANYOJAK';
       console.log('Dashboard detected role:', r);
       if (r === 'SUPERADMIN') {
         this.router.navigate(['/superadmin/dashboard']);
       } else if (r === 'STATEPRABHARI') {
         this.router.navigate(['/state-prabhari/dashboard']);
       }
+
+      this.initializeCards(r);
     });
 
     this.loadCounts();
   }
 
+  initializeCards(role: string) {
+    const r = role.toUpperCase().trim();
+    if (r === 'BOOTHSANYOJAK' || r === 'SECTORSANYOJAK') {
+      const allowedTitles = [
+        'Booth Voter', 'PannaPramukh', 'Activities', 'Double Voters',
+        'Pravasi', 'Sahmat', 'Asahmat', 'New Voters', 'Booth Samiti',
+        'Prabhavsali Vyakti', 'Senior Citizen', 'Vikalaang', 'Post'
+      ];
+      
+      if (r === 'SECTORSANYOJAK') {
+        allowedTitles.unshift('Booth');
+      }
+      
+      this.statCards = this.allCards.filter(card => allowedTitles.includes(card.title));
+      // Re-sort to maintain order if needed, or just let filter handle it
+    } else {
+      // Default cards for other roles (like VidhanSabhaPrabhari)
+      const defaultTitles = [
+        'Mandal', 'Sector', 'Booth', 'PannaPramukh', 'Sahmat', 'Asahmat',
+        'Activities', 'Pravasi', 'New Voters', 'Double Voters',
+        'Prabhavsali Vyakti', 'Block', 'BDC', 'Influencer Person'
+      ];
+      this.statCards = this.allCards.filter(card => defaultTitles.includes(card.title));
+    }
+  }
+
   loadCounts() {
-    this.dashboardService.getGlobalCounts().subscribe({
+    const role = (this.authService.getRole() || '').toUpperCase().trim();
+    const isBoothOnly = role === 'BOOTHSANYOJAK';
+
+    const obs = isBoothOnly
+      ? this.dashboardService.getBoothCounts()
+      : this.dashboardService.getGlobalCounts();
+
+    obs.subscribe({
       next: (res) => {
         if (res.isSuccess && res.data) {
           const counts = res.data;
+          if (counts.boothId) {
+            this.authService.setBoothId(String(counts.boothId));
+          }
           this.statCards = this.statCards.map(card => {
             const key = this.getMapKey(card.title);
             if (counts[key] !== undefined) {
@@ -159,8 +208,12 @@ export class DashboardComponent implements OnInit, AfterViewInit {
             return card;
           });
         }
+        this.loadingCounts = false;
       },
-      error: (err) => console.error('Error fetching dashboard counts:', err)
+      error: (err) => {
+        console.error('Error fetching dashboard counts:', err);
+        this.loadingCounts = false;
+      }
     });
   }
 
@@ -175,11 +228,16 @@ export class DashboardComponent implements OnInit, AfterViewInit {
       'Activities': 'activities',
       'Pravasi': 'pravasi',
       'New Voters': 'newVoters',
-      'Double Voter': 'doubleVoter',
-      'Prabhavshali Vyakti': 'prabhavshaliVyakti',
+      'Double Voters': 'doubleVoter',
+      'Prabhavsali Vyakti': 'prabhavshaliVyakti',
       'Block': 'block',
       'BDC': 'bdc',
-      'Influencer Person': 'influencerPerson'
+      'Influencer Person': 'influencerPerson',
+      'Booth Voter': 'boothVoter',
+      'Booth Samiti': 'boothSamiti',
+      'Senior Citizen': 'varisthNagrik',
+      'Vikalaang': 'viklaang',
+      'Post': 'post'
     };
     return mapping[title] || title.toLowerCase();
   }
@@ -191,6 +249,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   }
 
   private createRevenueChart() {
+    if (!this.revenueChartRef || !this.revenueChartRef.nativeElement) return;
     const ctx = this.revenueChartRef.nativeElement.getContext('2d')!;
 
     const gradient = ctx.createLinearGradient(0, 0, 0, 300);
@@ -293,6 +352,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
 
 
   private createPartyChart() {
+    if (!this.partyChartRef || !this.partyChartRef.nativeElement) return;
     const ctx = this.partyChartRef.nativeElement.getContext('2d')!;
 
     new Chart(ctx, {
@@ -351,6 +411,3 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   }
 
 }
-
-
-

@@ -313,5 +313,16 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
             _context.Tbl_Sector.Update(sector);
             await _context.SaveChangesAsync();
         }
+
+        public  async Task<IReadOnlyList<SectorIncahrgeDto>> GetIncahrgeByIdAsync(string userId)
+        {
+            return  await _context.Tbl_Sector.Where(m => m.CreatedByUserId == userId).Select(s => new SectorIncahrgeDto
+            {
+                UserId = s.UserId,
+                SectorId = s.Id,
+                SectorIncharge = s.InchargeName
+            }).ToListAsync();
+            
+        }
     }
 }

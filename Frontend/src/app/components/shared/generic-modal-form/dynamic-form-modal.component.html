@@ -1,4 +1,4 @@
-<div class="fixed inset-0 z-[999] overflow-y-auto bg-slate-900/40 backdrop-blur-xl animate-fade-in"
+<div class="fixed inset-0 z-[999] overflow-y-auto bg-slate-900/40 animate-fade-in"
   (click)="onCancel()">
   <div class="flex min-h-full items-center justify-center p-2">
     <div
@@ -40,7 +40,8 @@
                   <input *ngIf="['text', 'number', 'email', 'password', 'date'].includes(field.type)"
                     [type]="field.type" [id]="field.id" [formControlName]="field.id"
                     [placeholder]="field.placeholder || ''"
-                    class="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-md focus:border-violet-500 focus:ring-2 focus:ring-violet-500/10 outline-none transition-all text-xs font-medium text-slate-700 shadow-sm hover:border-slate-400"
+                    [readonly]="field.readonly"
+                    class="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-md focus:border-violet-500 focus:ring-2 focus:ring-violet-500/10 outline-none transition-all text-xs font-medium text-slate-700 shadow-sm hover:border-slate-400 disabled:opacity-60 read-only:bg-slate-50 read-only:text-slate-500 read-only:cursor-not-allowed"
                     [class.border-red-400]="form.get(field.id)?.touched && form.get(field.id)?.invalid" />
 
                   <!-- Select Dropdown -->

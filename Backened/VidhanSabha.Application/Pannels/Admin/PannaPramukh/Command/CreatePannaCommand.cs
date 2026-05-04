@@ -13,10 +13,13 @@ namespace VidhanSabha.Application.Pannels.Admin.PannaPramukh.Command
         public CreatePannaPramukhRequestDto Dto { get; set; }
         public string UserId { get; set; }
 
-        public CreatePannaCommand(CreatePannaPramukhRequestDto createPannaPramukhRequestDto, string userId)
+        public string Role { get; set; }
+
+        public CreatePannaCommand(CreatePannaPramukhRequestDto createPannaPramukhRequestDto, string userId, string role )
         {
             Dto = createPannaPramukhRequestDto;
             UserId = userId;
+            Role = role;
         }
     }
 }

@@ -13,12 +13,14 @@ namespace VidhanSabha.Application.Pannels.Admin.Sector.Commands
         public CreateSectorRequestDto Dto { get; set; }
         public int CreatedById { get; set; }
         public string? CreatedBy { get; set; }
+        public string CreatedByUserId { get; set; }
 
-        public CreateSectorCommand(CreateSectorRequestDto dto, int createdById, string? createdBy)
+        public CreateSectorCommand(CreateSectorRequestDto dto, int createdById, string? createdBy ,string createdByUserId)
         {
             Dto = dto;
             CreatedById = createdById;
             CreatedBy = createdBy;
+            CreatedByUserId = createdByUserId;
         }
     }
 }

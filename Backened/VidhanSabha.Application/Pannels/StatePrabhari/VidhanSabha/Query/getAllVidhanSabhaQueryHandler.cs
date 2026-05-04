@@ -20,7 +20,7 @@ namespace VidhanSabha.Application.Pannels.StatePrabhari.VidhanSabha.Query
             public async Task<IReadOnlyList<VidhanSabhaSatewiseResponseDto>> Handle(getAllVidhanSabhaQuery request, CancellationToken cancellationToken)
         {
            
-            return await _repo.GetByIdAsync(request.q);
+            return await _repo.GetByIdAsync(request.q,request.districtId);
         }
     }
 }

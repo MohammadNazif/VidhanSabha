@@ -1,0 +1,4 @@
+/* State Member Component Styles */
+:host {
+    display: block;
+}

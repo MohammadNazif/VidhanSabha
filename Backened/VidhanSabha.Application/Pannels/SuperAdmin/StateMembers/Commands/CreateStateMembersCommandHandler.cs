@@ -35,7 +35,7 @@ namespace VidhanSabha.Application.Pannels.SuperAdmin.StateMembers.Commands
             var dto = request.Dto;
 
             var members = Tbl_StateMembers.Create(
-                dto.DesignationId,dto.DesignationTypeId,dto.Name,dto.Email,dto.Mobile,dto.CategoryId,
+                dto.DesignationId,dto.DesignationTypeId,dto.Name,dto.Email,dto.Mobile,request.UserId ,dto.CategoryId,
                 dto.CastId, imagePath,dto.Education,dto.DOB,dto.Address,dto.Proffesion
                );
 

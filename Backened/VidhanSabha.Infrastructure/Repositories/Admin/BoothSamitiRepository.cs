@@ -39,9 +39,9 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
                 }
                 else
                 {
-                    var newMem = Tbl_BoothSamitiMem.Create(boothId, boothSamiti.UserId);
-                    newMem.Increment();
-                    await _context.Tbl_BoothSamitiMem.AddAsync(newMem, ct);
+                    //var newMem = Tbl_BoothSamitiMem.Create(boothId, boothSamiti.UserId);
+                    //newMem.Increment();
+                    //await _context.Tbl_BoothSamitiMem.AddAsync(newMem, ct);
                 }
 
                 await _context.SaveChangesAsync(ct);
@@ -75,16 +75,17 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
         {
             try
             {
-                return await _context.Tbl_BoothSamitiMem
+                return await _context.Tbl_BoothSanyojak
                     .AsNoTracking()
                     .Where(m => m.BoothId == boothId)
                     .Select(m => new BoothSamitiMemResponseDto
                     {
                         Id = m.Id,
+                        BoothId = m.BoothId,
                         BoothNo = m.Booth.BoothNumber,
                         PollingStation = m.Booth.PollingStationName,
 
-                        TotalMember = m.TotalMembers,
+                        TotalMember = 0,
 
                         // 🔥 Booth Sanyojak (separate table)
                         BoothAdhayaksh = _context.Tbl_BoothSanyojak
@@ -121,15 +122,15 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
             }
         }
 
-        public async Task<List<BoothSamitiResponseDto>> GetAllAsync(CancellationToken ct = default)
+        public async Task<List<BoothSamitiResponseDto>> GetAllAsync(int id, CancellationToken ct = default)
         {
             try
             {
-                return await _context.Tbl_BoothSamitis
-           .Include(x => x.Designation)
-           .Include(x => x.Category)
-           .Include(x => x.Caste)
-           .Select(x => new BoothSamitiResponseDto
+                return await _context.Tbl_BoothSamitis.Where(b => b.BoothIdMem == id)
+              .Include(x => x.Designation)
+             .Include(x => x.Category)
+              .Include(x => x.Caste)
+              .Select(x => new BoothSamitiResponseDto
            {
                Id = x.Id,
                Name = x.Name,
@@ -211,9 +212,8 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
                 var query = _context.Tbl_BoothSamitiMem
                .AsNoTracking()
                .Where(b =>
-                   (!qp.Id.HasValue || b.Id == qp.Id) && (b.UserId == qp.UserId) &&
-                   (!qp.BoothId.HasValue || b.Booth.Id == qp.BoothId) &&
-                   (qp.UserId == b.UserId)
+                   (!qp.Id.HasValue || b.Id == qp.Id) && (b.UserId == qp.UserId || b.CreatedToUserId == qp.UserId) &&
+                   (!qp.BoothId.HasValue || b.Booth.Id == qp.BoothId)
                    );
 
                 Expression<Func<Tbl_BoothSamitiMem, bool>>? search = null;
@@ -234,7 +234,7 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
                {
                    Id = m.Id,
                    BoothId = m.BoothId,
-
+                   designationIds = m.Members.Select(x => x.DesignationId).Distinct().ToList(),
                    // ✅ Booth details
                    BoothNo = m.Booth.BoothNumber,
                    PollingStation = m.Booth.PollingStationName,

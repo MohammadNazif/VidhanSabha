@@ -20,6 +20,7 @@ namespace VidhanSabha.Domain.Entities.Admin
 
         public string? UserId { get; set; }
         public string CreatedBy { get; set; }
+        public string CreatedByUserId { get; set; }
         public int CreatedById { get; private set; }
 
         // Only filled if IsSectorSanyojak = true
@@ -49,6 +50,7 @@ namespace VidhanSabha.Domain.Entities.Admin
         public static Tbl_Sector CreateBasic(
             int createdById,
             string? createdBy,
+            string createdByUserId,
             int mandalId,
             List<int>? villageIds,
             string sectorName)
@@ -60,6 +62,7 @@ namespace VidhanSabha.Domain.Entities.Admin
             {
                 CreatedById = createdById,
                 CreatedBy = createdBy,
+                CreatedByUserId = createdByUserId,
                 MandalId = mandalId,
                 SectorName = sectorName,
                 IsSectorSanyojak = false,
@@ -74,6 +77,7 @@ namespace VidhanSabha.Domain.Entities.Admin
         public static Tbl_Sector CreateWithSanyojak(
             int createdById,
             string? createdBy,
+            string createdByUserId,
             int mandalId,
             List<int>? villageIds,
             string sectorName,
@@ -102,6 +106,7 @@ namespace VidhanSabha.Domain.Entities.Admin
                 UserId =userId,
                 CreatedById = createdById,
                 CreatedBy = createdBy,
+                CreatedByUserId = createdByUserId,
                 MandalId = mandalId,
                 
                 SectorName = sectorName,

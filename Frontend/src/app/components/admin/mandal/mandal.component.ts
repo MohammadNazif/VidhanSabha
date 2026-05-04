@@ -12,6 +12,7 @@ import { StateService } from '../../../Services/Admin/state/state.service';
 import { AuthServiceService } from '../../../Services/Auth/auth.service';
 import { ToastService } from '../../../Services/common/toast/toast.service';
 import { CrudHandlerService } from '../../../Services/common/crud-handler.service';
+import { ActivatedRoute } from '@angular/router';
 
 
 @Component({
@@ -29,11 +30,18 @@ export class MandalComponent implements OnInit {
     private stateService: StateService,
     private authService: AuthServiceService,
     private toastService: ToastService,
-    private crudHandler: CrudHandlerService
+    private crudHandler: CrudHandlerService,
+    private route: ActivatedRoute
   ) { }
 
+  isListView = false;
   totalCount = 0;
   loading = false;
+
+  canManage(): boolean {
+    const role = (this.authService.getRole() || '').toUpperCase().trim();
+    return !this.isListView && (role === 'VIDHANSABHAPRABHARI' || role === 'SUPERADMIN' || role === 'ADMIN');
+  }
 
   // Server-side state
   pageNumber = 1;
@@ -49,7 +57,11 @@ export class MandalComponent implements OnInit {
   defaultStateId: string | null = null;
 
   ngOnInit() {
-    this.loadMandals();
+    this.route.url.subscribe((url: any) => {
+      const path = url[0]?.path || '';
+      this.isListView = path.includes('-list');
+      this.loadMandals();
+    });
   }
 
   loadMandals() {
@@ -138,8 +150,8 @@ export class MandalComponent implements OnInit {
   };
 
   actions: TableAction[] = [
-    { id: 'edit', label: '', variant: 'default', icon: 'edit' },
-    { id: 'delete', label: '', variant: 'danger', icon: 'delete' }
+    { id: 'edit', label: '', variant: 'default', icon: 'edit', show: () => this.canManage() },
+    { id: 'delete', label: '', variant: 'danger', icon: 'delete', show: () => this.canManage() }
   ];
 
 

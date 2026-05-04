@@ -11,9 +11,12 @@ namespace VidhanSabha.Application.Pannels.SuperAdmin.StateMembers.Commands
     public class CreateStateMembersCommand:IRequest<int>
     {
         public CreateStateMembersReqDto Dto{ get; set; }
-        public CreateStateMembersCommand(CreateStateMembersReqDto dto)
+
+        public string UserId { get; set; }
+        public CreateStateMembersCommand(CreateStateMembersReqDto dto,string userId)
         {
             Dto = dto;
+            UserId = userId;
         }
     }
 }

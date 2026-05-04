@@ -12,6 +12,7 @@ import { CrudHandlerService } from '../../../Services/common/crud-handler.servic
 import { AuthServiceService } from '../../../Services/Auth/auth.service';
 import { ActivatedRoute } from '@angular/router';
 import { ModulePermission } from '../../../models/module-permission.enum';
+import { PermissionService } from '../../../Services/common/permission.service';
 
 @Component({
   selector: 'app-socialmedia',
@@ -33,6 +34,11 @@ export class SocialMediaComponent implements OnInit {
   searchTerm = '';
   sortBy = '';
   isDescending = true;
+  isListView = false;
+
+  canManage(): boolean {
+    return !this.isListView && this.permissionService.hasPermission(ModulePermission.SocialMedia);
+  }
 
   columns: TableColumn[] = [
     { key: 'title', label: 'Title', sortable: true },
@@ -66,8 +72,8 @@ export class SocialMediaComponent implements OnInit {
   };
 
   actions: TableAction[] = [
-    { id: 'edit', label: '', variant: 'default', icon: 'edit', show: () => true },
-    { id: 'delete', label: '', variant: 'danger', icon: 'delete', show: () => true }
+    { id: 'edit', label: '', variant: 'default', icon: 'edit', show: () => this.canManage() },
+    { id: 'delete', label: '', variant: 'danger', icon: 'delete', show: () => this.canManage() }
   ];
 
   addSocialMediaConfig: FormConfig = {
@@ -170,11 +176,17 @@ export class SocialMediaComponent implements OnInit {
     private toastService: ToastService,
     private crudHandler: CrudHandlerService,
     private authService: AuthServiceService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private permissionService: PermissionService
   ) { }
 
   ngOnInit() {
-    this.loadData();
+    this.route.url.subscribe((url: any) => {
+      const path = url[0]?.path || '';
+      this.isListView = path.includes('-list');
+      this.config.filterable = this.isListView;
+      this.loadData();
+    });
   }
 
   loadData() {
@@ -237,7 +249,7 @@ export class SocialMediaComponent implements OnInit {
       );
     } else if (action.id === 'edit') {
       const editData = { ...row };
-      
+
       if (editData.id) {
         editData.id = String(editData.id);
       }

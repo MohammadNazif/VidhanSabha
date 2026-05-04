@@ -59,6 +59,8 @@ namespace VidhanSabha.Application.Pannels.Admin.BoothSamiti.Dtos
     {
         public int Id { get; set; }
         public int BoothId { get; set; }
+
+        public List<int> designationIds { get; set; }
         public int BoothNo { get; set; }
         public string Village { get; set; }
         public string PollingStation { get; set; }

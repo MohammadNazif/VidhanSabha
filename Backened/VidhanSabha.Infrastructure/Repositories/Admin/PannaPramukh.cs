@@ -1,13 +1,14 @@
-﻿using MediatR;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
+using MediatR;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using VidhanSabha.Application.Common.Dtos;
+using VidhanSabha.Application.Common.ExportPdfExcel.Dtos;
 using VidhanSabha.Application.Pannels.Admin.PannaPramukh.Dtos;
 using VidhanSabha.Application.Pannels.Admin.PannaPramukh.Interfaces;
 using VidhanSabha.Domain.Entities.Admin;
@@ -39,10 +40,17 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
         public async Task<PagedResult<PannaPramukhResponseDto>> GetAllAsync(PannaPramukhQueryParams qp, CancellationToken ct = default)
         {
             var query = _context.Tbl_PannaPramukh
-              .AsNoTracking()
-              .Where(b =>
+              .AsNoTracking();
+
+            var villageIds = qp.GetVillageIds();
+
+                   if (villageIds?.Count > 0)
+                     query = query.Where(b =>
+                    b.Villages.Any(v => villageIds.Contains(v.VillageId)));
+
+               query = query.Where(b =>
                   (!qp.Id.HasValue || b.Id == qp.Id) &&
-                  ( b.UserId == qp.UserId) &&
+                  ( b.UserId == qp.UserId || b.CreatedToUserId == qp.UserId) &&
                   (!qp.BoothId.HasValue || b.BoothId == qp.BoothId ));
 
 
@@ -87,7 +95,32 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
                 ct: ct
                 );
         }
+        public async Task<List<PannaPramukhExportRow>> GetPannaPramukhExportAsync(PannaPramukhQueryParams qp)
+        {
+            return await _context.Tbl_PannaPramukh   // 👈 replace with your actual DbSet name
+                .AsNoTracking()
+                .Where(m => m.Status == true && 
+                      (m.UserId == qp.UserId || m.CreatedToUserId == qp.UserId) &&
+                           (!qp.BoothId.HasValue || m.BoothId == qp.BoothId))
+                .Select(m => new PannaPramukhExportRow
+                {
+                    BoothNumber = m.Booth != null ? m.Booth.BoothNumber : 0,
 
+                    Village = m.Booth != null
+                        ? string.Join(", ", m.Booth.Villages
+                            .Select(v => v.Village != null ? v.Village.VillageName : "N/A"))
+                        : "N/A",
+
+                    PannaPramukh = m.PannaPramukhName,
+                    PannaNo = m.PannaNumber.ToString(),
+
+                    Cast = m.Cast != null ? m.Cast.CastName : "N/A",
+                    VoterId = m.VoterId,
+                    Address = m.Address,
+                    MobileNumber = m.PhoneNumber
+                })
+                .ToListAsync();
+        }
         public async Task<Tbl_PannaPramukh?> GetByIdAsync(int id)
         {
             try {

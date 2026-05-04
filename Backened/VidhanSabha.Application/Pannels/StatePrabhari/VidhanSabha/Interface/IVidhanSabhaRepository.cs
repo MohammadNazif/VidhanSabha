@@ -12,7 +12,7 @@ namespace VidhanSabha.Application.Pannels.StatePrabhari.VidhanSabha.Interface
     public interface IVidhanSabhaRepository
     {
         Task<int> AddAsync(Tbl_VidhanSabha vidhanSabha);
-        Task<IReadOnlyList<VidhanSabhaSatewiseResponseDto?>> GetByIdAsync(vidhansabhaparams qp);
+        Task<IReadOnlyList<VidhanSabhaSatewiseResponseDto?>> GetByIdAsync(vidhansabhaparams qp,int? districtId);
         Task<VidhanSabhaSatewiseResponseDto?> GetByVidhanIdAsync(int vidhanId);
         Task<IEnumerable<Tbl_VidhanSabha>> GetAllAsync();
         Task<bool> UpdateAsync(Tbl_VidhanSabha vidhanSabha);

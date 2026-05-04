@@ -14,11 +14,13 @@ import { CrudHandlerService } from '../../../Services/common/crud-handler.servic
 import { VidhanSabhaPrabhariService } from '../../../Services/Admin/vidhansabha-prabhari/vidhansabha-prabhari.service';
 import { StateService } from '../../../Services/Admin/state/state.service';
 import { AuthServiceService } from '../../../Services/Auth/auth.service';
+import { ActivatedRoute } from '@angular/router';
+import { GenericExportComponent } from '../../shared/generic-export/generic-export.component';
 
 @Component({
   selector: 'app-vidhansabha',
   standalone: true,
-  imports: [CommonModule, PageHeaderComponent, GenericTableComponent, GenericModalButtonComponent],
+  imports: [CommonModule, PageHeaderComponent, GenericTableComponent, GenericModalButtonComponent, GenericExportComponent],
   templateUrl: './vidhansabha.component.html',
   styleUrl: './vidhansabha.component.css'
 })
@@ -28,6 +30,8 @@ export class VidhanSabhaComponent implements OnInit {
 
   vidhanList: any[] = [];
   defaultStateId: string | null = null;
+  isListMode = false;
+  listTitle = 'Vidhan Sabha Management';
 
   isStatePrabhari(): boolean {
     return (this.authService.getRole() || '').toUpperCase().trim() === 'STATEPRABHARI';
@@ -124,10 +128,18 @@ export class VidhanSabhaComponent implements OnInit {
     private stateService: StateService,
     private authService: AuthServiceService,
     private toastService: ToastService,
-    private crudHandler: CrudHandlerService
+    private crudHandler: CrudHandlerService,
+    private route: ActivatedRoute
   ) { }
 
   ngOnInit() {
+    this.route.data.subscribe(data => {
+      this.isListMode = data['mode'] === 'list';
+      if (this.isListMode) {
+        this.listTitle = 'Vidhan Sabha List';
+        this.actions = [];
+      }
+    });
     if (this.isStatePrabhari()) {
       this.stateService.getAllStates().subscribe({
         next: (response) => {

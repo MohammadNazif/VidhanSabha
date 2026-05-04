@@ -211,12 +211,12 @@ export class AllowAccessListComponent implements OnInit {
         error: () => this.loading = false
       });
     } else if (typeField.value === 'sector') {
-      this.sectorService.getAllSectors({ pageSize: 1000 }).subscribe({
+      this.sectorService.getSectorIncharge().subscribe({
         next: (res) => {
-          const list = res.data?.items || res.data || [];
+          const list = res.data || [];
           entityField.options = list.map((o: any) => ({
-            id: o.id,
-            name: o.sectorName || o.name
+            id: o.userId || String(o.id),
+            name: o.sectorIncharge
           }));
           this.loading = false;
         },

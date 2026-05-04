@@ -54,7 +54,7 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
         }
 
         public async Task<PagedResult<PravasiVoterResponseDto>> GetAllAsync(
-     PravasiQueryParams qp, CancellationToken ct = default)
+        PravasiQueryParams qp, CancellationToken ct = default)
         {
             var query = _context.Tbl_PravasiVoter
                 .AsNoTracking()
@@ -63,11 +63,12 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
             var boothIds = qp.GetBoothIds();
             var castIds = qp.GetCastIds();
             var occupationIds = qp.GetOccupationIds();
+            var villageIds = qp.GetVillageIds();
 
             // ✅ FIX 1: query = assign karo, sirf query.Where nahi
             query = query.Where(b =>
                 (!qp.Id.HasValue || b.Id == qp.  Id) &&
-                b.UserId == qp.UserId);                 // ✅ FIX 2: closing brace sahi jagah
+                b.UserId == qp.UserId || b.CreatedToUserId == qp.UserId);                 // ✅ FIX 2: closing brace sahi jagah
 
             if (boothIds.Any())
                 query = query.Where(b => boothIds.Contains(b.BoothId));
@@ -77,6 +78,9 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
 
             if (occupationIds.Any())
                 query = query.Where(b => occupationIds.Contains(b.OccupationId));
+
+            if (villageIds.Any())
+                query = query.Where(b => b.Villages.Any(v => villageIds.Contains(v.VillageId)));
 
             Expression<Func<Tbl_PravasiVoter, bool>>? search = null;
             if (!string.IsNullOrWhiteSpace(qp.SearchTerm))
@@ -128,10 +132,11 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
             var boothIds = qp.GetBoothIds();
             var castIds = qp.GetCastIds();
             var occupationIds = qp.GetOccupationIds();
+            var villageIds = qp.GetVillageIds();
 
             query = query.Where(b =>
                 (!qp.Id.HasValue || b.Id == qp.Id) &&
-                b.UserId == qp.UserId);
+                (b.UserId == qp.UserId || b.CreatedToUserId == qp.UserId));
 
             if (boothIds.Any())
                 query = query.Where(b => boothIds.Contains(b.BoothId));
@@ -141,6 +146,10 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
 
             if (occupationIds.Any())
                 query = query.Where(b => occupationIds.Contains(b.OccupationId));
+
+              if (villageIds.Any())
+                query = query.Where(b => b.Villages.Any(v => villageIds.Contains(v.VillageId)));
+
 
             if (!string.IsNullOrWhiteSpace(qp.SearchTerm))
             {

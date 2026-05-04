@@ -11,11 +11,12 @@ namespace VidhanSabha.Application.Pannels.Admin.BoothSamiti.Command
     {
         public int BoothId { get; set; }
         public string? UserId { get; set; }
-
-        public CreateBoothSamitiMemCommand(int boothId, string? userId)
+        public string Role { get; set; }
+        public CreateBoothSamitiMemCommand(int boothId, string? userId, string role)
         {
             BoothId = boothId;
             UserId = userId;
+            Role = role;
         }
     }
 }

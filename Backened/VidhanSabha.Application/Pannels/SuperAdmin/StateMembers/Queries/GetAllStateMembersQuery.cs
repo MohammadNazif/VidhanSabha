@@ -10,7 +10,9 @@ using VidhanSabha.Application.Pannels.SuperAdmin.StateMembers.DTOs;
 
 namespace VidhanSabha.Application.Pannels.SuperAdmin.StateMembers.Queries
 {
-    public record GetAllStateMembersQuery(StateMembersQueryParams QueryParams) : IRequest<PagedResult<StateMembersResponseDto>>
+    public record GetAllStateMembersQuery(StateMembersQueryParams QueryParams,int? SamitiType) : IRequest<PagedResult<StateMembersResponseDto>>
     {
+      
+       
     }
 }

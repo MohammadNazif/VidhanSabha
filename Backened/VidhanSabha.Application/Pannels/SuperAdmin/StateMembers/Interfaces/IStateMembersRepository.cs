@@ -14,7 +14,7 @@ namespace VidhanSabha.Application.Pannels.SuperAdmin.StateMembers.Interfaces
     public interface IStateMembersRepository
     {
         Task<Tbl_StateMembers?> GetByIdAsync(int id);
-        Task<PagedResult<StateMembersResponseDto>> GetAllAsync(StateMembersQueryParams qp, CancellationToken ct = default);
+        Task<PagedResult<StateMembersResponseDto>> GetAllAsync(StateMembersQueryParams qp,int? samitiType, CancellationToken ct = default);
         Task<int> AddAsync(Tbl_StateMembers members, CancellationToken ct = default);
         int Update(Tbl_StateMembers members);
         void Delete(Tbl_StateMembers members);

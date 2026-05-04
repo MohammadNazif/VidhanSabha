@@ -20,7 +20,7 @@ namespace VidhanSabha.Infrastructure.Repositories.StatePrabhari
         }
 
             public async Task<int> AddAsync(Tbl_VidhanSabha vidhanSabha)
-            {
+                {
                 try
                 {
                     await _context.Tbl_VidhanSabha.AddAsync(vidhanSabha);
@@ -49,12 +49,12 @@ namespace VidhanSabha.Infrastructure.Repositories.StatePrabhari
         }
 
         public async Task<IReadOnlyList<VidhanSabhaSatewiseResponseDto?>> GetByIdAsync(vidhansabhaparams
-         qp)
+         qp, int? districtId)
         {
-            return await _context.Tbl_VidhanSabha.Where(x => x.UserId == qp.UserId).Select(b => new VidhanSabhaSatewiseResponseDto
+            return await _context.Tbl_VidhanSabha.Where(x => x.UserId == qp.UserId && (districtId == null || x.DistrictId == districtId)).Select(b => new VidhanSabhaSatewiseResponseDto
             {
                 Id = b.Id,
-                DistrictId = b.DistrictId,
+                DistrictId = b.DistrictId,  
                 DistrictName = b.district.DistrictName,
                 VidhanSabhaName = b.VidhanSabhaName,
                 VidhanSabhaNumber = b.VidhanSabhaNumber,

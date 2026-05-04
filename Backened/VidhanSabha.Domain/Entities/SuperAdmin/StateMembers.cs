@@ -15,6 +15,8 @@ namespace VidhanSabha.Domain.Entities.SuperAdmin
         public string Name { get; private set; }
         public string Email { get; private set; }
         public string Mobile { get; private set; }
+
+        public string UserId { get; set; }
         public int CategoryId { get; private set; }
         public int CastId { get; private set; }
         public string? Profile { get; private set; }
@@ -33,7 +35,7 @@ namespace VidhanSabha.Domain.Entities.SuperAdmin
         private Tbl_StateMembers() { }
 
         public static Tbl_StateMembers Create(
-            int designationId,int desingationTypeId,string name,string email,string mobile,
+            int designationId,int desingationTypeId,string name,string email,string mobile,string userId,
             int categoryId,int castId,string profile,string education,DateOnly dob,string address,string proffesion
             )
         {
@@ -44,6 +46,7 @@ namespace VidhanSabha.Domain.Entities.SuperAdmin
                 Name = name,
                 Email = email,
                 Mobile = mobile,
+                UserId = userId,
                 CategoryId = categoryId,
                 CastId = castId,
                 Profile = profile,

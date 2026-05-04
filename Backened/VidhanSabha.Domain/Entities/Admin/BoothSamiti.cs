@@ -73,8 +73,10 @@ namespace VidhanSabha.Domain.Entities.Admin
         public int TotalMembers { get; private set; } = 0;
         public bool Status { get; private set; } = true;
         public string? UserId { get; private set; }
+        public string? CreatedToUserId { get; private set; }
 
         // 🔗 Common se aayega
+        public ICollection<Tbl_BoothSamiti> Members { get; set; }
         public Tbl_Booth Booth { get; private set; } = null;
         //public Tbl_BoothSanyojak BoothSanyojak { get; private set; } = null;
         //public Tbl_BoothVillage BoothVillage { get; private set; } = null;
@@ -82,12 +84,13 @@ namespace VidhanSabha.Domain.Entities.Admin
         private Tbl_BoothSamitiMem() { }
 
         public static Tbl_BoothSamitiMem Create(
-            int boothId, string UserId)
+            int boothId, string UserId,string createdToUserId)
         {
             return new Tbl_BoothSamitiMem
             {
                 BoothId = boothId,
-                UserId = UserId
+                UserId = UserId,
+                CreatedToUserId = createdToUserId
             };
         }
 

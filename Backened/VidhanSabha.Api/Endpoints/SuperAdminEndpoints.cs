@@ -1,9 +1,11 @@
-﻿using MediatR;
+﻿using System.Security.Claims;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 using VidhanSabha.Api.Responses;
 using VidhanSabha.Application.Common.District.Queries;
 using VidhanSabha.Application.Common.Dtos;
+using VidhanSabha.Application.Pannels.Admin.Dashboard.Dtos;
+using VidhanSabha.Application.Pannels.Admin.Dashboard.Query;
 using VidhanSabha.Application.Pannels.Admin.PannaPramukh.Command;
 using VidhanSabha.Application.Pannels.Admin.PannaPramukh.Dtos;
 using VidhanSabha.Application.Pannels.Admin.PannaPramukh.Queries;
@@ -56,11 +58,13 @@ namespace VidhanSabha.Api.Endpoints
                }).WithName("CreateDesignation")
                .Produces(StatusCodes.Status200OK);
 
-            designation.MapGet("/getAll", async (string userId,IMediator mediator) =>
+            designation.MapGet("/getAll", async (IMediator mediator,HttpContext httpContext) =>
             {
+                string userId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value; 
                 var data = await mediator.Send(new getAllDesignationQuery(userId));
                 return Results.Ok(ApiResponse<IReadOnlyList<DesignationResponseDto>>.Ok(data, "Designation fetched Successfully"));
             }).WithName("GetAllDesignation")
+            .RequireAuthorization()
             .Produces(StatusCodes.Status200OK);
 
             designation.MapPost("/update", async (
@@ -97,10 +101,10 @@ namespace VidhanSabha.Api.Endpoints
                 return Results.Ok(ApiResponse<int>.Ok(data, "State Prabhari inserted SuccessFully"));
              });
 
-            stateprabhaari.MapGet("/vidhansabha/getAll", async (IMediator mediator,HttpContext httpContext,[AsParameters] vidhansabhaparams q) =>
+            stateprabhaari.MapGet("/vidhansabha/getAll", async (IMediator mediator,HttpContext httpContext,[AsParameters] vidhansabhaparams q,int? districtId) =>
             {
                 q.UserId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                var data = await mediator.Send(new getAllVidhanSabhaQuery(q));
+                var data = await mediator.Send(new getAllVidhanSabhaQuery(q,districtId));
                 return Results.Ok(ApiResponse<IReadOnlyList<VidhanSabhaSatewiseResponseDto>>.Ok(data, "VidhanSabha Fetched Successfully"));
             }).WithName("GetAllstatewiseVidhansabha")
             .RequireAuthorization()
@@ -113,9 +117,19 @@ namespace VidhanSabha.Api.Endpoints
             }).WithName("GetAllStatePrabhari")
      .Produces<ApiResponse<IReadOnlyList<StatePrabhariResponseDto>>>(200);
 
-            stateprabhaari.MapGet("vidhansabhaPrabhari/getAll", async (IMediator mediator,int stateId) =>
+            stateprabhaari.MapGet("/dashboardcount", async (IMediator mediator,HttpContext httpContext) =>
             {
-                var data = await mediator.Send(new getAllVidhanSabhaPrabhariQuery(stateId));
+                string userId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                var data = await mediator.Send(new GetStateDashboardCounts(userId));
+                return Results.Ok(ApiResponse<StateDashboardCountsDto>.Ok(data, "State Counts Fetched Successfully"));
+            }).WithName("Statedashboardcount")
+            .RequireAuthorization()
+            .Produces<ApiResponse<StateDashboardCountsDto>>(200);
+
+            stateprabhaari.MapGet("vidhansabhaPrabhari/getAll", async (IMediator mediator,int stateId,HttpContext httpContext) =>
+            {
+                string userId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                var data = await mediator.Send(new getAllVidhanSabhaPrabhariQuery(stateId,userId));
                 return Results.Ok(ApiResponse<IReadOnlyList<StatePrabhariResponseDto>>.Ok(data, "VidhanSabha Prabhari Fetched Successfully"));
             }).WithName("GetAllVidhanSabhaPrabhari")
            .Produces<ApiResponse<IReadOnlyList<StatePrabhariResponseDto>>>(200);
@@ -129,9 +143,10 @@ namespace VidhanSabha.Api.Endpoints
 
 
 
-            stateprabhaari.MapPost("/vidhansabha/create", async (IMediator mediator, CreateVidhanSabhaRequestDto requestDto) =>
+            stateprabhaari.MapPost("/vidhansabha/create", async (IMediator mediator, CreateVidhanSabhaRequestDto requestDto,HttpContext httpContext) =>
             {
-                var data = await mediator.Send(new CreateVidhanSabhaCommand(requestDto));
+                string userId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                var data = await mediator.Send(new CreateVidhanSabhaCommand(requestDto,userId));
                 return Results.Ok(ApiResponse<int>.Ok(data, "Vidhansabha Created Successfully"));
             }).WithName("VidhanSabhaCreated")
              .Produces(200);
@@ -166,11 +181,12 @@ namespace VidhanSabha.Api.Endpoints
 
             #region State Members
 
-            statemembers.MapPost("/create", async ([FromForm] CreateStateMembersReqDto dto, IMediator mediator) =>
+            statemembers.MapPost("/create", async ([FromForm] CreateStateMembersReqDto dto, IMediator mediator,HttpContext httpContext) =>
             {
-                var result = await mediator.Send(new CreateStateMembersCommand(dto));
+                string userId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                var result = await mediator.Send(new CreateStateMembersCommand(dto,userId));
                 return Results.Ok(ApiResponse<int>.Ok(result, "State Member Created Successfully"));
-            })
+            }).RequireAuthorization()
                 .WithName("CreateStateMember")
                 .DisableAntiforgery()
                 .Produces<int>(200);
@@ -192,11 +208,11 @@ namespace VidhanSabha.Api.Endpoints
                 .Produces(200);
 
             statemembers.MapGet("/getAll", async (
-                [AsParameters] StateMembersQueryParams q,
+                [AsParameters] StateMembersQueryParams q,int? samitiType,
                 IMediator mediator
                ) =>
             {
-                var result = await mediator.Send(new GetAllStateMembersQuery(q));
+                var result = await mediator.Send(new GetAllStateMembersQuery(q,samitiType));
                 return Results.Ok(ApiResponse<PagedResult<StateMembersResponseDto>>.Ok(result));
             })
              .WithName("GetAllStateMember")

@@ -12,6 +12,7 @@ import { CrudHandlerService } from '../../../Services/common/crud-handler.servic
 import { AuthServiceService } from '../../../Services/Auth/auth.service';
 import { ActivatedRoute } from '@angular/router';
 import { ModulePermission } from '../../../models/module-permission.enum';
+import { PermissionService } from '../../../Services/common/permission.service';
 
 import { GenericExportComponent } from '../../shared/generic-export/generic-export.component';
 
@@ -77,8 +78,7 @@ export class PannapramukhComponent implements OnInit {
 
   canManageVoters(): boolean {
     if (this.isListView) return false;
-    const role = (this.authService.getRole() || '').toUpperCase().trim();
-    return role !== 'STATEPRABHARI' && role !== 'ADHYAKSH';
+    return this.permissionService.hasPermission(ModulePermission.PannaPramukh);
   }
 
   addPannaConfig: FormConfig = {
@@ -225,44 +225,59 @@ export class PannapramukhComponent implements OnInit {
     private toastService: ToastService,
     private crudHandler: CrudHandlerService,
     private authService: AuthServiceService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private permissionService: PermissionService
   ) { }
 
   ngOnInit() {
+    const role = (this.authService.getRole() || '').toUpperCase().trim();
+    const isBoothSanyojak = role === 'BOOTHSANYOJAK';
+
+    if (isBoothSanyojak) {
+      this.boothIds = this.authService.getBoothId();
+    }
+
     this.route.url.subscribe(url => {
       const path = url[0]?.path || '';
       this.isListView = path.includes('-list');
       this.config.filterable = this.isListView;
       this.loading = true;
+
       if (this.isListView) {
-        this.loadFilterOptions();
+        this.loadFilterOptions(isBoothSanyojak);
       }
       this.loadData();
     });
   }
 
-  loadFilterOptions() {
+  loadFilterOptions(isBoothSanyojak: boolean = false) {
     this.config.filters = [
-      { key: 'boothIds', label: 'Booth', type: 'select', options: [], placeholder: '-- Select Booth --', multiple: true },
+      { key: 'boothIds', label: 'Booth', type: 'select', options: [], placeholder: '-- Select Booth --', multiple: true, visible: !isBoothSanyojak },
       { key: 'villageIds', label: 'Village', type: 'select', options: [], placeholder: '-- Select Village --', multiple: true },
       { key: 'castIds', label: 'Caste', type: 'select', options: [], placeholder: '-- Select Caste --', multiple: true }
     ];
 
     const userId = this.authService.getUserId();
     // Load Booths
-    this.pannaService.getCommonData('boothNumber', userId).subscribe((res: any) => {
-      const filter = this.config.filters?.find(f => f.key === 'boothIds');
-      if (filter) {
-        const list = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
-        filter.options = list.map((b: any) => ({
-          label: `Booth No. ${b.boothNumber}`,
-          value: String(b.boothId || b.id)
-        }));
-      }
-    });
+    if (!isBoothSanyojak) {
+      this.pannaService.getCommonData('boothNumber', userId).subscribe((res: any) => {
+        const filter = this.config.filters?.find(f => f.key === 'boothIds');
+        if (filter) {
+          const list = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
+          filter.options = list.map((b: any) => ({
+            label: `Booth No. ${b.boothNumber}`,
+            value: String(b.boothId || b.id)
+          }));
+        }
+      });
+    }
 
-    // Load All Villages initially
-    this.pannaService.getCommonData('village', null, 500000).subscribe((res: any) => {
+    // Load Villages (filtered by booth if BoothSanyojak)
+    const villageUrl = isBoothSanyojak && this.boothIds
+      ? `villagesByBoothId?boothId=${this.boothIds}`
+      : 'village';
+
+    this.pannaService.getCommonData(villageUrl, null, 500000).subscribe((res: any) => {
       const filter = this.config.filters?.find(f => f.key === 'villageIds');
       if (filter) {
         const list = Array.isArray(res?.data?.items) ? res.data.items : (Array.isArray(res?.items) ? res.items : (Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : [])));
@@ -461,14 +476,27 @@ export class PannapramukhComponent implements OnInit {
   handleExport(format: string) {
     if (!format) return;
     this.isExporting = true;
-    const request = format === 'excel' ? this.pannaService.exportToExcel() : this.pannaService.exportToPdf();
+
+    // Collect all current filter parameters for the export matching the API schema
+    const params: any = {
+      Search: this.searchTerm,
+      BoothId: this.boothIds,
+      VillageId: this.villageIds,
+      CastId: this.castIds,
+      UserId: this.authService.getUserId()
+    };
+
+    const request = format === 'excel' ?
+      this.pannaService.exportToExcel(params) :
+      this.pannaService.exportToPdf(params);
 
     request.subscribe({
       next: (blob: Blob) => {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `Panna_Pramukh_List.${format === 'excel' ? 'xlsx' : 'pdf'}`;
+        const timestamp = new Date().toISOString().split('T')[0];
+        a.download = `Panna_Pramukh_List_${timestamp}.${format === 'excel' ? 'xlsx' : 'pdf'}`;
         document.body.appendChild(a);
         a.click();
         window.URL.revokeObjectURL(url);

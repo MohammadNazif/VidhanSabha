@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { AuthServiceService } from '../../../Services/Auth/auth.service';
 import { VidhanSabhaCountService } from '../../../Services/Admin/vidhansabha-count/vidhansabha-count.service';
+import { StatePrabhariService } from '../../../Services/Admin/state-prabhari/state-prabhari.service';
 
 Chart.register(...registerables);
 
@@ -34,6 +35,7 @@ export class StatePrabhariDashboardComponent implements OnInit, AfterViewInit {
 
   currentDate = new Date();
   vidhanSabhaData: any[] = [];
+  loadingCounts = true;
   private chart: Chart | null = null;
 
   statCards: StatCard[] = [
@@ -44,38 +46,48 @@ export class StatePrabhariDashboardComponent implements OnInit, AfterViewInit {
       changeType: 'up',
       icon: 'landmark',
       gradient: 'linear-gradient(135deg, #f59e0b, #d97706)',
-      route: '/superadmin/vidhansabha',
+      route: '/superadmin/vidhansabha-list',
       description: 'Total constituencies'
     },
     {
       title: 'Districts',
-      value: 75,
-      change: '+5',
+      value: '-',
+      change: '0',
       changeType: 'up',
       icon: 'navigation',
       gradient: 'linear-gradient(135deg, #0ea5e9, #0284c7)',
-      route: '/superadmin/district',
+      route: '/superadmin/district-list',
       description: 'Active districts'
     },
     {
-      title: 'Designations',
-      value: 12,
-      change: '+2',
-      changeType: 'up',
-      icon: 'user-cog',
-      gradient: 'linear-gradient(135deg, #6366f1, #4f46e5)',
-      route: '/superadmin/designation',
-      description: 'Manage roles'
-    },
-    {
-      title: 'State Prabhari',
-      value: 1,
+      title: 'Pradesh Samiti',
+      value: '-',
       change: '0',
       changeType: 'up',
-      icon: 'clipboard-list',
+      icon: 'users',
+      gradient: 'linear-gradient(135deg, #ec4899, #db2777)',
+      route: '/state-prabhari/pradesh-samiti-list',
+      description: 'Samiti members'
+    },
+    {
+      title: 'Pradesh Karyakarini',
+      value: '-',
+      change: '0',
+      changeType: 'up',
+      icon: 'users',
+      gradient: 'linear-gradient(135deg, #6366f1, #4f46e5)',
+      route: '/state-prabhari/pradesh-karyakarini-list',
+      description: 'Karyakarini members'
+    },
+    {
+      title: 'Designations',
+      value: '-',
+      change: '0',
+      changeType: 'up',
+      icon: 'user-cog',
       gradient: 'linear-gradient(135deg, #22c55e, #16a34a)',
-      route: '/superadmin/state-prabhari',
-      description: 'Assigned states'
+      route: '/superadmin/designation',
+      description: 'Manage roles'
     }
   ];
 
@@ -83,13 +95,15 @@ export class StatePrabhariDashboardComponent implements OnInit, AfterViewInit {
     { title: 'Manage Vidhan Sabha', description: 'Add or update constituencies', icon: 'landmark', route: '/superadmin/vidhansabha', gradient: 'linear-gradient(135deg, #f59e0b, #d97706)' },
     { title: 'Update Designations', description: 'Manage administrative roles', icon: 'user-cog', route: '/superadmin/designation', gradient: 'linear-gradient(135deg, #6366f1, #4f46e5)' },
     { title: 'Review Districts', description: 'View assigned district details', icon: 'navigation', route: '/superadmin/district', gradient: 'linear-gradient(135deg, #0ea5e9, #0284c7)' },
-    { title: 'State Prabhari List', description: 'View all state prabharis', icon: 'clipboard-list', route: '/superadmin/state-prabhari', gradient: 'linear-gradient(135deg, #22c55e, #16a34a)' }
+    { title: 'State Prabhari List', description: 'View all state prabharis', icon: 'clipboard-list', route: '/superadmin/state-prabhari', gradient: 'linear-gradient(135deg, #22c55e, #16a34a)' },
+    { title: 'Samiti Member List', description: 'Manage Samiti members', icon: 'users', route: '/superadmin/state-member', gradient: 'linear-gradient(135deg, #ec4899, #db2777)' }
   ];
 
   constructor(
     private router: Router,
     private authService: AuthServiceService,
-    private vidhanSabhaCountService: VidhanSabhaCountService
+    private vidhanSabhaCountService: VidhanSabhaCountService,
+    private statePrabhariService: StatePrabhariService
   ) { }
 
   ngOnInit() {
@@ -97,6 +111,7 @@ export class StatePrabhariDashboardComponent implements OnInit, AfterViewInit {
       console.log('[StatePrabhariDashboard] userId:', userId);
       if (userId) {
         this.loadVidhanSabhaData(userId);
+        this.loadDashboardCounts(userId);
       }
     });
   }
@@ -128,6 +143,29 @@ export class StatePrabhariDashboardComponent implements OnInit, AfterViewInit {
         this.rebuildChart(data);
       },
       error: (err) => console.error('Error loading Vidhan Sabha data:', err)
+    });
+  }
+
+  private loadDashboardCounts(userId: string) {
+    this.statePrabhariService.getDashboardCounts(userId).subscribe({
+      next: (res: any) => {
+        const counts = res?.data || res || {};
+
+        // Update Stat Cards with dynamic data
+        this.statCards = this.statCards.map(card => {
+          if (card.title === 'Vidhan Sabha') return { ...card, value: counts.vidhanSabha ?? card.value };
+          if (card.title === 'Districts') return { ...card, value: counts.district ?? card.value };
+          if (card.title === 'Designations') return { ...card, value: counts.designation ?? card.value };
+          if (card.title === 'Pradesh Samiti') return { ...card, value: counts.pradeshSamiti ?? card.value };
+          if (card.title === 'Pradesh Karyakarini') return { ...card, value: counts.pradeshKaryarkarniSamiti ?? card.value };
+          return card;
+        });
+        this.loadingCounts = false;
+      },
+      error: (err) => {
+        console.error('Error loading dashboard counts:', err);
+        this.loadingCounts = false;
+      }
     });
   }
 

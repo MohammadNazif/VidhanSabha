@@ -41,6 +41,7 @@ namespace VidhanSabha.Application.Pannels.SuperAdmin.StatePrabhari.Command
 
                 // Step 2 — Insert tbl_stateprabhari
                 var data = Tbl_StatePrabhari.Create(
+                    request.CreatedByUserId,
                     userId,
                     request.stateId,
                     request.vidhanSanhaId,

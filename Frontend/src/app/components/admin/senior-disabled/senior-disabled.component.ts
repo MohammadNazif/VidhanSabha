@@ -15,6 +15,7 @@ import { ModulePermission } from '../../../models/module-permission.enum';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
 import { GenericExportComponent } from '../../shared/generic-export/generic-export.component';
+import { PermissionService } from '../../../Services/common/permission.service';
 
 @Component({
   selector: 'app-senior-disabled',
@@ -77,7 +78,7 @@ export class SeniorDisabledComponent implements OnInit {
   castIds: string | null = null;
 
   canManage(): boolean {
-    return !this.isListView;
+    return !this.isListView && this.permissionService.hasPermission(ModulePermission.SeniororDisabled);
   }
 
   get pageTitle() { return this.isDisabledView ? 'Disabled Management' : 'Senior Citizen Management'; }
@@ -243,44 +244,61 @@ export class SeniorDisabledComponent implements OnInit {
     private crudHandler: CrudHandlerService,
     private route: ActivatedRoute,
     private authService: AuthServiceService,
-    private http: HttpClient
+    private http: HttpClient,
+    private permissionService: PermissionService
   ) { }
 
   ngOnInit() {
-    this.route.url.subscribe(url => {
+    const role = (this.authService.getRole() || '').toUpperCase().trim();
+    const isBoothSanyojak = role === 'BOOTHSANYOJAK';
+
+    if (isBoothSanyojak) {
+      this.boothIds = this.authService.getBoothId();
+    }
+
+    this.route.url.subscribe((url: any) => {
       const path = url[0]?.path || '';
       this.isDisabledView = path.includes('disabled');
       this.isListView = path.includes('-list');
+
       this.tableConfig.filterable = this.isListView;
       this.loading = true;
+
       if (this.isListView) {
-        this.loadFilterOptions();
+        this.loadFilterOptions(isBoothSanyojak);
       }
+
       this.loadCitizens();
     });
   }
 
-  loadFilterOptions() {
+  loadFilterOptions(isBoothSanyojak: boolean = false) {
     this.tableConfig.filters = [
-      { key: 'boothIds', label: 'Booth', type: 'select', options: [], placeholder: '-- Select Booth --', multiple: true },
+      { key: 'boothIds', label: 'Booth', type: 'select', options: [], placeholder: '-- Select Booth --', multiple: true, visible: !isBoothSanyojak },
       { key: 'villageIds', label: 'Village', type: 'select', options: [], placeholder: '-- Select Village --', multiple: true },
       { key: 'castIds', label: 'Caste', type: 'select', options: [], placeholder: '-- Select Caste --', multiple: true }
     ];
 
     // Load Booths
-    this.http.get<any>(`${environment.apiUrl}/common/boothNumber`).subscribe(res => {
-      const filter = this.tableConfig.filters?.find(f => f.key === 'boothIds');
-      if (filter) {
-        const list = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
-        filter.options = list.map((b: any) => ({
-          label: `Booth No. ${b.boothNumber}`,
-          value: String(b.boothId || b.id)
-        }));
-      }
-    });
+    if (!isBoothSanyojak) {
+      this.http.get<any>(`${environment.apiUrl}/common/boothNumber`).subscribe(res => {
+        const filter = this.tableConfig.filters?.find(f => f.key === 'boothIds');
+        if (filter) {
+          const list = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
+          filter.options = list.map((b: any) => ({
+            label: `Booth No. ${b.boothNumber}`,
+            value: String(b.boothId || b.id)
+          }));
+        }
+      });
+    }
 
-    // Load All Villages initially
-    this.http.get<any>(`${environment.apiUrl}/common/village?pageSize=500000`).subscribe(res => {
+    // Load Villages (filtered by booth if BoothSanyojak)
+    const villageUrl = isBoothSanyojak && this.boothIds
+      ? `${environment.apiUrl}/common/villagesByBoothId?boothId=${this.boothIds}`
+      : `${environment.apiUrl}/common/village?pageSize=500000`;
+
+    this.http.get<any>(villageUrl).subscribe(res => {
       const filter = this.tableConfig.filters?.find(f => f.key === 'villageIds');
       if (filter) {
         const list = Array.isArray(res?.data?.items) ? res.data.items : (Array.isArray(res?.items) ? res.items : (Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : [])));
@@ -352,7 +370,7 @@ export class SeniorDisabledComponent implements OnInit {
 
   loadCitizens() {
     this.loading = true;
-    const params: any = { 
+    const params: any = {
       pageNumber: this.pageNumber,
       pageSize: this.pageSize,
       searchTerm: this.searchTerm,
@@ -362,7 +380,7 @@ export class SeniorDisabledComponent implements OnInit {
       villageIds: this.villageIds,
       castIds: this.castIds
     };
-    
+
     const userId = this.authService.getUserId();
     if (userId) {
       params.userId = userId;
@@ -414,7 +432,7 @@ export class SeniorDisabledComponent implements OnInit {
         'Record deleted successfully!',
         () => this.loadCitizens(),
         true,
-        this.isDisabledView ? ModulePermission.Disabled : ModulePermission.SeniorCitizen
+        ModulePermission.SeniororDisabled
       );
     } else if (action.id === 'edit') {
       // Note: Edit might need special handling for the nested array if backend returns flat results
@@ -476,14 +494,16 @@ export class SeniorDisabledComponent implements OnInit {
       `Record ${isUpdate ? 'updated' : 'created'} successfully!`,
       () => this.loadCitizens(),
       true,
-      this.isDisabledView ? ModulePermission.Disabled : ModulePermission.SeniorCitizen
+      ModulePermission.SeniororDisabled
     );
   }
 
   handleExport(format: string) {
     if (!format) return;
     this.isExporting = true;
-    const request = format === 'excel' ? this.citizenService.exportToExcel() : this.citizenService.exportToPdf();
+    const exportFormat = format as 'excel' | 'pdf';
+    const entityName = this.isDisabledView ? 'disabled' : 'seniorcitizen';
+    const request = this.citizenService.exportSpecial(entityName, exportFormat);
 
     request.subscribe({
       next: (blob: Blob) => {

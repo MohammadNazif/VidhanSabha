@@ -27,7 +27,7 @@ namespace VidhanSabha.Application.Pannels.SuperAdmin.StateMembers.Queries
         public async Task<PagedResult<StateMembersResponseDto>> Handle(GetAllStateMembersQuery request, CancellationToken cancellationToken)
         {
 
-            var res = await _repo.GetAllAsync(request.QueryParams);
+            var res = await _repo.GetAllAsync(request.QueryParams,request.SamitiType);
             if (res == null)
             {
                 throw new NotFoundException("State Members Not Found");

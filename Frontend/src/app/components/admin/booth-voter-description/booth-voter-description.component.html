@@ -1,31 +1,27 @@
 <div class="h-screen p-4 flex flex-col overflow-hidden bg-slate-50/50">
   <app-page-header title="Booth Voter Description" subtitle="Manage voter counts across booths and villages">
     <div class="flex items-center gap-3">
-      <app-generic-modal-button *ngIf="canManage()" #voterModal [config]="addVoterConfig" (formSubmit)="handleFormSubmit($event)"
-        label="Add Description" icon="+" variant="primary">
+      <app-generic-modal-button *ngIf="canManage()" #voterModal [config]="addVoterConfig"
+        (formSubmit)="handleFormSubmit($event)" label="Add Description" icon="+" variant="primary">
       </app-generic-modal-button>
 
-      <app-generic-export [show]="isListView && voterList && voterList.length > 0" 
-        [isExporting]="isExporting" (export)="handleExport($event)">
+      <app-generic-export [show]="isListView && voterList && voterList.length > 0" [isExporting]="isExporting"
+        (export)="handleExport($event)">
       </app-generic-export>
-      
-      <app-generic-modal-button #casteModal [config]="addCasteConfig" (formSubmit)="handleCasteSubmit($event)"
-        label="" class="hidden">
-      </app-generic-modal-button>
 
-      <app-generic-modal-button #samitiModal [config]="addSamitiConfig" (formSubmit)="handleSamitiSubmit($event)"
-        label="" class="hidden">
-      </app-generic-modal-button>
     </div>
   </app-page-header>
 
+  <!-- Hidden modals used by table actions -->
+  <app-generic-modal-button #casteModal [config]="addCasteConfig" (formSubmit)="handleCasteSubmit($event)" label=""
+    [hideButton]="true">
+  </app-generic-modal-button>
+
   <div class="flex-1 min-h-0 mt-4 bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
-    <app-generic-table class="flex-1 min-h-0" [columns]="columns" [data]="voterList" [config]="config" 
+    <app-generic-table class="flex-1 min-h-0" [columns]="columns" [data]="voterList" [config]="config"
       [actions]="actions" [totalItems]="totalCount" [loading]="loading" (actionClick)="handleAction($event)"
-      (pageChange)="handlePageChange($event)"
-      (sortChange)="handleSortChange($event)"
-      (searchChange)="handleSearchChange($event)"
-      (filterChange)="handleFilterChange($event)"
+      (pageChange)="handlePageChange($event)" (sortChange)="handleSortChange($event)"
+      (searchChange)="handleSearchChange($event)" (filterChange)="handleFilterChange($event)"
       (selectionChange)="handleSelection($event)">
     </app-generic-table>
   </div>

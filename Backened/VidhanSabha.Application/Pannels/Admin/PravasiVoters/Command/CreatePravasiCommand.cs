@@ -12,10 +12,12 @@ namespace VidhanSabha.Application.Pannels.Admin.PravasiVoters.Command
     {
         public CreatePravasiVoterRequestDto Dto { get; set; }
         public string UserId { get; set; }
-        public CreatePravasiCommand(CreatePravasiVoterRequestDto dto,string? userId)
+        public string Role { get; set; }
+        public CreatePravasiCommand(CreatePravasiVoterRequestDto dto,string? userId, string role)
         {
             Dto = dto;
             UserId = userId;
+            Role = role;
         }
     }
 }

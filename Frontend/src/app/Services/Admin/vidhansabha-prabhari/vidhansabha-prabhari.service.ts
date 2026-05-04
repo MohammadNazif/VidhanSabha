@@ -12,8 +12,7 @@ export class VidhanSabhaPrabhariService extends BaseApiService {
     return this.create('stateprabhari/vidhansabha', data);
   }
 
-  getAllPrabharis(stateId?: number | string | null): Observable<any> {
-    const params = stateId ? { stateId } : {};
+  getAllPrabharis(params: any): Observable<any> {
     return this.getAllByParams(this.entity, params);
   }
 

@@ -46,7 +46,7 @@ namespace VidhanSabha.Infrastructure.Persistence.Configurations.Admin
 
             // 🔗 Designation FK 
             builder.HasOne(x => x.BoothSamitiMem)
-                   .WithMany()
+                   .WithMany(b => b.Members)
                    .HasForeignKey(x => x.BoothIdMem)
                    .OnDelete(DeleteBehavior.Restrict);
 

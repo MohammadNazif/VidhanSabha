@@ -4,7 +4,7 @@
         <div class="flex items-center gap-3">
 
 
-            <app-generic-modal-button #sectorModal [config]="addSectorConfig" label="Add Sector" icon="+"
+            <app-generic-modal-button *ngIf="canManage()" #sectorModal [config]="addSectorConfig" label="Add Sector" icon="+"
                 variant="primary" (formSubmit)="handleFormSubmit($event)">
             </app-generic-modal-button>
         </div>

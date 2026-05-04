@@ -29,4 +29,8 @@ export class StatePrabhariService extends BaseApiService {
   createVidhanSabhaUnified(data: any): Observable<any> {
     return this.create(`${this.entity}/vidhansabha`, data);
   }
+
+  getDashboardCounts(userId: string): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/${this.entity}/dashboardcount?userId=${userId}`);
+  }
 }

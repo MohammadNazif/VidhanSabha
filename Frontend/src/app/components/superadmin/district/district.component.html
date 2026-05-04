@@ -1,16 +1,20 @@
-<div class="h-screen p-6 flex flex-col overflow-hidden bg-slate-50">
-  <app-page-header title="District Management" subtitle="Manage districts within states"
-    icon="📍">
-    <div class="flex gap-3">
-      <app-generic-modal-button #districtModal [config]="addDistrictConfig" 
-        [initialData]="{ stateId: defaultStateId }" label="Add District" icon="+"
-        (formSubmit)="handleFormSubmit($event)">
-      </app-generic-modal-button>
-      <app-generic-modal-button #vidhanSabhaModal [config]="addVidhanSabhaConfig" label="Add Vidhan Sabha" icon="layout"
-        [hideButton]="true" (formSubmit)="handleVidhanSabhaSubmit($event)">
-      </app-generic-modal-button>
-    </div>
-  </app-page-header>
+<div class="h-screen p-6 flex flex-col overflow-hidden bg-slate-50/50">
+    <app-page-header [title]="listTitle" subtitle="Manage and view district configurations" icon="navigation">
+        <div class="flex items-center gap-3">
+            <app-generic-export *ngIf="isListMode" [data]="districtList" [columns]="columns" fileName="Districts">
+            </app-generic-export>
+
+            <ng-container *ngIf="!isListMode">
+                <app-generic-modal-button #districtModal [config]="addDistrictConfig" variant="primary" icon="+"
+                    label="Add District" (formSubmit)="handleFormSubmit($event)">
+                </app-generic-modal-button>
+            </ng-container>
+
+            <app-generic-modal-button #vidhanSabhaModal [config]="addVidhanSabhaConfig" label="Add Vidhan Sabha" icon="layout"
+                [hideButton]="true" (formSubmit)="handleVidhanSabhaSubmit($event)">
+            </app-generic-modal-button>
+        </div>
+    </app-page-header>
 
   <div class="flex-1 min-h-0 mt-6 bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
     <app-generic-table class="flex-1 min-h-0" [data]="districtList" [columns]="columns" [config]="config" [actions]="actions"

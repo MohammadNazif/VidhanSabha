@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using VidhanSabha.Application.Common.Dtos;
+using VidhanSabha.Application.Common.multiplefilterparse;
 
 namespace VidhanSabha.Application.Pannels.Admin.BoothVoter.DTOs
 {
@@ -12,5 +13,9 @@ namespace VidhanSabha.Application.Pannels.Admin.BoothVoter.DTOs
         public int? Id { get; set; }
         public int? BoothId { get; set; }
         public int? SectorId { get; set; }
+
+        public string? VillageIds { get; set; }
+
+        public List<int> GetVillageIds() => FilterParse.ParseIds(VillageIds);
     }
 }

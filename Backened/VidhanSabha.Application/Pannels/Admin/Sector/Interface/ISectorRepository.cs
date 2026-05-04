@@ -17,6 +17,8 @@ namespace VidhanSabha.Application.Pannels.Admin.Sector.Interface
         Task<List<Tbl_Sector>?> GetByMandalIdAsync(int id);
 
         Task<Tbl_Sector> GetByIdAsync(int id);
+
+        Task<IReadOnlyList<SectorIncahrgeDto>> GetIncahrgeByIdAsync(string userId);
         Task<int> AddAsync(Tbl_Sector sector);
         Task<int> UpdateAsync(Tbl_Sector sector);
         Task DeleteAsync(Tbl_Sector sector);

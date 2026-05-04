@@ -26,6 +26,8 @@ namespace VidhanSabha.Domain.Entities.SuperAdmin
         public string Education { get; private set; } = string.Empty;
         public string Profession { get; private set; } = string.Empty;
         public string? CurrentAddress { get; private set; }
+
+        public string? CreatedByUserId { get; private set; }
         public bool Status { get; private set; } = true;
         public DateTime CreatedAt { get; private set; }
 
@@ -39,6 +41,7 @@ namespace VidhanSabha.Domain.Entities.SuperAdmin
 
         // ── Create ───────────────────────────────────────────────
         public static Tbl_StatePrabhari Create(
+            string CreatedByUserId,
             string userId,
             int? stateId,
             int? vidhanSanhaId,
@@ -58,6 +61,7 @@ namespace VidhanSabha.Domain.Entities.SuperAdmin
 
             return new Tbl_StatePrabhari
             {
+                CreatedByUserId = CreatedByUserId,
                 userId = userId,
                 StateId = stateId,
                 VidhansabhaId = vidhanSanhaId,

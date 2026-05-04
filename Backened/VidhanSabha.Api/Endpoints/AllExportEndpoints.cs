@@ -7,10 +7,16 @@ using VidhanSabha.Application.Pannels.Admin.DoubleVoter.DTOs;
 using VidhanSabha.Application.Pannels.Admin.DoubleVoter.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.NewVoter.DTOs;
 using VidhanSabha.Application.Pannels.Admin.NewVoter.Interfaces;
+using VidhanSabha.Application.Pannels.Admin.PannaPramukh.Dtos;
+using VidhanSabha.Application.Pannels.Admin.PannaPramukh.Interfaces;
+using VidhanSabha.Application.Pannels.Admin.PrabhavshaliVyakti.DTOs;
+using VidhanSabha.Application.Pannels.Admin.PrabhavshaliVyakti.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.PravasiVoters.DTOs;
 using VidhanSabha.Application.Pannels.Admin.PravasiVoters.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.SahmatAsahmat.DTOs;
 using VidhanSabha.Application.Pannels.Admin.SahmatAsahmat.Interfaces;
+using VidhanSabha.Application.Pannels.Admin.SeniorDisabled.DTOs;
+using VidhanSabha.Application.Pannels.Admin.SeniorDisabled.Interfaces;
 using VidhanSabha.Domain.Enums;
 
 namespace VidhanSabha.Api.Endpoints
@@ -21,24 +27,49 @@ namespace VidhanSabha.Api.Endpoints
         public static void AllExportEndpoints(this WebApplication app)
         {
             var pravsiExport = app.MapGroup("/api/pravasivoter")
-                .RequireAuthorization(ModulePermission.PravashiVoter.ToString());
+                .RequireAuthorization();
 
             var boothExport = app.MapGroup("/api/booth")
-               .RequireAuthorization(ModulePermission.Booth.ToString());
+               .RequireAuthorization();
 
             var doubleVoterExport = app.MapGroup("/api/doublevoter")
-              .RequireAuthorization(ModulePermission.DoubleVoter.ToString());
+              .RequireAuthorization();
 
             var newVoterExport = app.MapGroup("/api/newvoter")
-       .RequireAuthorization(ModulePermission.NewVoter.ToString());
+       .RequireAuthorization();
 
             var sahmatExport = app.MapGroup("/api/sahmat")
-               .RequireAuthorization(ModulePermission.NewVoter.ToString());
+               .RequireAuthorization();
             var asahmatExport = app.MapGroup("/api/asahmat")
-              .RequireAuthorization(ModulePermission.NewVoter.ToString());
+              .RequireAuthorization();
+
+            var doctorExport = app.MapGroup("/api/doctor")
+           .RequireAuthorization();
+            var advocateExport = app.MapGroup("/api/advocate")
+       .RequireAuthorization();
+            var governmentemoloyeeExport = app.MapGroup("/api/governmentemoloyee")
+       .RequireAuthorization();
+
+            var pradhanExport = app.MapGroup("/api/pradhan")
+  .RequireAuthorization();
+
+            var prabhavsaliExport = app.MapGroup("/api/prabhavshali")
+.RequireAuthorization();
+
+            var seniorcitizenExport = app.MapGroup("/api/seniorcitizen")
+.RequireAuthorization();
+
+            var disabledExport = app.MapGroup("/api/disabled")
+.RequireAuthorization();
+
+         var   pannapramukhExport = app.MapGroup("/api/pannapramukh")
+          .RequireAuthorization();
+
+
+
             // ── PDF Export ────────────────────────────────────────────────────────
             pravsiExport.MapGroup("")
-              .RequireAuthorization(ModulePermission.PravashiVoter.ToString())
+              .RequireAuthorization()
               .AddExportEndpoints<PravasiVoterExportRow, PravasiVoterFilter>(
                new PravasiVoterExportDef(),
               async (PravasiVoterFilter f, CancellationToken ct) =>
@@ -71,7 +102,7 @@ namespace VidhanSabha.Api.Endpoints
 
 
             boothExport.MapGroup("")
-              .RequireAuthorization(ModulePermission.Booth.ToString())
+              .RequireAuthorization()
               .AddExportEndpoints<BoothExportRow, BoothFilter>(
                new BoothExportDef(),
               async (BoothFilter f, CancellationToken ct) =>
@@ -92,7 +123,7 @@ namespace VidhanSabha.Api.Endpoints
 
 
             doubleVoterExport.MapGroup("")
-              .RequireAuthorization(ModulePermission.Booth.ToString())
+              .RequireAuthorization()
               .AddExportEndpoints < doublevoterExportRow, doublevoterFilter>(
                new doublevoterExportDef(),
               async (doublevoterFilter f, CancellationToken ct) =>
@@ -112,7 +143,7 @@ namespace VidhanSabha.Api.Endpoints
               });
 
             newVoterExport.MapGroup("")
-           .RequireAuthorization(ModulePermission.Booth.ToString())
+           .RequireAuthorization()
            .AddExportEndpoints<newvoterExportRow, newvoterFilter>(
             new newvoterExportDef(),
            async (newvoterFilter f, CancellationToken ct) =>
@@ -132,7 +163,7 @@ namespace VidhanSabha.Api.Endpoints
            });
 
             sahmatExport.MapGroup("")
-         .RequireAuthorization(ModulePermission.Booth.ToString())
+         .RequireAuthorization()
          .AddExportEndpoints<sahmatExportRow, sahmatFilter>(
           new sahmatExportDef(),
          async (sahmatFilter f, CancellationToken ct) =>
@@ -152,8 +183,9 @@ namespace VidhanSabha.Api.Endpoints
              return await repo.GetAllForExportAsync(qp);
 
          });
+
             asahmatExport.MapGroup("")
-     .RequireAuthorization(ModulePermission.Booth.ToString())
+     .RequireAuthorization()
      .AddExportEndpoints<sahmatExportRow, sahmatFilter>(
       new sahmatExportDef(),
      async (sahmatFilter f, CancellationToken ct) =>
@@ -173,6 +205,186 @@ namespace VidhanSabha.Api.Endpoints
          return await repo.GetAllForExportAsync(qp);
 
      });
+
+            prabhavsaliExport.MapGroup("")
+     .RequireAuthorization()
+     .AddExportEndpoints<prabhavsaliExportRow, prabhavsaliFilter>(
+      new prabhavsaliExportDef(),
+     async (prabhavsaliFilter f, CancellationToken ct) =>
+     {
+         var repo = app.Services
+             .CreateScope().ServiceProvider
+             .GetRequiredService<IPrabhavshaliRepository>();
+         f.designationId = null;
+         var qp = new PrabhavshaliQueryParams
+         {
+             UserId = f.UserId,
+             SearchTerm = f.Search,
+             designationId = f.designationId,
+
+         };
+
+         return await repo.GetExportByDesgIdAsync(qp);
+
+     });
+
+            doctorExport.MapGroup("")
+     .RequireAuthorization()
+     .AddExportEndpoints<prabhavsaliExportRow, prabhavsaliFilter>(
+      new prabhavsaliExportDef(),
+     async (prabhavsaliFilter f, CancellationToken ct) =>
+     {
+         var repo = app.Services
+             .CreateScope().ServiceProvider
+             .GetRequiredService<IPrabhavshaliRepository>();
+         f.designationId = 8;
+         var qp = new PrabhavshaliQueryParams
+         {
+             UserId = f.UserId,
+             SearchTerm = f.Search,
+             designationId = f.designationId,
+
+         };
+
+         return await repo.GetExportByDesgIdAsync(qp);
+
+     });
+
+            advocateExport.MapGroup("")
+.RequireAuthorization()
+.AddExportEndpoints<prabhavsaliExportRow, prabhavsaliFilter>(
+new prabhavsaliExportDef(),
+async (prabhavsaliFilter f, CancellationToken ct) =>
+{
+  var repo = app.Services
+      .CreateScope().ServiceProvider
+      .GetRequiredService<IPrabhavshaliRepository>();
+  f.designationId = 9;
+  var qp = new PrabhavshaliQueryParams
+  {
+      UserId = f.UserId,
+      SearchTerm = f.Search,
+      designationId = f.designationId,
+
+  };
+
+  return await repo.GetExportByDesgIdAsync(qp);
+
+});
+          
+
+            governmentemoloyeeExport.MapGroup("")
+.RequireAuthorization()
+.AddExportEndpoints<prabhavsaliExportRow, prabhavsaliFilter>(
+new prabhavsaliExportDef(),
+async (prabhavsaliFilter f, CancellationToken ct) =>
+{
+var repo = app.Services
+        .CreateScope().ServiceProvider
+        .GetRequiredService<IPrabhavshaliRepository>();
+f.designationId = 10;
+var qp = new PrabhavshaliQueryParams
+{
+UserId = f.UserId,
+SearchTerm = f.Search,
+designationId = f.designationId,
+
+};
+
+return await repo.GetExportByDesgIdAsync(qp);
+
+});
+
+
+            pradhanExport.MapGroup("")
+.RequireAuthorization()
+.AddExportEndpoints<prabhavsaliExportRow, prabhavsaliFilter>(
+new prabhavsaliExportDef(),
+async (prabhavsaliFilter f, CancellationToken ct) =>
+{
+  var repo = app.Services
+            .CreateScope().ServiceProvider
+            .GetRequiredService<IPrabhavshaliRepository>();
+  f.designationId = 1;
+     var qp = new PrabhavshaliQueryParams
+  {
+      UserId = f.UserId,
+      SearchTerm = f.Search,
+      designationId = f.designationId,
+
+  };
+
+  return await repo.GetExportByDesgIdAsync(qp);
+
+});
+
+
+            seniorcitizenExport.MapGroup("")
+.RequireAuthorization()
+.AddExportEndpoints<seniordisabledExportRow, seniordisabledFilter>(
+new seniordisabledExportDef(),
+async (seniordisabledFilter f, CancellationToken ct) =>
+{
+    var repo = app.Services
+              .CreateScope().ServiceProvider
+              .GetRequiredService<ISeniorDisabledRepository>();
+       f.TypeId = 1;
+    var qp = new SeniorDisabledQueryParams
+    {
+        UserId = f.UserId,
+        SearchTerm = f.Search,
+        TypeId = f.TypeId,
+
+    };
+
+       return await repo.GetSeniorDisabledExportAsync(qp);
+
+});
+
+
+            disabledExport.MapGroup("")
+.RequireAuthorization()
+.AddExportEndpoints<seniordisabledExportRow, seniordisabledFilter>(
+new seniordisabledExportDef(),
+async (seniordisabledFilter f, CancellationToken ct) =>
+{
+    var repo = app.Services
+              .CreateScope().ServiceProvider
+              .GetRequiredService<ISeniorDisabledRepository>();
+    f.TypeId = 2;
+    var qp = new SeniorDisabledQueryParams
+    {
+        UserId = f.UserId,
+        SearchTerm = f.Search,
+        TypeId = f.TypeId,
+
+    };
+
+    return await repo.GetSeniorDisabledExportAsync(qp);
+
+});
+
+            pannapramukhExport.MapGroup("")
+.RequireAuthorization()
+.AddExportEndpoints<PannaPramukhExportRow, PannaPramukhFilter>(
+new PannaPramukhExportDef(),
+async (PannaPramukhFilter f, CancellationToken ct) =>
+{
+  var repo = app.Services
+            .CreateScope().ServiceProvider
+            .GetRequiredService<IPannaPramukhRepository>();
+ 
+  var qp = new PannaPramukhQueryParams
+  {
+      UserId = f.UserId,
+      SearchTerm = f.Search,
+      //TypeId = f.TypeId,
+
+  };
+
+  return await repo.GetPannaPramukhExportAsync(qp);
+
+});
         }
     }
 

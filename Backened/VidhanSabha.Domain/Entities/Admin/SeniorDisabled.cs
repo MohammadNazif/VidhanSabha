@@ -21,6 +21,7 @@ namespace VidhanSabha.Domain.Entities.Admin
         public string VoterId { get; private set; }
         public bool Status { get; private set; } = true;
         public string? UserId { get; private set; }
+        public string? CreatedToUserId { get; private set; }
 
         private readonly List<Tbl_SeniorDisabledVillage> _villages = new();
         public IReadOnlyCollection<Tbl_SeniorDisabledVillage> Villages => _villages.AsReadOnly();
@@ -38,7 +39,7 @@ namespace VidhanSabha.Domain.Entities.Admin
      int typeId,
      int boothId,
      SeniorDisabledData data,
-     string UserId,
+     string UserId,string createdToUserId,
      List<int> villageIds
  )
         {
@@ -52,7 +53,8 @@ namespace VidhanSabha.Domain.Entities.Admin
                 CastId = data.CastId,
                 Mobile = data.Mobile,
                 VoterId = data.VoterId,
-                UserId = UserId
+                UserId = UserId,
+                CreatedToUserId = createdToUserId
             };
 
             senior.SetVillages(villageIds);
