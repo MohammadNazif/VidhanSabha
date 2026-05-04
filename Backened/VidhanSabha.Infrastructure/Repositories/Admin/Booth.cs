@@ -40,6 +40,7 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
 
         public async Task<List<BoothNumberDto>> BoothNumberExistsAsync(string userId)
         {
+            
             var vidhanSabhaId = await _context.Tbl_StatePrabhari
                 .Where(u => u.userId == userId)
                 .Select(u => u.VidhansabhaId)
@@ -63,6 +64,27 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
    
             return res;
         }
+
+        public async Task<List<BoothNumberDto>> BoothBysectorId(string userId)
+        {
+
+            var adminUserId =  await _context.Tbl_Sector.Where(x => x.UserId == userId).Select(b => b.CreatedByUserId).FirstOrDefaultAsync();
+           
+
+            var res = await _context.Tbl_Booth
+                .Where(b => b.UserId == adminUserId && b.Status)
+                .Select(b => new BoothNumberDto
+                {
+                    BoothId = b.Id,
+                    BoothNumber = b.BoothNumber,
+                    BoothName = b.PollingStationName
+                })
+                .ToListAsync();
+
+
+            return res;
+        }
+
 
         public async Task Delete(Tbl_Booth booth)
         {
@@ -159,7 +181,7 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
                 .AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(qp.UserId))
-                query = query.Where(b => b.UserId == qp.UserId);
+                query = query.Where(b => b.UserId == qp.UserId );
 
             if (!string.IsNullOrWhiteSpace(qp.SearchTerm))
             {
@@ -311,5 +333,23 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
             _context.Tbl_Booth.Update(booth);
             await _context.SaveChangesAsync(ct);
         }
+
+        public async Task<string> GetUseridbyBoothId(int boothId)
+        {
+            return await _context.Tbl_BoothSanyojak
+                .Where(m => m.BoothId == boothId)
+                .Select(b => b.UserId)
+                .FirstOrDefaultAsync();
+        }
+
+        public async Task<string> GetadminUseridbyUserId(int boothId)
+        {
+            return await _context.Tbl_Booth
+               .Where(m => m.Id == boothId)
+               .Select(b => b.UserId)
+               .FirstOrDefaultAsync();
+        }
+
+     
     }
 }

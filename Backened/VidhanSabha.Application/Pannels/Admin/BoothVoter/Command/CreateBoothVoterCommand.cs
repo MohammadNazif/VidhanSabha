@@ -13,10 +13,13 @@ namespace VidhanSabha.Application.Pannels.Admin.BoothVoter.Command
     {
         public CreateBoothVoterRequestDto Dto { get; set; }
         public string UserId { get; set; }
-        public CreateBoothVoterCommand(CreateBoothVoterRequestDto dto, string userId)
+
+        public string Role { get; set; }
+        public CreateBoothVoterCommand(CreateBoothVoterRequestDto dto, string userId, string role)
         {
             Dto = dto;
             UserId = userId;
+            Role = role;
         }
     }
 }

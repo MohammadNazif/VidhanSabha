@@ -29,7 +29,10 @@ import { CombinedReportComponent } from './components/admin/reports/combined-rep
 import { MandalReportComponent } from './components/admin/reports/mandal-report/mandal-report.component';
 import { BoothVoterDescriptionComponent } from './components/admin/booth-voter-description/booth-voter-description.component';
 import { BoothSamitiComponent } from './components/admin/booth-samiti/booth-samiti.component';
-import { SocialMediaComponent } from './components/admin/socialmedia/socialmedia.component'; // trigger rebuild
+import { SocialMediaComponent } from './components/admin/socialmedia/socialmedia.component';
+import { InfluencerPersonComponent } from './components/admin/influencer-person/influencer-person.component';
+import { InfluencerComponent } from './components/admin/influencer/influencer.component';
+import { StateMemberMgmtComponent } from './components/state-prabhari/state-member/state-member.component';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -40,9 +43,13 @@ export const routes: Routes = [
   { path: 'booth-voter-description', component: BoothVoterDescriptionComponent },
   { path: 'members', component: MembersComponent },
   { path: 'mandal', component: MandalComponent },
+  { path: 'mandal-list', component: MandalComponent },
   { path: 'sector', component: SectorComponent },
+  { path: 'sector-list', component: SectorComponent },
   { path: 'booth', component: BoothComponent },
   { path: 'booth-samiti', component: BoothSamitiComponent },
+  { path: 'booth-samiti-list', component: BoothSamitiComponent },
+  { path: 'booth-voter-description-list', component: BoothVoterDescriptionComponent },
   { path: 'booth-list', component: BoothComponent },
   { path: 'panna-pramukh', component: PannapramukhComponent },
   { path: 'panna-pramukh-list', component: PannapramukhComponent },
@@ -56,12 +63,15 @@ export const routes: Routes = [
   { path: 'double-voter', component: DoubleVoterComponent },
   { path: 'double-voter-list', component: DoubleVoterComponent },
   { path: 'prabhavshali-vyakt', component: PrabhavshaliComponent },
-  { path: 'influencer-person-list', component: PrabhavshaliComponent },
+  { path: 'prabhavshali-vyakt-list', component: PrabhavshaliComponent },
+  { path: 'influencer-person', component: InfluencerComponent },
+  { path: 'influencer-person-list', component: InfluencerComponent },
   { path: 'doctor-list', component: PrabhavshaliComponent },
   { path: 'advocate-list', component: PrabhavshaliComponent },
   { path: 'government-employee-list', component: PrabhavshaliComponent },
   { path: 'pradhan-list', component: PrabhavshaliComponent },
   { path: 'block', component: BlockComponent },
+  { path: 'block-list', component: BlockComponent },
   { path: 'block-pramukh-list', component: BlockComponent },
   { path: 'pradhan', component: PradhanComponent },
   { path: 'pradhan-list', component: PradhanComponent },
@@ -74,13 +84,25 @@ export const routes: Routes = [
   { path: 'allow-access', component: AllowAccessComponent },
   { path: 'allow-access-list', component: AllowAccessListComponent },
   { path: 'social-media', component: SocialMediaComponent },
+  { path: 'social-media-list', component: SocialMediaComponent },
   { path: 'superadmin/dashboard', component: SuperDashboardComponent },
   { path: 'superadmin/designation', component: DesignationComponent },
   { path: 'superadmin/state', component: StateComponent },
   { path: 'superadmin/state-prabhari', component: StatePrabhariListComponent },
   { path: 'superadmin/district', component: DistrictComponent },
+  { path: 'superadmin/district-list', component: DistrictComponent, data: { mode: 'list' } },
   { path: 'superadmin/vidhansabha', component: VidhanSabhaComponent },
+  { path: 'superadmin/vidhansabha-list', component: VidhanSabhaComponent, data: { mode: 'list' } },
+  { path: 'superadmin/state-member', component: StateMemberMgmtComponent },
+  { path: 'superadmin/state-member-list', component: StateMemberMgmtComponent, data: { mode: 'list' } },
+  { path: 'superadmin/pradesh-samiti-list', component: StateMemberMgmtComponent, data: { samitiType: 1, mode: 'list' } },
+  { path: 'superadmin/pradesh-karyakarini-list', component: StateMemberMgmtComponent, data: { samitiType: 2, mode: 'list' } },
+  { path: 'state-prabhari/state-member', component: StateMemberMgmtComponent },
+  { path: 'state-prabhari/state-member-list', component: StateMemberMgmtComponent, data: { mode: 'list' } },
+  { path: 'state-prabhari/pradesh-samiti-list', component: StateMemberMgmtComponent, data: { samitiType: 1, mode: 'list' } },
+  { path: 'state-prabhari/pradesh-karyakarini-list', component: StateMemberMgmtComponent, data: { samitiType: 2, mode: 'list' } },
   { path: 'state-prabhari/dashboard', component: StatePrabhariDashboardComponent },
   { path: 'state-prabhari/vidhansabha-prabhari', component: VidhanSabhaPrabhariListComponent },
+  { path: 'state-prabhari/vidhansabha-prabhari-list', component: VidhanSabhaPrabhariListComponent, data: { mode: 'list' } },
   { path: '**', redirectTo: '' }
 ];

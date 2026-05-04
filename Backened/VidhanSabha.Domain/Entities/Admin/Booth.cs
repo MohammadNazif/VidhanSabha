@@ -162,6 +162,8 @@ namespace VidhanSabha.Domain.Entities.Admin
         public string? ProfileImagePath { get; private set; }
         public Tbl_Cast? Cast { get; private set; }
 
+        public Tbl_Booth? Booth { get; set; }
+
         public Boolean Status { get; private set; } = true;
         private Tbl_BoothSanyojak() { }
 

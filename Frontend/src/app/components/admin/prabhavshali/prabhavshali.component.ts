@@ -13,6 +13,7 @@ import { AuthServiceService } from '../../../Services/Auth/auth.service';
 import { ModulePermission } from '../../../models/module-permission.enum';
 import { ActivatedRoute } from '@angular/router';
 import { GenericExportComponent } from '../../shared/generic-export/generic-export.component';
+import { PermissionService } from '../../../Services/common/permission.service';
 
 @Component({
   selector: 'app-prabhavshali',
@@ -40,11 +41,12 @@ export class PrabhavshaliComponent implements OnInit {
   isAdvocateView = false;
   isGovtEmployeeView = false;
   isPradhanView = false;
+  isSpecialView = false;
   pageTitle = 'Prabhavshali Vyakt Management';
   pageSubtitle = 'Manage influential people across booths and villages';
 
   canManage(): boolean {
-    return !this.isListView;
+    return !this.isSpecialView && !this.isListView && this.permissionService.hasPermission(ModulePermission.EffectivePersion);
   }
 
   columns: TableColumn[] = [
@@ -201,17 +203,28 @@ export class PrabhavshaliComponent implements OnInit {
     private toastService: ToastService,
     private crudHandler: CrudHandlerService,
     private authService: AuthServiceService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private permissionService: PermissionService
   ) { }
 
   ngOnInit() {
-    this.route.url.subscribe(url => {
+    const role = (this.authService.getRole() || '').toUpperCase().trim();
+    const isBoothSanyojak = role === 'BOOTHSANYOJAK';
+
+    if (isBoothSanyojak) {
+      this.boothIds = this.authService.getBoothId();
+    }
+
+    this.route.url.subscribe((url: any) => {
       const path = url[0]?.path || '';
+      const wasSpecialView = this.isSpecialView;
+
       this.isListView = path.includes('-list');
       this.isDoctorView = path === 'doctor-list';
       this.isAdvocateView = path === 'advocate-list';
       this.isGovtEmployeeView = path === 'government-employee-list';
       this.isPradhanView = path === 'pradhan-list';
+      this.isSpecialView = this.isDoctorView || this.isAdvocateView || this.isGovtEmployeeView || this.isPradhanView;
 
       if (this.isDoctorView) {
         this.pageTitle = 'Doctor List';
@@ -230,41 +243,61 @@ export class PrabhavshaliComponent implements OnInit {
         this.pageSubtitle = 'Manage influential people across booths and villages';
       }
 
-      this.config.filterable = this.isListView;
-      this.loading = true;
-      if (this.isListView) {
-        this.loadFilterOptions();
+      if (this.isSpecialView) {
+        this.actions = [];
+      } else {
+        this.actions = [
+          { id: 'edit', label: '', variant: 'default', icon: 'edit', show: () => this.canManage() },
+          { id: 'delete', label: '', variant: 'danger', icon: 'delete', show: () => this.canManage() }
+        ];
       }
+
+      this.config.filterable = this.isListView;
+
+      // Only reload filters if we switched between special/regular view
+      if (this.isListView && (wasSpecialView !== this.isSpecialView || !this.config.filters?.length)) {
+        this.loadFilterOptions(isBoothSanyojak);
+      }
+
       this.loadData();
     });
   }
 
-  loadFilterOptions() {
-    this.config.filters = [
-      { key: 'boothIds', label: 'Booth', type: 'select', options: [], placeholder: '-- Select Booth --', multiple: true },
-      { key: 'villageIds', label: 'Village', type: 'select', options: [], placeholder: '-- Select Village --', multiple: true }
-    ];
-
-    const isSpecialView = this.isDoctorView || this.isAdvocateView || this.isGovtEmployeeView || this.isPradhanView;
-    if (!isSpecialView) {
-      this.config.filters.push({ key: 'designationIds', label: 'Designation', type: 'select', options: [], placeholder: '-- Select Designation --', multiple: true });
+  loadFilterOptions(isBoothSanyojak: boolean = false) {
+    if (this.isSpecialView) {
+      this.config.filters = [
+        { key: 'boothIds', label: 'Booth', type: 'select', options: [], placeholder: '-- Select Booth --', multiple: true, visible: !isBoothSanyojak },
+        { key: 'villageIds', label: 'Village', type: 'select', options: [], placeholder: '-- Select Village --', multiple: true }
+      ];
+    } else {
+      this.config.filters = [
+        { key: 'boothIds', label: 'Booth', type: 'select', options: [], placeholder: '-- Select Booth --', multiple: true, visible: !isBoothSanyojak },
+        { key: 'villageIds', label: 'Village', type: 'select', options: [], placeholder: '-- Select Village --', multiple: true },
+        { key: 'designationIds', label: 'Designation', type: 'select', options: [], placeholder: '-- Select Designation --', multiple: true }
+      ];
     }
 
     const userId = this.authService.getUserId();
     // Load Booths
-    this.prabhavshaliService.getCommonData('boothNumber', userId).subscribe(res => {
-      const filter = this.config.filters?.find(f => f.key === 'boothIds');
-      if (filter) {
-        const list = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
-        filter.options = list.map((b: any) => ({
-          label: `Booth No. ${b.boothNumber}`,
-          value: String(b.boothId || b.id)
-        }));
-      }
-    });
+    if (!isBoothSanyojak) {
+      this.prabhavshaliService.getCommonData('boothNumber', userId).subscribe(res => {
+        const filter = this.config.filters?.find(f => f.key === 'boothIds');
+        if (filter) {
+          const list = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
+          filter.options = list.map((b: any) => ({
+            label: `Booth No. ${b.boothNumber}`,
+            value: String(b.boothId || b.id)
+          }));
+        }
+      });
+    }
 
-    // Load All Villages initially
-    this.prabhavshaliService.getCommonData('village', null, 500000).subscribe(res => {
+    // Load Villages (filtered by booth if BoothSanyojak)
+    const villageUrl = isBoothSanyojak && this.boothIds
+      ? `villagesByBoothId?boothId=${this.boothIds}`
+      : 'village';
+
+    this.prabhavshaliService.getCommonData(villageUrl, null, 500000).subscribe(res => {
       const filter = this.config.filters?.find(f => f.key === 'villageIds');
       if (filter) {
         const list = Array.isArray(res?.data?.items) ? res.data.items : (Array.isArray(res?.items) ? res.items : (Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : [])));
@@ -276,7 +309,7 @@ export class PrabhavshaliComponent implements OnInit {
     });
 
     // Load Designations
-    if (!isSpecialView) {
+    if (!this.isSpecialView) {
       this.prabhavshaliService.getDesignations().subscribe(res => {
         const filter = this.config.filters?.find(f => f.key === 'designationIds');
         if (filter) {
@@ -459,14 +492,34 @@ export class PrabhavshaliComponent implements OnInit {
   handleExport(format: string) {
     if (!format) return;
     this.isExporting = true;
-    const request = format === 'excel' ? this.prabhavshaliService.exportToExcel() : this.prabhavshaliService.exportToPdf();
+
+    let request;
+    const exportFormat = format as 'excel' | 'pdf';
+    if (this.isDoctorView) {
+      request = this.prabhavshaliService.exportSpecial('doctor', exportFormat);
+    } else if (this.isAdvocateView) {
+      request = this.prabhavshaliService.exportSpecial('advocate', exportFormat);
+    } else if (this.isGovtEmployeeView) {
+      request = this.prabhavshaliService.exportSpecial('governmentemoloyee', exportFormat);
+    } else if (this.isPradhanView) {
+      request = this.prabhavshaliService.exportSpecial('pradhan', exportFormat);
+    } else {
+      request = exportFormat === 'excel' ? this.prabhavshaliService.exportToExcel() : this.prabhavshaliService.exportToPdf();
+    }
 
     request.subscribe({
       next: (blob: Blob) => {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `Prabhavshali_List.${format === 'excel' ? 'xlsx' : 'pdf'}`;
+
+        let fileNamePrefix = 'Prabhavshali';
+        if (this.isDoctorView) fileNamePrefix = 'Doctor';
+        else if (this.isAdvocateView) fileNamePrefix = 'Advocate';
+        else if (this.isGovtEmployeeView) fileNamePrefix = 'Government_Employee';
+        else if (this.isPradhanView) fileNamePrefix = 'Pradhan';
+
+        a.download = `${fileNamePrefix}_List.${format === 'excel' ? 'xlsx' : 'pdf'}`;
         document.body.appendChild(a);
         a.click();
         window.URL.revokeObjectURL(url);

@@ -11,5 +11,6 @@ namespace VidhanSabha.Application.Pannels.Admin.PrabhavshaliVyakti.Queries
     public class GetAllParabhavshaliByDesignIdQuery:IRequest<List<PrabhavshaliResponseDesinIdDto>>
     {
         public int DesgId { get; set; }
+        public String UserId { get; set; }
     }
 }

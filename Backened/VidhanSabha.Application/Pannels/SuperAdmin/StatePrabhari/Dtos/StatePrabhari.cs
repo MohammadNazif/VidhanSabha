@@ -53,6 +53,8 @@ namespace VidhanSabha.Application.Pannels.SuperAdmin.StatePrabhari.Dtos
         public string Profession { get; set; } = string.Empty;
         public string? CurrentAddress { get; set; }
 
+        public string? CreatedByUserId { get; set; }
+
 
     }
 

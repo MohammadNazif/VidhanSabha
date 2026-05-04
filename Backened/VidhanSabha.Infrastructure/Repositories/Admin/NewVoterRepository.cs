@@ -67,7 +67,7 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
             // ✅ FIX 1: query = assign karo, sirf query.Where nahi
         query = query.Where(b =>
                 (!qp.Id.HasValue || b.Id == qp.Id) &&
-                b.UserId == qp.UserId);                 // ✅ FIX 2: closing brace sahi jagah
+                b.UserId == qp.UserId || b.CreatedToUserId == qp.UserId);                 // ✅ FIX 2: closing brace sahi jagah
 
             if (boothIds.Any())
                 query = query.Where(b => boothIds.Contains(b.BoothId));
@@ -146,7 +146,7 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
 
             query = query.Where(b =>
                 (!qp.Id.HasValue || b.Id == qp.Id) &&
-                b.UserId == qp.UserId);
+                b.UserId == qp.UserId || b.CreatedToUserId == qp.UserId);
 
             if (boothIds?.Count > 0)
                 query = query.Where(b => boothIds.Contains(b.BoothId));

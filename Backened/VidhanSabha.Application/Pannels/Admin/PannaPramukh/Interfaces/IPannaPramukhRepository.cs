@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using VidhanSabha.Application.Common.Dtos;
+using VidhanSabha.Application.Common.ExportPdfExcel.Dtos;
 using VidhanSabha.Application.Pannels.Admin.PannaPramukh.Dtos;
 using VidhanSabha.Domain.Entities.Admin;
 
@@ -11,6 +12,7 @@ namespace VidhanSabha.Application.Pannels.Admin.PannaPramukh.Interfaces
 {
     public interface IPannaPramukhRepository
     {
+        Task<List<PannaPramukhExportRow>> GetPannaPramukhExportAsync(PannaPramukhQueryParams qp);
         Task<Tbl_PannaPramukh?> GetByIdAsync(int id);
         Task<PagedResult<PannaPramukhResponseDto>> GetAllAsync(PannaPramukhQueryParams qp, CancellationToken ct = default);
         Task<bool> PannaNumberExistsAsync(int boothId, int pannaNumber, int? excludeId = null, CancellationToken ct = default);

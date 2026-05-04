@@ -39,12 +39,16 @@ export class PrabhavshaliService extends BaseApiService {
     return this.export(this.entity, 'pdf');
   }
 
+  exportSpecial(entityName: string, format: 'excel' | 'pdf'): Observable<Blob> {
+    return this.export(entityName, format);
+  }
+
   getDesignations(): Observable<any> {
     return this.getCustom('common/getadmindesignation');
   }
 
   getCommonData(path: string, userId?: string | null, pageSize: number = 1000): Observable<any> {
-    let url = `common/${path}?PageNumber=1&PageSize=${pageSize}`;
+    let url = `common/${path}`;
     if (userId) url += `&userId=${userId}`;
     return this.getCustom(url);
   }

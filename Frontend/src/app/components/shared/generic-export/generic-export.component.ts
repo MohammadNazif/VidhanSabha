@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Input, Output, OnInit, OnDestroy, HostListener, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { TableColumn } from '../generic-table/generic-table.types';
 
 @Component({
   selector: 'app-generic-export',
@@ -45,7 +46,7 @@ import { CommonModule } from '@angular/common';
               <svg *ngIf="option.value === 'pdf'" class="w-3.5 h-3.5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
               </svg>
-              <svg *ngIf="option.value === 'excel'" class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg *ngIf="option.value === 'excel' || option.value === 'csv'" class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
               </svg>
 
@@ -70,9 +71,13 @@ export class GenericExportComponent implements OnInit, OnDestroy {
   @Input() show: boolean = true;
   @Input() isExporting: boolean = false;
   @Input() label: string = 'Export';
+  @Input() data: any[] = [];
+  @Input() columns: TableColumn[] = [];
+  @Input() fileName: string = 'Export';
   @Input() options: { label: string; value: string; icon?: string }[] = [
     { label: 'Export PDF', value: 'pdf' },
-    { label: 'Export Excel', value: 'excel' }
+    { label: 'Export Excel', value: 'excel' },
+    { label: 'Export CSV', value: 'csv' }
   ];
 
   @Output() export = new EventEmitter<string>();
@@ -114,7 +119,38 @@ export class GenericExportComponent implements OnInit, OnDestroy {
   }
 
   selectOption(value: string) {
-    this.export.emit(value);
+    if (value === 'csv') {
+      this.downloadCSV();
+    } else {
+      this.export.emit(value);
+    }
     this.isOpen = false;
+  }
+
+  private downloadCSV() {
+    if (!this.data || this.data.length === 0) return;
+
+    // Filter out columns that don't have a label or key (like actions)
+    const validColumns = this.columns.filter(col => col.label && col.key);
+    
+    const headers = validColumns.map(col => col.label).join(',');
+    const rows = this.data.map(row => {
+      return validColumns.map(col => {
+        const val = row[col.key] ?? '';
+        return `"${String(val).replace(/"/g, '""')}"`;
+      }).join(',');
+    });
+
+    const csvContent = [headers, ...rows].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    
+    link.setAttribute('href', url);
+    link.setAttribute('download', `${this.fileName}_${new Date().getTime()}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   }
 }

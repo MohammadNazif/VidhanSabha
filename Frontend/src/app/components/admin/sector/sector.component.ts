@@ -13,6 +13,7 @@ import { StateService } from '../../../Services/Admin/state/state.service';
 import { AuthServiceService } from '../../../Services/Auth/auth.service';
 import { CrudHandlerService } from '../../../Services/common/crud-handler.service';
 import { ViewChild, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-sector',
@@ -65,8 +66,8 @@ export class SectorComponent implements OnInit {
   };
 
   actions: TableAction[] = [
-    { id: 'edit', label: '', variant: 'default', icon: 'edit' },
-    { id: 'delete', label: '', variant: 'danger', icon: 'delete' }
+    { id: 'edit', label: '', variant: 'default', icon: 'edit', show: () => this.canManage() },
+    { id: 'delete', label: '', variant: 'danger', icon: 'delete', show: () => this.canManage() }
   ];
 
   addSectorConfig: FormConfig = {
@@ -238,34 +239,46 @@ export class SectorComponent implements OnInit {
     private stateService: StateService,
     private authService: AuthServiceService,
     private crudHandler: CrudHandlerService,
-    private toastService: ToastService
+    private toastService: ToastService,
+    private route: ActivatedRoute
   ) { }
 
-  ngOnInit() {
-    if (this.isStatePrabhari()) {
-      // Fetch the assigned state ID
-      this.stateService.getAllStates().subscribe({
-        next: (response) => {
-          const list = response?.data || response || [];
-          if (list.length > 0) {
-            this.defaultStateId = String(list[0].stateId || list[0].id);
+  isListView = false;
 
-            // Simplify fields for State Prabhari
-            const districtField = this.addSectorConfig.fields.find(f => f.id === 'districtId');
-            if (districtField) {
-              delete (districtField as any).dependsOn;
-              districtField.apiUrl = () => `district/getAll?stateId=${this.defaultStateId}`;
+  canManage(): boolean {
+    return !this.isListView;
+  }
+
+  ngOnInit() {
+    this.route.url.subscribe((url: any) => {
+      const path = url[0]?.path || '';
+      this.isListView = path.includes('-list');
+
+      if (this.isStatePrabhari()) {
+        // Fetch the assigned state ID
+        this.stateService.getAllStates().subscribe({
+          next: (response) => {
+            const list = response?.data || response || [];
+            if (list.length > 0) {
+              this.defaultStateId = String(list[0].stateId || list[0].id);
+
+              // Simplify fields for State Prabhari
+              const districtField = this.addSectorConfig.fields.find(f => f.id === 'districtId');
+              if (districtField) {
+                delete (districtField as any).dependsOn;
+                districtField.apiUrl = () => `district/getAll?stateId=${this.defaultStateId}`;
+              }
+              this.loadSectors();
+            } else {
+              this.loadSectors();
             }
-            this.loadSectors();
-          } else {
-            this.loadSectors();
-          }
-        },
-        error: () => this.loadSectors()
-      });
-    } else {
-      this.loadSectors();
-    }
+          },
+          error: () => this.loadSectors()
+        });
+      } else {
+        this.loadSectors();
+      }
+    });
   }
 
   loadSectors() {

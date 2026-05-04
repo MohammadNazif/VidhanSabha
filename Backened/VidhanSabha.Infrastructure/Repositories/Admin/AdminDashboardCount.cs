@@ -4,10 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using VidhanSabha.Application.Common.Village.Queries;
 using VidhanSabha.Application.Pannels.Admin.Dashboard.Dtos;
 using VidhanSabha.Application.Pannels.Admin.Dashboard.Interface;
 using VidhanSabha.Domain.Entities.Admin;
 using VidhanSabha.Domain.Entities.Common;
+using VidhanSabha.Domain.Entities.StatePrabhari;
 using VidhanSabha.Infrastructure.Persistence;
 using VidhanSabha.Infrastructure.Repositories.Common;
 
@@ -44,18 +46,60 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
                                    .CountAsync(x => mandalIds.Contains(x.MandalId) && x.Status),
                 Booth = boothIds.Count,
                 PannaPramukh = await _context.Tbl_PannaPramukh
-                                   .CountAsync(x => boothIds.Contains(x.BoothId) && x.Status),
+                                   .CountAsync(x => boothIds.Contains(x.BoothId) && x.Status && x.UserId == userId),
 
-                Sahmat = await _context.Tbl_SahmatAsahmat.CountAsync(x => boothIds.Contains(x.BoothId) && x.TypeId == 1 && x.Status),
-                 Asahmat = await _context.Tbl_SahmatAsahmat.CountAsync(x => boothIds.Contains(x.BoothId) && x.TypeId == 2 && x.Status),
-                 Pravasi = await _context.Tbl_PravasiVoter.CountAsync(x => boothIds.Contains(x.BoothId) && x.Status),
-                 NewVoters = await _context.Tbl_NewVoter.CountAsync(x => boothIds.Contains(x.BoothId) && x.Status),
-                 DoubleVoter = await _context.Tbl_DoubleVoter.CountAsync(x => boothIds.Contains(x.BoothId) && x.Status),
-                 PrabhavshaliVyakti = await _context.Tbl_PrabhavshaliVyakti.CountAsync(x => boothIds.Contains(x.BoothId) && x.Status),
-                 Block = await _context.Tbl_Block.CountAsync( x => x.Status),
+                Sahmat = await _context.Tbl_SahmatAsahmat.CountAsync(x => boothIds.Contains(x.BoothId) && x.TypeId == 1 && x.Status && x.UserId == userId),
+                 Asahmat = await _context.Tbl_SahmatAsahmat.CountAsync(x => boothIds.Contains(x.BoothId) && x.TypeId == 2 && x.Status && x.UserId == userId),
+                 Pravasi = await _context.Tbl_PravasiVoter.CountAsync(x => boothIds.Contains(x.BoothId) && x.Status && x.UserId == userId),
+                 NewVoters = await _context.Tbl_NewVoter.CountAsync(x => boothIds.Contains(x.BoothId) && x.Status && x.UserId == userId),
+                 DoubleVoter = await _context.Tbl_DoubleVoter.CountAsync(x => boothIds.Contains(x.BoothId) && x.Status && x.UserId == userId),
+                 PrabhavshaliVyakti = await _context.Tbl_PrabhavshaliVyakti.CountAsync(x => boothIds.Contains(x.BoothId) && x.Status && x.UserId == userId),
+                 Block = await _context.Tbl_Block.CountAsync( x => x.Status ),
                  BDC  = await _context.Tbl_Block.CountAsync(x => x.Status)
 
             };
+        }
+
+        public async Task<StateDashboardCountsDto> GetStateDashboardCountsAsync(string userId)
+        {
+            return new StateDashboardCountsDto
+            {
+                VidhanSabha = await _context.Tbl_VidhanSabha.CountAsync(x => x.Status && x.UserId == userId),
+                District = await _context.Tbl_DistrictWiseCount.CountAsync(x => x.Status && x.UserId == userId),
+                Designation = await _context.Tbl_Designation.CountAsync(x => x.Status && x.UserId == userId),
+                PradeshSamiti = await _context.Tbl_StateMembers.CountAsync(x => x.Status && x.UserId == userId && x.DesignationTypeId == 1),
+                PradeshKaryarkarniSamiti = await _context.Tbl_StateMembers.CountAsync(x => x.Status && x.UserId == userId && x.DesignationTypeId == 2),
+            };
+
+        }
+
+        public async Task<BoothDashboardCountsDto> GetBoothDashboardCountsAsync(string userId)
+        {
+            return new BoothDashboardCountsDto
+            {
+
+                BoothId = await _context.Tbl_BoothSanyojak
+        .Where(x => x.UserId == userId)
+        .Select(b => b.BoothId)
+         .FirstOrDefaultAsync(),
+                PannaPramukh = await _context.Tbl_PannaPramukh
+                                   .CountAsync(x =>x.Status && x.CreatedToUserId == userId),
+
+                Sahmat = await _context.Tbl_SahmatAsahmat.CountAsync(x => x.Status && x.CreatedToUserId == userId && x.TypeId == 1),
+                Asahmat = await _context.Tbl_SahmatAsahmat.CountAsync(x =>x.Status && x.CreatedToUserId == userId && x.TypeId == 2),
+                Pravasi = await _context.Tbl_PravasiVoter.CountAsync(x => x.Status && x.CreatedToUserId == userId),
+                NewVoters = await _context.Tbl_NewVoter.CountAsync(x => x.Status && x.CreatedToUserId == userId),
+                DoubleVoter = await _context.Tbl_DoubleVoter.CountAsync(x => x.Status && x.CreatedToUserId == userId),
+                PrabhavshaliVyakti = await _context.Tbl_PrabhavshaliVyakti.CountAsync(x => x.Status && x.CreatedToUserId == userId),
+                BoothSamiti = await _context.Tbl_BoothSamitiMem.CountAsync(x => x.Status && x.CreatedToUserId == userId),
+                VaristhNagrik = await _context.Tbl_SeniorDisabled.CountAsync(x => x.Status && x.CreatedToUserId == userId && x.TypeId == 1),
+                Viklaang = await _context.Tbl_SeniorDisabled.CountAsync(x => x.Status && x.CreatedToUserId == userId && x.TypeId == 2),
+                Post = await _context.Tbl_SocialMediaPost.CountAsync(x => x.Status),
+                Activities = await _context.Tbl_Block.CountAsync(x => x.Status),
+                BoothVoter = await _context.Tbl_Block.CountAsync(x => x.Status)
+            };
+           
+
         }
     }
 }

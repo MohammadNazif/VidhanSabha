@@ -13,10 +13,12 @@ namespace VidhanSabha.Application.Pannels.Admin.DoubleVoter.Command
     {
         public CreateDoubleVoterReqDto Dto { get; set; }
         public string UserId { get; set; }
-        public CreateDoubleVoterCommand(CreateDoubleVoterReqDto dto,string? userId)
+        public string Role { get; set; }
+        public CreateDoubleVoterCommand(CreateDoubleVoterReqDto dto,string? userId, string role)
         {
             Dto = dto;
             UserId = userId;
+            Role = role;
         }
     }
 }

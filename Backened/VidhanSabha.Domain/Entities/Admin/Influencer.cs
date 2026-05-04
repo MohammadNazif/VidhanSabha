@@ -18,6 +18,7 @@ public class Tbl_Influencer
     public string Description { get; private set; }
     public bool Status { get; private set; } = true;
     public string? UserId { get; private set; }
+    public string? CreatedToUserId { get; private set; }
 
     // Multiple villages — ek Influencer ke multiple villages
     private readonly List<Tbl_InfluencerVillage> _villages = new();
@@ -37,6 +38,7 @@ public class Tbl_Influencer
         string mobile,
         string description,
         string UserId,
+        string createdToUserId,
         List<int> villageIds)
     {
         var entity = new Tbl_Influencer
@@ -47,7 +49,8 @@ public class Tbl_Influencer
             CastId = castId,
             Mobile = mobile,
             Description = description,
-            UserId = UserId
+            UserId = UserId,
+            CreatedToUserId = createdToUserId
         };
         entity.SetVillages(villageIds);
         return entity;

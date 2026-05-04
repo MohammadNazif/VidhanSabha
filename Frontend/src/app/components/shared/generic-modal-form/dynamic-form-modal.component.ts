@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators } fr
 import { FormConfig, FormField, FormResult, DropdownOption } from './generic-form.types';
 import { FormDataService } from './form-data.service';
 import { Subscription, isObservable, of, Observable } from 'rxjs';
+import { AuthServiceService } from '../../../Services/Auth/auth.service';
 
 @Component({
   selector: 'app-dynamic-form-modal',
@@ -32,10 +33,12 @@ export class DynamicFormModalComponent implements OnInit, OnDestroy {
 
   constructor(
     private fb: FormBuilder,
-    private formDataService: FormDataService
+    private formDataService: FormDataService,
+    private authService: AuthServiceService
   ) { }
 
   ngOnInit(): void {
+    this.handleBoothSanyojakRole();
     this.createForm();
     this.initializeOptions();
     this.setupFieldInteractions();
@@ -44,7 +47,25 @@ export class DynamicFormModalComponent implements OnInit, OnDestroy {
     // Disable reset logic for first 500ms to allow APIs to load
     setTimeout(() => {
       this.isInitializing = false;
+      // Re-trigger cascading once for BoothSanyojak if needed
+      this.updateCascadingOptions();
     }, 500);
+  }
+
+  private handleBoothSanyojakRole(): void {
+    const role = (this.authService.getRole() || '').toUpperCase().trim();
+    if (role === 'BOOTHSANYOJAK') {
+      const boothId = this.authService.getBoothId();
+      if (boothId) {
+        this.config.fields.forEach(field => {
+          if (field.id === 'boothId') {
+            field.defaultValue = boothId;
+            field.type = 'hidden';
+            this.fieldVisibility[field.id] = false;
+          }
+        });
+      }
+    }
   }
 
   ngOnDestroy(): void {
@@ -205,7 +226,12 @@ export class DynamicFormModalComponent implements OnInit, OnDestroy {
               this.subscriptions.add(
                 this.formDataService.getOptionsFromApi(url, field.apiMapper, this.form.value).subscribe(options => {
                   this.fieldOptions[field.id] = options;
-                  this.handleChildValueReset(field.id, options);
+                  if (field.type === 'text' || field.type === 'textarea') {
+                    const newValue = options.length > 0 ? options[0].value : '';
+                    this.form.get(field.id)?.setValue(newValue);
+                  } else {
+                    this.handleChildValueReset(field.id, options);
+                  }
                 })
               );
             }

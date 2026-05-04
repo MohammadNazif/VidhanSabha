@@ -20,7 +20,7 @@ namespace VidhanSabha.Application.Pannels.Admin.PrabhavshaliVyakti.Queries
         }
         public async Task<List<PrabhavshaliResponseDesinIdDto>> Handle(GetAllParabhavshaliByDesignIdQuery request, CancellationToken cancellationToken)
         {
-            var res = await _repo.GetByDesgIdAsync(request.DesgId);
+            var res = await _repo.GetByDesgIdAsync(request.DesgId,request.UserId);
 
             if (res == null )
             {

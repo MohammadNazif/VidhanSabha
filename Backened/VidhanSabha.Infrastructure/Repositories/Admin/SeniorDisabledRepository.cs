@@ -1,12 +1,13 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using VidhanSabha.Application.Common.Dtos;
+using VidhanSabha.Application.Common.ExportPdfExcel.Dtos;
 using VidhanSabha.Application.Common.SeniorDisabledType.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.PravasiVoters.DTOs;
 using VidhanSabha.Application.Pannels.Admin.SeniorDisabled.DTOs;
@@ -70,7 +71,7 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
                 (!qp.Id.HasValue || b.Id == qp.Id) &&
                  (!qp.TypeId.HasValue || b.TypeId == qp.TypeId) &&
                 
-                b.UserId == qp.UserId && b.Status);            
+                (b.UserId == qp.UserId || b.CreatedToUserId == qp.UserId ) && b.Status );            
 
             if (boothIds.Any())
                 query = query.Where(b => boothIds.Contains(b.BoothId));
@@ -127,6 +128,24 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
                },
                ct:ct
                );
+        }
+        public async Task<List<seniordisabledExportRow>> GetSeniorDisabledExportAsync(SeniorDisabledQueryParams qp)
+        {
+            return await _context.Tbl_SeniorDisabled  // replace with your actual table name
+                .Where(m => !qp.TypeId.HasValue || m.TypeId == qp.TypeId && m.Status && ( m.UserId == qp.UserId || m.CreatedToUserId == qp.UserId))
+                .Select(m => new seniordisabledExportRow
+                {
+                    BoothNumber = m.Booth != null ? m.Booth.BoothNumber : 0,
+
+                    Village = string.Join(", ", m.Booth.Villages
+                        .Select(v => v.Village != null ? v.Village.VillageName : "N/A")),
+
+                    Name = m.Name,
+                    MobileNumber = m.Mobile,
+                    Category = m.Category != null ? m.Category.Name : "N/A",
+                    VoterId = m.VoterId
+                })
+                .ToListAsync();
         }
         public async Task<Tbl_SeniorDisabled?> GetByIdAsync(int id)
         {

@@ -15,6 +15,7 @@ import { ModulePermission } from '../../../models/module-permission.enum';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
 import { GenericExportComponent } from '../../shared/generic-export/generic-export.component';
+import { PermissionService } from '../../../Services/common/permission.service';
 
 @Component({
   selector: 'app-pravasi-voter',
@@ -37,6 +38,7 @@ export class PravasiVoterComponent implements OnInit {
   isDescending = false;
 
   boothIds: string | null = null;
+  villageIds: string | null = null;
   castIds: string | null = null;
   occupationIds: string | null = null;
 
@@ -71,9 +73,7 @@ export class PravasiVoterComponent implements OnInit {
   ];
 
   canManageVoters(): boolean {
-    if (this.isListView) return false;
-    const role = (this.authService.getRole() || '').toUpperCase().trim();
-    return role !== 'STATEPRABHARI' && role !== 'ADHYAKSH';
+    return !this.isListView && this.permissionService.hasPermission(ModulePermission.PravashiVoter);
   }
 
   addVoterConfig: FormConfig = {
@@ -213,42 +213,69 @@ export class PravasiVoterComponent implements OnInit {
     private crudHandler: CrudHandlerService,
     private authService: AuthServiceService,
     private route: ActivatedRoute,
-    private http: HttpClient
+    private http: HttpClient,
+    private permissionService: PermissionService
   ) { }
 
   ngOnInit() {
-    this.route.url.subscribe(url => {
+    const role = (this.authService.getRole() || '').toUpperCase().trim();
+    const isBoothSanyojak = role === 'BOOTHSANYOJAK';
+
+    if (isBoothSanyojak) {
+      this.boothIds = this.authService.getBoothId();
+    }
+
+    this.route.url.subscribe((url: any) => {
       const path = url[0]?.path || '';
       this.isListView = path.includes('-list');
       this.loading = true;
-      this.loadFilterOptions();
+      this.loadFilterOptions(isBoothSanyojak);
       this.loadVoters();
     });
   }
 
-  loadFilterOptions() {
+  loadFilterOptions(isBoothSanyojak: boolean = false) {
     if (!this.isListView) {
       this.config.filters = [];
       return;
     }
 
     this.config.filters = [
-      { key: 'boothIds', label: 'Booth', type: 'select', options: [], placeholder: '-- Select Booth --', multiple: true },
+      { key: 'boothIds', label: 'Booth', type: 'select', options: [], placeholder: '-- Select Booth --', multiple: true, visible: !isBoothSanyojak },
+      { key: 'villageIds', label: 'Village', type: 'select', options: [], placeholder: '-- Select Village --', multiple: true },
       { key: 'castIds', label: 'Caste', type: 'select', options: [], placeholder: '-- Select Caste --', multiple: true },
       { key: 'occupationIds', label: 'Occupation', type: 'select', options: [], placeholder: '-- Select Occupation --', multiple: true }
     ];
 
     // Load Booths
-    this.http.get<any>(`${environment.apiUrl}/common/boothnumber`).subscribe({
-      next: (res) => {
-        const filter = this.config.filters?.find(f => f.key === 'boothIds');
-        if (filter) {
-          const list = Array.isArray(res?.data?.items) ? res.data.items : (Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []));
-          filter.options = list.map((item: any) => ({
-            value: String(item.boothId),
-            label: ` Booth -${item.boothNumber}`
-          }));
+    if (!isBoothSanyojak) {
+      this.http.get<any>(`${environment.apiUrl}/common/boothnumber`).subscribe({
+        next: (res) => {
+          const filter = this.config.filters?.find(f => f.key === 'boothIds');
+          if (filter) {
+            const list = Array.isArray(res?.data?.items) ? res.data.items : (Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []));
+            filter.options = list.map((item: any) => ({
+              value: String(item.boothId),
+              label: ` Booth -${item.boothNumber}`
+            }));
+          }
         }
+      });
+    }
+
+    // Load Villages (filtered by booth if BoothSanyojak)
+    const villageUrl = isBoothSanyojak && this.boothIds
+      ? `${environment.apiUrl}/common/villagesByBoothId?boothId=${this.boothIds}`
+      : `${environment.apiUrl}/common/village?pageSize=500000`;
+
+    this.http.get<any>(villageUrl).subscribe(res => {
+      const filter = this.config.filters?.find(f => f.key === 'villageIds');
+      if (filter) {
+        const list = Array.isArray(res?.data?.items) ? res.data.items : (Array.isArray(res?.items) ? res.items : (Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : [])));
+        filter.options = list.map((v: any) => ({
+          label: v.name || v.villageName,
+          value: String(v.id || v.villageId)
+        }));
       }
     });
 
@@ -285,6 +312,7 @@ export class PravasiVoterComponent implements OnInit {
     const processIds = (ids: any) => Array.isArray(ids) ? (ids.length > 0 ? ids.join(',') : null) : (ids || null);
 
     this.boothIds = processIds(filterState['boothIds']);
+    this.villageIds = processIds(filterState['villageIds']);
     this.castIds = processIds(filterState['castIds']);
     this.occupationIds = processIds(filterState['occupationIds']);
 
@@ -302,6 +330,7 @@ export class PravasiVoterComponent implements OnInit {
       sortBy: this.sortBy,
       isDescending: this.isDescending,
       boothIds: this.boothIds,
+      villageIds: this.villageIds,
       castIds: this.castIds,
       occupationIds: this.occupationIds
     };
@@ -432,7 +461,7 @@ export class PravasiVoterComponent implements OnInit {
 
   handleExport(format: string) {
     if (!format || this.isExporting) return;
-    
+
     this.isExporting = true;
 
     let fileName = `pravasi_voters_${new Date().getTime()}`;

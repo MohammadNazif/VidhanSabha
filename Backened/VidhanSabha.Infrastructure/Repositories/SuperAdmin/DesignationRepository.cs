@@ -28,7 +28,7 @@ namespace VidhanSabha.Infrastructure.Repositories.SuperAdmin
             throw new NotImplementedException();
         }
 
-        public async Task<IReadOnlyList<DesignationResponseDto>> GetAllAsync(string userId,CancellationToken ct = default)
+        public async Task<IReadOnlyList<DesignationResponseDto>>    GetAllAsync(string userId,CancellationToken ct = default)
         {
             var data = await _context.Tbl_Designation.Where(x=>x.UserId == userId)
                 .Select(b => new DesignationResponseDto

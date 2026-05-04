@@ -15,9 +15,12 @@ namespace VidhanSabha.Application.Pannels.Admin.PravasiVoters.DTOs
         public string? CastIds { get; set; }
         public string? OccupationIds { get; set; }
 
+        public string? VillageIds { get; set; }
+
         public List<int> GetBoothIds() => FilterParse.ParseIds(BoothIds);
         public List<int> GetCastIds() => FilterParse.ParseIds(CastIds);
 
+        public List<int> GetVillageIds() => FilterParse.ParseIds(VillageIds);
         public List<int> GetOccupationIds() => FilterParse.ParseIds(OccupationIds);
     }
 }

@@ -12,11 +12,13 @@ import { StateService } from '../../../Services/Admin/state/state.service';
 import { AuthServiceService } from '../../../Services/Auth/auth.service';
 import { ToastService } from '../../../Services/common/toast/toast.service';
 import { CrudHandlerService } from '../../../Services/common/crud-handler.service';
+import { ActivatedRoute } from '@angular/router';
+import { GenericExportComponent } from '../../shared/generic-export/generic-export.component';
 
 @Component({
   selector: 'app-vidhansabha-prabhari-list',
   standalone: true,
-  imports: [CommonModule, PageHeaderComponent, GenericTableComponent, GenericModalButtonComponent],
+  imports: [CommonModule, PageHeaderComponent, GenericTableComponent, GenericModalButtonComponent, GenericExportComponent],
   templateUrl: './vidhansabha-prabhari-list.component.html',
   styleUrl: './vidhansabha-prabhari-list.component.css'
 })
@@ -25,6 +27,17 @@ export class VidhanSabhaPrabhariListComponent implements OnInit {
 
   prabhariList: any[] = [];
   defaultStateId: string | null = null;
+  loading = false;
+  totalCount = 0;
+  isListMode = false;
+  listTitle = 'Vidhan Sabha Prabhari Management';
+
+  // Pagination state
+  pageNumber = 1;
+  pageSize = 50;
+  searchTerm = '';
+  sortBy = 'id';
+  isDescending = true;
 
   isStatePrabhari(): boolean {
     return (this.authService.getRole() || '').toUpperCase().trim() === 'STATEPRABHARI';
@@ -35,7 +48,17 @@ export class VidhanSabhaPrabhariListComponent implements OnInit {
     { key: 'vidhanSabhaName', label: 'Vidhan Sabha', sortable: true },
     { key: 'prabhariName', label: 'Prabhari', sortable: true },
     { key: 'prabhariEmail', label: 'Email', sortable: true },
-    { key: 'gender', label: 'Gender', sortable: true },
+    {
+      key: 'gender',
+      label: 'Gender',
+      type: 'badge',
+      sortable: true,
+      badgeVariant: (val: string) => {
+        if (val === 'Male') return 'info';
+        if (val === 'Female') return 'success';
+        return 'default';
+      }
+    },
     { key: 'contactNumber', label: 'Contact', sortable: true },
     { key: 'categoryName', label: 'Category', sortable: true },
     { key: 'castName', label: 'Caste', sortable: true },
@@ -47,8 +70,9 @@ export class VidhanSabhaPrabhariListComponent implements OnInit {
     selectable: false,
     filterable: true,
     paginated: true,
-    defaultPageSize: 10,
-    pageSizeOptions: [10, 20, 50],
+    serverSide: true,
+    defaultPageSize: 50,
+    pageSizeOptions: [10, 25, 50, 100],
     searchable: true,
     searchPlaceholder: 'Search prabharis...',
     showRowNumbers: true,
@@ -57,8 +81,8 @@ export class VidhanSabhaPrabhariListComponent implements OnInit {
   };
 
   actions: TableAction[] = [
-    { id: 'edit', label: '', variant: 'default', icon: 'edit' },
-    { id: 'delete', label: '', variant: 'danger', icon: 'delete' }
+    { id: 'edit', label: '', variant: 'default', icon: 'edit', show: () => true },
+    { id: 'delete', label: '', variant: 'danger', icon: 'delete', show: () => true }
   ];
 
   addPrabhariConfig: FormConfig = {
@@ -107,12 +131,13 @@ export class VidhanSabhaPrabhariListComponent implements OnInit {
         type: 'select',
         placeholder: '-- Select Vidhan Sabha --',
         dependsOn: 'districtId',
-        apiUrl: (distId: any) => `stateprabhari/vidhansabha/getAll?districtId=${distId}`,
+        apiUrl: (distId: any) => `stateprabhari/vidhansabha/getAll?districtId=${distId}&pageNumber=1&pageSize=100000&sortBy=id&IsDescending=true`,
         apiMapper: (data: any) => {
           const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
           return list.map((item: any) => ({
             value: String(item.id),
-            label: item.vidhanSabhaName
+            label: item.vidhanSabhaName + (item.hasPrabhari ? ' (Already Assigned)' : ''),
+            disabled: item.hasPrabhari
           }));
         },
         validations: [Validators.required],
@@ -233,10 +258,19 @@ export class VidhanSabhaPrabhariListComponent implements OnInit {
     private stateService: StateService,
     private authService: AuthServiceService,
     private toastService: ToastService,
-    private crudHandler: CrudHandlerService
+    private crudHandler: CrudHandlerService,
+    private route: ActivatedRoute
   ) { }
 
   ngOnInit() {
+    this.route.data.subscribe(data => {
+      this.isListMode = data['mode'] === 'list';
+      if (this.isListMode) {
+        this.listTitle = 'Vidhan Sabha Prabhari List';
+        this.actions = [];
+      }
+    });
+
     if (this.isStatePrabhari()) {
       this.stateService.getAllStates().subscribe({
         next: (response) => {
@@ -257,18 +291,55 @@ export class VidhanSabhaPrabhariListComponent implements OnInit {
   }
 
   loadPrabharis() {
-    this.prabhariService.getAllPrabharis(this.defaultStateId).subscribe({
+    this.loading = true;
+    const params: any = {
+      pageNumber: this.pageNumber,
+      pageSize: this.pageSize,
+      searchTerm: this.searchTerm,
+      sortBy: this.sortBy,
+      isDescending: this.isDescending
+    };
+
+    if (this.defaultStateId) {
+      params.stateId = this.defaultStateId;
+    }
+
+    this.prabhariService.getAllPrabharis(params).subscribe({
       next: (response) => {
-        if (response && response.isSuccess) {
-          this.prabhariList = response.data;
-        } else if (Array.isArray(response)) {
-          this.prabhariList = response;
+        const dataWrap = response.data;
+        if (dataWrap && dataWrap.items) {
+          this.prabhariList = dataWrap.items;
+          this.totalCount = dataWrap.totalCount || 0;
         } else {
-          this.prabhariList = [];
+          this.prabhariList = Array.isArray(dataWrap) ? dataWrap : (Array.isArray(response) ? response : []);
+          this.totalCount = this.prabhariList.length;
         }
+        this.loading = false;
       },
-      error: (err) => console.error('Error fetching prabharis:', err)
+      error: (err) => {
+        console.error('Error fetching prabharis:', err);
+        this.loading = false;
+      }
     });
+  }
+
+  handlePageChange(event: any) {
+    this.pageNumber = event.currentPage;
+    this.pageSize = event.pageSize;
+    this.loadPrabharis();
+  }
+
+  handleSortChange(event: any) {
+    this.sortBy = event.column;
+    this.isDescending = event.direction === 'desc';
+    this.pageNumber = 1;
+    this.loadPrabharis();
+  }
+
+  handleSearchChange(term: string) {
+    this.searchTerm = term;
+    this.pageNumber = 1;
+    this.loadPrabharis();
   }
 
   handleAction(event: any) {

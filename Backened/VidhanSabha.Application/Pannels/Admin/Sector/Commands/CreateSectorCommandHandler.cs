@@ -2,6 +2,7 @@
 using VidhanSabha.Application.Common.CredentialMananger;
 using VidhanSabha.Application.Common.ImageService;
 using VidhanSabha.Application.Common.ImageService.Interface;
+using VidhanSabha.Application.Pannels.Admin.Booth.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.Sector.DTOs;
 using VidhanSabha.Application.Pannels.Admin.Sector.Interface;
 using VidhanSabha.Domain.Entities.Admin;
@@ -22,6 +23,7 @@ namespace VidhanSabha.Application.Pannels.Admin.Sector.Commands
             _imageService = imageService;
             _sectorRepository = sectorRepository;
             _credentialManager = credentialManager;
+
         }
 
         public async Task<int> Handle(CreateSectorCommand request, CancellationToken cancellationToken)
@@ -41,6 +43,7 @@ namespace VidhanSabha.Application.Pannels.Admin.Sector.Commands
                 sector = Tbl_Sector.CreateBasic(
                     request.CreatedById,
                     request.CreatedBy,
+                    request.CreatedByUserId,
                     dto.MandalId,
                     dto.VillageId,
                     dto.SectorName
@@ -69,10 +72,11 @@ namespace VidhanSabha.Application.Pannels.Admin.Sector.Commands
                 sector = Tbl_Sector.CreateWithSanyojak(
                     request.CreatedById,
                     request.CreatedBy,
+                    request.CreatedByUserId,
                     dto.MandalId,
                     dto.VillageId,
                     dto.SectorName,
-                    userId, // 👈 IMPORTANT
+                    userId, 
                     dto.InchargeName,
                     dto.Age.Value,
                     dto.FatherName,

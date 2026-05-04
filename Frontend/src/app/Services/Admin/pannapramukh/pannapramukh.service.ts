@@ -26,16 +26,16 @@ export class PannapramukhService extends BaseApiService {
     return this.delete(this.entity, id);
   }
 
-  exportToExcel(): Observable<Blob> {
-    return this.export(this.entity, 'excel');
+  exportToExcel(params: any = {}): Observable<Blob> {
+    return this.export(this.entity, 'excel', params);
   }
 
-  exportToPdf(): Observable<Blob> {
-    return this.export(this.entity, 'pdf');
+  exportToPdf(params: any = {}): Observable<Blob> {
+    return this.export(this.entity, 'pdf', params);
   }
 
   getCommonData(path: string, userId?: string | null, pageSize: number = 1000): Observable<any> {
-    let url = `common/${path}?PageNumber=1&PageSize=${pageSize}`;
+    let url = `common/${path}`;
     if (userId) url += `&userId=${userId}`;
     return this.getCustom(url);
   }

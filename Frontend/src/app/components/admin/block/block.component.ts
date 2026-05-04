@@ -10,6 +10,7 @@ import { BlockService } from '../../../Services/Admin/block/block.service';
 import { ToastService } from '../../../Services/common/toast/toast.service';
 import { CrudHandlerService } from '../../../Services/common/crud-handler.service';
 import { ActivatedRoute } from '@angular/router';
+import { AuthServiceService } from '../../../Services/Auth/auth.service';
 
 @Component({
   selector: 'app-block',
@@ -34,7 +35,9 @@ export class BlockComponent implements OnInit {
   isListView = false;
 
   canManage(): boolean {
-    return !this.isListView;
+    if (this.isListView) return false;
+    const role = (this.authService.getRole() || '').toUpperCase().trim();
+    return ['SUPERADMIN', 'ADMIN', 'VIDHANSABHAPRABHARI'].includes(role);
   }
 
   columns: TableColumn[] = [
@@ -178,11 +181,12 @@ export class BlockComponent implements OnInit {
     private blockService: BlockService,
     private toastService: ToastService,
     private crudHandler: CrudHandlerService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private authService: AuthServiceService
   ) { }
 
   ngOnInit() {
-    this.route.url.subscribe(url => {
+    this.route.url.subscribe((url: any) => {
       const path = url[0]?.path || '';
       this.isListView = path.includes('-list');
       this.loadData();

@@ -13,6 +13,7 @@ import { ActivatedRoute } from '@angular/router';
 import { AuthServiceService } from '../../../Services/Auth/auth.service';
 import { ModulePermission } from '../../../models/module-permission.enum';
 import { GenericExportComponent } from '../../shared/generic-export/generic-export.component';
+import { PermissionService } from '../../../Services/common/permission.service';
 
 @Component({
   selector: 'app-sahmat-asahmat',
@@ -74,9 +75,7 @@ export class SahmatAsahmatComponent implements OnInit {
   ];
 
   canManageVoters(): boolean {
-    if (this.isListView) return false;
-    const role = (this.authService.getRole() || '').toUpperCase().trim();
-    return role !== 'STATEPRABHARI' && role !== 'ADHYAKSH';
+    return !this.isListView && this.permissionService.hasPermission(ModulePermission.Sahmat);
   }
 
   addVoterConfig: FormConfig = {
@@ -226,49 +225,59 @@ export class SahmatAsahmatComponent implements OnInit {
     private toastService: ToastService,
     private crudHandler: CrudHandlerService,
     private route: ActivatedRoute,
-    private authService: AuthServiceService
+    private authService: AuthServiceService,
+    private permissionService: PermissionService
   ) { }
 
   ngOnInit() {
-    this.route.url.subscribe(url => {
+    const role = (this.authService.getRole() || '').toUpperCase().trim();
+    const isBoothSanyojak = role === 'BOOTHSANYOJAK';
+
+    if (isBoothSanyojak) {
+      this.boothIds = this.authService.getBoothId();
+    }
+
+    this.route.url.subscribe((url: any) => {
       const path = url[0]?.path || '';
       this.isAsahmatView = path === 'asahmat-list';
       this.isListView = path.includes('-list');
       this.config.filterable = this.isListView;
       this.loading = true;
       if (this.isListView) {
-        this.loadFilterOptions();
+        this.loadFilterOptions(isBoothSanyojak);
       }
       this.loadVoters();
     });
   }
 
-  loadFilterOptions() {
+  loadFilterOptions(isBoothSanyojak: boolean = false) {
     this.config.filters = [
-      { key: 'boothIds', label: 'Booth', type: 'select', options: [], placeholder: '-- Select Booth --', multiple: true },
+      { key: 'boothIds', label: 'Booth', type: 'select', options: [], placeholder: '-- Select Booth --', multiple: true, visible: !isBoothSanyojak },
       { key: 'villageIds', label: 'Village', type: 'select', options: [], placeholder: '-- Select Village --', multiple: true },
       { key: 'partyIds', label: 'Party', type: 'select', options: [], placeholder: '-- Select Party --', multiple: true }
     ];
 
     const userId = this.authService.getUserId();
     // Load Booths
-    // Using a manual http call for filters to avoid global loader if common/ is not in interceptor yet (it is)
-    // But we need to make sure we don't block.
+    if (!isBoothSanyojak) {
+      this.voterService.getCommonData('boothNumber', userId).subscribe((res: any) => {
+        const filter = this.config.filters?.find(f => f.key === 'boothIds');
+        if (filter) {
+          const list = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
+          filter.options = list.map((b: any) => ({
+            label: `Booth No. ${b.boothNumber}`,
+            value: String(b.boothId || b.id)
+          }));
+        }
+      });
+    }
 
-    // Load Booths
-    this.voterService.getCommonData('boothNumber', userId).subscribe((res: any) => {
-      const filter = this.config.filters?.find(f => f.key === 'boothIds');
-      if (filter) {
-        const list = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
-        filter.options = list.map((b: any) => ({
-          label: `Booth No. ${b.boothNumber}`,
-          value: String(b.boothId || b.id)
-        }));
-      }
-    });
+    // Load Villages (filtered by booth if BoothSanyojak)
+    const villageUrl = isBoothSanyojak && this.boothIds
+      ? `villagesByBoothId?boothId=${this.boothIds}`
+      : 'village';
 
-    // Load All Villages initially
-    this.voterService.getCommonData('village', null, 500000).subscribe((res: any) => {
+    this.voterService.getCommonData(villageUrl, null, 500000).subscribe((res: any) => {
       const filter = this.config.filters?.find(f => f.key === 'villageIds');
       if (filter) {
         const list = Array.isArray(res?.data?.items) ? res.data.items : (Array.isArray(res?.items) ? res.items : (Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : [])));
@@ -479,8 +488,8 @@ export class SahmatAsahmatComponent implements OnInit {
   handleExport(format: string) {
     if (!format) return;
     this.isExporting = true;
-    const request = format === 'excel' 
-      ? this.voterService.exportToExcel(this.isAsahmatView) 
+    const request = format === 'excel'
+      ? this.voterService.exportToExcel(this.isAsahmatView)
       : this.voterService.exportToPdf(this.isAsahmatView);
 
     const viewName = this.isAsahmatView ? 'Asahmat' : 'Sahmat';

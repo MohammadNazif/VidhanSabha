@@ -59,16 +59,16 @@ namespace VidhanSabha.Infrastructure.Repositories.SuperAdmin
 
         public async Task<Tbl_StateMembers?> GetByIdAsync(int id, CancellationToken ct = default)
         {
-            return await _context.Tbl_StateMembers.Where(m => m.Id == id).FirstOrDefaultAsync();
+            return await _context.Tbl_StateMembers.Where(m => m.Id == id ).FirstOrDefaultAsync();
         }
 
 
-        public async Task<PagedResult<StateMembersResponseDto>> GetAllAsync(StateMembersQueryParams qp, CancellationToken ct = default)
+        public async Task<PagedResult<StateMembersResponseDto>> GetAllAsync(StateMembersQueryParams qp,int? samitiId, CancellationToken ct = default)
         {
             var query = _context.Tbl_StateMembers
                .AsNoTracking()
                .Where(b =>
-                   (!qp.Id.HasValue || b.Id == qp.Id) 
+                   (!qp.Id.HasValue || b.Id == qp.Id) && (samitiId == null || b.DesignationTypeId == samitiId)
                    );
 
             Expression<Func<Tbl_StateMembers, bool>>? search = null;

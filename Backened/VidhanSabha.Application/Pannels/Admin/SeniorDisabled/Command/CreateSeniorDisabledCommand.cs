@@ -13,10 +13,12 @@ namespace VidhanSabha.Application.Pannels.Admin.SeniorDisabled.Command
     {
         public CreateSeniorDisabledReqDto Dto { get; set; }
         public string UserId { get; set; }
-        public CreateSeniorDisabledCommand(CreateSeniorDisabledReqDto dto, string? userId)
+        public string Role { get; set; }
+        public CreateSeniorDisabledCommand(CreateSeniorDisabledReqDto dto, string? userId, string role)
         {
             Dto = dto;
             UserId = userId;
+            Role = role;
         }
     }
 }

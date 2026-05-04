@@ -17,11 +17,13 @@ import { VidhanSabhaService } from '../../../Services/Admin/vidhansabha/vidhansa
 import { VidhanSabhaPrabhariService } from '../../../Services/Admin/vidhansabha-prabhari/vidhansabha-prabhari.service';
 import { StatePrabhariService } from '../../../Services/Admin/state-prabhari/state-prabhari.service';
 import { AuthServiceService } from '../../../Services/Auth/auth.service';
+import { ActivatedRoute } from '@angular/router';
+import { GenericExportComponent } from '../../shared/generic-export/generic-export.component';
 
 @Component({
   selector: 'app-district',
   standalone: true,
-  imports: [CommonModule, PageHeaderComponent, GenericTableComponent, GenericModalButtonComponent],
+  imports: [CommonModule, PageHeaderComponent, GenericTableComponent, GenericModalButtonComponent, GenericExportComponent],
   templateUrl: './district.component.html',
   styleUrl: './district.component.css'
 })
@@ -31,6 +33,8 @@ export class DistrictComponent implements OnInit {
 
   districtList: any[] = [];
   defaultStateId: string | null = null;
+  isListMode = false;
+  listTitle = 'District Management';
 
   isStatePrabhari(): boolean {
     return (this.authService.getRole() || '').toUpperCase().trim() === 'STATEPRABHARI';
@@ -276,10 +280,18 @@ export class DistrictComponent implements OnInit {
     private authService: AuthServiceService,
     private statePrabhariService: StatePrabhariService,
     private toastService: ToastService,
-    private crudHandler: CrudHandlerService
+    private crudHandler: CrudHandlerService,
+    private route: ActivatedRoute
   ) { }
 
   ngOnInit() {
+    this.route.data.subscribe(data => {
+      this.isListMode = data['mode'] === 'list';
+      if (this.isListMode) {
+        this.listTitle = 'District List';
+        this.actions = [];
+      }
+    });
     if (this.isStatePrabhari()) {
       // Automatically hide state selection for State Prabhari
       const stateField = this.addDistrictConfig.fields.find(f => f.id === 'stateId');

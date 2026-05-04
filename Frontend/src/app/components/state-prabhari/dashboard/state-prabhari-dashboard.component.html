@@ -1,11 +1,12 @@
 <div class="dashboard-container p-4 lg:p-6 min-h-screen">
-  
+
   <!-- 🔥 Compact Header -->
   <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-5 gap-3">
     <div>
       <h1 class="text-lg md:text-xl font-bold text-slate-900 leading-tight">
-        Welcome back, 
-        <span class="text-transparent bg-clip-text" style="background-image: linear-gradient(135deg, #4f46e5, #6366f1);">
+        Welcome back,
+        <span class="text-transparent bg-clip-text"
+          style="background-image: linear-gradient(135deg, #4f46e5, #6366f1);">
           State Prabhari
         </span> 🇮🇳
       </h1>
@@ -16,51 +17,71 @@
       <div class="px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 bg-white border border-slate-200 shadow-sm">
         📅 {{ currentDate | date:'mediumDate' }}
       </div>
-      <button class="px-3 py-1.5 rounded-lg text-xs font-bold text-white transition-all duration-300 shadow-sm hover:shadow-md hover:-translate-y-0.5"
-              style="background: linear-gradient(135deg, #4f46e5, #6366f1);">
+      <button
+        class="px-3 py-1.5 rounded-lg text-xs font-bold text-white transition-all duration-300 shadow-sm hover:shadow-md hover:-translate-y-0.5"
+        style="background: linear-gradient(135deg, #4f46e5, #6366f1);">
         + Master Data
       </button>
     </div>
   </div>
 
-  <!-- 🔥 Thin Stat Cards (Admin Design) -->
-  <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-4 gap-4 mb-6">
-    <div *ngFor="let card of statCards; let i = index" 
-         (click)="navigateTo(card.route)"
-         class="stat-card group relative overflow-hidden rounded-xl p-3 bg-white border border-slate-200 cursor-pointer shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md"
-         [style.animation-delay]="i * 20 + 'ms'">
-      <!-- Glow -->
-      <div class="absolute -top-8 -right-8 w-20 h-20 rounded-full opacity-10 blur-2xl transition-opacity duration-500 group-hover:opacity-20"
-           [style.background]="card.gradient"></div>
+  <!-- 🔥 Symmetric Stat Cards (Restored Original Design) -->
+  <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 xl:grid-cols-5 gap-4 mb-6">
+    <!-- Skeleton Loaders -->
+    <ng-container *ngIf="loadingCounts">
+      <div *ngFor="let card of statCards" 
+        class="stat-card rounded-xl p-3 bg-white border border-slate-100 shadow-sm">
+        <div class="flex items-center justify-between">
+          <div class="space-y-2">
+            <div class="h-3 w-16 shimmer rounded"></div>
+            <div class="h-6 w-12 shimmer rounded"></div>
+            <div class="h-3 w-8 shimmer rounded"></div>
+          </div>
+          <div class="w-9 h-9 rounded-lg shimmer"></div>
+        </div>
+      </div>
+    </ng-container>
 
-      <div class="flex items-center justify-between relative z-10">
-        <div>
-          <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">
-            {{ card.title }}
-          </p>
-          <p class="text-lg md:text-xl font-bold text-slate-800 leading-none">
-            {{ card.value }}
-          </p>
-          
-          <div class="flex items-center gap-1 mt-1">
-            <span class="text-[10px] font-bold px-1.5 py-0.5 rounded"
-                  [class]="card.changeType === 'up' ? 'text-green-700 bg-green-100' : 'text-red-700 bg-red-100'">
-              {{ card.changeType === 'up' ? '↑' : '↓' }} {{ card.change }}
-            </span>
+    <ng-container *ngIf="!loadingCounts">
+      <div *ngFor="let card of statCards; let i = index" (click)="navigateTo(card.route)"
+        class="stat-card group relative overflow-hidden rounded-xl p-3 bg-white border border-slate-200 cursor-pointer shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md"
+        [style.animation-delay]="i * 20 + 'ms'">
+        <!-- Glow -->
+        <div
+          class="absolute -top-8 -right-8 w-20 h-20 rounded-full opacity-10 blur-2xl transition-opacity duration-500 group-hover:opacity-20"
+          [style.background]="card.gradient"></div>
+
+        <div class="flex items-center justify-between relative z-10">
+          <div>
+            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+              {{ card.title }}
+            </p>
+            <p class="text-lg md:text-xl font-bold text-slate-800 leading-none">
+              {{ card.value }}
+            </p>
+
+            <div class="flex items-center gap-1 mt-1">
+              <span class="text-[10px] font-bold px-1.5 py-0.5 rounded"
+                [class]="card.changeType === 'up' ? 'text-green-700 bg-green-100' : 'text-red-700 bg-red-100'">
+                {{ card.changeType === 'up' ? '↑' : '↓' }} {{ card.change }}
+              </span>
+            </div>
+          </div>
+
+          <!-- High-Visibility Icon Box -->
+          <div
+            class="w-9 h-9 rounded-lg flex items-center justify-center absolute right-3 top-3 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3 shadow-sm text-white"
+            [style.background]="card.gradient">
+            <lucide-icon [name]="card.icon" [size]="18" [strokeWidth]="2.5"></lucide-icon>
           </div>
         </div>
 
-        <!-- High-Visibility Icon Box -->
-        <div class="w-9 h-9 rounded-lg flex items-center justify-center absolute right-3 top-3 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3 shadow-sm text-white"
-             [style.background]="card.gradient">
-          <lucide-icon [name]="card.icon" [size]="18" [strokeWidth]="2.5"></lucide-icon>
-        </div>
+        <!-- Bottom bar -->
+        <div
+          class="absolute bottom-0 left-0 right-0 h-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+          [style.background]="card.gradient"></div>
       </div>
-
-      <!-- Bottom bar -->
-      <div class="absolute bottom-0 left-0 right-0 h-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-           [style.background]="card.gradient"></div>
-    </div>
+    </ng-container>
   </div>
 
   <!-- Charts Row -->
@@ -87,19 +108,61 @@
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div *ngFor="let item of quickActions" 
-             (click)="navigateTo(item.route)"
-             class="flex items-center gap-4 p-4 rounded-xl border border-slate-50 hover:bg-slate-50 transition-colors cursor-pointer group">
-          <div class="w-10 h-10 rounded-full flex items-center justify-center text-white transition-colors group-hover:scale-110"
-               [style.background]="item.gradient">
+        <div *ngFor="let item of quickActions" (click)="navigateTo(item.route)"
+          class="flex items-center gap-4 p-4 rounded-xl border border-slate-50 hover:bg-slate-50 transition-colors cursor-pointer group">
+          <div
+            class="w-10 h-10 rounded-full flex items-center justify-center text-white transition-colors group-hover:scale-110"
+            [style.background]="item.gradient">
             <lucide-icon [name]="item.icon" [size]="18"></lucide-icon>
           </div>
           <div class="flex-1">
             <h4 class="text-sm font-bold text-slate-800">{{ item.title }}</h4>
             <p class="text-[11px] text-slate-500">{{ item.description }}</p>
           </div>
-          <lucide-icon name="chevron-right" class="text-slate-300 group-hover:text-indigo-500 transition-colors" [size]="16"></lucide-icon>
+          <lucide-icon name="chevron-right" class="text-slate-300 group-hover:text-indigo-500 transition-colors"
+            [size]="16"></lucide-icon>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🔥 Symmetric Static Info Cards (State Summary) -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
+    <div class="p-5 rounded-2xl bg-gradient-to-br from-indigo-500 to-indigo-600 text-white shadow-lg shadow-indigo-200 relative overflow-hidden group">
+      <lucide-icon name="shield" class="absolute -right-4 -bottom-4 w-20 h-20 opacity-10 rotate-12 transition-transform group-hover:scale-110"></lucide-icon>
+      <h4 class="text-xs font-bold uppercase tracking-widest opacity-80 mb-2">State Mission</h4>
+      <p class="text-sm font-bold leading-relaxed mb-4 italic">"Empowering grassroots leadership through digital oversight."</p>
+      <div class="flex items-center gap-2 mt-auto">
+        <div class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></div>
+        <span class="text-[10px] font-bold uppercase tracking-tighter">Strategic Focus 2026</span>
+      </div>
+    </div>
+
+    <div class="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm relative overflow-hidden group">
+      <div class="absolute top-0 right-0 p-3">
+        <div class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-indigo-600">
+          <lucide-icon name="target" [size]="16"></lucide-icon>
+        </div>
+      </div>
+      <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Coverage Goal</h4>
+      <p class="text-2xl font-black text-slate-800 mb-1">92%</p>
+      <p class="text-[10px] font-bold text-slate-500 uppercase">Booth Verification Status</p>
+      <div class="mt-4 w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+        <div class="h-full bg-indigo-500 w-[92%] transition-all duration-1000"></div>
+      </div>
+    </div>
+
+    <div class="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm relative overflow-hidden group">
+      <div class="absolute top-0 right-0 p-3">
+        <div class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-green-600">
+          <lucide-icon name="check-circle" [size]="16"></lucide-icon>
+        </div>
+      </div>
+      <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">System Sync</h4>
+      <p class="text-sm font-bold text-slate-700 leading-tight mb-2">Data is synchronized with central headquarters.</p>
+      <div class="flex items-center gap-2 mt-4 text-[10px] font-bold text-green-600">
+        <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+        LAST SYNC: JUST NOW
       </div>
     </div>
   </div>

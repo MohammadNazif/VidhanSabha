@@ -68,10 +68,18 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
         public async Task<PagedResult<BoothVoterResponseDto>> GetAllAsync(BoothVoterQueryParams qp, CancellationToken ct = default)
         {
             var query = _context.Tbl_BoothVoter
-    .AsNoTracking()
-    .Where(b =>
+    .AsNoTracking();
+
+            var villageIds = qp.GetVillageIds();
+
+            if(villageIds.Any())
+            {
+                query = query.Where(b => b.Villages.Any(v => villageIds.Contains(v.VillageId)));
+            }
+
+            query =  query.Where(b =>
         (!qp.Id.HasValue || b.Id == qp.Id) &&
-        (b.UserId == qp.UserId) &&
+        (b.UserId == qp.UserId || b.CreatedToUserId == qp.UserId) &&
         (!qp.BoothId.HasValue || b.BoothId == qp.BoothId) &&
         (!qp.SectorId.HasValue || b.Booth.SectorId == qp.SectorId)
     );

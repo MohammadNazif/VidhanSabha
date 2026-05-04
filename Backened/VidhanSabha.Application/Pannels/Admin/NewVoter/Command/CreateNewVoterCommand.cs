@@ -13,10 +13,12 @@ namespace VidhanSabha.Application.Pannels.Admin.NewVoter.Command
     {
         public CreateNewVoterRequestDto Dto { get; set; }
         public string UserId { get; set; }
-        public CreateNewVoterCommand(CreateNewVoterRequestDto dto, string? userId)
+        public string Role { get; set; }
+        public CreateNewVoterCommand(CreateNewVoterRequestDto dto, string? userId, string role)
         {
             Dto = dto;
             UserId = userId;
+            Role = role;
         }
     }
 }

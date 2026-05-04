@@ -113,7 +113,7 @@ export class GenericTableComponent implements OnInit, OnChanges, OnDestroy {
     searchPlaceholder: 'Search records...',
     hoverable: true,
     striped: false,
-    showRowNumbers: false,
+    showRowNumbers: true,
     emptyMessage: 'No records found',
     emptyIcon: '📭',
     loading: false,

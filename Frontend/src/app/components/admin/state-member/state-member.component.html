@@ -1,0 +1,38 @@
+<div class="p-6">
+    <app-page-header 
+        [title]="'Samati Member Management'" 
+        [subtitle]="'Manage state members and their details'"
+        icon="people">
+        
+        <div class="flex gap-3">
+            <app-generic-export
+                [isExporting]="isExporting"
+                (export)="handleExport($event)">
+            </app-generic-export>
+
+            <app-generic-modal-button
+                #memberModal
+                [config]="formConfig"
+                (formSubmit)="handleFormSubmit($event)"
+                buttonLabel="Add Member"
+                buttonIcon="add"
+                variant="primary">
+            </app-generic-modal-button>
+        </div>
+    </app-page-header>
+
+    <div class="mt-6">
+        <app-generic-table
+            [data]="memberList"
+            [columns]="columns"
+            [config]="config"
+            [actions]="actions"
+            [totalCount]="totalCount"
+            [loading]="loading"
+            (pageChange)="handlePageChange($event)"
+            (sortChange)="handleSortChange($event)"
+            (searchChange)="handleSearchChange($event)"
+            (actionClick)="handleAction($event)">
+        </app-generic-table>
+    </div>
+</div>

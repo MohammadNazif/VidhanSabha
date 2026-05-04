@@ -25,42 +25,59 @@
 
   <!-- 🔥 Thin Stat Cards (Admin Design) -->
   <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-4 gap-4 mb-6">
-    <div *ngFor="let card of statCards; let i = index" 
-         (click)="navigateTo(card.route)"
-         class="stat-card group relative overflow-hidden rounded-xl p-3 bg-white border border-slate-200 cursor-pointer shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md"
-         [style.animation-delay]="i * 20 + 'ms'">
-      <!-- Glow -->
-      <div class="absolute -top-8 -right-8 w-20 h-20 rounded-full opacity-10 blur-2xl transition-opacity duration-500 group-hover:opacity-20"
-           [style.background]="card.gradient"></div>
+    <!-- Skeleton Loaders -->
+    <ng-container *ngIf="loadingCounts">
+      <div *ngFor="let card of statCards" 
+        class="stat-card rounded-xl p-3 bg-white border border-slate-100 shadow-sm">
+        <div class="flex items-center justify-between">
+          <div class="space-y-2">
+            <div class="h-3 w-16 shimmer rounded"></div>
+            <div class="h-6 w-12 shimmer rounded"></div>
+            <div class="h-3 w-8 shimmer rounded"></div>
+          </div>
+          <div class="w-9 h-9 rounded-lg shimmer"></div>
+        </div>
+      </div>
+    </ng-container>
 
-      <div class="flex items-center justify-between relative z-10">
-        <div>
-          <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">
-            {{ card.title }}
-          </p>
-          <p class="text-lg md:text-xl font-bold text-slate-800 leading-none">
-            {{ card.value }}
-          </p>
-          
-          <div class="flex items-center gap-1 mt-1">
-            <span class="text-[10px] font-bold px-1.5 py-0.5 rounded"
-                  [class]="card.changeType === 'up' ? 'text-green-700 bg-green-100' : 'text-red-700 bg-red-100'">
-              {{ card.changeType === 'up' ? '↑' : '↓' }} {{ card.change }}
-            </span>
+    <ng-container *ngIf="!loadingCounts">
+      <div *ngFor="let card of statCards; let i = index" 
+           (click)="navigateTo(card.route)"
+           class="stat-card group relative overflow-hidden rounded-xl p-3 bg-white border border-slate-200 cursor-pointer shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md"
+           [style.animation-delay]="i * 20 + 'ms'">
+        <!-- Glow -->
+        <div class="absolute -top-8 -right-8 w-20 h-20 rounded-full opacity-10 blur-2xl transition-opacity duration-500 group-hover:opacity-20"
+             [style.background]="card.gradient"></div>
+
+        <div class="flex items-center justify-between relative z-10">
+          <div>
+            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+              {{ card.title }}
+            </p>
+            <p class="text-lg md:text-xl font-bold text-slate-800 leading-none">
+              {{ card.value }}
+            </p>
+            
+            <div class="flex items-center gap-1 mt-1">
+              <span class="text-[10px] font-bold px-1.5 py-0.5 rounded"
+                    [class]="card.changeType === 'up' ? 'text-green-700 bg-green-100' : 'text-red-700 bg-red-100'">
+                {{ card.changeType === 'up' ? '↑' : '↓' }} {{ card.change }}
+              </span>
+            </div>
+          </div>
+
+          <!-- High-Visibility Icon Box -->
+          <div class="w-9 h-9 rounded-lg flex items-center justify-center absolute right-3 top-3 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3 shadow-sm text-white"
+               [style.background]="card.gradient">
+            <lucide-icon [name]="card.icon" [size]="18" [strokeWidth]="2.5"></lucide-icon>
           </div>
         </div>
 
-        <!-- High-Visibility Icon Box -->
-        <div class="w-9 h-9 rounded-lg flex items-center justify-center absolute right-3 top-3 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3 shadow-sm text-white"
-             [style.background]="card.gradient">
-          <lucide-icon [name]="card.icon" [size]="18" [strokeWidth]="2.5"></lucide-icon>
-        </div>
+        <!-- Bottom bar -->
+        <div class="absolute bottom-0 left-0 right-0 h-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+             [style.background]="card.gradient"></div>
       </div>
-
-      <!-- Bottom bar -->
-      <div class="absolute bottom-0 left-0 right-0 h-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-           [style.background]="card.gradient"></div>
-    </div>
+    </ng-container>
   </div>
 
   <!-- Charts Row -->

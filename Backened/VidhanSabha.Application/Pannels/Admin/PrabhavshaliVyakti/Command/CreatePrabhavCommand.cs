@@ -13,10 +13,12 @@ namespace VidhanSabha.Application.Pannels.Admin.PrabhavshaliVyakti.Command
     {
         public CreatePrabhavshaliReqDto Dto { get; set; }
         public string UserId { get; set; }
-        public CreatePrabhavCommand(CreatePrabhavshaliReqDto dto, string? userId)
+        public string Role { get; set; }
+        public CreatePrabhavCommand(CreatePrabhavshaliReqDto dto, string? userId, string role)
         {
             Dto = dto;
             UserId = userId;
+            Role = role;
         }
     }
 }

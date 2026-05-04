@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using System.Security.Claims;
 using VidhanSabha.Api.Responses;
+using VidhanSabha.Application.Common.Booth.Dtos;
 using VidhanSabha.Application.Common.BoothSamitiDesignation.DTOs;
 using VidhanSabha.Application.Common.BoothSamitiDesignation.Queries;
 using VidhanSabha.Application.Common.Dtos;
@@ -101,11 +102,11 @@ public static class AdminEndpoints
         var block = app.MapGroup("/api/block")
                         .WithTags("Block");
 
+        var boothSamitiMem = app.MapGroup("/api/boothsamitiMem")
+                    .WithTags("BoothSamitiMem");
+
         var boothSamiti = app.MapGroup("/api/boothsamiti")
                     .WithTags("BoothSamiti");
-
-        var boothSamitiMem = app.MapGroup("/api/boothsamitimem")
-                    .WithTags("BoothSamitiMem");
 
         var bdc = app.MapGroup("/api/bdc")
                         .WithTags("BDC");
@@ -198,12 +199,12 @@ public static class AdminEndpoints
         #region Sector
         sector.MapPost("/create", async ([FromForm] CreateSectorRequestDto dto, IMediator mediator, HttpContext http) =>
         {
-            var userId = 1;
-            var userName = "Admin";
-
-            var result = await mediator.Send(new CreateSectorCommand(dto, userId, userName));
+           string userId = http.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userName = "VidhansabhaPrabhari";
+            var result = await mediator.Send(new CreateSectorCommand(dto,2, userName,userId));
             return Results.Ok(ApiResponse<int>.Ok(result, "Sector Created Successfully"));
-        }).DisableAntiforgery()
+        }).RequireAuthorization()
+            .DisableAntiforgery()
           .WithName("CreateSector")
           .Produces<int>(200);
 
@@ -232,6 +233,15 @@ public static class AdminEndpoints
         })
             .WithName("GetSectorByMandal")
             .Produces<List<SectorByMAndalResponseDto>>(200);
+
+        sector.MapGet("/getSectorIncharge", async (IMediator mediator, HttpContext httpContext) =>
+        {
+            string userId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var result = await mediator.Send(new getSectorInchargeQuery(userId));
+            return Results.Ok(ApiResponse<IReadOnlyList<SectorIncahrgeDto>>.Ok(result));
+        }).RequireAuthorization()
+           .WithName("GetSectorIncharge")
+           .Produces<IReadOnlyList<SectorIncahrgeDto>>(200);
 
         sector.MapGet("/getAll", async (
             [AsParameters] SectorQueryParams q,
@@ -306,6 +316,16 @@ public static class AdminEndpoints
             return Results.Ok(ApiResponse<PagedResult<BoothResponseDto>>.Ok(result));
         }).RequireAuthorization();
 
+        booth.MapGet("/getAllBoothBySectorid", async (
+        
+         IMediator mediator, HttpContext httpContext) =>
+        {
+            string userId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var result = await mediator.Send(new getboothbysectoridquery(userId));
+
+            return Results.Ok(ApiResponse<List<BoothNumberDto>>.Ok(result));
+        }).RequireAuthorization();
+
         booth.MapGet("/getAllBoothReports", async (
             [AsParameters] BoothQueryParams q,
            IMediator mediator, HttpContext httpContext) =>
@@ -337,7 +357,8 @@ public static class AdminEndpoints
         pannapramukh.MapPost("/create", async ([FromForm]CreatePannaPramukhRequestDto dto, IMediator mediator, HttpContext http) =>
                 {
                     string UserId = http.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                    var result = await mediator.Send(new CreatePannaCommand(dto, UserId));
+                    string role = http.User.FindFirst(ClaimTypes.Role)?.Value;
+                    var result = await mediator.Send(new CreatePannaCommand(dto, UserId,role));
                     return Results.Ok(ApiResponse<int>.Ok(result, "Panna Pramukh Created Successfully"));
                 })
                 .WithName("CreatePannaPramukh")
@@ -363,18 +384,18 @@ public static class AdminEndpoints
             .RequireAuthorization(ModulePermission.PannaPramukh.ToString())
             .Produces(200);
 
-        //pannapramukh.MapGet("/getAll", async (
-        //    [AsParameters] PannaPramukhQueryParams q,
-        //    IMediator mediator,
-        //    HttpContext httpContext) =>
-        //{
-        //    string UserId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        //    var result = await mediator.Send(new GetAllPannaQuery(q));
-        //    return Results.Ok(ApiResponse<PagedResult<PannaPramukhResponseDto>>.Ok(result));
-        //})
-        // .WithName("GetAllPannaPramukh")
-        // .RequireAuthorization(ModulePermission.PannaPramukh.ToString())
-        // .Produces<ApiResponse<List<PannaPramukhResponseDto>>>(200);
+        pannapramukh.MapGet("/getAll", async (
+            [AsParameters] PannaPramukhQueryParams q,
+            IMediator mediator,
+            HttpContext httpContext) =>
+        {
+            string UserId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var result = await mediator.Send(new GetAllPannaQuery(q));
+            return Results.Ok(ApiResponse<PagedResult<PannaPramukhResponseDto>>.Ok(result));
+        })
+         .WithName("GetAllPannaPramukh")
+         .RequireAuthorization()
+         .Produces<ApiResponse<List<PannaPramukhResponseDto>>>(200);
         #endregion
 
         #region PravasiVoter
@@ -382,7 +403,8 @@ public static class AdminEndpoints
         pravasivoter.MapPost("/create", async (CreatePravasiVoterRequestDto dto, IMediator mediator, HttpContext http) =>
         {
             string UserId = http.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var result = await mediator.Send(new CreatePravasiCommand(dto, UserId));
+            string Role = http.User.FindFirst(ClaimTypes.Role)?.Value;
+            var result = await mediator.Send(new CreatePravasiCommand(dto, UserId,Role));
             return Results.Ok(ApiResponse<int>.Ok(result, "Pravasi Voter Created Successfully"));
         })
                 .WithName("CreatePravasiVoter")
@@ -414,7 +436,7 @@ public static class AdminEndpoints
             q.UserId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var result = await mediator.Send(new GetAllPravasiQuery(q));
             return Results.Ok(ApiResponse<PagedResult<PravasiVoterResponseDto>>.Ok(result));
-        }).RequireAuthorization(ModulePermission.PravashiVoter.ToString());
+        }).RequireAuthorization();
 
         #endregion
 
@@ -423,7 +445,8 @@ public static class AdminEndpoints
         newvoter.MapPost("/create", async (CreateNewVoterRequestDto dto, IMediator mediator, HttpContext http) =>
         {
             string UserId = http.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var result = await mediator.Send(new CreateNewVoterCommand(dto, UserId));
+            string Role = http.User.FindFirst(ClaimTypes.Role)?.Value;
+            var result = await mediator.Send(new CreateNewVoterCommand(dto, UserId,Role));
             return Results.Ok(ApiResponse<int>.Ok(result, "New Voter Created Successfully"));
         }).RequireAuthorization(ModulePermission.NewVoter.ToString())
                 .WithName("CreateNewVoter")
@@ -453,7 +476,7 @@ public static class AdminEndpoints
             q.UserId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var result = await mediator.Send(new GetAllNewVoterQuery(q));
             return Results.Ok(ApiResponse<PagedResult<NewVoterResponseDto>>.Ok(result));
-        }).RequireAuthorization(ModulePermission.NewVoter.ToString());
+        }).RequireAuthorization();
 
         #endregion
 
@@ -462,7 +485,8 @@ public static class AdminEndpoints
         boothvoter.MapPost("/create", async (CreateBoothVoterRequestDto dto, IMediator mediator, HttpContext http) =>
         {
             string UserId = http.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var result = await mediator.Send(new CreateBoothVoterCommand(dto, UserId));
+            string Role = http.User.FindFirst(ClaimTypes.Role)?.Value;
+            var result = await mediator.Send(new CreateBoothVoterCommand(dto, UserId,Role));
             return Results.Ok(ApiResponse<int>.Ok(result, "Booth Voter Created Successfully"));
         }).RequireAuthorization(ModulePermission.BoothVoterDescrition.ToString())
                 .WithName("CreateBoothVoter")
@@ -491,7 +515,7 @@ public static class AdminEndpoints
             q.UserId = http.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var result = await mediator.Send(new GetAllBoothVoterQuery(q));
             return Results.Ok(ApiResponse<PagedResult<BoothVoterResponseDto>>.Ok(result));
-        }).RequireAuthorization(ModulePermission.BoothVoterDescrition.ToString());
+        }).RequireAuthorization();
 
         #endregion
 
@@ -572,7 +596,8 @@ public static class AdminEndpoints
         pradhan.MapPost("/create", async (CreatePradhanRequestDto dto, IMediator mediator, HttpContext http) =>
         {
             string UserId = http.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var result = await mediator.Send(new CreatePradhanCommand(dto,UserId));
+            string Role = http.User.FindFirst(ClaimTypes.Role)?.Value;
+            var result = await mediator.Send(new CreatePradhanCommand(dto,UserId,Role));
             return Results.Ok(ApiResponse<int>.Ok(result, "Pradhan Created Successfully"));
         }).RequireAuthorization()
                 .WithName("CreatePradhan")
@@ -603,61 +628,87 @@ public static class AdminEndpoints
         }).WithName("getAllPradhan");
         #endregion
 
-        #region BoothSamiti
+        #region BoothSamitiMem
+        boothSamitiMem.MapGet("/getAllMem", async (IMediator mediator,int id) =>
+        {
+            var result = await mediator.Send(new GetAllBoothSamitiQuery(id));
+            return Results.Ok(ApiResponse<List<BoothSamitiResponseDto>>.Ok(result));
+        }).RequireAuthorization();
 
-        boothSamiti.MapPost("/create", async (CreateBoothSamitiRequestDto dto, IMediator mediator, HttpContext http) =>
+        //boothSamitiMem.MapGet("/getAllMem", async ([AsParameters] BoothSamitiQueryParams q,
+        //   IMediator mediator, HttpContext http) =>
+        //{
+        //    q.UserId = http.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        //    var result = await mediator.Send(new GetAllMemQuery(q));
+        //    return Results.Ok(ApiResponse<PagedResult<BoothSamitiMemResponseDto>>.Ok(result));
+        //})
+        //   .RequireAuthorization()
+        //   .WithName("GetAllBoothSamitiMem")
+        //   .Produces<List<BoothSamitiMemResponseDto>>(200);
+
+        boothSamitiMem.MapPost("/create", async (CreateBoothSamitiRequestDto dto, IMediator mediator, HttpContext http) =>
         {
             string UserId = http.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var result = await mediator.Send(new CreateBoothSamitiCommand(dto, UserId));
             return Results.Ok(ApiResponse<int>.Ok(result, "Booth Samiti Created Successfully"));
         })
         .RequireAuthorization(ModulePermission.BoothSamiti.ToString())
-        .WithName("CreateBoothSamiti")
+        .WithName("CreateBoothSamitiMem")
         .Produces<int>(200);
 
 
-        boothSamiti.MapPost("/update", async (UpdateBoothSamitiRequestDto dto, IMediator mediator) =>
+        boothSamitiMem.MapPost("/update", async (UpdateBoothSamitiRequestDto dto, IMediator mediator) =>
         {
             var result = await mediator.Send(new UpdateBoothSamitiCommand(dto));
             return Results.Ok(ApiResponse<int>.Ok(result, "Booth Samiti Updated Successfully"));
         })
         .RequireAuthorization(ModulePermission.BoothSamiti.ToString())
-        .WithName("UpdateBoothSamiti")
+        .WithName("UpdateBoothSamitiMem")
         .Produces<int>(200);
 
 
-        boothSamiti.MapPost("/delete", async (int id, IMediator mediator) =>
+        boothSamitiMem.MapPost("/delete", async (int id, IMediator mediator) =>
         {
             var result = await mediator.Send(new DeleteBoothSamitiCommand(id));
             return Results.Ok(ApiResponse<int>.Ok(result, "Booth Samiti Deleted Successfully"));
         })
          .RequireAuthorization(ModulePermission.BoothSamiti.ToString())
-        .WithName("DeleteBoothSamiti")
+        .WithName("DeleteBoothSamitiMem")
         .Produces<int>(200);
 
+      
 
-        boothSamiti.MapGet("/getAll", async (IMediator mediator) =>
-        {
-            var result = await mediator.Send(new GetAllBoothSamitiQuery());
-            return Results.Ok(ApiResponse<List<BoothSamitiResponseDto>>.Ok(result));
-        }).RequireAuthorization(ModulePermission.BoothSamiti.ToString());
 
         #endregion
 
-        #region BoothSamitiMem
+        #region BoothSamiti
 
-        boothSamitiMem.MapPost("/create", async (int BoothId, IMediator mediator, HttpContext http) =>
+
+
+        boothSamiti.MapGet("/getAll", async ([AsParameters] BoothSamitiQueryParams q,
+         IMediator mediator, HttpContext http) =>
+        {
+            q.UserId = http.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var result = await mediator.Send(new GetAllMemQuery(q));
+            return Results.Ok(ApiResponse<PagedResult<BoothSamitiMemResponseDto>>.Ok(result));
+        })
+         .RequireAuthorization()
+         .WithName("GetAllBoothSamiti")
+         .Produces<List<BoothSamitiMemResponseDto>>(200);
+
+        boothSamiti.MapPost("/create", async (int BoothId, IMediator mediator, HttpContext http) =>
         {
             string UserId = http.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var result = await mediator.Send(new CreateBoothSamitiMemCommand(BoothId, UserId));
+            string Role = http.User.FindFirst(ClaimTypes.Role)?.Value;
+            var result = await mediator.Send(new CreateBoothSamitiMemCommand(BoothId, UserId,Role));
             return Results.Ok(ApiResponse<int>.Ok(result, "Booth Samiti Member Created Successfully"));
         })
         .RequireAuthorization(ModulePermission.BoothSamiti.ToString())
-        .WithName("CreateBoothSamitiMember")
+        .WithName("CreateBoothSamiti")
         .Produces<int>(200);
+            
 
-
-        boothSamitiMem.MapGet("/getById/{boothId}", async (int boothId,IMediator mediator) =>
+        boothSamiti.MapGet("/getById", async (int boothId,IMediator mediator) =>
         {
             var result = await mediator.Send(
                 new GetBoothByIdQuery(boothId)
@@ -671,16 +722,7 @@ public static class AdminEndpoints
             .WithName("GetBoothSamitiMemByBoothId")
             .Produces<ApiResponse<BoothSamitiMemResponseDto>>(200);
 
-        boothSamitiMem.MapGet("/getAllMem", async ([AsParameters] BoothSamitiQueryParams q, 
-            IMediator mediator, HttpContext http) =>
-        {
-            q.UserId = http.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var result = await mediator.Send(new GetAllMemQuery(q));
-            return Results.Ok(ApiResponse<PagedResult<BoothSamitiMemResponseDto>>.Ok(result));
-        })
-            .RequireAuthorization()
-            .WithName("GetAllBoothSamitiMem")
-            .Produces<List<BoothSamitiMemResponseDto>>(200);
+       
 
         #endregion
 
@@ -693,7 +735,7 @@ public static class AdminEndpoints
             string UserId = http.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var result = await mediator.Send(new CreateInfluencerCommand(dto, UserId));
             return Results.Ok(ApiResponse<int>.Ok(result, "Influencer Created Successfully"));
-        })
+        }).RequireAuthorization()
                 .WithName("CreateInfluencer")
                 .Produces<int>(200);
 
@@ -702,7 +744,7 @@ public static class AdminEndpoints
         {
             int result = await mediator.Send(new UpdateInfluencerCommand(dto));
             return Results.Ok(ApiResponse<int>.Ok(result, "Influencer Updated Successfully"));
-        })
+        }).RequireAuthorization()
             .WithName("UpdateInfluencer")
             .Produces<int>(200);
 
@@ -710,16 +752,18 @@ public static class AdminEndpoints
         {
             var res = await mediator.Send(new DeleteInfluencerCommand(id));
             return Results.Ok("Influencer Deleted Successfully");
-        })
+        }).RequireAuthorization()
             .WithName("DeleteInfluencer")
             .Produces(200);
 
-        influencer.MapGet("/getAll", async (IMediator mediator) =>
+        influencer.MapGet("/getAll", async (IMediator mediator,[AsParameters] InfluencerQueryParams qp,HttpContext httpContext) =>
         {
-            var result = await mediator.Send(new GetAllInfluencerQuery());
-            return Results.Ok(ApiResponse<List<InfluencerResponseDto>>.Ok(result));
+            qp.UserId =  httpContext .User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var result = await mediator.Send(new GetAllInfluencerQuery(qp));
+            return Results.Ok(ApiResponse<PagedResult<InfluencerResponseDto>>.Ok(result));
         })
          .WithName("GetAllInfluencer")
+         .RequireAuthorization()
          .Produces<ApiResponse<List<InfluencerResponseDto>>>(200);
         #endregion
 
@@ -739,7 +783,8 @@ public static class AdminEndpoints
         doublevoter.MapPost("/create", async (CreateDoubleVoterReqDto dto, IMediator mediator, HttpContext http) =>
         {
             string UserId = http.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var result = await mediator.Send(new CreateDoubleVoterCommand(dto, UserId));
+            string Role = http.User.FindFirst(ClaimTypes.Role)?.Value;
+            var result = await mediator.Send(new CreateDoubleVoterCommand(dto, UserId,Role));
             return Results.Ok(ApiResponse<int>.Ok(result, "New Voter Created Successfully"));
         })
             .RequireAuthorization(ModulePermission.DoubleVoter.ToString())
@@ -769,7 +814,7 @@ public static class AdminEndpoints
             q.UserId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var result = await mediator.Send(new GetAllDoubleVoterQuery(q));
             return Results.Ok(ApiResponse<PagedResult<DoubleVoterResponseDto>>.Ok(result));
-        });
+        }).RequireAuthorization();
 
         #endregion
 
@@ -778,7 +823,9 @@ public static class AdminEndpoints
         prabhavshali.MapPost("/create", async (CreatePrabhavshaliReqDto dto, IMediator mediator, HttpContext http) =>
         {
             string UserId = http.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var result = await mediator.Send(new CreatePrabhavCommand(dto,UserId));
+            string Role = http.User.FindFirst(ClaimTypes.Role)?.Value;
+            var result = await mediator.Send(new CreatePrabhavCommand(dto,UserId,Role));
+            
             return Results.Ok(ApiResponse<int>.Ok(result, "Prabhavshali Vyakti Created Successfully"));
         })
                .RequireAuthorization()
@@ -812,16 +859,18 @@ public static class AdminEndpoints
             return Results.Ok(ApiResponse<PagedResult<PrabhavshaliResponseDto>>.Ok(result));
         }).RequireAuthorization();
 
-        prabhavshali.MapGet("/getDesgById", async (int desgId, IMediator mediator) =>
+        prabhavshali.MapGet("/getDesgById", async (int desgId, IMediator mediator, HttpContext httpContext) =>
         {
+            string userId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var result = await mediator.Send(
                 new GetAllParabhavshaliByDesignIdQuery
                 {
-                    DesgId = desgId
+                    DesgId = desgId,
+                    UserId = userId,
                 });
 
             return Results.Ok(ApiResponse<List<PrabhavshaliResponseDesinIdDto>>.Ok(result));
-        });
+        }).RequireAuthorization();
 
         #endregion
 
@@ -911,17 +960,18 @@ public static class AdminEndpoints
         seniordisabled.MapPost("/create", async (CreateSeniorDisabledReqDto dto, IMediator mediator, HttpContext http) =>
         {
             string UserId = http.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var result = await mediator.Send(new CreateSeniorDisabledCommand(dto, UserId));
+            string Role = http.User.FindFirst(ClaimTypes.Role)?.Value;
+            var result = await mediator.Send(new CreateSeniorDisabledCommand(dto, UserId,Role));
             return Results.Ok(ApiResponse<int>.Ok(result, "SeniorDisabled Created Successfully"));
-        })
+        }).RequireAuthorization(ModulePermission.SeniororDisabled.ToString())
                 .WithName("CreateSeniorDisabled")
-                .Produces<int>(200);
+                .Produces<int>(200);    
 
         seniordisabled.MapPost("/update", async (UpdateSeniorDisabledReqDto dto, IMediator mediator) =>
         {
             var result = await mediator.Send(new UpdateSeniorDisabledCommand(dto));
             return Results.Ok(ApiResponse<int>.Ok(result, "SeniorDisabled Updated Successfully"));
-        })
+        }).RequireAuthorization(ModulePermission.SeniororDisabled.ToString())
                 .WithName("UpdateSeniorDisabled")
                 .Produces<int>(200);
 
@@ -929,7 +979,7 @@ public static class AdminEndpoints
         {
             var result = await mediator.Send(new DeleteSeniorDisabledCommand(id));
             return Results.Ok(ApiResponse<int>.Ok(result, "SeniorDisabled Deleted Successfully"));
-        })
+        }).RequireAuthorization(ModulePermission.SeniororDisabled.ToString())
                 .WithName("DeleteSeniorDisabled")
                 .Produces<int>(200);
 
@@ -997,5 +1047,14 @@ public static class AdminEndpoints
             return Results.Ok(ApiResponse<DashboardCountsDto>.Ok(result));
         }).WithName("getAlldashboardCounts")
             .RequireAuthorization();
-}
+
+
+        dashboardCounts.MapGet("booth/getAll", async (IMediator mediator, HttpContext httpContext) =>
+        {
+            string userId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var result = await mediator.Send(new GetBoothDashboardCountQuery(userId));
+            return Results.Ok(ApiResponse<BoothDashboardCountsDto>.Ok(result));
+        }).WithName("getAllBoothdashboardCounts")
+         .RequireAuthorization();
+    }
 }

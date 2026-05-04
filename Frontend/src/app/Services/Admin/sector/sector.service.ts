@@ -23,4 +23,8 @@ export class SectorService extends BaseApiService {
   updateSector(data: any): Observable<any> {
     return this.update(this.entity, data);
   }
+
+  getSectorIncharge(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/${this.entity}/getSectorIncharge`);
+  }
 }

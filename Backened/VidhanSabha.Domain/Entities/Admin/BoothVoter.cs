@@ -17,6 +17,8 @@ namespace VidhanSabha.Domain.Entities.Admin
         public int Other { get; private set; }
         public bool Status { get; private set; } = true;
         public string? UserId { get; private set; }
+        public string? CreatedToUserId { get; private set; }
+        public string? Role { get; private set; }
 
         private static void Validate(int totalVoter, int male, int female, int other)
         {
@@ -40,7 +42,7 @@ namespace VidhanSabha.Domain.Entities.Admin
 
         public static Tbl_BoothVoter Create(
             int BoothId, int TotalVoter, int Male,
-            int Female, int Other, string UserId,
+            int Female, int Other, string UserId,string createdToUserId,string role,
             List<int> villageIds
             )
         {
@@ -52,7 +54,9 @@ namespace VidhanSabha.Domain.Entities.Admin
                 Male = Male,
                 Female = Female,
                 Other = Other,
-                UserId = UserId
+                UserId = UserId,
+                CreatedToUserId = createdToUserId,
+                Role = role,
             };
             boothvoter.SetVillages(villageIds);
             return boothvoter;

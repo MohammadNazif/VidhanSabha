@@ -1,0 +1,5 @@
+/* Influencer Person Component Styles */
+:host {
+  display: block;
+  height: 100%;
+}

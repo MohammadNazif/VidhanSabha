@@ -1,11 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using VidhanSabha.Application.Common.Dtos;
+using VidhanSabha.Application.Common.ExportPdfExcel.Dtos;
 using VidhanSabha.Application.Pannels.Admin.PrabhavshaliVyakti.DTOs;
 using VidhanSabha.Application.Pannels.Admin.PrabhavshaliVyakti.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.PravasiVoters.DTOs;
@@ -59,12 +60,23 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
             try
             {
                 var query = _context.Tbl_PrabhavshaliVyakti
-                .AsNoTracking()
-                .Where(b =>
-                    (b.UserId == qp.UserId) &&
+                .AsNoTracking();
+                var villageIds = qp.GetVillageIds();
+                var designationIds = qp.GetDesignationIds();
+
+                if(villageIds.Any())
+                {
+                    query = query.Where(b => b.Villages.Any(v => villageIds.Contains(v.VillageId)));
+                }
+                if(designationIds.Any())
+                {
+                    query = query.Where(b => designationIds.Contains(b.DesignationId));
+                }
+
+                query = query.Where(b =>
+                    (b.UserId == qp.UserId || b.CreatedToUserId == qp.UserId) &&
                     (!qp.Id.HasValue || b.Id == qp.Id) &&
                     (!qp.BoothId.HasValue || b.BoothId == qp.BoothId) &&
-                    (!qp.VillageId.HasValue || b.Villages.Any(v => v.VillageId == qp.VillageId)) &&
                     (!qp.CastId.HasValue || b.CastId == qp.CastId)
                 );
 
@@ -123,13 +135,34 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
                 throw;
             }
         }
+        public async Task<List<prabhavsaliExportRow>> GetExportByDesgIdAsync(PrabhavshaliQueryParams qp)
+        {
+            return await _context.Tbl_PrabhavshaliVyakti
+                .Where(m =>
+    (qp.designationId == null || m.DesignationId == qp.designationId) &&
+    (m.UserId == qp.UserId || m.CreatedToUserId == qp.UserId)
+   )
+                .Select(m => new prabhavsaliExportRow
+                {
+                    BoothNumber = m.Booth != null ? m.Booth.BoothNumber : 0,
+                    Village = string.Join(", ", m.Villages
+                        .Select(v => v.Village != null ? v.Village.VillageName : "N/A")),
 
-        public async Task<List<PrabhavshaliResponseDesinIdDto>> GetByDesgIdAsync(int desgid)
+                    Name = m.Name,
+                    Designation = m.Designation != null ? m.Designation.DesignationName : "Unknown",
+                    MobileNumber = m.Mobile,
+                    Category = m.Category != null ? m.Category.Name : "N/A",
+                    Cast = m.Cast != null ? m.Cast.CastName : "N/A",
+                    Description = m.Description
+                })
+                .ToListAsync();
+        }
+        public async Task<List<PrabhavshaliResponseDesinIdDto>> GetByDesgIdAsync(int desgid,string userId)
         {
             try
             {
                 return await _context.Tbl_PrabhavshaliVyakti
-                    .Where(m => m.DesignationId == desgid)
+                    .Where(m => m.DesignationId == desgid && (m.UserId == userId || m.CreatedToUserId == userId))
                     .Select(m => new PrabhavshaliResponseDesinIdDto
                     {
                         Id = m.Id,

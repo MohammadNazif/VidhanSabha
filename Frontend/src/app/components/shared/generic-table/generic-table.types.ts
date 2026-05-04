@@ -20,6 +20,7 @@ export interface TableFilter {
   placeholder?: string;
   value?: any; // Current selected value
   multiple?: boolean; // Enable multi-select for select type
+  visible?: boolean; // Whether the filter is visible
 }
 
 export interface TableColumn {

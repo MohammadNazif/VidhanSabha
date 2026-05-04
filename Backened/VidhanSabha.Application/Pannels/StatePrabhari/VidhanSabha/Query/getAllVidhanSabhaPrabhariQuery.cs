@@ -12,9 +12,11 @@ namespace VidhanSabha.Application.Pannels.StatePrabhari.VidhanSabha.Query
     {
         public int StateId { get; set; }
 
-        public getAllVidhanSabhaPrabhariQuery(int stateId)
+        public string UserId { get; set; }
+        public getAllVidhanSabhaPrabhariQuery(int stateId,string userId)
         {
             StateId = stateId;
+            UserId = userId;
         }
 
     }

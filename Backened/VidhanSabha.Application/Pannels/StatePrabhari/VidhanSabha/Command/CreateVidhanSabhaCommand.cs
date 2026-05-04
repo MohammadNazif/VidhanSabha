@@ -11,9 +11,11 @@ namespace VidhanSabha.Application.Pannels.StatePrabhari.VidhanSabha.Command
     public class CreateVidhanSabhaCommand : IRequest<int>
     {
        public CreateVidhanSabhaRequestDto Dto;
-        public CreateVidhanSabhaCommand(CreateVidhanSabhaRequestDto dto)
+        public string UserId { get; set; }
+        public CreateVidhanSabhaCommand(CreateVidhanSabhaRequestDto dto,string userId)
         {
-            Dto = dto;   
+            Dto = dto;
+            UserId = userId;
         }
        
  

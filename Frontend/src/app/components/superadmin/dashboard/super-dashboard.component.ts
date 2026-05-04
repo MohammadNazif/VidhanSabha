@@ -21,7 +21,7 @@ interface StatCard {
   selector: 'app-super-dashboard',
   standalone: true,
   imports: [
-    CommonModule, 
+    CommonModule,
     LucideAngularModule
   ],
   templateUrl: './super-dashboard.component.html',
@@ -31,9 +31,16 @@ export class SuperDashboardComponent implements OnInit, AfterViewInit {
   @ViewChild('prabhariChart') prabhariChartRef!: ElementRef<HTMLCanvasElement>;
 
   currentDate = new Date();
+  loadingCounts = true;
+
+  ngOnInit() {
+    // Simulate loading for consistency
+    setTimeout(() => {
+      this.loadingCounts = false;
+    }, 500);
+  }
 
   statCards: StatCard[] = [
-
     {
       title: 'Vidhan Sabha',
       value: 403,
@@ -74,13 +81,21 @@ export class SuperDashboardComponent implements OnInit, AfterViewInit {
       gradient: 'linear-gradient(135deg, #6366f1, #4f46e5)',
       route: '/superadmin/designation',
       description: 'Manage administrative roles'
+    },
+    {
+      title: 'Samiti Members',
+      value: '-',
+      change: '+0',
+      changeType: 'up',
+      icon: 'users',
+      gradient: 'linear-gradient(135deg, #ec4899, #db2777)',
+      route: '/superadmin/state-member',
+      description: 'Manage state members'
     }
 
   ];
 
   constructor(private router: Router) { }
-
-  ngOnInit() { }
 
   ngAfterViewInit() {
     this.createPrabhariChart();
@@ -93,6 +108,7 @@ export class SuperDashboardComponent implements OnInit, AfterViewInit {
   }
 
   private createPrabhariChart() {
+    if (!this.prabhariChartRef || !this.prabhariChartRef.nativeElement) return;
     const ctx = this.prabhariChartRef.nativeElement.getContext('2d')!;
 
     new Chart(ctx, {

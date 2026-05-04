@@ -20,6 +20,7 @@ namespace VidhanSabha.Domain.Entities.Admin
         public string Description { get; private set; }
         public bool Status { get; private set; } = true;
         public string? UserId { get; private set; }
+        public string? CreatedToUserId { get; private set; }
 
 
         private readonly List<Tbl_PrabhavshaliVillage> _villages = new();
@@ -36,7 +37,7 @@ namespace VidhanSabha.Domain.Entities.Admin
         public static Tbl_PrabhavshaliVyakti Create(
             int BoothId,int DesignationId, string Name,
             int CategoryId, int CastId,
-            string Mobile,string Description,string userId,
+            string Mobile,string Description,string userId,string createdToUserId,
             List<int> villageIds
             )
         {
@@ -49,7 +50,8 @@ namespace VidhanSabha.Domain.Entities.Admin
                 CastId = CastId,
                 Mobile = Mobile,
                 Description=Description,
-                UserId = userId
+                UserId = userId,
+                CreatedToUserId = createdToUserId
             };
             prabhav.SetVillages(villageIds);
             return prabhav;

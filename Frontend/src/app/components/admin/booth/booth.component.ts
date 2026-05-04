@@ -12,10 +12,11 @@ import { StateService } from '../../../Services/Admin/state/state.service';
 import { AuthServiceService } from '../../../Services/Auth/auth.service';
 import { ToastService } from '../../../Services/common/toast/toast.service';
 import { CrudHandlerService } from '../../../Services/common/crud-handler.service';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, UrlSegment } from '@angular/router';
 import { ModulePermission } from '../../../models/module-permission.enum';
 import { MandalService } from '../../../Services/Admin/mandal/mandal.service';
 import { SectorService } from '../../../Services/Admin/sector/sector.service';
+import { PermissionService } from '../../../Services/common/permission.service';
 
 
 import { GenericExportComponent } from '../../shared/generic-export/generic-export.component';
@@ -38,12 +39,14 @@ export class BoothComponent implements OnInit {
     private crudHandler: CrudHandlerService,
     private route: ActivatedRoute,
     private mandalService: MandalService,
-    private sectorService: SectorService
+    private sectorService: SectorService,
+    private permissionService: PermissionService
   ) { }
 
   isListView = false;
   totalCount = 0;
   loading = false;
+  boothList: any[] = [];
 
   // Server-side state
   pageNumber = 1;
@@ -55,9 +58,7 @@ export class BoothComponent implements OnInit {
   sectorId: string | number | null = null;
 
   canManage(): boolean {
-    if (this.isListView) return false;
-    // Admins can manage Master Data, but we can add role specific logic here if needed
-    return true;
+    return !this.isListView && this.permissionService.hasPermission(ModulePermission.BoothVoterDescrition);
   }
 
   isStatePrabhari(): boolean {
@@ -67,7 +68,7 @@ export class BoothComponent implements OnInit {
   defaultStateId: string | null = null;
 
   ngOnInit() {
-    this.route.url.subscribe((url: any) => {
+    this.route.url.subscribe((url: UrlSegment[]) => {
       const path = url[0]?.path || '';
       this.isListView = path.includes('-list');
       this.config.filterable = this.isListView;
@@ -129,7 +130,6 @@ export class BoothComponent implements OnInit {
     // filterState for multiple selects is an array. Convert to comma separated string if backend expects string.
     // If backend expects numeric ID, and we pass array of IDs, it might fail if backend doesn't support array.
     // Assuming backend might take comma separated for mandalId/sectorId if we pass multiple. 
-    // Wait, the API for booths takes mandalId as int usually? Let's check Booth API. 
     // Usually, list APIs support CSV or we send the first one. Let's send CSV.
     const mIds = filterState['mandalId'];
     if (Array.isArray(mIds)) {
@@ -436,8 +436,6 @@ export class BoothComponent implements OnInit {
       }
     ]
   };
-
-  boothList: any[] = [];
 
   columns: TableColumn[] = [
     { key: 'mandalName', label: 'Mandal', sortable: true },

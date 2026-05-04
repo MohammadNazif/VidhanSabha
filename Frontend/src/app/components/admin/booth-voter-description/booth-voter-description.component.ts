@@ -15,6 +15,7 @@ import { AuthServiceService } from '../../../Services/Auth/auth.service';
 import { ActivatedRoute } from '@angular/router';
 import { ModulePermission } from '../../../models/module-permission.enum';
 import { GenericExportComponent } from '../../shared/generic-export/generic-export.component';
+import { PermissionService } from '../../../Services/common/permission.service';
 
 @Component({
   selector: 'app-booth-voter-description',
@@ -66,8 +67,7 @@ export class BoothVoterDescriptionComponent implements OnInit {
   actions: TableAction[] = [
     { id: 'edit', label: '', variant: 'default', icon: 'edit', show: () => this.canManage() },
     { id: 'delete', label: '', variant: 'danger', icon: 'delete', show: () => this.canManage() },
-    { id: 'add_caste', label: 'Caste Wise', variant: 'primary', icon: 'plus', show: () => this.canManage() },
-    { id: 'add_samiti', label: 'Add', variant: 'primary', icon: 'users', show: () => this.canManage() }
+    { id: 'add_caste', label: 'Caste Wise', variant: 'primary', icon: 'add', show: () => this.canManage() }
   ];
 
   constructor(
@@ -77,14 +77,12 @@ export class BoothVoterDescriptionComponent implements OnInit {
     private toastService: ToastService,
     private crudHandler: CrudHandlerService,
     private authService: AuthServiceService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private permissionService: PermissionService
   ) { }
 
   canManage(): boolean {
-    if (this.isListView) return false;
-    const role = (this.authService.getRole() || '').toUpperCase().trim();
-    // Allow BoothSanyojak and VidhanSabhaPrabhari as per sidebar.component.ts
-    return true;
+    return !this.isListView && this.permissionService.hasPermission(ModulePermission.BoothVoterDescrition);
   }
 
   addVoterConfig: FormConfig = {
@@ -315,39 +313,52 @@ export class BoothVoterDescriptionComponent implements OnInit {
   };
 
   ngOnInit() {
-    this.route.url.subscribe(url => {
+    const role = (this.authService.getRole() || '').toUpperCase().trim();
+    const isBoothSanyojak = role === 'BOOTHSANYOJAK';
+
+    if (isBoothSanyojak) {
+      this.boothIds = this.authService.getBoothId();
+    }
+
+    this.route.url.subscribe((url: any) => {
       const path = url[0]?.path || '';
       this.isListView = path.includes('-list');
       this.config.filterable = this.isListView;
       this.loading = true;
       if (this.isListView) {
-        this.loadFilterOptions();
+        this.loadFilterOptions(isBoothSanyojak);
       }
       this.loadVoters();
     });
   }
 
-  loadFilterOptions() {
+  loadFilterOptions(isBoothSanyojak: boolean = false) {
     this.config.filters = [
-      { key: 'boothIds', label: 'Booth', type: 'select', options: [], placeholder: '-- Select Booth --', multiple: true },
+      { key: 'boothIds', label: 'Booth', type: 'select', options: [], placeholder: '-- Select Booth --', multiple: true, visible: !isBoothSanyojak },
       { key: 'villageIds', label: 'Village', type: 'select', options: [], placeholder: '-- Select Village --', multiple: true }
     ];
 
     const userId = this.authService.getUserId();
     // Load Booths
-    this.boothVoterService.getCommonData('boothNumber', userId).subscribe((res: any) => {
-      const filter = this.config.filters?.find(f => f.key === 'boothIds');
-      if (filter) {
-        const list = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
-        filter.options = list.map((b: any) => ({
-          label: `Booth No. ${b.boothNumber}`,
-          value: String(b.boothId || b.id)
-        }));
-      }
-    });
+    if (!isBoothSanyojak) {
+      this.boothVoterService.getCommonData('boothNumber', userId).subscribe((res: any) => {
+        const filter = this.config.filters?.find(f => f.key === 'boothIds');
+        if (filter) {
+          const list = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
+          filter.options = list.map((b: any) => ({
+            label: `Booth No. ${b.boothNumber}`,
+            value: String(b.boothId || b.id)
+          }));
+        }
+      });
+    }
 
-    // Load All Villages initially
-    this.boothVoterService.getCommonData('village', null, 500000).subscribe((res: any) => {
+    // Load Villages (filtered by booth if BoothSanyojak)
+    const villageUrl = isBoothSanyojak && this.boothIds
+      ? `villagesByBoothId?boothId=${this.boothIds}`
+      : 'village';
+
+    this.boothVoterService.getCommonData(villageUrl, null, 500000).subscribe((res: any) => {
       const filter = this.config.filters?.find(f => f.key === 'villageIds');
       if (filter) {
         const list = Array.isArray(res?.data?.items) ? res.data.items : (Array.isArray(res?.items) ? res.items : (Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : [])));

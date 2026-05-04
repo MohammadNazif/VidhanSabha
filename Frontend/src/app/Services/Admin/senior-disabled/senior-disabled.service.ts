@@ -31,4 +31,8 @@ export class SeniorDisabledService extends BaseApiService {
   exportToPdf(): Observable<Blob> {
     return this.http.get(`${this.apiUrl}/${this.entity}/export/pdf`, { responseType: 'blob' });
   }
+
+  exportSpecial(entityName: string, format: 'excel' | 'pdf'): Observable<Blob> {
+    return this.export(entityName, format);
+  }
 }

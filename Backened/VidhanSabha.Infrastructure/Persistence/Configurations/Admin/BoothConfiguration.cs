@@ -30,7 +30,7 @@ namespace VidhanSabha.Infrastructure.Persistence.Configurations.Admin
             entity.HasIndex(e => new { e.MandalId, e.BoothNumber }).IsUnique();
 
             entity.HasOne(e => e.Sanyojak)
-                  .WithOne()
+                    .WithOne(s => s.Booth)
                   .HasForeignKey<Tbl_BoothSanyojak>(s => s.BoothId)
                   .OnDelete(DeleteBehavior.Cascade);
         }

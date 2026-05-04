@@ -15,6 +15,7 @@ import { ModulePermission } from '../../../models/module-permission.enum';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
 import { GenericExportComponent } from '../../shared/generic-export/generic-export.component';
+import { PermissionService } from '../../../Services/common/permission.service';
 
 @Component({
   selector: 'app-new-voter',
@@ -74,9 +75,7 @@ export class NewVoterComponent implements OnInit {
   ];
 
   canManageVoters(): boolean {
-    if (this.isListView) return false;
-    const role = (this.authService.getRole() || '').toUpperCase().trim();
-    return role !== 'STATEPRABHARI' && role !== 'ADHYAKSH';
+    return !this.isListView && this.permissionService.hasPermission(ModulePermission.NewVoter);
   }
 
   addVoterConfig: FormConfig = {
@@ -217,43 +216,57 @@ export class NewVoterComponent implements OnInit {
     private crudHandler: CrudHandlerService,
     private authService: AuthServiceService,
     private route: ActivatedRoute,
-    private http: HttpClient
+    private http: HttpClient,
+    private permissionService: PermissionService
   ) { }
 
   ngOnInit() {
-    this.route.url.subscribe(url => {
+    const role = (this.authService.getRole() || '').toUpperCase().trim();
+    const isBoothSanyojak = role === 'BOOTHSANYOJAK';
+
+    if (isBoothSanyojak) {
+      this.boothIds = this.authService.getBoothId();
+    }
+
+    this.route.url.subscribe((url: any) => {
       const path = url[0]?.path || '';
       this.isListView = path.includes('-list');
       this.config.filterable = this.isListView;
       if (this.isListView) {
         this.loading = true;
-        this.loadFilterOptions();
+        this.loadFilterOptions(isBoothSanyojak);
       }
       this.loadData();
     });
   }
 
-  loadFilterOptions() {
+  loadFilterOptions(isBoothSanyojak: boolean = false) {
     this.config.filters = [
-      { key: 'boothIds', label: 'Booth', type: 'select', options: [], placeholder: '-- Select Booth --', multiple: true },
+      { key: 'boothIds', label: 'Booth', type: 'select', options: [], placeholder: '-- Select Booth --', multiple: true, visible: !isBoothSanyojak },
       { key: 'villageIds', label: 'Village', type: 'select', options: [], placeholder: '-- Select Village --', multiple: true },
       { key: 'castIds', label: 'Caste', type: 'select', options: [], placeholder: '-- Select Caste --', multiple: true }
     ];
 
     // Load Booths
-    this.http.get<any>(`${environment.apiUrl}/common/boothNumber`).subscribe(res => {
-      const filter = this.config.filters?.find(f => f.key === 'boothIds');
-      if (filter) {
-        const list = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
-        filter.options = list.map((b: any) => ({
-          label: `Booth No. ${b.boothNumber}`,
-          value: String(b.boothId || b.id)
-        }));
-      }
-    });
+    if (!isBoothSanyojak) {
+      this.http.get<any>(`${environment.apiUrl}/common/boothNumber`).subscribe(res => {
+        const filter = this.config.filters?.find(f => f.key === 'boothIds');
+        if (filter) {
+          const list = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
+          filter.options = list.map((b: any) => ({
+            label: `Booth No. ${b.boothNumber}`,
+            value: String(b.boothId || b.id)
+          }));
+        }
+      });
+    }
 
-    // Load All Villages initially
-    this.http.get<any>(`${environment.apiUrl}/common/village?pageSize=500000`).subscribe(res => {
+    // Load Villages (filtered by booth if BoothSanyojak)
+    const villageUrl = isBoothSanyojak && this.boothIds
+      ? `${environment.apiUrl}/common/villagesByBoothId?boothId=${this.boothIds}`
+      : `${environment.apiUrl}/common/village?pageSize=500000`;
+
+    this.http.get<any>(villageUrl).subscribe(res => {
       const filter = this.config.filters?.find(f => f.key === 'villageIds');
       if (filter) {
         const list = Array.isArray(res?.data?.items) ? res.data.items : (Array.isArray(res?.items) ? res.items : (Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : [])));

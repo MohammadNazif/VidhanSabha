@@ -20,7 +20,7 @@ namespace VidhanSabha.Application.Pannels.StatePrabhari.VidhanSabha.Query
         }
         public async Task<IReadOnlyList<StatePrabhariResponseDto>> Handle(getAllVidhanSabhaPrabhariQuery request, CancellationToken cancellationToken)
         {
-            var data = await _repo.GetByStateIdAsync(request.StateId);
+            var data = await _repo.GetByStateIdAsync(request.StateId,request.UserId);
             if(data == null)
             {
                 throw new NotFoundException("Not Found");

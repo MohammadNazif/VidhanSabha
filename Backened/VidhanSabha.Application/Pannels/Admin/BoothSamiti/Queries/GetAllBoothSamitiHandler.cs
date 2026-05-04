@@ -23,7 +23,7 @@ namespace VidhanSabha.Application.Pannels.Admin.BoothSamiti.Queries
             GetAllBoothSamitiQuery request,
             CancellationToken cancellationToken)
         {
-            return await _repository.GetAllAsync(cancellationToken);
+            return await _repository.GetAllAsync(request.Id, cancellationToken);
         }
     }
 }

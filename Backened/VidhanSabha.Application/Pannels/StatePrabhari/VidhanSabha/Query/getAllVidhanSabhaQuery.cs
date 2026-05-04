@@ -12,9 +12,11 @@ namespace VidhanSabha.Application.Pannels.StatePrabhari.VidhanSabha.Query
     public class getAllVidhanSabhaQuery : IRequest<IReadOnlyList<VidhanSabhaSatewiseResponseDto>>
     {
         public vidhansabhaparams q;
-        public getAllVidhanSabhaQuery(vidhansabhaparams q)
+        public int? districtId { get; set; }
+        public getAllVidhanSabhaQuery(vidhansabhaparams q,int? districtId)
         {
             this.q = q;
+            this.districtId = districtId;
         }
     }
 }
