@@ -49,11 +49,10 @@ namespace VidhanSabha.Infrastructure.Repositories.StatePrabhari
             throw new NotImplementedException();
         }
 
-        public async Task<Tbl_DistrictWiseCount> GetByDistrictIdAsync(int districId, CancellationToken ct = default)
+        public async Task<Tbl_DistrictWiseCount> GetByDistrictIdAsync(int districId, string userId, CancellationToken ct = default)
         {
-              return await _context.Tbl_DistrictWiseCount.FirstOrDefaultAsync(x=>x.DistrictId == districId,ct);
+            return await _context.Tbl_DistrictWiseCount.FirstOrDefaultAsync(x => x.DistrictId == districId && x.UserId == userId, ct);
         }
-
         public  async  Task<IReadOnlyList<VidhansabhaDistrictResponseDto>?> GetByIdAsync(string userId, CancellationToken ct = default)
         {
              var res = await _context.Tbl_DistrictWiseCount.Where(e => e.UserId == userId)

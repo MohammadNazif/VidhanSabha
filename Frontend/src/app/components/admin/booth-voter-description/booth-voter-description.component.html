@@ -1,5 +1,5 @@
 <div class="h-screen p-4 flex flex-col overflow-hidden bg-slate-50/50">
-  <app-page-header title="Booth Voter Description" subtitle="Manage voter counts across booths and villages">
+  <app-page-header [title]="isListView ? 'Booth Voter Desc. List' : 'Booth Voter Description'" subtitle="Manage voter counts across booths and villages">
     <div class="flex items-center gap-3">
       <app-generic-modal-button *ngIf="canManage()" #voterModal [config]="addVoterConfig"
         (formSubmit)="handleFormSubmit($event)" label="Add Description" icon="+" variant="primary">

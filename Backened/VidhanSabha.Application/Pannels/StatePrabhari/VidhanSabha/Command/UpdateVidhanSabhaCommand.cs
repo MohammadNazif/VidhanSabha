@@ -11,9 +11,12 @@ namespace VidhanSabha.Application.Pannels.StatePrabhari.VidhanSabha.Command
     public class UpdateVidhanSabhaCommand : IRequest<int>
     {
         public UpdatePrabhariRequestDto Dto { get; set; }
-        public UpdateVidhanSabhaCommand(UpdatePrabhariRequestDto dto)
+
+        public string UserId { get; set; }
+        public UpdateVidhanSabhaCommand(UpdatePrabhariRequestDto dto,string userId)
         {
             Dto = dto;
+            UserId = userId;
         }
     }
 }

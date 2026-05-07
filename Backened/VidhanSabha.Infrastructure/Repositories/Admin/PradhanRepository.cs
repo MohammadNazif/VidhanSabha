@@ -95,6 +95,7 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
 
                 // ✅ FIX 1: query = assign karo, sirf query.Where nahi
                 query = query.Where(b =>
+                  b.Status &&
                     (!qp.Id.HasValue || b.Id == qp.Id));
                     //b.UserId == qp.UserId);                 // ✅ FIX 2: closing brace sahi jagah
 

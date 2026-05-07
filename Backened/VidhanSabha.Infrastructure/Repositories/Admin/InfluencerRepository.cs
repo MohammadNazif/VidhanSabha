@@ -45,6 +45,10 @@ public class InfluencerRepository : BaseRepository<Tbl_Influencer>, IInfluencerR
         InfluencerQueryParams qp,
      CancellationToken ct = default)
        {
+        //var vidhanSabhaId = await _context.Tbl_StatePrabhari
+        //.Where(u => u.userId == qp.UserId)
+        //.Select(u => u.VidhansabhaId)
+        //.FirstOrDefaultAsync();
         var query = _context.Tbl_Influencer
             .AsNoTracking()
             .AsQueryable();
@@ -60,7 +64,7 @@ public class InfluencerRepository : BaseRepository<Tbl_Influencer>, IInfluencerR
         //    query = query.Where(x => x.CategoryId == qp.CategoryId);
 
 
-        query = query.Where(m => m.Status && (m.UserId == qp.UserId || m.CreatedToUserId == qp.UserId));
+        query = query.Where(b => b.Status && (b.Booth.Mandal.Status && b.Booth.Sector.Status) && (b.UserId == qp.UserId || b.CreatedToUserId == qp.UserId ));
         // Search
         Expression<Func<Tbl_Influencer, bool>>? search = null;
 

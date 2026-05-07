@@ -216,7 +216,7 @@ export class AllowAccessListComponent implements OnInit {
           const list = res.data || [];
           entityField.options = list.map((o: any) => ({
             id: o.userId || String(o.id),
-            name: o.sectorIncharge
+            name: o.sectorSanyojak || o.sectorIncharge
           }));
           this.loading = false;
         },
@@ -229,7 +229,7 @@ export class AllowAccessListComponent implements OnInit {
           const list = res.data || [];
           entityField.options = list.map((o: any) => ({
             id: o.userId || String(o.boothId),
-            name: o.boothInchargeName
+            name: o.boothAdhyakshName || o.boothInchargeName
           }));
         },
         error: () => this.loading = false

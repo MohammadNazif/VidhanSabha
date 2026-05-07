@@ -17,6 +17,9 @@ export class AuthServiceService {
   private boothIdSubject = new BehaviorSubject<string | null>(localStorage.getItem('boothId'));
   boothId$ = this.boothIdSubject.asObservable();
 
+  private stateIdSubject = new BehaviorSubject<string | null>(localStorage.getItem('stateId'));
+  stateId$ = this.stateIdSubject.asObservable();
+
   constructor() { }
 
   setRole(role: string) {
@@ -55,14 +58,25 @@ export class AuthServiceService {
     return this.boothIdSubject.value;
   }
 
+  setStateId(stateId: string) {
+    localStorage.setItem('stateId', stateId);
+    this.stateIdSubject.next(stateId);
+  }
+
+  getStateId(): string | null {
+    return this.stateIdSubject.value;
+  }
+
   clearRole() {
     localStorage.removeItem('userRole');
     localStorage.removeItem('userId');
     localStorage.removeItem('token');
     localStorage.removeItem('boothId');
+    localStorage.removeItem('stateId');
     this.userRoleSubject.next(null);
     this.userIdSubject.next(null);
     this.tokenSubject.next(null);
     this.boothIdSubject.next(null);
+    this.stateIdSubject.next(null);
   }
 }

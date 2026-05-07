@@ -14,5 +14,7 @@ namespace VidhanSabha.Application.Pannels.Admin.Dashboard.Interface
         Task<StateDashboardCountsDto> GetStateDashboardCountsAsync(string userId);
 
         Task<BoothDashboardCountsDto> GetBoothDashboardCountsAsync(string userId);
+
+        Task<SectorDashboardCountsDto> GetSectorDashboardCountsAsync(string userId);
     }
 }

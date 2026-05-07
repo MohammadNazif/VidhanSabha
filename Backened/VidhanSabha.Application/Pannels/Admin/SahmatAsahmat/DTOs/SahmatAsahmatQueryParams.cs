@@ -13,10 +13,12 @@ namespace VidhanSabha.Application.Pannels.Admin.SahmatAsahmat.DTOs
         public int? Id { get; set; }
         public int? BoothId { get; set; }
         public string? VillageIds { get; set; }
+        public string? BoothIds { get; set; }
 
         public string? partyIds { get; set; }
 
         public List<int> GetVillageIds() => FilterParse.ParseIds(VillageIds);
+        public List<int> GetBoothIds() => FilterParse.ParseIds(BoothIds);
         public List<int> GetParties() => FilterParse.ParseIds(partyIds);
         public int? OccupationId { get; set; }
 

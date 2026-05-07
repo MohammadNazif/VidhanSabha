@@ -1,0 +1,22 @@
+<div class="h-screen p-4 flex flex-col overflow-hidden bg-slate-50/50">
+  <app-page-header title="Sector With Booth Report" subtitle="Comprehensive hierarchy of Mandals, Sectors, and Booth level details">
+      <app-generic-export [show]="flattenedData && flattenedData.length > 0" [isExporting]="exporting"
+        (export)="handleExport($event)">
+      </app-generic-export>
+  </app-page-header>
+
+  <div class="flex-1 min-h-0 mt-4 bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
+    <app-generic-table class="flex-1 min-h-0" 
+      [columns]="columns" 
+      [data]="flattenedData" 
+      [config]="config" 
+      [totalItems]="totalCount" 
+      [loading]="loading"
+      (pageChange)="handlePageChange($event)"
+      (searchChange)="handleSearchChange($event)"
+      (filterChange)="handleFilterChange($event)"
+      (sortChange)="handleSortChange($event)"
+      (selectionChange)="handleSelection($event)">
+    </app-generic-table>
+  </div>
+</div>

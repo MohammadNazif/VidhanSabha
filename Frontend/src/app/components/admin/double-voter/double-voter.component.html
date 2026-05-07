@@ -1,5 +1,5 @@
 <div class="h-screen p-4 flex flex-col overflow-hidden bg-slate-50/50">
-    <app-page-header title="Double Voter Management" subtitle="Manage voters registered in multiple locations.">
+    <app-page-header [title]="isListView ? 'Double Voter List' : 'Double Voter Management'" subtitle="Manage voters registered in multiple locations.">
         <div class="flex items-center gap-3">
             <app-generic-modal-button *ngIf="canManage()" #voterModal [config]="addVoterConfig" label="Add Double Voter" icon="+" variant="primary"
                 (formSubmit)="handleFormSubmit($event)">

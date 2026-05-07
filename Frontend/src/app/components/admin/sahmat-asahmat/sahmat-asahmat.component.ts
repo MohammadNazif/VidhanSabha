@@ -75,7 +75,10 @@ export class SahmatAsahmatComponent implements OnInit {
   ];
 
   canManageVoters(): boolean {
-    return !this.isListView && this.permissionService.hasPermission(ModulePermission.Sahmat);
+    if (this.isListView) return false;
+    const role = (this.authService.getRole() || '').toUpperCase().trim();
+    if (role === 'VIDHANSABHAPRABHARI') return true;
+    return this.permissionService.hasPermission(ModulePermission.Sahmat);
   }
 
   addVoterConfig: FormConfig = {
@@ -88,7 +91,13 @@ export class SahmatAsahmatComponent implements OnInit {
         label: 'Booth No',
         type: 'select',
         placeholder: '-- Select Booth No --',
-        apiUrl: 'common/boothNumber',
+        apiUrl: () => {
+          const role = (this.authService.getRole() || '').toUpperCase().trim();
+          if (role === 'SECTORSANYOJAK') {
+            return `booth/getAllBoothBySectorid?sectorid=${this.authService.getUserId()}`;
+          }
+          return 'common/boothNumber';
+        },
         apiMapper: (data: any) => {
           const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
           return list.map((item: any) => ({
@@ -257,10 +266,17 @@ export class SahmatAsahmatComponent implements OnInit {
       { key: 'partyIds', label: 'Party', type: 'select', options: [], placeholder: '-- Select Party --', multiple: true }
     ];
 
-    const userId = this.authService.getUserId();
+
     // Load Booths
     if (!isBoothSanyojak) {
-      this.voterService.getCommonData('boothNumber', userId).subscribe((res: any) => {
+      const role = (this.authService.getRole() || '').toUpperCase().trim();
+      const isSectorSanyojak = role === 'SECTORSANYOJAK';
+
+      const request = isSectorSanyojak
+        ? this.voterService.getCustom(`booth/getAllBoothBySectorid?sectorid=${this.authService.getUserId()}`)
+        : this.voterService.getCommonData('boothNumber');
+
+      request.subscribe((res: any) => {
         const filter = this.config.filters?.find(f => f.key === 'boothIds');
         if (filter) {
           const list = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);

@@ -13,10 +13,13 @@ namespace VidhanSabha.Application.Pannels.Admin.SahmatAsahmat.Command
     {
         public CreateSahmatAsahmatReqDto Dto { get; set; }
         public string UserId { get; set; }
-        public CreateSahmatAsahmatCommand(CreateSahmatAsahmatReqDto dto, string? userId)
+
+        public string Role { get; set; }
+        public CreateSahmatAsahmatCommand(CreateSahmatAsahmatReqDto dto, string? userId,string role)
         {
             Dto = dto;
             UserId = userId;
+            Role = role;
         }
     }
 }

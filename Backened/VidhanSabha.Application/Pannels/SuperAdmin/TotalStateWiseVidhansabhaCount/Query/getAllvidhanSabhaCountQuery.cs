@@ -11,9 +11,11 @@ namespace VidhanSabha.Application.Pannels.SuperAdmin.TotalStateWiseVidhansabhaCo
     public class getAllvidhanSabhaCountQuery : IRequest<IReadOnlyList<VidhansabhaResponseDto>>
     {
         public string? UserId;
-        public getAllvidhanSabhaCountQuery(string? userId)
+        public string? Role;
+        public getAllvidhanSabhaCountQuery(string? userId, string? role)
         {
             UserId = userId;
+            Role = role;
         }
     }
 }

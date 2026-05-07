@@ -207,12 +207,17 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
 
         public async Task<PagedResult<BoothSamitiMemResponseDto>> GetAllMem(BoothSamitiQueryParams qp, CancellationToken ct = default)
         {
+
             try
             {
+        //        var vidhanSabhaId = await _context.Tbl_StatePrabhari
+        //.Where(u => u.userId == qp.UserId)
+        //.Select(u => u.VidhansabhaId)
+        //.FirstOrDefaultAsync();
                 var query = _context.Tbl_BoothSamitiMem
                .AsNoTracking()
                .Where(b =>
-                   (!qp.Id.HasValue || b.Id == qp.Id) && (b.UserId == qp.UserId || b.CreatedToUserId == qp.UserId) &&
+                   (!qp.Id.HasValue || b.Id == qp.Id) && (b.Booth.Mandal.Status && b.Booth.Sector.Status ) &&  (b.UserId == qp.UserId || b.CreatedToUserId == qp.UserId || b.CreatedsectorUserId == qp.UserId) &&
                    (!qp.BoothId.HasValue || b.Booth.Id == qp.BoothId)
                    );
 

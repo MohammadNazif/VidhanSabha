@@ -11,9 +11,12 @@ namespace VidhanSabha.Application.Pannels.SuperAdmin.StatePrabhari.Command
     public class UpdatePrabhariCommand : IRequest<int>
     {
         public UpdatePrabhariRequestDto Dto;
-        public UpdatePrabhariCommand(UpdatePrabhariRequestDto dto)
+
+        public string? UserId { get; set; }
+        public UpdatePrabhariCommand(UpdatePrabhariRequestDto dto,string userId)
         {
             Dto = dto;
+            UserId = userId;
         }
     }
 }

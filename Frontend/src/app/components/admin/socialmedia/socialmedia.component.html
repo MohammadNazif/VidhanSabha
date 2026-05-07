@@ -1,12 +1,14 @@
 <div class="h-screen p-6 flex flex-col overflow-hidden bg-slate-50/50">
-    <app-page-header title="Social Media Management"
+    <app-page-header [title]="isListView ? 'Social Media List' : 'Social Media Management'"
         subtitle="Create and manage social media posts across multiple platforms.">
         <div class="flex items-center gap-3">
             <app-generic-modal-button #socialMediaModal [config]="addSocialMediaConfig" label="Create Post" icon="+"
-                variant="primary" (formSubmit)="handleFormSubmit($event)">
+                variant="primary" (formSubmit)="handleFormSubmit($event)" *ngIf="canManage()">
             </app-generic-modal-button>
 
-
+            <app-generic-export [show]="isListView && socialMediaList && socialMediaList.length > 0" 
+                [isExporting]="isExporting" (export)="handleExport($event)">
+            </app-generic-export>
         </div>
     </app-page-header>
 

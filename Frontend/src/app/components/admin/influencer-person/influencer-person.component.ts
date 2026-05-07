@@ -37,7 +37,10 @@ export class InfluencerPersonComponent implements OnInit {
   isListView = false;
 
   canManage(): boolean {
-    return !this.isListView;
+    if (this.isListView) return false;
+    const role = (this.authService.getRole() || '').toUpperCase().trim();
+    if (role === 'VIDHANSABHAPRABHARI') return true;
+    return true;
   }
 
   columns: TableColumn[] = [
@@ -130,7 +133,13 @@ export class InfluencerPersonComponent implements OnInit {
         label: 'Booth',
         type: 'select',
         placeholder: '-- Select Booth --',
-        apiUrl: 'common/boothNumber',
+        apiUrl: () => {
+          const role = (this.authService.getRole() || '').toUpperCase().trim();
+          if (role === 'SECTORSANYOJAK') {
+            return `booth/getAllBoothBySectorid?sectorid=${this.authService.getUserId()}`;
+          }
+          return 'common/boothNumber';
+        },
         apiMapper: (data: any) => {
           const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
           return list.map((item: any) => ({

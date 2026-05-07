@@ -18,15 +18,16 @@ import { BehaviorSubject } from 'rxjs';
 import { Validators } from '@angular/forms';
 import { environment } from '../../../../environments/environment';
 import { PermissionService } from '../../../Services/common/permission.service';
+import { GenericExportComponent } from '../../shared/generic-export/generic-export.component';
 
 
 @Component({
   selector: 'app-booth-samiti',
   standalone: true,
-  imports: [CommonModule, PageHeaderComponent, GenericTableComponent, LucideAngularModule, GenericModalButtonComponent],
+  imports: [CommonModule, PageHeaderComponent, GenericTableComponent, LucideAngularModule, GenericModalButtonComponent, GenericExportComponent],
   template: `
     <div class="h-screen p-6 flex flex-col overflow-hidden bg-slate-50/50">
-      <app-page-header [title]="isMemberView ? selectedBoothName : 'Booth Samiti Members'" 
+      <app-page-header [title]="isMemberView ? selectedBoothName : (isListView ? 'Booth Samiti List' : 'Booth Samiti Management')" 
                        [subtitle]="isMemberView ? 'Manage members assigned to this booth' : 'Overview of all registered booth samitis'">
         
         <div class="flex items-center gap-3">
@@ -39,6 +40,10 @@ import { PermissionService } from '../../../Services/common/permission.service';
           <app-generic-modal-button *ngIf="canManage() && !isMemberView" #samitiModal [config]="samitiFormConfig" (formSubmit)="handleFormSubmit($event)"
             label="Add Samiti" icon="+" variant="primary">
           </app-generic-modal-button>
+
+          <app-generic-export [show]="isListView && memberList && memberList.length > 0" 
+              [isExporting]="isExporting" (export)="handleExport($event)">
+          </app-generic-export>
         </div>
 
         <app-generic-modal-button #memberModal [config]="memberFormConfig" (formSubmit)="handleMemberSubmit($event)"
@@ -70,6 +75,7 @@ export class BoothSamitiComponent implements OnInit {
   memberList: any[] = [];
   totalCount = 0;
   loading = false;
+  isExporting = false;
 
   pageNumber = 1;
   pageSize = 50;
@@ -118,7 +124,10 @@ export class BoothSamitiComponent implements OnInit {
   }
 
   canManage(): boolean {
-    return !this.isListView && this.permissionService.hasPermission(ModulePermission.BoothSamiti);
+    if (this.isListView) return false;
+    const role = (this.authService.getRole() || '').toUpperCase().trim();
+    if (role === 'VIDHANSABHAPRABHARI') return true;
+    return this.permissionService.hasPermission(ModulePermission.BoothSamiti);
   }
 
   backToList() {
@@ -138,7 +147,6 @@ export class BoothSamitiComponent implements OnInit {
   updateTableConfig() {
     if (this.isMemberView) {
       this.columns = [
-        { key: 'srNo', label: 'Sr. No.', width: '50px' as any },
         { key: 'name', label: 'Name', sortable: true },
         { key: 'designationName', label: 'Designation', sortable: true },
         { key: 'categoryName', label: 'Category', sortable: true },
@@ -153,7 +161,7 @@ export class BoothSamitiComponent implements OnInit {
       ];
     } else {
       this.columns = [
-        { key: 'srNo', label: 'Sr. No.', width: '50px' as any },
+
         { key: 'boothNo', label: 'Booth No.', sortable: true },
         { key: 'village', label: 'Village', sortable: true },
         { key: 'pollingStation', label: 'Polling Station', sortable: true },
@@ -231,7 +239,13 @@ export class BoothSamitiComponent implements OnInit {
         label: 'Booth',
         type: 'select',
         placeholder: '-- Select Booth --',
-        apiUrl: 'common/boothNumber',
+        apiUrl: () => {
+          const role = (this.authService.getRole() || '').toUpperCase().trim();
+          if (role === 'SECTORSANYOJAK') {
+            return `booth/getAllBoothBySectorid?sectorid=${this.authService.getUserId()}`;
+          }
+          return 'common/boothNumber';
+        },
         apiMapper: (data: any) => {
           const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
           return list.map((item: any) => ({

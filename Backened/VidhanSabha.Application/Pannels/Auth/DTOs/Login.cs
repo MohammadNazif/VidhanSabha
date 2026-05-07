@@ -20,7 +20,7 @@ namespace VidhanSabha.Application.Pannels.Auth.DTOs
         public string MobileNumber { get; set; }
         public PrabhariRole Role { get; set; }
         public string Status { get; set; }
-        public string Token { get; set; }      // <-- added
-        public DateTime ExpiresAt { get; set; } // <-- added
+        public string Token { get; set; }
+        public DateTime ExpiresAt { get; set; }
     }
 }

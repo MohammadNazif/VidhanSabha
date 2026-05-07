@@ -59,6 +59,15 @@ namespace VidhanSabha.Api.Endpoints
              .WithName("GetCast")
              .Produces<ApiResponse<List<CastResponseDto>>>(200);
 
+            common.MapGet("/getAllCast", async (IMediator mediator) =>
+            {
+                var result = await mediator.Send(new getAllCastWithoutCategoryIdQuery());
+                return Results.Ok(ApiResponse<List<CastResponseDto>>.Ok(result));
+
+            })
+             .WithName("GetAllCast")
+             .Produces<ApiResponse<List<CastResponseDto>>>(200);
+
             common.MapGet("/village", async (int id, IMediator mediator) =>
             {
                 var result = await mediator.Send(new GetallVillageByMandalId(id));
@@ -76,7 +85,7 @@ namespace VidhanSabha.Api.Endpoints
              .WithName("GetBoothNumbers")
              .Produces<List<BoothNumberDto>>(200);
 
-            common.MapGet("/villagesByBoothId", async (int boothId, IMediator mediator) =>
+            common.MapGet("/villagesByBoothId", async (int? boothId, IMediator mediator) =>
                {
                    var result = await mediator.Send(new GetallVillageByBoothId(boothId));
                    return Results.Ok(ApiResponse<List<VillageByBoothResponseDto>>.Ok(result));

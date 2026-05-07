@@ -27,6 +27,7 @@ import {
   SortDirection,
   BadgeVariant
 } from './generic-table.types';
+import { environment } from '../../../../environments/environment';
 
 /** Built-in Lucide-style SVG icons — pass the key as `action.icon` */
 const ICON_MAP: Record<string, string> = {
@@ -536,5 +537,35 @@ export class GenericTableComponent implements OnInit, OnChanges, OnDestroy {
 
   isActionDisabled(action: TableAction, row: any): boolean {
     return action.disabled ? action.disabled(row) : false;
+  }
+
+  isNumericColumn(col: TableColumn): boolean {
+    if (col.align) return false;
+    if (col.type === 'number') return true;
+
+    // Detection logic: check if the first few rows have numeric-like values
+    if (!this.data || this.data.length === 0) return false;
+    const sample = this.data.slice(0, 5);
+    return sample.some(row => {
+      const val = this.getCellValue(row, col);
+      if (val === null || val === undefined || val === '') return false;
+      return typeof val === 'number' || (typeof val === 'string' && /^\d+$/.test(val.trim()));
+    });
+  }
+
+  getImageUrl(path: string): string {
+    if (!path) return '';
+    if (path.startsWith('http')) return path;
+    const baseUrl = environment.apiUrl.replace('/api', '');
+    return `${baseUrl}/${path}`;
+  }
+
+  handleImageError(event: any) {
+    event.target.style.display = 'none';
+    const parent = event.target.parentElement;
+    if (parent) {
+      const fallback = parent.querySelector('.avatar-placeholder');
+      if (fallback) fallback.style.display = 'flex';
+    }
   }
 }

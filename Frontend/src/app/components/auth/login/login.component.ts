@@ -64,7 +64,8 @@ export class LoginComponent {
             1: 'StatePrabhari',
             2: 'VidhanSabhaPrabhari',
             3: 'BoothSanyojak',
-            4: 'SectorSanyojak'
+            4: 'SectorSanyojak',
+            5: 'SUPERADMIN'
           };
           
           if (typeof role === 'number') {

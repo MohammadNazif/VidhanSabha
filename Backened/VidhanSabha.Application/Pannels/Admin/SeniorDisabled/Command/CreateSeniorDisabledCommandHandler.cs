@@ -31,14 +31,24 @@ namespace VidhanSabha.Application.Pannels.Admin.SeniorDisabled.Command
             var req = request.Dto;
 
             string createdtouserId = null;
+            string createdsectorUserId = null;
             if (IsUserRole(request.Role, PrabhariRole.VidhanSabhaPrabhari))
             {
+                createdsectorUserId = await _booth.GetSectorUseridbyBoothId(request.Dto.BoothId);
                 createdtouserId = await _booth.GetUseridbyBoothId(request.Dto.BoothId);
             }
             else if (IsUserRole(request.Role, PrabhariRole.BoothSanyojak))
             {
                 createdtouserId = request.UserId;
+                createdsectorUserId = await _booth.GetSectorUseridbyBoothId(request.Dto.BoothId);
 
+                request.UserId = await _booth.GetadminUseridbyUserId(request.Dto.BoothId);
+
+            }
+            else if (IsUserRole(request.Role, PrabhariRole.SectorSanyojak))
+            {
+                createdsectorUserId = request.UserId;
+                createdtouserId = await _booth.GetUseridbyBoothId(request.Dto.BoothId);
                 request.UserId = await _booth.GetadminUseridbyUserId(request.Dto.BoothId);
 
             }
@@ -61,6 +71,8 @@ namespace VidhanSabha.Application.Pannels.Admin.SeniorDisabled.Command
         data,
         request.UserId,
         createdtouserId,
+        createdsectorUserId,
+        request.Role,
         req.VillageId
        ))
     .ToList();

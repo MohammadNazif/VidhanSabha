@@ -15,20 +15,20 @@ namespace VidhanSabha.Domain.Entities.Admin
         public string SectorName { get; private set; }
         public bool IsSectorSanyojak { get; private set; }
 
-        private readonly List<Tbl_SectorVillage> _villages = new();
-        public IReadOnlyCollection<Tbl_SectorVillage> Villages => _villages.AsReadOnly();
+        private readonly List<Tbl_SectorVillage>? _villages = new();
+        public IReadOnlyCollection<Tbl_SectorVillage>? Villages => _villages.AsReadOnly();
 
         public string? UserId { get; set; }
-        public string CreatedBy { get; set; }
-        public string CreatedByUserId { get; set; }
-        public int CreatedById { get; private set; }
+        public string? CreatedBy { get; set; }
+        public string? CreatedByUserId { get; set; }
+        public int? CreatedById { get; private set; }
 
         // Only filled if IsSectorSanyojak = true
         public string? InchargeName { get; private set; }
         public int? Age { get; private set; }
         public string? FatherName { get; private set; }
         public int? CategoryId { get; private set; }
-        public int? CastId { get; private set; }
+        public int CastId { get; private set; }
         public string? EducationLevel { get; private set; }
         public string? PhoneNumber { get; private set; }
         public string? Address { get; private set; }
@@ -138,7 +138,7 @@ namespace VidhanSabha.Domain.Entities.Admin
             Age = null;
             FatherName = null;
             CategoryId = null;
-            CastId = null;
+            CastId = 0;
             EducationLevel = null;
             PhoneNumber = null;
             Address = null;

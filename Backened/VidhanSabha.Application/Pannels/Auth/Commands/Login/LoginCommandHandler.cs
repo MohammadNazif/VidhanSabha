@@ -36,7 +36,7 @@ namespace VidhanSabha.Application.Pannels.Auth.Commands.Login
                     MobileNumber = user.Mobile,
                     Role = user.Role,
                     Token = token,
-                    ExpiresAt = DateTime.UtcNow.AddMinutes(60)
+                    ExpiresAt = DateTime.UtcNow.AddMinutes(120)
                 };
             }
         }

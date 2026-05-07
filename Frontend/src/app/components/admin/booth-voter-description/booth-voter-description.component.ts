@@ -82,7 +82,10 @@ export class BoothVoterDescriptionComponent implements OnInit {
   ) { }
 
   canManage(): boolean {
-    return !this.isListView && this.permissionService.hasPermission(ModulePermission.BoothVoterDescrition);
+    if (this.isListView) return false;
+    const role = (this.authService.getRole() || '').toUpperCase().trim();
+    if (role === 'VIDHANSABHAPRABHARI') return true;
+    return this.permissionService.hasPermission(ModulePermission.BoothVoterDescrition);
   }
 
   addVoterConfig: FormConfig = {
@@ -95,7 +98,13 @@ export class BoothVoterDescriptionComponent implements OnInit {
         label: 'Booth',
         type: 'select',
         placeholder: '--Select Booth--',
-        apiUrl: () => `common/boothNumber?PageNumber=1&PageSize=1000&IsDescending=true&SortBy=id&userId=${this.authService.getUserId()}`,
+        apiUrl: () => {
+          const role = (this.authService.getRole() || '').toUpperCase().trim();
+          if (role === 'SECTORSANYOJAK') {
+            return `booth/getAllBoothBySectorid?sectorid=${this.authService.getUserId()}`;
+          }
+          return `common/boothNumber?PageNumber=1&PageSize=1000&IsDescending=true&SortBy=id&userId=${this.authService.getUserId()}`;
+        },
         apiMapper: (data: any) => {
           const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
           return list.map((item: any) => ({
@@ -338,10 +347,16 @@ export class BoothVoterDescriptionComponent implements OnInit {
       { key: 'villageIds', label: 'Village', type: 'select', options: [], placeholder: '-- Select Village --', multiple: true }
     ];
 
-    const userId = this.authService.getUserId();
     // Load Booths
     if (!isBoothSanyojak) {
-      this.boothVoterService.getCommonData('boothNumber', userId).subscribe((res: any) => {
+      const role = (this.authService.getRole() || '').toUpperCase().trim();
+      const isSectorSanyojak = role === 'SECTORSANYOJAK';
+
+      const request = isSectorSanyojak
+        ? this.boothVoterService.getCustom(`booth/getAllBoothBySectorid?sectorid=${this.authService.getUserId()}`)
+        : this.boothVoterService.getCommonData('boothNumber');
+
+      request.subscribe((res: any) => {
         const filter = this.config.filters?.find(f => f.key === 'boothIds');
         if (filter) {
           const list = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);

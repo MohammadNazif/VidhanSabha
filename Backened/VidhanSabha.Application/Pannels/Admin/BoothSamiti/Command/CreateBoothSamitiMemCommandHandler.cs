@@ -28,21 +28,34 @@ namespace VidhanSabha.Application.Pannels.Admin.BoothSamiti.Command
         {
 
             string createdtouserId = null;
+            string createdsectorUserId = null;
             if (IsUserRole(request.Role, PrabhariRole.VidhanSabhaPrabhari))
             {
+                createdsectorUserId = await _booth.GetSectorUseridbyBoothId(request.BoothId);
                 createdtouserId = await _booth.GetUseridbyBoothId(request.BoothId);
             }
             else if (IsUserRole(request.Role, PrabhariRole.BoothSanyojak))
             {
                 createdtouserId = request.UserId;
+                createdsectorUserId = await _booth.GetSectorUseridbyBoothId(request.BoothId);
 
+                request.UserId = await _booth.GetadminUseridbyUserId(request.BoothId);
+
+            }
+            else if (IsUserRole(request.Role, PrabhariRole.SectorSanyojak))
+            {
+                createdsectorUserId = request.UserId;
+                createdtouserId = await _booth.GetUseridbyBoothId(request.BoothId);
                 request.UserId = await _booth.GetadminUseridbyUserId(request.BoothId);
 
             }
             var entity = Tbl_BoothSamitiMem.Create(
                 request.BoothId,
                 request.UserId,
-                createdtouserId
+                createdtouserId,
+                createdsectorUserId,
+                request.Role
+
 
             );
 

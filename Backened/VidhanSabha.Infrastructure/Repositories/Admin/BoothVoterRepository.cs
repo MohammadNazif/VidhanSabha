@@ -67,19 +67,28 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
 
         public async Task<PagedResult<BoothVoterResponseDto>> GetAllAsync(BoothVoterQueryParams qp, CancellationToken ct = default)
         {
+        //    var vidhanSabhaId = await _context.Tbl_StatePrabhari
+        //.Where(u => u.userId == qp.UserId)
+        //.Select(u => u.VidhansabhaId)
+        //.FirstOrDefaultAsync();
             var query = _context.Tbl_BoothVoter
     .AsNoTracking();
 
             var villageIds = qp.GetVillageIds();
+            var boothIds = qp.GetBoothIds();
 
             if(villageIds.Any())
             {
                 query = query.Where(b => b.Villages.Any(v => villageIds.Contains(v.VillageId)));
             }
+            if(boothIds.Any())
+            {
+                query = query.Where(b => boothIds.Contains(b.BoothId));
+            }
 
             query =  query.Where(b =>
-        (!qp.Id.HasValue || b.Id == qp.Id) &&
-        (b.UserId == qp.UserId || b.CreatedToUserId == qp.UserId) &&
+        (!qp.Id.HasValue || b.Id == qp.Id) && (b.Booth.Mandal.Status && b.Booth.Sector.Status ) && 
+        (b.UserId == qp.UserId || b.CreatedToUserId == qp.UserId || b.CreatedsectorUserId == qp.UserId) &&
         (!qp.BoothId.HasValue || b.BoothId == qp.BoothId) &&
         (!qp.SectorId.HasValue || b.Booth.SectorId == qp.SectorId)
     );

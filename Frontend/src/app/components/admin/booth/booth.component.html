@@ -1,5 +1,5 @@
 <div class="h-screen p-4 flex flex-col overflow-hidden bg-slate-50/50">
-    <app-page-header title="Booth Management" subtitle="Manage and view assembly booth configurations">
+    <app-page-header [title]="isListView ? 'Booth List' : 'Booth Management'" subtitle="Manage and view assembly booth configurations">
         <div class="flex items-center gap-3">
             <app-generic-modal-button *ngIf="canManage()" #boothModal [config]="addBoothConfig" label="Add New Booth" icon="+" variant="primary"
                 (formSubmit)="handleFormSubmit($event)">

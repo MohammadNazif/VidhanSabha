@@ -4,6 +4,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
+using DocumentFormat.OpenXml.Spreadsheet;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -39,19 +40,33 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
 
         public async Task<PagedResult<PannaPramukhResponseDto>> GetAllAsync(PannaPramukhQueryParams qp, CancellationToken ct = default)
         {
+
+            //var vidhanSabhaId = await _context.Tbl_StatePrabhari
+            // .Where(u => u.userId == qp.UserId)
+            // .Select(u => u.VidhansabhaId)
+            // .FirstOrDefaultAsync();
+
             var query = _context.Tbl_PannaPramukh
               .AsNoTracking();
 
-            var villageIds = qp.GetVillageIds();
+              var villageIds = qp.GetVillageIds();
+              var boothIds = qp.GetBoothIds();
 
                    if (villageIds?.Count > 0)
                      query = query.Where(b =>
                     b.Villages.Any(v => villageIds.Contains(v.VillageId)));
 
-               query = query.Where(b =>
+                   if (boothIds?.Count > 0)
+                     query = query.Where(b =>
+                    boothIds.Contains(b.BoothId));
+
+            query = query.Where(b =>
                   (!qp.Id.HasValue || b.Id == qp.Id) &&
-                  ( b.UserId == qp.UserId || b.CreatedToUserId == qp.UserId) &&
-                  (!qp.BoothId.HasValue || b.BoothId == qp.BoothId ));
+                  ( b.UserId == qp.UserId || b.CreatedToUserId == qp.UserId || b.CreatedsectorUserId == qp.UserId) &&
+                  ( b.Booth.Sector.Status ) && (b.Booth.Mandal.Status) &&
+                  ((!qp.BoothId.HasValue || b.BoothId == qp.BoothId) && b.Booth.Status)
+                  && (b.Booth.Mandal.Status  && b.Booth.Sector.Status ));
+
 
 
             Expression<Func<Tbl_PannaPramukh, bool>>? search = null;
@@ -100,7 +115,7 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
             return await _context.Tbl_PannaPramukh   // 👈 replace with your actual DbSet name
                 .AsNoTracking()
                 .Where(m => m.Status == true && 
-                      (m.UserId == qp.UserId || m.CreatedToUserId == qp.UserId) &&
+                      (m.UserId == qp.UserId || m.CreatedToUserId == qp.UserId || m.CreatedsectorUserId == qp.UserId) &&
                            (!qp.BoothId.HasValue || m.BoothId == qp.BoothId))
                 .Select(m => new PannaPramukhExportRow
                 {

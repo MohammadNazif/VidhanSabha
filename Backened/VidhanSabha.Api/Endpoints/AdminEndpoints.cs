@@ -1,8 +1,10 @@
-﻿using MediatR;
+﻿using System.Security.Claims;
+using DocumentFormat.OpenXml.Bibliography;
+using MediatR;
 using Microsoft.AspNetCore.Components.Forms;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
-using System.Security.Claims;
 using VidhanSabha.Api.Responses;
 using VidhanSabha.Application.Common.Booth.Dtos;
 using VidhanSabha.Application.Common.BoothSamitiDesignation.DTOs;
@@ -67,6 +69,7 @@ using VidhanSabha.Application.Pannels.Admin.SocialMediaPost.DTOs;
 using VidhanSabha.Application.Pannels.Admin.SocialMediaPost.Queries;
 using VidhanSabha.Domain.Enums;
 using static System.Net.WebRequestMethods;
+using VillageDto = VidhanSabha.Application.Pannels.Admin.Sector.DTOs.VillageDto;
 public static class AdminEndpoints
 {
     public static void MapAdminEndpoints(this WebApplication app)
@@ -187,12 +190,23 @@ public static class AdminEndpoints
 
         mandal.MapGet("/getAllCombinedReports", async (
             [AsParameters] MandalQueryParams q,
-            IMediator mediator) =>
+            IMediator mediator, HttpContext httpContext) =>
         {
+            q.UserId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var result = await mediator.Send(new GetAllCombinedMandalReportsQuery(q));
 
             return Results.Ok(ApiResponse<PagedResult<MandalFullDto>>.Ok(result));
-        });
+        }).RequireAuthorization();
+
+        mandal.MapGet("/getAllMandalReport", async (
+        [AsParameters] MandalQueryParams q,
+        IMediator mediator, HttpContext httpContext) =>
+        {
+            q.UserId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var result = await mediator.Send(new getAllMandalReportQuery(q));
+
+            return Results.Ok(ApiResponse<PagedResult<MandalReportDto>>.Ok(result));
+        }).RequireAuthorization();
 
         #endregion
 
@@ -255,25 +269,36 @@ public static class AdminEndpoints
 
         sector.MapGet("/getAllSectorReports", async (
             [AsParameters] SectorQueryParams q,
-            IMediator mediator) =>
+            IMediator mediator, HttpContext httpContext) =>
         {
+            q.UserId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var result = await mediator.Send(new GetAllSectorReportsQuery(q));
             return Results.Ok(ApiResponse<PagedResult<SectorReportDto>>.Ok(result));
-        });
+        }).RequireAuthorization();
 
         sector.MapGet("/getAllAdminSectorReports", async (
             [AsParameters] SectorQueryParams q,
-            IMediator mediator) =>
+            IMediator mediator, HttpContext httpContext) =>
         {
+            q.UserId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var result = await mediator.Send(new GetAllAdminSectorReportsQuery(q));
             return Results.Ok(ApiResponse<PagedResult<AdminSectorReportsDto>>.Ok(result));
-        });
-        
+        }).RequireAuthorization();
+
+        sector.MapGet("/getAllSectorVillages", async (
+           [AsParameters] SectorVillageQueryParams q,
+           IMediator mediator, HttpContext httpContext) =>
+        {
+            q.UserId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var result = await mediator.Send(new GetAllSectorVillagesQuery(q));
+            return Results.Ok(ApiResponse<List<VillageDto>>.Ok(result));
+        }).RequireAuthorization();
+
 
         #endregion
 
         #region Booth
-        booth.MapPost("/create", async ([FromForm]BoothRequestDto dto, IMediator mediator, HttpContext http) =>
+        booth.MapPost("/create", async ([FromForm] BoothRequestDto dto, IMediator mediator, HttpContext http) =>
         {
             string UserId = http.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
@@ -334,7 +359,7 @@ public static class AdminEndpoints
             var result = await mediator.Send(new GetAllBoothReportsQuery(q,userId));
 
             return Results.Ok(ApiResponse<PagedResult<BoothReportsDto>>.Ok(result));
-        });
+        }).RequireAuthorization();
 
 
         #endregion
@@ -557,7 +582,8 @@ public static class AdminEndpoints
         sahmatasahmat.MapPost("/create", async (CreateSahmatAsahmatReqDto dto, IMediator mediator,HttpContext http) =>
         {
             string UserId = http.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var result = await mediator.Send(new CreateSahmatAsahmatCommand(dto,UserId));
+            string Role = http.User.FindFirst(ClaimTypes.Role)?.Value;
+            var result = await mediator.Send(new CreateSahmatAsahmatCommand(dto,UserId,Role));
             return Results.Ok(ApiResponse<int>.Ok(result, "Sahmat/Asahmat Voter Created Successfully"));
         }).RequireAuthorization()
                 .WithName("Sahmat/AsahmatNewVoter")
@@ -1056,5 +1082,13 @@ public static class AdminEndpoints
             return Results.Ok(ApiResponse<BoothDashboardCountsDto>.Ok(result));
         }).WithName("getAllBoothdashboardCounts")
          .RequireAuthorization();
+
+        dashboardCounts.MapGet("sector/getAll", async (IMediator mediator, HttpContext httpContext) =>
+        {
+            string userId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var result = await mediator.Send(new getSectorDashboardCountQuery(userId));
+            return Results.Ok(ApiResponse<SectorDashboardCountsDto>.Ok(result));
+        }).WithName("getAllSectordashboardCounts")
+        .RequireAuthorization();
     }
 }

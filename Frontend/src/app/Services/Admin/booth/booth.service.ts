@@ -28,6 +28,14 @@ export class BoothService extends BaseApiService {
     return this.http.get(`${this.apiUrl}/common/getboothincharge?pageSize=1000`);
   }
 
+  getAllBoothReports(params: any = {}): Observable<any> {
+    return this.getWithParams(`${this.apiUrl}/${this.entity}/getAllBoothReports`, params);
+  }
+
+  exportBoothReport(format: 'excel' | 'pdf', params: any = {}): Observable<Blob> {
+    return this.export(`${this.entity}/report`, format, params);
+  }
+
   exportToExcel(): Observable<Blob> {
     return this.http.get(`${this.apiUrl}/${this.entity}/export/excel`, { responseType: 'blob' });
   }

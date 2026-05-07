@@ -1,11 +1,15 @@
 <div class="h-screen p-6 flex flex-col overflow-hidden">
-    <app-page-header title="Mandal Registration" subtitle="Manage and view all Mandals in the legislative assembly.">
+    <app-page-header [title]="isListView ? 'Mandal List' : 'Mandal Registration'" subtitle="Manage and view all Mandals in the legislative assembly.">
 
         <div class="flex items-center gap-3">
 
             <app-generic-modal-button *ngIf="canManage()" #mandalModal [config]="addMandalConfig" label="Add Mandal" icon="+"
                 variant="primary" (formSubmit)="handleFormSubmit($event)">
             </app-generic-modal-button>
+
+            <app-generic-export [show]="isListView && mandalList && mandalList.length > 0" 
+                [isExporting]="isExporting" (export)="handleExport($event)">
+            </app-generic-export>
         </div>
     </app-page-header>
 

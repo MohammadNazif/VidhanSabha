@@ -9,7 +9,7 @@ using VidhanSabha.Application.Pannels.StatePrabhari.VidhanSabha.Dtos;
 
 namespace VidhanSabha.Application.Pannels.StatePrabhari.VidhanSabha.Query
 {
-    public class getAllVidhanSabhaQuery : IRequest<IReadOnlyList<VidhanSabhaSatewiseResponseDto>>
+    public class getAllVidhanSabhaQuery : IRequest<PagedResult<VidhanSabhaSatewiseResponseDto>>
     {
         public vidhansabhaparams q;
         public int? districtId { get; set; }

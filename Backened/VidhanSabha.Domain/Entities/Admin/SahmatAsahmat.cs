@@ -23,6 +23,8 @@ namespace VidhanSabha.Domain.Entities.Admin
         public bool Status { get; private set; } = true;
         public string? UserId { get; private set; }
         public string? CreatedToUserId { get; private set; }
+        public string? CreatedsectorUserId { get; private set; }
+        public string? Role { get; private set; }
 
         private readonly List<Tbl_SahmatAsahmatVillage> _villages = new();
         public IReadOnlyCollection<Tbl_SahmatAsahmatVillage> Villages => _villages.AsReadOnly();
@@ -37,7 +39,7 @@ namespace VidhanSabha.Domain.Entities.Admin
             int BoothId,int TypeId,
             string Name,
             int Age,string Mobile,int PartyId,
-            int OccupationId,string Reason,string VoterId,string userId,string createdToUserId, List<int> villageIds)
+            int OccupationId,string Reason,string VoterId,string userId,string createdToUserId,string createdsectorUserId, string role, List<int> villageIds)
         {
             var data = new Tbl_SahmatAsahmat
             {
@@ -52,7 +54,9 @@ namespace VidhanSabha.Domain.Entities.Admin
                 Reason = Reason,
                 VoterId = VoterId,
                 UserId = userId,
-                CreatedToUserId = createdToUserId 
+                CreatedToUserId = createdToUserId ,
+                CreatedsectorUserId = createdsectorUserId,
+                Role = role
             };
             data.SetVillages(villageIds);
             return data;

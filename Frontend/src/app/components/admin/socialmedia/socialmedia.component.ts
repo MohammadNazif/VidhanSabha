@@ -14,10 +14,12 @@ import { ActivatedRoute } from '@angular/router';
 import { ModulePermission } from '../../../models/module-permission.enum';
 import { PermissionService } from '../../../Services/common/permission.service';
 
+import { GenericExportComponent } from '../../shared/generic-export/generic-export.component';
+
 @Component({
   selector: 'app-socialmedia',
   standalone: true,
-  imports: [CommonModule, PageHeaderComponent, GenericTableComponent, GenericModalButtonComponent],
+  imports: [CommonModule, PageHeaderComponent, GenericTableComponent, GenericModalButtonComponent, GenericExportComponent],
   templateUrl: './socialmedia.component.html',
   styleUrl: './socialmedia.component.css'
 })
@@ -27,6 +29,7 @@ export class SocialMediaComponent implements OnInit {
   socialMediaList: any[] = [];
   totalCount = 0;
   loading = false;
+  isExporting = false;
 
   // Server-side state
   pageNumber = 1;
@@ -37,7 +40,10 @@ export class SocialMediaComponent implements OnInit {
   isListView = false;
 
   canManage(): boolean {
-    return !this.isListView && this.permissionService.hasPermission(ModulePermission.SocialMedia);
+    if (this.isListView) return false;
+    const role = (this.authService.getRole() || '').toUpperCase().trim();
+    if (role === 'VIDHANSABHAPRABHARI') return true;
+    return this.permissionService.hasPermission(ModulePermission.SocialMedia);
   }
 
   columns: TableColumn[] = [
@@ -156,7 +162,13 @@ export class SocialMediaComponent implements OnInit {
         label: 'Booths',
         type: 'select',
         placeholder: '--Select Booths--',
-        apiUrl: 'common/boothNumber',
+        apiUrl: () => {
+          const role = (this.authService.getRole() || '').toUpperCase().trim();
+          if (role === 'SECTORSANYOJAK') {
+            return `booth/getAllBoothBySectorid?sectorid=${this.authService.getUserId()}`;
+          }
+          return 'common/boothNumber';
+        },
         apiMapper: (data: any) => {
           const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
           return list.map((item: any) => ({
@@ -318,6 +330,10 @@ export class SocialMediaComponent implements OnInit {
 
   handleExport(format: string) {
     if (!format) return;
-    this.toastService.showSuccess('Export Started', `Successfully generated ${format.toUpperCase()} export!`);
+    this.isExporting = true;
+    setTimeout(() => {
+      this.isExporting = false;
+      this.toastService.showSuccess('Export Started', `Successfully generated ${format.toUpperCase()} export!`);
+    }, 1000);
   }
 }

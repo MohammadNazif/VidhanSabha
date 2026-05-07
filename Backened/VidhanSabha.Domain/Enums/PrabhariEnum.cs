@@ -12,5 +12,6 @@ namespace VidhanSabha.Domain.Enums
         VidhanSabhaPrabhari = 2,
         BoothSanyojak =3,
         SectorSanyojak= 4,
+        SUPERADMIN =5
     }
 }

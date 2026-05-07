@@ -33,6 +33,15 @@ export class VidhanSabhaComponent implements OnInit {
   isListMode = false;
   listTitle = 'Vidhan Sabha Management';
 
+  // Server-side state
+  pageNumber = 1;
+  pageSize = 10;
+  searchTerm = '';
+  sortBy = 'id';
+  isDescending = true;
+  totalCount = 0;
+  loading = false;
+
   isStatePrabhari(): boolean {
     return (this.authService.getRole() || '').toUpperCase().trim() === 'STATEPRABHARI';
   }
@@ -58,6 +67,7 @@ export class VidhanSabhaComponent implements OnInit {
     defaultPageSize: 10,
     pageSizeOptions: [10, 20, 50],
     searchable: true,
+    serverSide: true,
     searchPlaceholder: 'Search constituencies...',
     showRowNumbers: true,
     striped: true,
@@ -141,42 +151,91 @@ export class VidhanSabhaComponent implements OnInit {
       }
     });
     if (this.isStatePrabhari()) {
-      this.stateService.getAllStates().subscribe({
-        next: (response) => {
-          const list = response?.data || response || [];
-          if (list.length > 0) {
-            this.defaultStateId = String(list[0].stateId || list[0].id);
+      const savedStateId = this.authService.getStateId();
+      if (savedStateId) {
+        this.defaultStateId = savedStateId;
 
-            const districtField = this.addVidhanConfig.fields.find(f => f.id === 'districtId');
-            if (districtField) {
-              districtField.apiUrl = () => `vidhansabhacount/districtwise/getAll?userId=${this.authService.getUserId()}`;
+        const districtField = this.addVidhanConfig.fields.find(f => f.id === 'districtId');
+        if (districtField) {
+          districtField.apiUrl = () => `vidhansabhacount/districtwise/getAll?userId=${this.authService.getUserId()}`;
+        }
+        // Load data only after defaultStateId is ready
+        this.loadVidhanSabhas();
+      } else {
+        this.stateService.getAllStates().subscribe({
+          next: (response) => {
+            const list = response?.data || response || [];
+            if (list.length > 0) {
+              this.defaultStateId = String(list[0].stateId || list[0].id);
+
+              const districtField = this.addVidhanConfig.fields.find(f => f.id === 'districtId');
+              if (districtField) {
+                districtField.apiUrl = () => `vidhansabhacount/districtwise/getAll?userId=${this.authService.getUserId()}`;
+              }
+              // Load data only after defaultStateId is ready
+              this.loadVidhanSabhas();
             }
-            // Load data only after defaultStateId is ready
-            this.loadVidhanSabhas();
-          }
-        },
-        error: () => this.loadVidhanSabhas() // Fallback load
-      });
+          },
+          error: () => this.loadVidhanSabhas() // Fallback load
+        });
+      }
     } else {
       this.loadVidhanSabhas();
     }
   }
 
   loadVidhanSabhas() {
-    this.vidhanService.getVidhanSabhasByStateId(this.defaultStateId).subscribe({
+    this.loading = true;
+    const params = {
+      stateId: this.defaultStateId,
+      PageNumber: this.pageNumber,
+      PageSize: this.pageSize,
+      SearchTerm: this.searchTerm,
+      SortBy: this.sortBy,
+      IsDescending: this.isDescending
+    };
+
+    this.vidhanService.getVidhanSabhasByStateId(params).subscribe({
       next: (response) => {
         if (response && response.isSuccess) {
-          const list = response.data || [];
+          const rawData = response.data;
+          const list = Array.isArray(rawData?.items) ? rawData.items : (Array.isArray(rawData) ? rawData : []);
           this.vidhanList = list.map((item: any) => ({
             ...item,
             hasPrabhari: item.hasPrabhari ? 'Yes' : 'No'
           }));
+          this.totalCount = rawData?.totalCount || list.length;
         } else {
           this.vidhanList = [];
+          this.totalCount = 0;
         }
+        this.loading = false;
       },
-      error: (err) => console.error('Error fetching Vidhan Sabhas:', err)
+      error: (err) => {
+        console.error('Error fetching Vidhan Sabhas:', err);
+        this.loading = false;
+        this.totalCount = 0;
+      }
     });
+  }
+
+  handlePageChange(event: any) {
+    this.pageNumber = event.currentPage;
+    this.pageSize = event.pageSize;
+    this.loadVidhanSabhas();
+  }
+
+  handleSortChange(event: any) {
+    this.sortBy = event.column;
+    this.isDescending = event.direction === 'desc';
+    this.pageNumber = 1;
+    this.loadVidhanSabhas();
+  }
+
+  handleSearchChange(term: string) {
+    this.searchTerm = term;
+    this.pageNumber = 1;
+    this.loadVidhanSabhas();
   }
 
   handleAction(event: any) {

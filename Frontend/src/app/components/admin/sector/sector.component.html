@@ -1,5 +1,5 @@
 <div class="h-screen p-6 flex flex-col overflow-hidden">
-    <app-page-header title="Sectors Registration" subtitle="Manage and view all sectors in the assembly.">
+    <app-page-header [title]="isListView ? 'Sector List' : 'Sectors Registration'" subtitle="Manage and view all sectors in the assembly.">
 
         <div class="flex items-center gap-3">
 
@@ -7,6 +7,10 @@
             <app-generic-modal-button *ngIf="canManage()" #sectorModal [config]="addSectorConfig" label="Add Sector" icon="+"
                 variant="primary" (formSubmit)="handleFormSubmit($event)">
             </app-generic-modal-button>
+
+            <app-generic-export [show]="isListView && sectorList && sectorList.length > 0" 
+                [isExporting]="isExporting" (export)="handleExport($event)">
+            </app-generic-export>
         </div>
     </app-page-header>
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using VidhanSabha.Application.Common.Dtos;
 using VidhanSabha.Application.Pannels.SuperAdmin.StatePrabhari.Command;
 using VidhanSabha.Domain.Enums;
 
@@ -61,5 +62,13 @@ namespace VidhanSabha.Application.Pannels.SuperAdmin.StatePrabhari.Dtos
     public class UpdatePrabhariRequestDto : CreatePrabhariRequestDto
     {
         public int Id { get; set; }
+        public string  userId { get; set; }
     }
+
+    public class QueryParams :BaseQueryParams
+    {
+      
+    }
+
+
 }

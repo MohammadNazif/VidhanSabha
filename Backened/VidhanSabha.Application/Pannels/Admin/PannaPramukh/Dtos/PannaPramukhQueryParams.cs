@@ -13,8 +13,10 @@ namespace VidhanSabha.Application.Pannels.Admin.PannaPramukh.Dtos
         public int? Id { get; set; }
 
         public string? VillageIds { get; set; }
+        public string? BoothIds { get; set; }
 
         public List<int> GetVillageIds() => FilterParse.ParseIds(VillageIds);
+        public List<int> GetBoothIds() => FilterParse.ParseIds(BoothIds);
 
         public int? BoothId { get; set; }
 

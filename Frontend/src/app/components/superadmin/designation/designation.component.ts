@@ -24,12 +24,12 @@ export class DesignationComponent implements OnInit {
   designationList: any[] = [];
 
   columns: TableColumn[] = [
-    { key: 'designationName', label: 'Designation Name', type: 'avatar', sortable: true, avatarFallbackKey: 'name' },
+    { key: 'designationName', label: 'Designation Name' },
   ];
 
   config: TableConfig = {
     selectable: false,
-    filterable: true,
+    // filterable: true,
     paginated: true,
     defaultPageSize: 10,
     pageSizeOptions: [10, 20, 50],

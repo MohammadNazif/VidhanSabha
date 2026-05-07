@@ -40,7 +40,10 @@ export class InfluencerComponent implements OnInit {
   pageSubtitle = 'Manage master data for influential people';
 
   canManage(): boolean {
-    return !this.isListView;
+    if (this.isListView) return false;
+    const role = (this.authService.getRole() || '').toUpperCase().trim();
+    if (role === 'VIDHANSABHAPRABHARI') return true;
+    return true; // Influencer Master Data is usually manageable by authorized roles
   }
 
   columns: TableColumn[] = [
@@ -134,7 +137,13 @@ export class InfluencerComponent implements OnInit {
         label: 'Booth',
         type: 'select',
         placeholder: '-- Select Booth --',
-        apiUrl: 'common/boothNumber',
+        apiUrl: () => {
+          const role = (this.authService.getRole() || '').toUpperCase().trim();
+          if (role === 'SECTORSANYOJAK') {
+            return `booth/getAllBoothBySectorid?sectorid=${this.authService.getUserId()}`;
+          }
+          return 'common/boothNumber';
+        },
         apiMapper: (data: any) => {
           const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
           return list.map((item: any) => ({

@@ -10,14 +10,17 @@ import { BdcService } from '../../../Services/Admin/bdc/bdc.service';
 import { ToastService } from '../../../Services/common/toast/toast.service';
 import { CrudHandlerService } from '../../../Services/common/crud-handler.service';
 import { ActivatedRoute } from '@angular/router';
+import { AuthServiceService } from '../../../Services/Auth/auth.service';
+
+import { GenericExportComponent } from '../../shared/generic-export/generic-export.component';
 
 @Component({
   selector: 'app-bdc',
   standalone: true,
-  imports: [CommonModule, FormsModule, GenericTableComponent, GenericModalButtonComponent, PageHeaderComponent],
+  imports: [CommonModule, FormsModule, GenericTableComponent, GenericModalButtonComponent, PageHeaderComponent, GenericExportComponent],
   template: `
     <div class="h-full flex flex-col p-4 gap-4 overflow-hidden">
-      <app-page-header title="BDC Management" subtitle="Manage Block Development Council members and assignments">
+      <app-page-header [title]="isListView ? 'BDC List' : 'BDC Management'" subtitle="Manage Block Development Council members and assignments">
         <app-generic-modal-button 
             *ngIf="canManage()"
             #bdcModal 
@@ -27,6 +30,10 @@ import { ActivatedRoute } from '@angular/router';
             variant="primary" 
             (formSubmit)="handleFormSubmit($event)">
         </app-generic-modal-button>
+
+        <app-generic-export [show]="isListView && bdcs && bdcs.length > 0" 
+            [isExporting]="isExporting" (export)="handleExport($event)">
+        </app-generic-export>
       </app-page-header>
 
       <div class="flex-1 min-h-0 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col p-2">
@@ -52,9 +59,12 @@ export class BdcComponent implements OnInit {
   totalItems = 0;
   searchTerm = '';
   isListView = false;
+  isExporting = false;
 
   canManage(): boolean {
-    return !this.isListView;
+    if (this.isListView) return false;
+    const role = (this.authService.getRole() || '').toUpperCase().trim();
+    return ['SUPERADMIN', 'ADMIN', 'VIDHANSABHAPRABHARI'].includes(role);
   }
 
   columns: TableColumn[] = [
@@ -218,7 +228,8 @@ export class BdcComponent implements OnInit {
     private bdcService: BdcService,
     private toastService: ToastService,
     private crudHandler: CrudHandlerService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private authService: AuthServiceService
   ) { }
 
   ngOnInit() {
@@ -311,6 +322,10 @@ export class BdcComponent implements OnInit {
 
   handleExport(format: string) {
     if (!format) return;
-    this.toastService.showSuccess('Export Started', `Successfully generated ${format.toUpperCase()} export!`);
+    this.isExporting = true;
+    setTimeout(() => {
+      this.isExporting = false;
+      this.toastService.showSuccess('Export Started', `Successfully generated ${format.toUpperCase()} export!`);
+    }, 1000);
   }
 }

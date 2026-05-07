@@ -1,8 +1,9 @@
-﻿using MediatR;
+﻿using DocumentFormat.OpenXml.Drawing.Charts;
+using MediatR;
 using VidhanSabha.Application.Common.CredentialMananger;
-using VidhanSabha.Application.Common.UnitOfWork;
 using VidhanSabha.Application.Pannels.SuperAdmin.StatePrabhari.Interfaces;
 using VidhanSabha.Domain.Entities.SuperAdmin;
+using VidhanSabha.Domain.Enums;
 
 namespace VidhanSabha.Application.Pannels.SuperAdmin.StatePrabhari.Command
 {
@@ -10,65 +11,55 @@ namespace VidhanSabha.Application.Pannels.SuperAdmin.StatePrabhari.Command
     {
         private readonly IStatePrabhariRepository _repo;
         private readonly CredentialManagerFunc _credentialManager;
-        private readonly IUnitOfWork _uow;
+        // ✅ IUnitOfWork REMOVED — caller owns the transaction
 
         public CreatePrabhariCommandHandler(
             IStatePrabhariRepository repo,
-            CredentialManagerFunc credentialManager,
-            IUnitOfWork uow)
+            CredentialManagerFunc credentialManager)
         {
             _repo = repo;
             _credentialManager = credentialManager;
-            _uow = uow;
         }
 
         public async Task<int> Handle(CreatePrabhariCommand req, CancellationToken cancellationToken)
         {
-            
             var request = req.Dto;
             var userId = $"USR_{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}";
-            await _uow.BeginTransactionAsync();
-
-            try
+            if (IsUserRole(req.Role, PrabhariRole.SUPERADMIN))
             {
-                // Step 1 — Insert tbl_login first
-                await _credentialManager.InsertCredentialAsync(
-                     userId: userId,
-                    mobile: request.ContactNumber,
-                    email: request.PrabhariEmail,
-                    role: request.PrabhariRole
-                );
-
-                // Step 2 — Insert tbl_stateprabhari
-                var data = Tbl_StatePrabhari.Create(
-                    request.CreatedByUserId,
-                    userId,
-                    request.stateId,
-                    request.vidhanSanhaId,
-                    request.PrabhariRole,
-                    request.PrabhariName,
-                    request.PrabhariEmail,
-                    request.Gender,
-                    request.ContactNumber,
-                    request.CategoryId,
-                    request.CastId,
-                    request.Education,
-                    request.Profession,
-                    request.CurrentAddress
-                );
-
-                var result = await _repo.AddAsync(data);
-
-                // Step 3 — Both success → commit
-                await _uow.CommitAsync();
-
-                return result;
+                request.PrabhariRole = PrabhariRole.StatePrabhari;
             }
-            catch (Exception ex)
-            {
-                await _uow.RollbackAsync();
-                throw new ApplicationException($"Prabhari registration failed. Rolled back. Reason: {ex.Message}", ex);
-            }
+
+            await _credentialManager.InsertCredentialAsync(
+                userId: userId,
+                mobile: request.ContactNumber,
+                email: request.PrabhariEmail,
+                role: request.PrabhariRole
+            );
+
+            // Step 2 — Insert tbl_stateprabhari
+            var data = Tbl_StatePrabhari.Create(
+                req.UserId,
+                userId,
+                request.stateId,
+                request.vidhanSanhaId,
+                request.PrabhariRole,          // ✅ BUG FIXED: was hardcoded to PrabhariRole.StatePrabhari
+                request.PrabhariName,
+                request.PrabhariEmail,
+                request.Gender,
+                request.ContactNumber,
+                request.CategoryId,
+                request.CastId,
+                request.Education,
+                request.Profession,
+                request.CurrentAddress
+            );
+
+            return await _repo.AddAsync(data);
+        }
+        private bool IsUserRole(string currentRole, PrabhariRole roleToCheck)
+        {
+            return currentRole == roleToCheck.ToString();
         }
     }
 }

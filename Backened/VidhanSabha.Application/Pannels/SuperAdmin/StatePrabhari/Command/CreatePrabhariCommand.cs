@@ -11,9 +11,13 @@ namespace VidhanSabha.Application.Pannels.SuperAdmin.StatePrabhari.Command
     public class CreatePrabhariCommand : IRequest<int>
     {
         public CreatePrabhariRequestDto Dto { get; private set; }
-        public CreatePrabhariCommand(CreatePrabhariRequestDto dto)
+        public string UserId { get; private set; }
+        public string Role { get; private set; }
+        public CreatePrabhariCommand(CreatePrabhariRequestDto dto,string userId,string role)
         {
             Dto = dto;
+            UserId = userId;
+            Role = role;
         }
     }
 }

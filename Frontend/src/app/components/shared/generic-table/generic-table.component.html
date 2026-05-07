@@ -125,10 +125,11 @@
 
         <!-- Column Headers -->
         <th *ngFor="let col of visibleColumns" [style.width]="col.width || 'auto'"
-          [style.min-width]="col.minWidth || 'auto'" [style.text-align]="col.align || 'left'"
+          [style.min-width]="col.minWidth || 'auto'" 
+          [style.text-align]="col.align || (isNumericColumn(col) ? 'center' : 'left')"
           [class.sortable]="col.sortable" [class.sorted]="sortState.column === col.key" [class]="col.cssClass || ''"
           (click)="onSort(col)">
-          <div class="th-content" [style.justify-content]="col.align === 'center' ? 'center' : (col.align === 'right' ? 'flex-end' : 'flex-start')">
+          <div class="th-content" [style.justify-content]="(col.align === 'center' || (!col.align && isNumericColumn(col))) ? 'center' : (col.align === 'right' ? 'flex-end' : 'flex-start')">
             <span>{{ col.label }}</span>
             <span *ngIf="col.sortable" class="sort-icon" [class.active]="sortState.column === col.key">
               {{ getSortIcon(col) }}
@@ -183,7 +184,9 @@
           </td>
 
           <!-- Data Cells -->
-          <td *ngFor="let col of visibleColumns" [style.text-align]="col.align || 'left'" [class]="col.cssClass || ''">
+          <td *ngFor="let col of visibleColumns" 
+              [style.text-align]="col.align || (isNumericColumn(col) ? 'center' : 'left')" 
+              [class]="col.cssClass || ''">
             <!-- Custom template via content projection -->
             <ng-container *ngIf="cellTemplate; else defaultCell">
               <ng-container
@@ -211,7 +214,19 @@
               <!-- Avatar -->
               <ng-container *ngIf="col.type === 'avatar'">
                 <div class="cell-avatar">
-                  <span class="avatar-name">{{ getCellValue(row, col) }}</span>
+                  <div class="avatar-circle" *ngIf="getCellValue(row, col)">
+                    <img [src]="getImageUrl(getCellValue(row, col))" 
+                         (error)="handleImageError($event)"
+                         class="avatar-img" />
+                    <div class="avatar-placeholder hidden">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="opacity-40"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    </div>
+                  </div>
+                  <div class="avatar-fallback" *ngIf="!getCellValue(row, col)">
+                    <div class="avatar-circle bg-slate-50 border-slate-100">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-slate-300"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    </div>
+                  </div>
                 </div>
               </ng-container>
 

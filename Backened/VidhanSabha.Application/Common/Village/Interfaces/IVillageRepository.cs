@@ -14,6 +14,6 @@ namespace VidhanSabha.Application.Common.Category.Interfaces
         Task<List<VillageResponseDtos>> GetAllVillageAsync();
         Task<List<Tbl_Village>> GetAllByMandalIdAsync(int mandalId);
 
-        Task<List<VillageByBoothResponseDto>> GetAllByBoothIdAsync(int boothId);
+        Task<List<VillageByBoothResponseDto>> GetAllByBoothIdAsync(int? boothId);
     }
 }

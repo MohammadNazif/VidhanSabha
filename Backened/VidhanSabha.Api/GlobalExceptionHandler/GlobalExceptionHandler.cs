@@ -35,9 +35,8 @@ public class GlobalExceptionHandler : IExceptionHandler
             Title = GetTitle(statusCode),
             Status = statusCode,
             Instance = context.Request.Path,
-            Detail = _env.IsDevelopment()
-                ? exception.Message
-                : "Something went wrong"
+            Detail = exception.Message
+               
         };
 
         problem.Extensions["traceId"] = context.TraceIdentifier;

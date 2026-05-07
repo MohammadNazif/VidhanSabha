@@ -10,13 +10,13 @@ using VidhanSabha.Domain.Enums;
 public class CreateVidhanSabhaCommandHandler : IRequestHandler<CreateVidhanSabhaCommand, int>
 {
     private readonly IVidhanSabhaRepository _vidhanSabhaRepo;
-    private readonly IMediator _mediator;              // ✅ MediatR injected
+    private readonly IMediator _mediator;
     private readonly IUnitOfWork _uow;
 
     public CreateVidhanSabhaCommandHandler(
         IVidhanSabhaRepository vidhanSabhaRepo,
-        IMediator mediator,                            // ✅ No need for _prabhariRepo
-        IUnitOfWork uow)                               //    or _credentialManager here
+        IMediator mediator,
+        IUnitOfWork uow)
     {
         _vidhanSabhaRepo = vidhanSabhaRepo;
         _mediator = mediator;
@@ -27,47 +27,58 @@ public class CreateVidhanSabhaCommandHandler : IRequestHandler<CreateVidhanSabha
     {
         var req = request.Dto;
         int vidhanSabhaId = 0;
+
         await _uow.BeginTransactionAsync();
         try
         {
-          
-              var data =  await  _vidhanSabhaRepo.GetByVidhanIdAsync(req.VidhanSabhaId);
-               if(data == null)
-              {
-                var vidhanSabha = Tbl_VidhanSabha.Create(req.VidhanSabhaName, req.VidhanSabhaCount, req.DistrictId, req.UserId, req.stateId);
+            // Step 1 — Check if VidhanSabha already exists
+            var existing = await _vidhanSabhaRepo.GetByVidhanIdAsync(req.VidhanSabhaId);
+            if (existing == null)
+            {
+                var vidhanSabha = Tbl_VidhanSabha.Create(
+                    req.VidhanSabhaName,
+                    req.vidhanSabhaNumber,
+                    req.DistrictId,
+                    req.UserId,
+                    req.stateId
+                );
+                vidhanSabhaId = await _vidhanSabhaRepo.AddAsync(vidhanSabha);
+            }
+            else
+            {
+                vidhanSabhaId = existing.vidhanSabhaId;
+            }
 
-                 vidhanSabhaId = await _vidhanSabhaRepo.AddAsync(vidhanSabha);
-               }
-              else
-             {
-                vidhanSabhaId = data.vidhanSabhaId;
-              }
-             
-          
+            // Step 2 — Optionally create Prabhari (no nested transaction — outer tx covers it)
             if (req.Prabhari != null && req.isPrabhari)
             {
                 var p = req.Prabhari;
-
-                
-                await _mediator.Send(new CreatePrabhariCommand(new CreatePrabhariRequestDto
-                {
-
-                    CreatedByUserId = request.UserId,
-                    PrabhariRole = PrabhariRole.VidhanSabhaPrabhari,
-                    stateId  = p.stateId,
-                    vidhanSanhaId = vidhanSabhaId, 
-                    PrabhariName =p.PrabhariName,
-                    PrabhariEmail = p.PrabhariEmail,
-                    Gender = p.Gender,
-                    ContactNumber = p.ContactNumber,
-                    CategoryId = p.CategoryId,
-                    CastId = p.CastId,
-                    Education = p.Education,
-                    Profession = p.Profession,
-                    CurrentAddress = p.CurrentAddress
-                }), cancellationToken);
+                await _mediator.Send(
+                    new CreatePrabhariCommand(
+                        new CreatePrabhariRequestDto
+                        {
+                            CreatedByUserId = request.UserId,
+                            PrabhariRole = PrabhariRole.VidhanSabhaPrabhari,
+                            stateId = p.stateId,
+                            vidhanSanhaId = vidhanSabhaId,
+                            PrabhariName = p.PrabhariName,
+                            PrabhariEmail = p.PrabhariEmail,
+                            Gender = p.Gender,
+                            ContactNumber = p.ContactNumber,
+                            CategoryId = p.CategoryId,
+                            CastId = p.CastId,
+                            Education = p.Education,
+                            Profession = p.Profession,
+                            CurrentAddress = p.CurrentAddress
+                        },
+                        request.UserId,
+                        request.Role
+                    ),
+                    cancellationToken
+                );
             }
 
+            // Step 3 — Everything succeeded, commit the single transaction
             await _uow.CommitAsync();
             return vidhanSabhaId;
         }

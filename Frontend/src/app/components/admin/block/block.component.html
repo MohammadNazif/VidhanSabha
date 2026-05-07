@@ -1,9 +1,13 @@
 <div class="h-screen p-6 flex flex-col overflow-hidden bg-slate-50/50">
-    <app-page-header title="Block Management" subtitle="Manage blocks and block pramukhs.">
+    <app-page-header [title]="isListView ? 'Block List' : 'Block Management'" subtitle="Manage blocks and block pramukhs.">
         <div class="flex items-center gap-3">
             <app-generic-modal-button *ngIf="canManage()" #blockModal [config]="formConfig" label="Add Block" icon="+" variant="primary"
                 (formSubmit)="handleFormSubmit($event)">
             </app-generic-modal-button>
+
+            <app-generic-export [show]="isListView && blockList && blockList.length > 0" 
+                [isExporting]="isExporting" (export)="handleExport($event)">
+            </app-generic-export>
         </div>
     </app-page-header>
 

@@ -57,6 +57,10 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
 
         public async Task<PagedResult<SeniorDisabledResponseDto>> GetAllAsync(SeniorDisabledQueryParams qp, CancellationToken ct = default)
         {
+        //    var vidhanSabhaId = await _context.Tbl_StatePrabhari
+        //.Where(u => u.userId == qp.UserId)
+        //.Select(u => u.VidhansabhaId)
+        //.FirstOrDefaultAsync();
             var query = _context.Tbl_SeniorDisabled
                .AsNoTracking()
                .AsQueryable();
@@ -68,10 +72,10 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
             // ✅ FIX 1: query = assign karo, sirf query.Where nahi
             query = query.Where(b =>
              
-                (!qp.Id.HasValue || b.Id == qp.Id) &&
+                (!qp.Id.HasValue || b.Id == qp.Id) && (b.Booth.Mandal.Status && b.Booth.Sector.Status) &&
                  (!qp.TypeId.HasValue || b.TypeId == qp.TypeId) &&
                 
-                (b.UserId == qp.UserId || b.CreatedToUserId == qp.UserId ) && b.Status );            
+                (b.UserId == qp.UserId || b.CreatedToUserId == qp.UserId || b.CreatedsectorUserId == qp.UserId ) && b.Status );            
 
             if (boothIds.Any())
                 query = query.Where(b => boothIds.Contains(b.BoothId));
@@ -132,7 +136,7 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
         public async Task<List<seniordisabledExportRow>> GetSeniorDisabledExportAsync(SeniorDisabledQueryParams qp)
         {
             return await _context.Tbl_SeniorDisabled  // replace with your actual table name
-                .Where(m => !qp.TypeId.HasValue || m.TypeId == qp.TypeId && m.Status && ( m.UserId == qp.UserId || m.CreatedToUserId == qp.UserId))
+                .Where(m => !qp.TypeId.HasValue || m.TypeId == qp.TypeId && m.Status && ( m.UserId == qp.UserId || m.CreatedToUserId == qp.UserId || m.CreatedsectorUserId == qp.UserId))
                 .Select(m => new seniordisabledExportRow
                 {
                     BoothNumber = m.Booth != null ? m.Booth.BoothNumber : 0,

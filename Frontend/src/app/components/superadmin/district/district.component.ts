@@ -42,8 +42,7 @@ export class DistrictComponent implements OnInit {
 
   columns: TableColumn[] = [
     { key: 'districtName', label: 'District Name', sortable: true },
-    { key: 'vidhanSabhaCount', label: 'VS Count', sortable: true },
-    { key: 'remainingCount', label: 'Remaining Count', sortable: true }
+    { key: 'vidhanSabhaCount', label: 'VS Count', sortable: true }
   ];
 
   config: TableConfig = {
@@ -60,7 +59,7 @@ export class DistrictComponent implements OnInit {
   };
 
   actions: TableAction[] = [
-    { id: 'add_vidhansabha', label: 'Vidhan Sabha', variant: 'primary', icon: 'layout' },
+    // { id: 'add_vidhansabha', label: 'Vidhan Sabha', variant: 'primary', icon: 'layout' },
     { id: 'edit', label: '', variant: 'default', icon: 'edit' },
     { id: 'delete', label: '', variant: 'danger', icon: 'delete' }
   ];
@@ -299,38 +298,58 @@ export class DistrictComponent implements OnInit {
         stateField.type = 'hidden';
       }
 
-      // Fetch the assigned state ID and configure modal
-      this.stateService.getAllStates().subscribe({
-        next: (response) => {
-          const list = response?.data || response || [];
-          if (list.length > 0) {
-            this.defaultStateId = String(list[0].stateId || list[0].id);
+      const savedStateId = this.authService.getStateId();
+      if (savedStateId) {
+        this.defaultStateId = savedStateId;
+        this.addDistrictConfig.fields = this.addDistrictConfig.fields.filter(f => f.id !== 'stateId');
+        const districtField = this.addDistrictConfig.fields.find(f => f.id === 'districtId');
+        if (districtField) {
+          delete (districtField as any).dependsOn;
+          districtField.apiUrl = () => `common/getdistrict?id=${this.defaultStateId}`;
+          districtField.apiMapper = (data: any) => {
+            const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
+            return list.map((item: any) => ({
+              value: String(item.id),
+              label: item.districtName,
+              disabled: this.districtList.some(d => d.districtId === item.id)
+            }));
+          };
+        }
+        this.loadDistricts();
+      } else {
+        // Fetch the assigned state ID and configure modal
+        this.stateService.getAllStates().subscribe({
+          next: (response) => {
+            const list = response?.data || response || [];
+            if (list.length > 0) {
+              this.defaultStateId = String(list[0].stateId || list[0].id);
 
-            // Standardize Add District configuration for State Prabhari
-            this.addDistrictConfig.fields = this.addDistrictConfig.fields.filter(f => f.id !== 'stateId');
-            const districtField = this.addDistrictConfig.fields.find(f => f.id === 'districtId');
-            if (districtField) {
-              delete (districtField as any).dependsOn;
-              districtField.id = 'districtId';
-              districtField.name = 'districtId';
-              districtField.apiUrl = () => `common/getdistrict?id=${this.defaultStateId}`;
-              districtField.apiMapper = (data: any) => {
-                const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
-                return list.map((item: any) => ({
-                  value: String(item.id),
-                  label: item.districtName,
-                  disabled: this.districtList.some(d => d.districtId === item.id)
-                }));
-              };
+              // Standardize Add District configuration for State Prabhari
+              this.addDistrictConfig.fields = this.addDistrictConfig.fields.filter(f => f.id !== 'stateId');
+              const districtField = this.addDistrictConfig.fields.find(f => f.id === 'districtId');
+              if (districtField) {
+                delete (districtField as any).dependsOn;
+                districtField.id = 'districtId';
+                districtField.name = 'districtId';
+                districtField.apiUrl = () => `common/getdistrict?id=${this.defaultStateId}`;
+                districtField.apiMapper = (data: any) => {
+                  const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
+                  return list.map((item: any) => ({
+                    value: String(item.id),
+                    label: item.districtName,
+                    disabled: this.districtList.some(d => d.districtId === item.id)
+                  }));
+                };
+              }
+              // Load districts after we have the defaultStateId
+              this.loadDistricts();
+            } else {
+              this.loadDistricts();
             }
-            // Load districts after we have the defaultStateId
-            this.loadDistricts();
-          } else {
-            this.loadDistricts();
-          }
-        },
-        error: () => this.loadDistricts()
-      });
+          },
+          error: () => this.loadDistricts()
+        });
+      }
     } else {
       this.loadDistricts();
     }
@@ -400,7 +419,7 @@ export class DistrictComponent implements OnInit {
       userId: this.authService.getUserId(),
       stateId: Number(raw.stateId || this.districtModal.initialData?.stateId || this.defaultStateId),
       districtId: Number(raw.districtId || raw.id),
-      vidhanSabhaCount: Number(raw.vidhanSabhaCount)
+      VidhanSabhaNumber: Number(raw.vidhanSabhaCount)
     };
 
     const isUpdate = !!submitData.id;

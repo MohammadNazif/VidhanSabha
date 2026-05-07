@@ -1,0 +1,32 @@
+<div class="h-screen p-4 flex flex-col overflow-hidden bg-slate-50/50">
+  <app-page-header
+    title="Booth Report"
+    subtitle="Comprehensive report of all booths and their statistics">
+    <div class="flex items-center gap-3">
+      <button (click)="goBack()" class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-slate-600 hover:text-slate-900 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-all shadow-sm">
+        <lucide-icon name="arrow-left" [size]="14"></lucide-icon>
+        Back
+      </button>
+      <app-generic-export
+        [show]="reportData && reportData.length > 0"
+        [isExporting]="exporting"
+        (export)="handleExport($event)">
+      </app-generic-export>
+    </div>
+  </app-page-header>
+
+  <div class="flex-1 min-h-0 mt-4 bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
+    <app-generic-table
+      class="flex-1 min-h-0"
+      [data]="reportData"
+      [columns]="columns"
+      [config]="config"
+      [loading]="loading"
+      [totalItems]="totalCount"
+      (pageChange)="handlePageChange($event)"
+      (searchChange)="handleSearchChange($event)"
+      (filterChange)="handleFilterChange($event)"
+      (sortChange)="handleSortChange($event)">
+    </app-generic-table>
+  </div>
+</div>

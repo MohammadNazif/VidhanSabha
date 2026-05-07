@@ -68,11 +68,11 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
         public async Task<List<BoothNumberDto>> BoothBysectorId(string userId)
         {
 
-            var adminUserId =  await _context.Tbl_Sector.Where(x => x.UserId == userId).Select(b => b.CreatedByUserId).FirstOrDefaultAsync();
+            var sectorId =  await _context.Tbl_Sector.Where(x => x.UserId == userId).Select(b => b.Id).FirstOrDefaultAsync();
            
 
             var res = await _context.Tbl_Booth
-                .Where(b => b.UserId == adminUserId && b.Status)
+                .Where(b => b.SectorId == sectorId && b.Status)
                 .Select(b => new BoothNumberDto
                 {
                     BoothId = b.Id,
@@ -98,10 +98,12 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
         {
             var query = _context.Tbl_Booth
            .AsNoTracking()
-        .Where(b => b.Mandal.VidhanId == vidhanId);
+         .Where(b => !vidhanId.HasValue || b.Mandal.VidhanId == vidhanId.Value);
 
             var mandalIds = qp.GetMandalIds();
             var sectorIds = qp.GetSectorIds();
+
+            var boothIds = qp.GetBoothIds();
 
             if (mandalIds.Any())
             {
@@ -110,9 +112,11 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
 
             if (sectorIds.Any())
                 query = query.Where(b => sectorIds.Contains(b.SectorId));
+            if (boothIds.Any())
+                query = query.Where(b => boothIds.Contains(b.Id));
 
             if (!string.IsNullOrEmpty(qp.UserId))
-                query = query.Where(b => b.UserId == qp.UserId);
+                query = query.Where(b => b.UserId == qp.UserId || b.Sector.UserId == qp.UserId);
             Expression<Func<Tbl_Booth, bool>>? search = null;
 
             if (!string.IsNullOrWhiteSpace(qp.SearchTerm))
@@ -224,65 +228,117 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
 
 
         public async Task<PagedResult<BoothReportsDto>> GetAllBoothReports(
-          BoothQueryParams qp,int? vidhanId, CancellationToken ct = default)
+          BoothQueryParams qp,
+          string userId,
+          CancellationToken ct = default)
         {
+            var term = qp.SearchTerm?.Trim().ToLower();
+
+            // =========================
+            // 🔹 BASE QUERY
+            // =========================
             var query = _context.Tbl_Booth
                 .AsNoTracking()
-                //.Where(b => b.Mandal.VidhanId == vidhanId)
-                .Where(b =>
-                   (b.UserId == qp.UserId));
-                    //(!qp.MandalId.HasValue || b.MandalId == qp.MandalId) && (b.UserId == qp.UserId) &&
-                    //(!qp.SectorId.HasValue || b.SectorId == qp.SectorId));
+                .Where(b => b.UserId == userId);
 
-            Expression<Func<Tbl_Booth, bool>>? search = null;
+            var mandalIds = qp.GetMandalIds();
+            var villageIds = qp.GetvillageIds();
+            var boothIds = qp.GetBoothIds();
+            var castIds = qp.GetCastIds();
 
-            if (!string.IsNullOrWhiteSpace(qp.SearchTerm))
-            {;
-                var term = qp.SearchTerm.Trim().ToLower();
-                search = b =>
-                    b.PollingStationName.ToLower().Contains(term) ||
-                    b.PollingStationLocation.ToLower().Contains(term) ||
-                    b.Mandal.Name.ToLower().Contains(term) ||
-                    b.Sector.SectorName.ToLower().Contains(term);
+            if (mandalIds.Any())
+                query = query.Where(b => mandalIds.Contains(b.MandalId));
+
+            if (villageIds.Any())
+                query = query.Where(b => b.Villages.Any(v => villageIds.Contains(v.VillageId)));
+
+            if (boothIds.Any())
+                query = query.Where(b => boothIds.Contains(b.Id));
+
+            if (castIds.Any())
+                query = query.Where(b => b.Sanyojak != null && castIds.Contains(b.Sanyojak.CastId));
+
+            // =========================
+            // 🔍 SEARCH — baked into query directly
+            // =========================
+            if (!string.IsNullOrWhiteSpace(term))
+            {
+                query = query.Where(b =>
+                    (b.PollingStationName != null && b.PollingStationName.ToLower().Contains(term)) ||
+                    (b.PollingStationLocation != null && b.PollingStationLocation.ToLower().Contains(term)) ||
+                    (b.Mandal != null && b.Mandal.Name != null && b.Mandal.Name.ToLower().Contains(term)) ||
+                    (b.Sector != null && b.Sector.SectorName != null && b.Sector.SectorName.ToLower().Contains(term)) ||
+                    (b.Sanyojak != null && b.Sanyojak.InchargeName != null && b.Sanyojak.InchargeName.ToLower().Contains(term)) ||
+                    (b.Sanyojak != null && b.Sanyojak.PhoneNumber != null && b.Sanyojak.PhoneNumber.Contains(term)));
             }
 
+            // =========================
+            // 📦 PAGINATION + PROJECTION
+            // =========================
             return await query.ToPagedResultAsync(
                 queryParams: qp,
-                searchPredicate: search,
+                searchPredicate: null,  // ✅ already applied above
                 defaultSort: b => b.BoothNumber,
                 projection: b => new BoothReportsDto
                 {
-
                     BoothId = b.Id,
                     BoothNo = b.BoothNumber,
                     PollingStation = b.PollingStationName,
-                    BoothAdhyaksh=b.Sanyojak.InchargeName,
-                    Mobile=b.Sanyojak.PhoneNumber,
-                    Villages = b.Villages.Select(v => new VillageResponseDto
-                    {
-                        VillageId = v.VillageId,
-                        VillageName = v.Village.VillageName,
-                        HasAnshik = v.HasAnshik
-                    }).ToList(),
-                    Cast=b.Sanyojak.Cast.CastName,
 
-                    TotalVotes =
-                    _context.Tbl_SeniorDisabled.Count(x => x.BoothId == b.Id && x.TypeId == 1 && x.Status) +
-                    _context.Tbl_SeniorDisabled.Count(x => x.BoothId == b.Id && x.TypeId == 2 && x.Status) +
-                    _context.Tbl_DoubleVoter.Count(x => x.BoothId == b.Id && x.Status) +
-                    _context.Tbl_PravasiVoter.Count(x => x.BoothId == b.Id && x.Status),
+                    BoothAdhyaksh = b.Sanyojak != null
+                        ? b.Sanyojak.InchargeName
+                        : null,
+
+                    Mobile = b.Sanyojak != null
+                        ? b.Sanyojak.PhoneNumber
+                        : null,
+
+                    Cast = b.Sanyojak != null && b.Sanyojak.Cast != null
+                        ? b.Sanyojak.Cast.CastName
+                        : null,
+
+                    Villages = b.Villages != null
+                        ? b.Villages.Select(v => new VillageResponseDto
+                        {
+                            VillageId = v.VillageId,
+                            VillageName = v.Village != null ? v.Village.VillageName : null,
+                            HasAnshik = v.HasAnshik
+                        }).ToList()
+                        : new List<VillageResponseDto>(),
+
+                    TotalVotes = _context.Tbl_BoothVoter
+                        .Where(x =>
+                            x.BoothId == b.Id &&
+                            x.UserId == userId &&
+                            x.Status)
+                        .Select(x => x.TotalVoter)
+                        .FirstOrDefault(),
 
                     SeniorCitizen = _context.Tbl_SeniorDisabled
-                    .Count(x => x.BoothId == b.Id && x.TypeId==1 && x.Status),
+                        .Count(x =>
+                            x.BoothId == b.Id &&
+                            x.TypeId == 1 &&
+                            x.Status &&
+                            x.UserId == userId),
 
                     Handicap = _context.Tbl_SeniorDisabled
-                    .Count(x => x.BoothId == b.Id && x.TypeId==2 && x.Status),
+                        .Count(x =>
+                            x.BoothId == b.Id &&
+                            x.TypeId == 2 &&
+                            x.Status &&
+                            x.UserId == userId),
 
                     DoubleVotes = _context.Tbl_DoubleVoter
-                    .Count(x => x.BoothId == b.Id && x.Status),
+                        .Count(x =>
+                            x.BoothId == b.Id &&
+                            x.Status &&
+                            x.UserId == userId),
 
                     Pravasi = _context.Tbl_PravasiVoter
-                    .Count(x => x.BoothId == b.Id && x.Status)
+                        .Count(x =>
+                            x.BoothId == b.Id &&
+                            x.Status &&
+                            x.UserId == userId)
                 },
                 ct: ct
             );
@@ -348,6 +404,11 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
                .FirstOrDefaultAsync();
         }
 
-     
+        public async Task<string> GetSectorUseridbyBoothId(int boothId)
+        {
+            var sectorId = await _context.Tbl_Booth.Where(x => x.Id == boothId).Select(b => b.SectorId).FirstOrDefaultAsync();
+
+            return await _context.Tbl_Sector.Where(x => x.Id == sectorId).Select(b => b.UserId).FirstOrDefaultAsync();
+        }
     }
 }

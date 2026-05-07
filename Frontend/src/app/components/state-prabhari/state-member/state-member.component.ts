@@ -36,7 +36,7 @@ export class StateMemberMgmtComponent implements OnInit {
   isDescending = true;
   isListMode = false;
   filterDesignationId: number | null = null;
-  filterSamitiType: string | null = null;
+  filterSamitiType: any = null;
   listTitle = 'Samiti Member Management';
 
   columns: TableColumn[] = [
@@ -239,8 +239,8 @@ export class StateMemberMgmtComponent implements OnInit {
       this.filterDesignationId = data['designationId'] || null;
       this.filterSamitiType = data['samitiType'] || null;
 
-      if (this.filterDesignationId === 1) this.listTitle = 'Pradesh Samiti Member List';
-      else if (this.filterDesignationId === 2) this.listTitle = 'Pradesh Karyakarini Samiti List';
+      if (this.filterSamitiType === 1 || this.filterSamitiType === '1') this.listTitle = 'Pradesh Samiti List';
+      else if (this.filterSamitiType === 2 || this.filterSamitiType === '2') this.listTitle = 'Pradesh Karyakarini Samiti List';
       else if (this.isListMode) this.listTitle = 'Samiti Member List';
     });
     this.loadData();

@@ -74,10 +74,16 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
         public async Task<PagedResult<SahmatAsahmatResponseDto>> GetAllAsync(SahmatAsahmatQueryParams qp, CancellationToken ct = default)
         {
 
+         //   var vidhanSabhaId = await _context.Tbl_StatePrabhari
+         //.Where(u => u.userId == qp.UserId)
+         //.Select(u => u.VidhansabhaId)
+         //.FirstOrDefaultAsync();
+
             var query = _context.Tbl_SahmatAsahmat
               .AsNoTracking();
 
             var villageIds = qp.GetVillageIds();
+            var boothIds = qp.GetBoothIds();
             var parties = qp.GetParties();
               
               if (villageIds.Any())
@@ -88,10 +94,14 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
                 {
                     query = query.Where(s => parties.Contains(s.PartyId));
             }
+                if (boothIds.Any())
+                  {
+                    query = query.Where(s => boothIds.Contains(s.BoothId));
+            }
 
-           query = query.Where(b =>
-                   (!qp.TypeId.HasValue || b.TypeId == qp.TypeId) &&
-                   (b.UserId == qp.UserId || b.CreatedToUserId == qp.UserId) &&
+            query = query.Where(b =>
+                   (!qp.TypeId.HasValue || b.TypeId == qp.TypeId) && (b.Booth.Mandal.Status && b.Booth.Sector.Status ) && 
+                   (b.UserId == qp.UserId || b.CreatedToUserId == qp.UserId || b.CreatedsectorUserId == qp.UserId) &&
                   (!qp.BoothId.HasValue || b.Booth.Id == qp.BoothId) &&
                   (!qp.OccupationId.HasValue || b.Occupation.Id == qp.OccupationId)
                   );
@@ -156,7 +166,7 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
             // ✅ Filters
             query = query.Where(b =>
                 (!qp.BoothId.HasValue || b.BoothId == qp.BoothId) &&
-                (b.UserId == qp.UserId || b.CreatedToUserId == qp.UserId) &&
+                (b.UserId == qp.UserId || b.CreatedToUserId == qp.UserId || b.CreatedsectorUserId == qp.UserId) &&
                
                 (!qp.OccupationId.HasValue || b.OccupationId == qp.OccupationId)
             );

@@ -68,7 +68,7 @@ export class VidhanSabhaPrabhariListComponent implements OnInit {
 
   config: TableConfig = {
     selectable: false,
-    filterable: true,
+    // filterable: true,
     paginated: true,
     serverSide: true,
     defaultPageSize: 50,
@@ -272,19 +272,24 @@ export class VidhanSabhaPrabhariListComponent implements OnInit {
     });
 
     if (this.isStatePrabhari()) {
-      this.stateService.getAllStates().subscribe({
-        next: (response) => {
-          const list = response?.data || response || [];
-          if (list.length > 0) {
-            this.defaultStateId = String(list[0].stateId || list[0].id);
-            this.addPrabhariConfig.fields = this.addPrabhariConfig.fields.filter(f => f.id !== 'stateId');
-
-
-            this.loadPrabharis();
-          }
-        },
-        error: () => this.loadPrabharis()
-      });
+      const savedStateId = this.authService.getStateId();
+      if (savedStateId) {
+        this.defaultStateId = savedStateId;
+        this.addPrabhariConfig.fields = this.addPrabhariConfig.fields.filter(f => f.id !== 'stateId');
+        this.loadPrabharis();
+      } else {
+        this.stateService.getAllStates().subscribe({
+          next: (response) => {
+            const list = response?.data || response || [];
+            if (list.length > 0) {
+              this.defaultStateId = String(list[0].stateId || list[0].id);
+              this.addPrabhariConfig.fields = this.addPrabhariConfig.fields.filter(f => f.id !== 'stateId');
+              this.loadPrabharis();
+            }
+          },
+          error: () => this.loadPrabharis()
+        });
+      }
     } else {
       this.loadPrabharis();
     }
@@ -293,11 +298,11 @@ export class VidhanSabhaPrabhariListComponent implements OnInit {
   loadPrabharis() {
     this.loading = true;
     const params: any = {
-      pageNumber: this.pageNumber,
-      pageSize: this.pageSize,
-      searchTerm: this.searchTerm,
-      sortBy: this.sortBy,
-      isDescending: this.isDescending
+      PageNumber: this.pageNumber,
+      PageSize: this.pageSize,
+      SearchTerm: this.searchTerm,
+      SortBy: this.sortBy,
+      IsDescending: this.isDescending
     };
 
     if (this.defaultStateId) {
@@ -375,6 +380,7 @@ export class VidhanSabhaPrabhariListComponent implements OnInit {
     if (isUpdate) {
       submitData = {
         Id: raw.id ?? initialId,
+        UserId: raw.userId || this.prabhariModal.initialData?.userId || this.authService.getUserId(),
         PrabhariName: raw.prabhariName,
         PrabhariEmail: raw.prabhariEmail,
         Gender: raw.gender,

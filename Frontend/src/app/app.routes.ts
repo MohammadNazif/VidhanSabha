@@ -28,11 +28,15 @@ import { AllowAccessListComponent } from './components/admin/access/allow-access
 import { CombinedReportComponent } from './components/admin/reports/combined-report/combined-report.component';
 import { MandalReportComponent } from './components/admin/reports/mandal-report/mandal-report.component';
 import { BoothVoterDescriptionComponent } from './components/admin/booth-voter-description/booth-voter-description.component';
+import { SectorWithBoothReportComponent } from './components/admin/reports/sector-with-booth-report/sector-with-booth-report.component';
 import { BoothSamitiComponent } from './components/admin/booth-samiti/booth-samiti.component';
 import { SocialMediaComponent } from './components/admin/socialmedia/socialmedia.component';
 import { InfluencerPersonComponent } from './components/admin/influencer-person/influencer-person.component';
 import { InfluencerComponent } from './components/admin/influencer/influencer.component';
 import { StateMemberMgmtComponent } from './components/state-prabhari/state-member/state-member.component';
+import { BoothReportComponent } from './components/admin/reports/booth-report/booth-report.component';
+import { SectorReportComponent } from './components/admin/reports/sector-report/sector-report.component';
+import { MandalSamitiComponent } from './components/admin/mandal-samiti/mandal-samiti.component';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -40,6 +44,9 @@ export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: 'combined-report', component: CombinedReportComponent },
   { path: 'mandal-report', component: MandalReportComponent },
+  { path: 'sector-with-booth-report', component: SectorWithBoothReportComponent },
+  { path: 'booth-report', component: BoothReportComponent },
+  { path: 'sector-report', component: SectorReportComponent },
   { path: 'booth-voter-description', component: BoothVoterDescriptionComponent },
   { path: 'members', component: MembersComponent },
   { path: 'mandal', component: MandalComponent },
@@ -104,5 +111,7 @@ export const routes: Routes = [
   { path: 'state-prabhari/dashboard', component: StatePrabhariDashboardComponent },
   { path: 'state-prabhari/vidhansabha-prabhari', component: VidhanSabhaPrabhariListComponent },
   { path: 'state-prabhari/vidhansabha-prabhari-list', component: VidhanSabhaPrabhariListComponent, data: { mode: 'list' } },
+  { path: 'mandal-samiti', component: MandalSamitiComponent },
+  { path: 'mandal-samiti-list', component: MandalSamitiComponent },
   { path: '**', redirectTo: '' }
 ];

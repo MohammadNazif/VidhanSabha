@@ -70,7 +70,10 @@ export class DoubleVoterComponent implements OnInit {
   ];
 
   canManage(): boolean {
-    return !this.isListView && this.permissionService.hasPermission(ModulePermission.DoubleVoter);
+    if (this.isListView) return false;
+    const role = (this.authService.getRole() || '').toUpperCase().trim();
+    if (role === 'VIDHANSABHAPRABHARI') return true;
+    return this.permissionService.hasPermission(ModulePermission.DoubleVoter);
   }
 
   addVoterConfig: FormConfig = {
@@ -83,7 +86,13 @@ export class DoubleVoterComponent implements OnInit {
         label: 'Booth No',
         type: 'select',
         placeholder: '-- Select Booth --',
-        apiUrl: 'common/boothNumber',
+        apiUrl: () => {
+          const role = (this.authService.getRole() || '').toUpperCase().trim();
+          if (role === 'SECTORSANYOJAK') {
+            return `booth/getAllBoothBySectorid?sectorid=${this.authService.getUserId()}`;
+          }
+          return 'common/boothNumber';
+        },
         apiMapper: (data: any) => {
           const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
           return list.map((item: any) => ({
@@ -208,7 +217,13 @@ export class DoubleVoterComponent implements OnInit {
 
     // Load Booths
     if (!isBoothSanyojak) {
-      this.http.get<any>(`${environment.apiUrl}/common/boothNumber`).subscribe(res => {
+      const role = (this.authService.getRole() || '').toUpperCase().trim();
+      const isSectorSanyojak = role === 'SECTORSANYOJAK';
+      const boothUrl = isSectorSanyojak
+        ? `${environment.apiUrl}/booth/getAllBoothBySectorid?sectorid=${this.authService.getUserId()}`
+        : `${environment.apiUrl}/common/boothNumber`;
+
+      this.http.get<any>(boothUrl).subscribe(res => {
         const filter = this.config.filters?.find(f => f.key === 'boothIds');
         if (filter) {
           const list = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);

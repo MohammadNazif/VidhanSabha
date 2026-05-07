@@ -50,11 +50,14 @@ export class SidebarComponent implements OnInit {
         { label: 'State Prabhari', route: '/superadmin/state-prabhari', roles: ['SUPERADMIN'] },
 
         // Members & Prabhari
-        { label: 'Samiti Member', route: '/superadmin/state-member', roles: ['SUPERADMIN', 'StatePrabhari'] },
+        { label: 'Samiti Member', route: '/superadmin/state-member', roles: ['StatePrabhari'] },
         { label: 'Vidhan Sabha Prabhari', route: '/state-prabhari/vidhansabha-prabhari', roles: ['StatePrabhari'] },
         { label: 'Designation', route: '/superadmin/designation', roles: ['Adhyaksh', 'StatePrabhari'] },
 
-        // Voter/Field Operations (Permission Based)
+        // Requested Order
+        { label: 'Mandal', route: '/mandal', roles: ['VidhanSabhaPrabhari'] },
+        { label: 'Sector', route: '/sector', roles: ['VidhanSabhaPrabhari'] },
+        { label: 'Booth', route: '/booth', roles: ['VidhanSabhaPrabhari'] },
         { label: 'PannaPramukh', route: '/panna-pramukh', roles: ['VidhanSabhaPrabhari', 'BoothSanyojak', 'SectorSanyojak'], moduleId: ModulePermission.PannaPramukh },
         { label: 'Pravasi Voter', route: '/pravasi-voter', roles: ['VidhanSabhaPrabhari', 'BoothSanyojak', 'SectorSanyojak'], moduleId: ModulePermission.PravashiVoter },
         { label: 'New Voter', route: '/new-voter', roles: ['VidhanSabhaPrabhari', 'BoothSanyojak', 'SectorSanyojak'], moduleId: ModulePermission.NewVoter },
@@ -63,7 +66,12 @@ export class SidebarComponent implements OnInit {
         { label: 'Sahmat/Asahmat', route: '/sahmat-asahmat', roles: ['VidhanSabhaPrabhari', 'BoothSanyojak', 'SectorSanyojak'], moduleId: ModulePermission.Sahmat },
         { label: 'Double Voter/Married', route: '/double-voter', roles: ['VidhanSabhaPrabhari', 'BoothSanyojak', 'SectorSanyojak'], moduleId: ModulePermission.DoubleVoter },
         { label: 'Booth Samiti', route: '/booth-samiti', roles: ['VidhanSabhaPrabhari', 'BoothSanyojak', 'SectorSanyojak'], moduleId: ModulePermission.BoothSamiti },
+        { label: 'Mandal Samiti', route: '/mandal-samiti', roles: ['VidhanSabhaPrabhari'] },
         { label: 'Prabhavshali Vyakti', route: '/prabhavshali-vyakt', roles: ['VidhanSabhaPrabhari', 'BoothSanyojak', 'SectorSanyojak'], moduleId: ModulePermission.EffectivePersion },
+        { label: 'Influencer Person', route: '/influencer-person', roles: ['VidhanSabhaPrabhari'] },
+        { label: 'Block', route: '/block', roles: ['VidhanSabhaPrabhari'] },
+        { label: 'BDC', route: '/bdc', roles: ['VidhanSabhaPrabhari'] },
+        { label: 'Pradhan', route: '/pradhan', roles: ['VidhanSabhaPrabhari'] },
       ]
     },
 
@@ -74,11 +82,11 @@ export class SidebarComponent implements OnInit {
       roles: ['SUPERADMIN', 'StatePrabhari', 'VidhanSabhaPrabhari', 'BoothSanyojak', 'SectorSanyojak'],
       children: [
         // SUPERADMIN / StatePrabhari Lists
-        { label: 'Vidhan Sabha List', route: '/superadmin/vidhansabha-list', roles: ['SUPERADMIN', 'StatePrabhari'] },
-        { label: 'District List', route: '/superadmin/district-list', roles: ['SUPERADMIN', 'StatePrabhari'] },
-        { label: 'Samiti Member List', route: '/state-prabhari/state-member-list', roles: ['SUPERADMIN', 'StatePrabhari'] },
-        { label: 'Pradesh Samiti List', route: '/state-prabhari/pradesh-samiti-list', roles: ['SUPERADMIN', 'StatePrabhari'] },
-        { label: 'Pradesh Karyakarini List', route: '/state-prabhari/pradesh-karyakarini-list', roles: ['SUPERADMIN', 'StatePrabhari'] },
+        { label: 'Vidhan Sabha List', route: '/superadmin/vidhansabha-list', roles: ['StatePrabhari'] },
+        { label: 'District List', route: '/superadmin/district-list', roles: ['StatePrabhari'] },
+        { label: 'Samiti Member List', route: '/state-prabhari/state-member-list', roles: ['StatePrabhari'] },
+        { label: 'Pradesh Samiti List', route: '/state-prabhari/pradesh-samiti-list', roles: ['StatePrabhari'] },
+        { label: 'Pradesh Karyakarini List', route: '/state-prabhari/pradesh-karyakarini-list', roles: ['StatePrabhari'] },
 
         // Ground Level Lists (Synced with Dashboard Cards)
         { label: 'Mandal List', route: '/mandal-list', roles: ['VidhanSabhaPrabhari'] },
@@ -97,9 +105,23 @@ export class SidebarComponent implements OnInit {
         { label: 'Influencer Person List', route: '/influencer-person-list', roles: ['VidhanSabhaPrabhari'] },
         { label: 'Booth Voter Desc. List', route: '/booth-voter-description-list', roles: ['BoothSanyojak', 'SectorSanyojak', 'VidhanSabhaPrabhari'], moduleId: ModulePermission.BoothVoterDescrition },
         { label: 'Booth Samiti List', route: '/booth-samiti-list', roles: ['BoothSanyojak', 'SectorSanyojak', 'VidhanSabhaPrabhari'], moduleId: ModulePermission.BoothSamiti },
+        { label: 'Mandal Samiti List', route: '/mandal-samiti-list', roles: ['VidhanSabhaPrabhari'] },
         { label: 'Senior Citizen List', route: '/senior-citizen-list', roles: ['BoothSanyojak', 'SectorSanyojak', 'VidhanSabhaPrabhari'], moduleId: ModulePermission.SeniororDisabled },
         { label: 'Disabled List', route: '/disabled-list', roles: ['BoothSanyojak', 'SectorSanyojak', 'VidhanSabhaPrabhari'], moduleId: ModulePermission.SeniororDisabled },
         { label: 'Post List', route: '/social-media-list', roles: ['BoothSanyojak', 'SectorSanyojak', 'VidhanSabhaPrabhari'], moduleId: ModulePermission.SocialMedia },
+      ]
+    },
+
+    {
+      icon: 'bar-chart-2', label: 'Reports',
+      expanded: false,
+      roles: ['VidhanSabhaPrabhari'],
+      children: [
+        { label: 'Combined Report', route: '/combined-report' },
+        { label: 'Mandal Report', route: '/mandal-report' },
+        { label: 'Sector With Booth Report', route: '/sector-with-booth-report' },
+        { label: 'Booth Report', route: '/booth-report' },
+        { label: 'Sector Report', route: '/sector-report' }
       ]
     },
 
@@ -114,7 +136,7 @@ export class SidebarComponent implements OnInit {
     },
 
     { icon: 'share-2', label: 'Social Media', route: '/social-media', roles: ['VidhanSabhaPrabhari', 'BoothSanyojak', 'SectorSanyojak'], moduleId: ModulePermission.SocialMedia },
-    { icon: 'calendar', label: 'Activity', route: '/activity', roles: ['VidhanSabhaPrabhari', 'BoothSanyojak', 'SectorSanyojak'], moduleId: ModulePermission.Activity },
+    // { icon: 'calendar', label: 'Activity', route: '/activity', roles: [], moduleId: ModulePermission.Activity },
   ];
 
   renderedNavItems: NavItem[] = [];
@@ -146,6 +168,8 @@ export class SidebarComponent implements OnInit {
     const currentRole = this.authService.getRole();
 
     const isSectorSanyojak = currentRole && String(currentRole).toUpperCase() === 'SECTORSANYOJAK';
+    const isBoothSanyojak = currentRole && String(currentRole).toUpperCase() === 'BOOTHSANYOJAK';
+    const isVidhanSabhaPrabhari = currentRole && String(currentRole).toUpperCase() === 'VIDHANSABHAPRABHARI';
 
     // First filter by role and permission
     let filteredItems = this.navItems.filter(item => {
@@ -154,8 +178,8 @@ export class SidebarComponent implements OnInit {
         (currentRole && item.roles.some(role => String(role).toUpperCase() === String(currentRole).toUpperCase()));
       if (!hasRole) return false;
 
-      // For top-level items, we check permission normally
-      if (item.moduleId !== undefined && !this.permissionService.hasPermission(item.moduleId)) return false;
+      // For top-level items, we check permission normally (unless Prabhari)
+      if (item.moduleId !== undefined && !isVidhanSabhaPrabhari && !this.permissionService.hasPermission(item.moduleId)) return false;
 
       return true;
     }).map(item => {
@@ -170,11 +194,8 @@ export class SidebarComponent implements OnInit {
               (currentRole && child.roles.some(role => String(role).toUpperCase() === String(currentRole).toUpperCase()));
             if (!hasRole) return false;
 
-            // Permission check:
-            // 1. If it's the "Lists" section and user is SectorSanyojak, show ALWAYS.
-            // 2. Otherwise, if moduleId is present, check permission.
             if (child.moduleId !== undefined) {
-              const shouldBypass = isListSection && isSectorSanyojak;
+              const shouldBypass = (isListSection && (isSectorSanyojak || isBoothSanyojak)) || isVidhanSabhaPrabhari;
               if (!shouldBypass && !this.permissionService.hasPermission(child.moduleId)) return false;
             }
 

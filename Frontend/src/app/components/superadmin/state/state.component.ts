@@ -30,13 +30,13 @@ export class StateComponent implements OnInit {
   stateList: any[] = [];
 
   columns: TableColumn[] = [
-    { key: 'stateName', label: 'State Name', type: 'avatar', sortable: true, avatarFallbackKey: 'stateName' },
+    { key: 'stateName', label: 'State Name' },
     { key: 'vidhanSabhaCount', label: 'Vidhansabha Count', sortable: true }
   ];
 
   config: TableConfig = {
     selectable: false,
-    filterable: true,
+    // filterable: true,
     paginated: true,
     defaultPageSize: 10,
     pageSizeOptions: [10, 20, 50],
@@ -266,7 +266,7 @@ export class StateComponent implements OnInit {
     const role = (this.authService.getRole() || '').toUpperCase().trim();
     if (role === 'STATEPRABHARI') {
       this.columns = [
-        { key: 'stateName', label: 'State Name', type: 'avatar', sortable: true, avatarFallbackKey: 'stateName' },
+        { key: 'stateName', label: 'State Name' },
         { key: 'vidhanSabhaCount', label: 'Vidhansabha Count', sortable: true },
         { key: 'remainingCount', label: 'Remaining Count', sortable: true }
       ];

@@ -59,9 +59,16 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
         {
             try
             {
+
+             //   var vidhanSabhaId = await _context.Tbl_StatePrabhari
+             //.Where(u => u.userId == qp.UserId)
+             //.Select(u => u.VidhansabhaId)
+             //.FirstOrDefaultAsync();
+
                 var query = _context.Tbl_PrabhavshaliVyakti
                 .AsNoTracking();
                 var villageIds = qp.GetVillageIds();
+                var boothIds = qp.GetBoothIds();
                 var designationIds = qp.GetDesignationIds();
 
                 if(villageIds.Any())
@@ -72,12 +79,15 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
                 {
                     query = query.Where(b => designationIds.Contains(b.DesignationId));
                 }
-
+                if(boothIds.Any())
+                {
+                    query = query.Where(b => boothIds.Contains(b.BoothId));
+                }
                 query = query.Where(b =>
-                    (b.UserId == qp.UserId || b.CreatedToUserId == qp.UserId) &&
+                    (b.UserId == qp.UserId || b.CreatedToUserId == qp.UserId || b.CreatedsectorUserId == qp.UserId) &&
                     (!qp.Id.HasValue || b.Id == qp.Id) &&
                     (!qp.BoothId.HasValue || b.BoothId == qp.BoothId) &&
-                    (!qp.CastId.HasValue || b.CastId == qp.CastId)
+                    (!qp.CastId.HasValue || b.CastId == qp.CastId) && (b.Booth.Mandal.Status && b.Booth.Sector.Status)
                 );
 
                 Expression<Func<Tbl_PrabhavshaliVyakti, bool>>? search = null;
@@ -140,7 +150,7 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
             return await _context.Tbl_PrabhavshaliVyakti
                 .Where(m =>
     (qp.designationId == null || m.DesignationId == qp.designationId) &&
-    (m.UserId == qp.UserId || m.CreatedToUserId == qp.UserId)
+    (m.UserId == qp.UserId || m.CreatedToUserId == qp.UserId || m.CreatedsectorUserId == qp.UserId) 
    )
                 .Select(m => new prabhavsaliExportRow
                 {

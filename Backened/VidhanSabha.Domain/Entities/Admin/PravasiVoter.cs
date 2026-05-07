@@ -22,6 +22,8 @@ namespace VidhanSabha.Domain.Entities.Admin
         public bool Status { get; private set; } = true;
         public string? UserId { get; private set; }
         public string? CreatedToUserId { get; private set; }
+        public string? CreatedsectorUserId { get; private set; }
+        public string? Role { get; private set; }
 
         private readonly List<Tbl_PravasiVillage> _villages = new();
         public IReadOnlyCollection<Tbl_PravasiVillage> Villages => _villages.AsReadOnly();
@@ -38,7 +40,7 @@ namespace VidhanSabha.Domain.Entities.Admin
             int BoothId, string Name,
             string Mobile, int CategoryId,
             int CastId, int OccupationId,
-            string VoterId, string CurrentAddress, string UserId,string createdToUserId,
+            string VoterId, string CurrentAddress, string UserId,string createdToUserId,string createdsectorUserId, string role,
             List<int> villageIds
             )
         {
@@ -53,7 +55,9 @@ namespace VidhanSabha.Domain.Entities.Admin
                 VoterId = VoterId,
                 CurrentAddress = CurrentAddress,
                 UserId = UserId,
-                CreatedToUserId = createdToUserId
+                CreatedToUserId = createdToUserId,
+                CreatedsectorUserId = createdsectorUserId,
+                Role = role
             };
             pravasi.SetVillages(villageIds);
             return pravasi;

@@ -38,18 +38,21 @@ namespace VidhanSabha.Application.Pannels.Admin.PannaPramukh.Command
             string createdsectorUserId = null;
             if (IsUserRole(request.Role, PrabhariRole.VidhanSabhaPrabhari))
             {
+                createdsectorUserId = await _booth.GetSectorUseridbyBoothId(request.Dto.BoothId);
                 createdtouserId = await _booth.GetUseridbyBoothId(request.Dto.BoothId);
             }
             else if (IsUserRole(request.Role, PrabhariRole.BoothSanyojak))
             {
-                createdsectorUserId = request.UserId;
-
+                createdtouserId = request.UserId;
+                createdsectorUserId = await _booth.GetSectorUseridbyBoothId(request.Dto.BoothId);
                 request.UserId = await _booth.GetadminUseridbyUserId(request.Dto.BoothId);
 
             }
             else if (IsUserRole(request.Role, PrabhariRole.SectorSanyojak))
             {
-                createdtouserId = request.UserId;
+                createdtouserId = await _booth.GetUseridbyBoothId(request.Dto.BoothId);
+
+                createdsectorUserId = request.UserId;
 
                 request.UserId = await _booth.GetadminUseridbyUserId(request.Dto.BoothId);
 

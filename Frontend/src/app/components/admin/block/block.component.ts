@@ -12,10 +12,12 @@ import { CrudHandlerService } from '../../../Services/common/crud-handler.servic
 import { ActivatedRoute } from '@angular/router';
 import { AuthServiceService } from '../../../Services/Auth/auth.service';
 
+import { GenericExportComponent } from '../../shared/generic-export/generic-export.component';
+
 @Component({
   selector: 'app-block',
   standalone: true,
-  imports: [CommonModule, PageHeaderComponent, GenericTableComponent, GenericModalButtonComponent],
+  imports: [CommonModule, PageHeaderComponent, GenericTableComponent, GenericModalButtonComponent, GenericExportComponent],
   templateUrl: './block.component.html',
   styleUrl: './block.component.css'
 })
@@ -25,6 +27,7 @@ export class BlockComponent implements OnInit {
   blockList: any[] = [];
   totalCount = 0;
   loading = false;
+  isExporting = false;
 
   // Server-side state
   pageNumber = 1;
@@ -292,5 +295,16 @@ export class BlockComponent implements OnInit {
       `Block ${isUpdate ? 'updated' : 'created'} successfully!`,
       () => this.loadData()
     );
+  }
+
+  handleExport(format: string) {
+    if (!format) return;
+    this.isExporting = true;
+    console.log(`Generating ${format.toUpperCase()} export...`);
+    // Simulate export delay
+    setTimeout(() => {
+      this.isExporting = false;
+      this.toastService.showSuccess('Export Started', `Successfully generated ${format.toUpperCase()} export!`);
+    }, 1000);
   }
 }

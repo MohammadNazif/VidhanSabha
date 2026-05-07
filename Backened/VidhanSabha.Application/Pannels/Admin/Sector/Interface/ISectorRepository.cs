@@ -12,7 +12,7 @@ namespace VidhanSabha.Application.Pannels.Admin.Sector.Interface
     public interface ISectorRepository
     {
         Task<PagedResult<SectorResponseDto>> GetAllAsync(SectorQueryParams qp,int? vidhanID,CancellationToken ct);
-        Task<PagedResult<SectorReportDto>> GetAllSectorReports(SectorQueryParams qp,CancellationToken ct);
+        Task<PagedResult<SectorReportDto>> GetAllSectorReports(SectorQueryParams qp,int? VidhanSabhaId, CancellationToken ct);
         Task<PagedResult<AdminSectorReportsDto>> GetAllAdminSectorReports(SectorQueryParams qp,CancellationToken ct);
         Task<List<Tbl_Sector>?> GetByMandalIdAsync(int id);
 
@@ -22,5 +22,9 @@ namespace VidhanSabha.Application.Pannels.Admin.Sector.Interface
         Task<int> AddAsync(Tbl_Sector sector);
         Task<int> UpdateAsync(Tbl_Sector sector);
         Task DeleteAsync(Tbl_Sector sector);
+
+        Task<List<VillageDto>> GetAllSectorVillagesByUserId(
+      SectorVillageQueryParams qp,
+    CancellationToken ct = default);
     }
 }

@@ -10,14 +10,14 @@ namespace VidhanSabha.Domain.Entities.StatePrabhari
 {
     public class Tbl_VidhanSabha
     {
-        public int Id { get;private set; }
+        public int Id { get; private set; }
 
         public int StateId { get; set; }
         public string UserId { get; private set; }
         public string VidhanSabhaName { get; private set; }
         public int VidhanSabhaNumber { get; private set; }
 
-     
+
         public int DistrictId { get; private set; }
         //public Tbl_StatePrabhari? Prabhari { get; private set; }
 
@@ -30,12 +30,12 @@ namespace VidhanSabha.Domain.Entities.StatePrabhari
 
         }
 
-        public static Tbl_VidhanSabha Create(string vidhanSabhaName, int VidhanSabhaNumber, int districtId,string userId,int stateId)
+        public static Tbl_VidhanSabha Create(string vidhanSabhaName, int VidhanSabhaNumber, int districtId, string userId, int stateId)
         {
             if (string.IsNullOrWhiteSpace(vidhanSabhaName))
                 throw new ArgumentException("VidhanSabhaName cannot be empty.");
             if (VidhanSabhaNumber <= 0)
-                throw new ArgumentException("VidhanSabhaCount must be greater than zero.");
+                throw new ArgumentException("VidhanSabhaNumber must be greater than zero.");
             if (districtId <= 0)
                 throw new ArgumentException("Select Valid District.");
             return new Tbl_VidhanSabha
@@ -48,6 +48,22 @@ namespace VidhanSabha.Domain.Entities.StatePrabhari
             };
 
 
+        }
+        public void Update(string vidhanSabhaName, int vidhanSabhaNumber)
+        {
+            if (string.IsNullOrWhiteSpace(vidhanSabhaName))
+                throw new ArgumentException("VidhanSabhaName cannot be empty.");
+            if (vidhanSabhaNumber <= 0)
+                throw new ArgumentException("VidhanSabhaNumber must be greater than zero.");
+
+            // Update the current instance
+            VidhanSabhaName = vidhanSabhaName;
+            VidhanSabhaNumber = vidhanSabhaNumber;
+        }
+
+        public void Delete()
+        {
+           Status = false;
         }
     }
 }

@@ -1,5 +1,6 @@
 import { Component, OnInit, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Observable } from 'rxjs';
 import { Chart, registerables } from 'chart.js';
 import {
   LucideAngularModule,
@@ -13,7 +14,9 @@ import {
   Users,
   Plus,
   Database,
-  Share2
+  Share2,
+  ClipboardList,
+  BarChart2
 } from 'lucide-angular';
 
 import { Router } from '@angular/router';
@@ -69,7 +72,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     { title: 'PannaPramukh', value: 0, icon: 'book-open', gradient: 'linear-gradient(135deg, #f59e0b, #d97706)', change: '+0%', changeType: 'up', route: '/panna-pramukh-list' },
     { title: 'Sahmat', value: 0, icon: 'shield-check', gradient: 'linear-gradient(135deg, #10b981, #059669)', change: '+0%', changeType: 'up', route: '/sahmat-list' },
     { title: 'Asahmat', value: 0, icon: 'shield-alert', gradient: 'linear-gradient(135deg, #ef4444, #dc2626)', change: '+0%', changeType: 'down', route: '/asahmat-list' },
-    { title: 'Activities', value: 0, icon: 'calendar', gradient: 'linear-gradient(135deg, #8b5cf6, #7c3aed)', change: '+0%', changeType: 'up', route: '/activity' },
+    // { title: 'Activities', value: 0, icon: 'calendar', gradient: 'linear-gradient(135deg, #8b5cf6, #7c3aed)', change: '+0%', changeType: 'up', route: '/activity' },
     { title: 'Pravasi', value: 0, icon: 'users', gradient: 'linear-gradient(135deg, #06b6d4, #0891b2)', change: '+0%', changeType: 'up', route: '/pravasi-voter-list' },
     { title: 'New Voters', value: 0, icon: 'plus', gradient: 'linear-gradient(135deg, #84cc16, #65a30d)', change: '+0%', changeType: 'up', route: '/new-voter-list' },
     { title: 'Double Voters', value: 0, icon: 'shield-alert', gradient: 'linear-gradient(135deg, #f97316, #ea580c)', change: '+0%', changeType: 'down', route: '/double-voter-list' },
@@ -81,7 +84,12 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     { title: 'Booth Samiti', value: 0, icon: 'building', gradient: 'linear-gradient(135deg, #6366f1, #4f46e5)', change: '+0%', changeType: 'up', route: '/booth-samiti-list' },
     { title: 'Senior Citizen', value: 0, icon: 'users', gradient: 'linear-gradient(135deg, #f59e0b, #d97706)', change: '+0%', changeType: 'up', route: '/senior-citizen-list' },
     { title: 'Vikalaang', value: 0, icon: 'users', gradient: 'linear-gradient(135deg, #ef4444, #dc2626)', change: '+0%', changeType: 'up', route: '/disabled-list' },
-    { title: 'Post', value: 0, icon: 'share-2', gradient: 'linear-gradient(135deg, #8b5cf6, #7c3aed)', change: '+0%', changeType: 'up' }
+    { title: 'Post', value: 0, icon: 'share-2', gradient: 'linear-gradient(135deg, #8b5cf6, #7c3aed)', change: '+0%', changeType: 'up' },
+    { title: 'Combined Report', value: 'View', icon: 'bar-chart-2', gradient: 'linear-gradient(135deg, #6366f1, #4f46e5)', change: 'Full Summary', changeType: 'up', route: '/combined-report' },
+    { title: 'Mandal Report', value: 'View', icon: 'bar-chart-2', gradient: 'linear-gradient(135deg, #0ea5e9, #0284c7)', change: 'Regional Summary', changeType: 'up', route: '/mandal-report' },
+    { title: 'Booth Voter Report', value: 'View', icon: 'bar-chart-2', gradient: 'linear-gradient(135deg, #22c55e, #16a34a)', change: 'Voter Stats', changeType: 'up', route: '/booth-voter-description-list' },
+    { title: 'Booth Samiti Report', value: 'View', icon: 'bar-chart-2', gradient: 'linear-gradient(135deg, #8b5cf6, #7c3aed)', change: 'Samiti Stats', changeType: 'up', route: '/booth-samiti-list' },
+    { title: 'Pradhan', value: 0, icon: 'users', gradient: 'linear-gradient(135deg, #ec4899, #db2777)', change: '+0%', changeType: 'up', route: '/pradhan-list' },
   ];
 
   constructor(
@@ -167,11 +175,11 @@ export class DashboardComponent implements OnInit, AfterViewInit {
         'Pravasi', 'Sahmat', 'Asahmat', 'New Voters', 'Booth Samiti',
         'Prabhavsali Vyakti', 'Senior Citizen', 'Vikalaang', 'Post'
       ];
-      
+
       if (r === 'SECTORSANYOJAK') {
         allowedTitles.unshift('Booth');
       }
-      
+
       this.statCards = this.allCards.filter(card => allowedTitles.includes(card.title));
       // Re-sort to maintain order if needed, or just let filter handle it
     } else {
@@ -179,7 +187,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
       const defaultTitles = [
         'Mandal', 'Sector', 'Booth', 'PannaPramukh', 'Sahmat', 'Asahmat',
         'Activities', 'Pravasi', 'New Voters', 'Double Voters',
-        'Prabhavsali Vyakti', 'Block', 'BDC', 'Influencer Person'
+        'Prabhavsali Vyakti', 'Block', 'BDC', 'Influencer Person', 'Pradhan'
       ];
       this.statCards = this.allCards.filter(card => defaultTitles.includes(card.title));
     }
@@ -189,12 +197,17 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     const role = (this.authService.getRole() || '').toUpperCase().trim();
     const isBoothOnly = role === 'BOOTHSANYOJAK';
 
-    const obs = isBoothOnly
-      ? this.dashboardService.getBoothCounts()
-      : this.dashboardService.getGlobalCounts();
+    let obs: Observable<any>;
+    if (role === 'BOOTHSANYOJAK') {
+      obs = this.dashboardService.getBoothCounts();
+    } else if (role === 'SECTORSANYOJAK') {
+      obs = this.dashboardService.getSectorCounts();
+    } else {
+      obs = this.dashboardService.getGlobalCounts();
+    }
 
     obs.subscribe({
-      next: (res) => {
+      next: (res: any) => {
         if (res.isSuccess && res.data) {
           const counts = res.data;
           if (counts.boothId) {
@@ -210,7 +223,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
         }
         this.loadingCounts = false;
       },
-      error: (err) => {
+      error: (err: any) => {
         console.error('Error fetching dashboard counts:', err);
         this.loadingCounts = false;
       }
@@ -237,7 +250,8 @@ export class DashboardComponent implements OnInit, AfterViewInit {
       'Booth Samiti': 'boothSamiti',
       'Senior Citizen': 'varisthNagrik',
       'Vikalaang': 'viklaang',
-      'Post': 'post'
+      'Post': 'post',
+      'Pradhan': 'pradhan'
     };
     return mapping[title] || title.toLowerCase();
   }

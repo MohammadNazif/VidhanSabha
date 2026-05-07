@@ -15,4 +15,8 @@ export class DashboardService extends BaseApiService {
   getBoothCounts(): Observable<any> {
     return this.http.get(`${this.apiUrl}${this.entity}/booth/getAll`);
   }
+
+  getSectorCounts(): Observable<any> {
+    return this.http.get(`${this.apiUrl}${this.entity}/sector/getAll`);
+  }
 }

@@ -43,6 +43,14 @@ export class MandalService extends BaseApiService {
     return this.getWithParams(`${this.apiUrl}/${this.entity}/getAllCombinedReports`, params);
   }
 
+  getAllMandalReport(params: any = {}): Observable<any> {
+    return this.getWithParams(`${this.apiUrl}/${this.entity}/getAllMandalReport`, params);
+  }
+
+  exportMandalReport(format: 'excel' | 'pdf', params: any = {}): Observable<Blob> {
+    return this.export(`${this.entity}/mandalReport`, format, params);
+  }
+
   exportCombinedReportExcel(): Observable<Blob> {
     return this.http.get(`${this.apiUrl}/${this.entity}/exportCombined/excel`, { responseType: 'blob' });
   }

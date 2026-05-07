@@ -36,7 +36,6 @@ export class PannapramukhService extends BaseApiService {
 
   getCommonData(path: string, userId?: string | null, pageSize: number = 1000): Observable<any> {
     let url = `common/${path}`;
-    if (userId) url += `&userId=${userId}`;
     return this.getCustom(url);
   }
 }

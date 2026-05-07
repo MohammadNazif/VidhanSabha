@@ -15,10 +15,12 @@ import { CrudHandlerService } from '../../../Services/common/crud-handler.servic
 import { ActivatedRoute } from '@angular/router';
 
 
+import { GenericExportComponent } from '../../shared/generic-export/generic-export.component';
+
 @Component({
   selector: 'app-mandal',
   standalone: true,
-  imports: [CommonModule, PageHeaderComponent, GenericTableComponent, GenericModalButtonComponent],
+  imports: [CommonModule, PageHeaderComponent, GenericTableComponent, GenericModalButtonComponent, GenericExportComponent],
   templateUrl: './mandal.component.html',
   styleUrl: './mandal.component.css'
 })
@@ -37,6 +39,7 @@ export class MandalComponent implements OnInit {
   isListView = false;
   totalCount = 0;
   loading = false;
+  isExporting = false;
 
   canManage(): boolean {
     const role = (this.authService.getRole() || '').toUpperCase().trim();
@@ -131,7 +134,7 @@ export class MandalComponent implements OnInit {
   mandalList: any[] = []; // Will be populated from API
 
   columns: TableColumn[] = [
-    { key: 'name', label: 'Name', type: 'avatar', sortable: true, avatarFallbackKey: 'name' },
+    { key: 'name', label: 'Name', sortable: true },
 
   ];
 
@@ -207,7 +210,12 @@ export class MandalComponent implements OnInit {
 
   handleExport(format: string) {
     if (!format) return;
+    this.isExporting = true;
     console.log(`Generating ${format.toUpperCase()} export...`);
-    this.toastService.showSuccess('Export Started', `Successfully generated ${format.toUpperCase()} export!`);
+    // Simulate export delay
+    setTimeout(() => {
+      this.isExporting = false;
+      this.toastService.showSuccess('Export Started', `Successfully generated ${format.toUpperCase()} export!`);
+    }, 1000);
   }
 }

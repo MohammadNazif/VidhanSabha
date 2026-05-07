@@ -10,9 +10,9 @@ namespace VidhanSabha.Application.Common.Village.Queries
 {
     public class GetallVillageByBoothId : IRequest<List<VillageByBoothResponseDto>>
     {
-            public int id { get; set; }
+            public int? id { get; set; }
     
-            public GetallVillageByBoothId(int id)
+            public GetallVillageByBoothId(int? id)
             {
                 this.id = id;
         }
