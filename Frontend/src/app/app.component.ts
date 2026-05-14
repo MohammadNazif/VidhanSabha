@@ -24,7 +24,8 @@ export class AppComponent implements OnInit {
   ngOnInit() {
     this.router.events.subscribe(event => {
       if (event instanceof NavigationEnd) {
-        this.isLoginPage = event.urlAfterRedirects.includes('/login');
+        const url = event.urlAfterRedirects;
+        this.isLoginPage = url.includes('/login') || url === '/' || url === '';
       }
     });
     this.checkScreenSize();

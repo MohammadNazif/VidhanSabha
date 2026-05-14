@@ -11,17 +11,26 @@ import { DesignationService } from '../../../Services/Admin/designation/designat
 import { AuthServiceService } from '../../../Services/Auth/auth.service';
 import { ToastService } from '../../../Services/common/toast/toast.service';
 import { CrudHandlerService } from '../../../Services/common/crud-handler.service';
+import { GenericExportComponent } from '../../shared/generic-export/generic-export.component';
 
 @Component({
   selector: 'app-designation',
   standalone: true,
-  imports: [CommonModule, PageHeaderComponent, GenericTableComponent, GenericModalButtonComponent],
+  imports: [CommonModule, PageHeaderComponent, GenericTableComponent, GenericModalButtonComponent, GenericExportComponent],
   templateUrl: './designation.component.html',
   styleUrl: './designation.component.css'
 })
 export class DesignationComponent implements OnInit {
   @ViewChild('designationModal') designationModal!: GenericModalButtonComponent;
   designationList: any[] = [];
+  isExporting = false;
+  searchTerm = '';
+  pageNumber = 1;
+  pageSize = 10;
+  sortBy = '';
+  isDescending = false;
+  totalCount = 0;
+  loading = false;
 
   columns: TableColumn[] = [
     { key: 'designationName', label: 'Designation Name' },
@@ -29,7 +38,6 @@ export class DesignationComponent implements OnInit {
 
   config: TableConfig = {
     selectable: false,
-    // filterable: true,
     paginated: true,
     defaultPageSize: 10,
     pageSizeOptions: [10, 20, 50],
@@ -73,28 +81,57 @@ export class DesignationComponent implements OnInit {
   }
 
   loadDesignations() {
+    this.loading = true;
     const userId = this.authService.getUserId();
-    this.designationService.getAllDesignations({ userId: userId }).subscribe({
+    const params = {
+      userId: userId,
+      pageNumber: this.pageNumber,
+      pageSize: this.pageSize,
+      searchTerm: this.searchTerm,
+      sortBy: this.sortBy,
+      isDescending: this.isDescending
+    };
+
+    this.designationService.getAllDesignations(params).subscribe({
       next: (response) => {
-        if (response && response.isSuccess) {
-          this.designationList = response.data;
-        } else if (Array.isArray(response)) {
-          this.designationList = response;
-        } else if (response && Array.isArray(response.data)) {
-          this.designationList = response.data;
+        const dataWrap = response.data;
+        if (dataWrap && dataWrap.items) {
+          this.designationList = dataWrap.items;
+          this.totalCount = dataWrap.totalCount || 0;
         } else {
-          this.designationList = [];
+          this.designationList = Array.isArray(dataWrap) ? dataWrap : (Array.isArray(response) ? response : []);
+          this.totalCount = this.designationList.length;
         }
+        this.loading = false;
       },
       error: (err) => {
         console.error('Error fetching designations:', err);
+        this.loading = false;
       }
     });
   }
 
+  handlePageChange(event: any) {
+    this.pageNumber = event.currentPage;
+    this.pageSize = event.pageSize;
+    this.loadDesignations();
+  }
+
+  handleSortChange(event: any) {
+    this.sortBy = event.column;
+    this.isDescending = event.direction === 'desc';
+    this.pageNumber = 1;
+    this.loadDesignations();
+  }
+
+  handleSearchChange(term: string) {
+    this.searchTerm = term;
+    this.pageNumber = 1;
+    this.loadDesignations();
+  }
+
   handleAction(event: any) {
     const { action, row } = event;
-
     if (action.id === 'delete') {
       this.crudHandler.handleRequest(
         this.designationService.deleteDesignation(row.id),
@@ -104,8 +141,6 @@ export class DesignationComponent implements OnInit {
       );
     } else if (action.id === 'edit') {
       this.designationModal.openModal(row);
-    } else {
-      this.toastService.showWarning('Action Selected', `Action ${action.id} clicked for ${row.name || 'this item'}`);
     }
   }
 
@@ -133,7 +168,31 @@ export class DesignationComponent implements OnInit {
   }
 
   handleExport(format: string) {
-    if (!format) return;
-    this.toastService.showSuccess('Export Started', `Successfully generated ${format.toUpperCase()} export!`);
+    if (!format || this.isExporting) return;
+    this.isExporting = true;
+    
+    const params = {
+      searchTerm: this.searchTerm
+    };
+
+    this.designationService.export('designation', format as 'excel' | 'pdf', params).subscribe({
+      next: (blob: Blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Designations_List.${format === 'excel' ? 'xlsx' : 'pdf'}`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        this.isExporting = false;
+        this.toastService.showSuccess('Success', `Designation list exported to ${format.toUpperCase()} successfully!`);
+      },
+      error: (err) => {
+        console.error(`Error exporting to ${format}:`, err);
+        this.toastService.showError('Error', `Failed to export designation list to ${format.toUpperCase()}`);
+        this.isExporting = false;
+      }
+    });
   }
 }

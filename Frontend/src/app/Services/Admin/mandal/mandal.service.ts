@@ -48,7 +48,7 @@ export class MandalService extends BaseApiService {
   }
 
   exportMandalReport(format: 'excel' | 'pdf', params: any = {}): Observable<Blob> {
-    return this.export(`${this.entity}/mandalReport`, format, params);
+    return this.export(`mandalreport`, format, params);
   }
 
   exportCombinedReportExcel(): Observable<Blob> {
@@ -57,5 +57,37 @@ export class MandalService extends BaseApiService {
 
   exportCombinedReportPdf(): Observable<Blob> {
     return this.http.get(`${this.apiUrl}/${this.entity}/exportCombined/pdf`, { responseType: 'blob' });
+  }
+
+  exportMandalExcel(params: any = {}): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/${this.entity}/export/excel`, {
+      params,
+      responseType: 'blob'
+    });
+  }
+
+  exportMandalPdf(params: any = {}): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/${this.entity}/export/pdf`, {
+      params,
+      responseType: 'blob'
+    });
+  }
+
+  getSanyojak(mandalId: any): Observable<any> {
+    return this.http.get(`${this.apiUrl}/${this.entity}/getsanyojak`, { params: { id: mandalId } });
+  }
+
+  exportCombinedMandalExcel(params: any = {}): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/combinedmandalreport/export/excel`, {
+      params,
+      responseType: 'blob'
+    });
+  }
+
+  exportCombinedMandalPdf(params: any = {}): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/combinedmandalreport/export/pdf`, {
+      params,
+      responseType: 'blob'
+    });
   }
 }

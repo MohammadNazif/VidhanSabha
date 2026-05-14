@@ -7,19 +7,19 @@ namespace VidhanSabha.Application.Pannels.Admin.Sector.DTOs
     public class CreateSectorRequestDto
     {
         public int MandalId { get; set; }
-        public string VillageIds { get; set; }  // Send as "1,2,3" from client
+        public List<int> VillageIds { get; set; }  
 
-        [JsonIgnore]
-        public List<int> VillageId => VillageIds?
-       .Split(',', StringSplitOptions.RemoveEmptyEntries)
-      .Select(x => {
-        if (int.TryParse(x.Trim(), out var id))
-            return (int?)id;
-        return null;
-    })
-    .Where(x => x.HasValue)
-    .Select(x => x.Value)
-    .ToList() ?? new List<int>();
+      //  [JsonIgnore]
+      //  public List<int> VillageId => VillageIds?
+      //  .Split(',', StringSplitOptions.RemoveEmptyEntries)
+      //  .Select(x => {
+      //  if (int.TryParse(x.Trim(), out var id))
+      //      return (int?)id;
+      //  return null;
+      // })
+      //.Where(x => x.HasValue)
+      //.Select(x => x.Value)
+      //.ToList() ?? new List<int>();
         public string SectorName { get; set; }
         public bool IsSectorSanyojak { get; set; }
 
@@ -68,7 +68,7 @@ namespace VidhanSabha.Application.Pannels.Admin.Sector.DTOs
         public string? EducationLevel { get; set; }
         public string? PhoneNumber { get; set; }
         public string? Address { get; set; }
-        public string? ProfileImage { get; set; }
+        public string? Profile { get; set; }
         public bool Status { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }

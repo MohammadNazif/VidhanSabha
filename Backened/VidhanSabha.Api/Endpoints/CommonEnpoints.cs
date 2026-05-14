@@ -173,6 +173,18 @@ namespace VidhanSabha.Api.Endpoints
             })
                 .WithName("getseniordisabledtype")
                 .Produces<List<SeniorDisabledTypeResponseDto>>(200);
+
+
+            common.MapPost("/setLocation", async (string latitude,string longitute,string userId, IMediator mediator) =>
+            {
+                var lang = latitude;
+                var lat = longitute;
+                var UserId = userId;
+                
+            })
+                .WithName("Locationn")
+                .Produces(200);
         }
+
     }
 }

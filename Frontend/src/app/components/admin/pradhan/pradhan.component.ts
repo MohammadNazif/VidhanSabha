@@ -20,7 +20,7 @@ import { GenericExportComponent } from '../../shared/generic-export/generic-expo
   imports: [CommonModule, FormsModule, GenericTableComponent, GenericModalButtonComponent, PageHeaderComponent, GenericExportComponent],
   template: `
     <div class="h-full flex flex-col p-4 gap-4 overflow-hidden">
-      <app-page-header [title]="isListView ? 'Pradhan List' : 'Pradhan Management'" subtitle="Manage village pradhans and their assignments">
+      <app-page-header [title]="isListView ? 'Pradhan List' : 'Master Data - Pradhan'" subtitle="Manage village pradhans and their assignments">
         <app-generic-modal-button 
             *ngIf="canManage()"
             #pradhanModal 
@@ -45,7 +45,9 @@ import { GenericExportComponent } from '../../shared/generic-export/generic-expo
           [loading]="loading"
           [totalItems]="totalItems"
           (actionClick)="handleAction($event)"
-          (searchChange)="handleSearchChange($event)">
+          (searchChange)="handleSearchChange($event)"
+          (pageChange)="handlePageChange($event)"
+          (sortChange)="handleSortChange($event)">
         </app-generic-table>
       </div>
     </div>
@@ -182,9 +184,22 @@ export class PradhanComponent implements OnInit {
     });
   }
 
+  pageNumber = 1;
+  pageSize = 50;
+  sortBy = '';
+  isDescending = false;
+
   loadPradhans() {
     this.loading = true;
-    this.pradhanService.getAllPradhans({ searchTerm: this.searchTerm }).subscribe({
+    const params: any = {
+      pageNumber: this.pageNumber,
+      pageSize: this.pageSize,
+      searchTerm: this.searchTerm,
+      sortBy: this.sortBy,
+      isDescending: this.isDescending
+    };
+
+    this.pradhanService.getAllPradhans(params).subscribe({
       next: (res: any) => {
         this.pradhans = res.data?.items || res.data || [];
         this.totalItems = res.data?.totalCount || this.pradhans.length;
@@ -195,6 +210,19 @@ export class PradhanComponent implements OnInit {
         this.toastService.showError('Error', 'Failed to load pradhans');
       }
     });
+  }
+
+  handlePageChange(event: any) {
+    this.pageNumber = event.currentPage;
+    this.pageSize = event.pageSize;
+    this.loadPradhans();
+  }
+
+  handleSortChange(event: any) {
+    this.sortBy = event.column;
+    this.isDescending = event.direction === 'desc';
+    this.pageNumber = 1;
+    this.loadPradhans();
   }
 
   handleAction(event: { action: TableAction; row: any; index: number }) {

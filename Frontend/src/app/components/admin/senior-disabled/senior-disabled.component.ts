@@ -404,7 +404,9 @@ export class SeniorDisabledComponent implements OnInit {
       params.userId = userId;
     }
 
-    params['TypeId'] = this.isDisabledView ? 2 : 1;
+    if (this.isListView) {
+      params['TypeId'] = this.isDisabledView ? 2 : 1;
+    }
 
     // Clean up empty params
     Object.keys(params).forEach(key => {
@@ -483,6 +485,34 @@ export class SeniorDisabledComponent implements OnInit {
     const raw = result.data;
     const isUpdate = !!(raw.id || (this.citizenModal.initialData && this.citizenModal.initialData.id));
 
+    if (isUpdate) {
+      const firstItem = raw.seniorDisabledRequest[0];
+      const submitUpdateData = {
+        Id: Number(raw.id || this.citizenModal.initialData.id),
+        TypeId: Number(raw.typeId),
+        BoothId: Number(raw.boothId),
+        VillageId: Array.isArray(raw.villageId) ? raw.villageId.map(Number) : [Number(raw.villageId)],
+        Name: firstItem.name,
+        Address: firstItem.address,
+        CategoryId: Number(firstItem.categoryId),
+        CastId: Number(firstItem.castId),
+        Mobile: String(firstItem.mobile),
+        VoterId: firstItem.voterId
+      };
+
+      this.citizenService.updateSeniorDisabled(submitUpdateData).subscribe({
+        next: () => {
+          this.toastService.showSuccess('Updated', 'Record updated successfully!');
+          this.citizenModal.closeModal();
+          this.loadCitizens();
+        },
+        error: (err) => {
+          this.toastService.showError('Error', err.error?.message || 'Update failed');
+        }
+      });
+      return;
+    }
+
     const submitData: any = {
       typeId: Number(raw.typeId),
       boothId: Number(raw.boothId),
@@ -498,18 +528,10 @@ export class SeniorDisabledComponent implements OnInit {
       userId: this.authService.getUserId()
     };
 
-    if (isUpdate) {
-      submitData.id = Number(raw.id || this.citizenModal.initialData.id);
-    }
-
-    const request = isUpdate
-      ? this.citizenService.updateSeniorDisabled(submitData)
-      : this.citizenService.createSeniorDisabled(submitData);
-
     this.crudHandler.handleRequest(
-      request,
-      isUpdate ? 'Updated' : 'Created',
-      `Record ${isUpdate ? 'updated' : 'created'} successfully!`,
+      this.citizenService.createSeniorDisabled(submitData),
+      'Created',
+      'Record created successfully!',
       () => this.loadCitizens(),
       true,
       ModulePermission.SeniororDisabled

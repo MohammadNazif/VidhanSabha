@@ -10,13 +10,11 @@ namespace VidhanSabha.Application.Pannels.Admin.Mandal.Commands
 {
    public class CreateMandalCommand : IRequest<MandalResponseDto>
         {
-            public string userId { get; set; }
-            public string Name { get; set; }
 
-            public CreateMandalCommand( string name, string userId)
+          public CreateMandalRequestDto Dto { get; set; }
+          public CreateMandalCommand(CreateMandalRequestDto dto)
             {
-            this.userId = userId;
-                Name = name;
+            Dto = dto;
             }
        }
 }

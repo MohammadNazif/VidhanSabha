@@ -213,7 +213,7 @@ export class BoothComponent implements OnInit {
 
     const userId = this.authService.getUserId();
     if (userId) {
-      params.userId = userId;
+      params.userId = null;
     }
 
     // Clean up empty params to prevent URL clutter (e.g. sectorId=)

@@ -1,27 +1,27 @@
 <div class="h-screen p-6 flex flex-col overflow-hidden">
-    <app-page-header [title]="isListView ? 'Sector List' : 'Sectors Registration'" subtitle="Manage and view all sectors in the assembly.">
+    <app-page-header [title]="isListView ? 'Sector List' : 'Sectors Registration'"
+        subtitle="Manage and view all sectors in the assembly.">
 
         <div class="flex items-center gap-3">
 
 
-            <app-generic-modal-button *ngIf="canManage()" #sectorModal [config]="addSectorConfig" label="Add Sector" icon="+"
-                variant="primary" (formSubmit)="handleFormSubmit($event)">
+            <app-generic-modal-button *ngIf="canManage()" #sectorModal [config]="addSectorConfig" label="Add Sector"
+                icon="+" variant="primary" (formSubmit)="handleFormSubmit($event)">
             </app-generic-modal-button>
 
-            <app-generic-export [show]="isListView && sectorList && sectorList.length > 0" 
-                [isExporting]="isExporting" (export)="handleExport($event)">
+            <app-generic-export [show]="isListView && sectorList && sectorList.length > 0" [isExporting]="isExporting"
+                (export)="handleExport($event)">
             </app-generic-export>
         </div>
     </app-page-header>
 
     <!-- Table Card Wrapper -->
-    <div class="flex-1 min-h-0 rounded-2xl border border-slate-200 bg-white shadow-sm p-1 lg:p-3 overflow-hidden flex flex-col">
-        <app-generic-table class="flex-1 min-h-0" [data]="sectorList" [columns]="columns" [config]="config" 
-            [actions]="actions" [totalItems]="totalCount" [loading]="loading" (actionClick)="handleAction($event)" 
-            (pageChange)="handlePageChange($event)"
-            (sortChange)="handleSortChange($event)"
-            (searchChange)="handleSearchChange($event)"
-            (selectionChange)="handleSelection($event)">
+    <div
+        class="flex-1 min-h-0 rounded-2xl border border-slate-200 bg-white shadow-sm p-1 lg:p-3 overflow-hidden flex flex-col">
+        <app-generic-table class="flex-1 min-h-0" [data]="sectorList" [columns]="columns" [config]="config"
+            [actions]="actions" [totalItems]="totalCount" [loading]="loading" (actionClick)="handleAction($event)"
+            (pageChange)="handlePageChange($event)" (sortChange)="handleSortChange($event)"
+            (searchChange)="handleSearchChange($event)" (selectionChange)="handleSelection($event)">
         </app-generic-table>
     </div>
 </div>

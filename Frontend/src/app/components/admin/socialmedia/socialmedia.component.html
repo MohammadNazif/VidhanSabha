@@ -6,7 +6,7 @@
                 variant="primary" (formSubmit)="handleFormSubmit($event)" *ngIf="canManage()">
             </app-generic-modal-button>
 
-            <app-generic-export [show]="isListView && socialMediaList && socialMediaList.length > 0" 
+            <app-generic-export [show]="isListView && socialMediaList && socialMediaList.length > 0"
                 [isExporting]="isExporting" (export)="handleExport($event)">
             </app-generic-export>
         </div>

@@ -1,11 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using VidhanSabha.Application.Common.Dtos;
+using VidhanSabha.Application.Common.ExportPdfExcel.Dtos;
 using VidhanSabha.Application.Pannels.Admin.Sector.DTOs;
 using VidhanSabha.Application.Pannels.Admin.Sector.Interface;
 using VidhanSabha.Domain.Entities.Admin;
@@ -19,58 +20,55 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
     {
         public SectorRepository(DatabaseContext context) : base(context) { }
 
-        public async Task<PagedResult<SectorResponseDto>> GetAllAsync(SectorQueryParams qp,int? vidhanId,CancellationToken ct)
+        public async Task<PagedResult<SectorResponseDto>> GetAllAsync(SectorQueryParams qp, int? vidhanId, CancellationToken ct)
         {
-            var query = _context.Tbl_Sector.Where(x => x.Mandal.VidhanId == vidhanId)
-               .AsNoTracking()
-               .Where(b =>
-                   (!qp.Id.HasValue || b.Id == qp.Id) 
-                   
-                   );
+            var query = _context.Tbl_Sector
+                .AsNoTracking()
+                .Where(x => x.Mandal.VidhanId == vidhanId)
+                .Where(b => (!qp.Id.HasValue || b.Id == qp.Id));
 
             Expression<Func<Tbl_Sector, bool>>? search = null;
-
             if (!string.IsNullOrWhiteSpace(qp.SearchTerm))
             {
                 var term = qp.SearchTerm.Trim().ToLower();
-                search = b =>
-                    b.SectorName.ToLower().Contains(term);
-                //b.Village.VillageName.ToLower().Contains(term) ||
+                search = b => b.SectorName.ToLower().Contains(term) ||
+                   b.Mandal.Name.ToLower().Contains(term) ||
+                   b.InchargeName.ToLower().Contains(term) 
+                ;
             }
 
             return await query.ToPagedResultAsync(
-               queryParams: qp,
-               searchPredicate: search,
-               defaultSort: b => b.Id,
-               projection: s => new SectorResponseDto
-               {
-                   Id = s.Id,
-                   MandalId = s.MandalId,
-                   MandalName = s.Mandal.Name,
-                   Villages = s.Villages.Select(v => new VillageResponseDto
-                   {
-                       VillageId = v.VillageId,
-                       VillageName = v.Village.VillageName
-                   }).ToList(),
-                   SectorName = s.SectorName,
-                   IsSectorSanyojak = s.IsSectorSanyojak,
-                   InchargeName = s.InchargeName,
-                   Age = s.Age,
-                   FatherName = s.FatherName,
-                   CategoryId = s.CategoryId,
-                   CategoryName = s.Category.Name,
-                   CastId = s.CastId,
-                   CastName = s.Cast.CastName,
-                   EducationLevel = s.EducationLevel,
-                   PhoneNumber = s.PhoneNumber,
-                   Address = s.Address,
-                   ProfileImage = s.ProfileImage,
-                   Status = s.Status
-               },
-               ct:ct
-               );
+                queryParams: qp,
+                searchPredicate: search,
+                defaultSort: b => b.Id,
+                projection: s => new SectorResponseDto
+                {
+                    Id = s.Id,
+                    MandalId = s.MandalId,
+                    MandalName = s.Mandal != null ? s.Mandal.Name : null,
+                    Villages = s.Villages.Select(v => new VillageResponseDto
+                    {
+                        VillageId = v.VillageId,
+                        VillageName = v.Village != null ? v.Village.VillageName : null  // ✅ null safe
+                    }).ToList(),
+                    SectorName = s.SectorName,
+                    IsSectorSanyojak = s.IsSectorSanyojak,
+                    InchargeName = s.InchargeName,
+                    Age = s.Age,
+                    FatherName = s.FatherName,
+                    CategoryId = s.CategoryId,
+                    CategoryName = s.Category != null ? s.Category.Name : null,      
+                    CastId = s.CastId,
+                    CastName = s.Cast != null ? s.Cast.CastName : null,
+                    EducationLevel = s.EducationLevel,
+                    PhoneNumber = s.PhoneNumber,
+                    Address = s.Address,
+                    Profile = s.ProfileImage,
+                    Status = s.Status
+                },
+                ct: ct
+            );
         }
-
         public async Task<PagedResult<SectorReportDto>> GetAllSectorReports(
         SectorQueryParams qp,
         int? vidhanSabhaId,
@@ -176,8 +174,8 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
                     InchargeName = s.InchargeName,
                     Age = s.Age,
                     FatherName = s.FatherName,
-                    CastId = s.CastId,
-                    CastName = s.CastId != null && s.Cast != null ? s.Cast.CastName : null,
+                    CastId = s.CastId != null ? (s.CastId != null ? s.CastId : null) : null,
+                    //CastName = s.CastId != null ? (s.Cast != null ? s.Cast.CastName : null) : null,
                     EducationLevel = s.EducationLevel,
                     PhoneNumber = s.PhoneNumber,
                     Address = s.Address,
@@ -292,7 +290,7 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
           SectorName = s.SectorName ?? string.Empty,
           SectorSanyojak = s.IsSectorSanyojak ? (s.InchargeName ?? string.Empty) : string.Empty,
           Mobile = s.IsSectorSanyojak ? (s.PhoneNumber ?? string.Empty) : string.Empty,
-          Cast = s.CastId != null ? (s.Cast != null ? s.Cast.CastName : null) : null,
+          Cast = s.Cast != null ? s.Cast.CastName : null,
 
           Villages = s.Villages != null
               ? s.Villages.Select(v => new VillageDto
@@ -344,7 +342,74 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
   );
             
         }
+        public async Task<List<SectorReportExportRow>> GetSectorReportExportAsync(
+    SectorReportFilter filter,
+    CancellationToken ct = default)
+        {
+            if (string.IsNullOrWhiteSpace(filter.UserId))
+                throw new ArgumentException("UserId is required for sector reports.");
 
+            var query = _context.Tbl_Sector
+                .AsNoTracking()
+                .Where(s => s.CreatedByUserId == filter.UserId);
+
+            if (filter.SectorId.HasValue)
+                query = query.Where(s => s.Id == filter.SectorId.Value);
+
+            if (filter.MandalId.HasValue)
+                query = query.Where(s => s.MandalId == filter.MandalId.Value);
+
+            if (filter.CastId.HasValue)
+                query = query.Where(s => s.CastId == filter.CastId.Value);
+
+            if (filter.VillageId.HasValue)
+                query = query.Where(s => s.Villages.Any(v => v.VillageId == filter.VillageId.Value));
+
+            // Projection
+            var result = await query
+                .Select(s => new SectorReportExportRow
+                {
+                    SectorId = s.Id,
+                    SectorName = s.SectorName ?? string.Empty,
+                    SectorSanyojak = s.IsSectorSanyojak ? (s.InchargeName ?? string.Empty) : string.Empty,
+                    Mobile = s.IsSectorSanyojak ? (s.PhoneNumber ?? string.Empty) : string.Empty,
+                    Cast = s.Cast != null ? s.Cast.CastName : null,
+
+                    Villages = s.Villages != null
+                        ? s.Villages.Select(v => new VillageExpDto
+                        {
+                            Id = v.VillageId,
+                            Name = v.Village != null ? v.Village.VillageName : null
+                        }).ToList()
+                        : new List<VillageExpDto>(),
+
+                    TotalBooth = _context.Tbl_Booth
+                        .Count(x => x.SectorId == s.Id && x.Status),
+
+                    TotalVotes = _context.Tbl_BoothVoter
+                        .Where(x => x.Booth.SectorId == s.Id && x.Booth.Sector.CreatedByUserId == filter.UserId && x.Status)
+                        .Sum(x => (int?)x.TotalVoter) ?? 0,
+
+                    SeniorCitizen = _context.Tbl_SeniorDisabled
+                        .Count(x => x.Booth.SectorId == s.Id && x.Booth.Sector.CreatedByUserId == filter.UserId &&
+                                    x.UserId == filter.UserId && x.TypeId == 1 && x.Status),
+
+                    Handicap = _context.Tbl_SeniorDisabled
+                        .Count(x => x.Booth.SectorId == s.Id && x.Booth.Sector.CreatedByUserId == filter.UserId &&
+                                    x.UserId == filter.UserId && x.TypeId == 2 && x.Status),
+
+                    DoubleVoter = _context.Tbl_DoubleVoter
+                        .Count(x => x.Booth.SectorId == s.Id && x.Booth.Sector.CreatedByUserId == filter.UserId &&
+                                    x.UserId == filter.UserId && x.Status),
+
+                    PravasiVoter = _context.Tbl_PravasiVoter
+                        .Count(x => x.Booth.SectorId == s.Id && x.Booth.Sector.CreatedByUserId == filter.UserId &&
+                                    x.UserId == filter.UserId && x.Status)
+                })
+                .ToListAsync(ct);
+
+            return result;
+        }
         public async Task<Tbl_Sector?> GetByIdAsync(int id)
             => await _context.Tbl_Sector
                 .Include(s => s.Mandal)

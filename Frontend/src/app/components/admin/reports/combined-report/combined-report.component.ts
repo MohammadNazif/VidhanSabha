@@ -9,6 +9,7 @@ import { TableColumn, TableConfig, TableFilter } from '../../../shared/generic-t
 import { SectorService } from '../../../../Services/Admin/sector/sector.service';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
+import { AuthServiceService } from '../../../../Services/Auth/auth.service';
 
 import { GenericExportComponent } from '../../../shared/generic-export/generic-export.component';
 
@@ -37,16 +38,17 @@ export class CombinedReportComponent implements OnInit {
   columns: TableColumn[] = [
     { key: 'mandalName', label: 'Mandal', sortable: true },
     { key: 'sectorName', label: 'Sector', sortable: true },
-    { key: 'inchargeName', label: 'Sector Sanyojak', sortable: true },
-    { key: 'inchargeFatherName', label: 'Sanyojak Father', sortable: true },
-    { key: 'phoneNumber', label: 'Sector Sanyojak Phone', sortable: true },
+    { key: 'sectorInchargeName', label: 'Sector Incharge', sortable: true },
+    { key: 'sectorFatherName', label: 'Incharge Father', sortable: true },
+    { key: 'sectorPhone', label: 'Incharge Phone', sortable: true },
     { key: 'boothNumber', label: 'Booth No.', sortable: true },
     { key: 'pollingStationName', label: 'Polling Station', sortable: true },
-    { key: 'sanyojakProfile', label: 'Booth Adhyaksh Photo', type: 'avatar', align: 'center', sortable: false, avatarFallbackKey: 'sanyojakName' },
-    { key: 'sanyojakName', label: 'Booth Adhyaksh', sortable: true },
-    { key: 'sanyojakFatherName', label: 'Adhyaksh Father', sortable: true },
-    { key: 'sanyojakPhone', label: 'Booth Adhyaksh Phone', sortable: true },
-    { key: 'villageNames', label: 'Villages', sortable: false }
+    { key: 'sanyojakName', label: 'Sanyojak', sortable: true },
+    { key: 'sanyojakFatherName', label: 'Sanyojak Father', sortable: true },
+    { key: 'sanyojakPhone', label: 'Sanyojak Phone', sortable: true },
+    { key: 'sanyojakAge', label: 'Age', sortable: true },
+    { key: 'sanyojakCaste', label: 'Caste', sortable: true },
+    { key: 'villageNames', label: 'Villages', sortable: true }
   ];
 
   config: TableConfig = {
@@ -75,7 +77,8 @@ export class CombinedReportComponent implements OnInit {
     private mandalService: MandalService,
     private sectorService: SectorService,
     private toastService: ToastService,
-    private http: HttpClient
+    private http: HttpClient,
+    private authService: AuthServiceService
   ) { }
 
   ngOnInit(): void {
@@ -147,7 +150,7 @@ export class CombinedReportComponent implements OnInit {
         try {
           if (res.isSuccess && res.data) {
             this.reportData = res.data.items || [];
-            this.flattenedData = this.flattenReportData(this.reportData);
+            this.flattenedData = this.reportData; // Already flat from API
             this.totalCount = res.data.totalCount || 0;
             this.totalPages = res.data.totalPages || 0;
           }
@@ -193,48 +196,29 @@ export class CombinedReportComponent implements OnInit {
   }
 
   private flattenReportData(mandals: any[]): any[] {
-    const flattened: any[] = [];
-    mandals.forEach(mandal => {
-      if (mandal.sectors && mandal.sectors.length > 0) {
-        mandal.sectors.forEach((sector: any) => {
-          flattened.push({
-            mandalName: mandal.name,
-            sectorName: sector.sectorName,
-            inchargeName: sector.inchargeName,
-            inchargeFatherName: sector.fatherName,
-            phoneNumber: sector.phoneNumber,
-            boothNumber: sector.booth?.boothNumber || 'N/A',
-            pollingStationName: sector.booth?.pollingStationName || 'N/A',
-            sanyojakProfile: sector.booth?.sanyojak?.profilePath,
-            sanyojakName: sector.booth?.sanyojak?.name || 'N/A',
-            sanyojakFatherName: sector.booth?.sanyojak?.fatherName || 'N/A',
-            sanyojakPhone: sector.booth?.sanyojak?.phone || 'N/A',
-            villageNames: this.getVillageNames(sector.booth?.villages)
-          });
-        });
-      } else {
-        flattened.push({
-          mandalName: mandal.name,
-          sectorName: 'N/A',
-          inchargeName: 'N/A',
-          phoneNumber: 'N/A',
-          boothNumber: 'N/A',
-          pollingStationName: 'N/A',
-          sanyojakName: 'N/A',
-          sanyojakPhone: 'N/A',
-          villageNames: 'N/A'
-        });
-      }
-    });
-    return flattened;
+    return mandals; // No longer needed as API returns flat data
   }
 
   handleExport(format: string) {
     if (!format) return;
     this.exporting = true;
+
+    const params: any = {
+      UserId: this.authService.getUserId(),
+      PageNumber: this.pageNumber,
+      PageSize: 1000,
+      Search: this.searchTerm || ''
+    };
+
+    if (this.currentFilters['MandalIds']?.length) params.MandalId = this.currentFilters['MandalIds'].join(',');
+    if (this.currentFilters['SectorIds']?.length) params.SectorId = this.currentFilters['SectorIds'].join(',');
+    if (this.currentFilters['BoothIds']?.length) params.BoothId = this.currentFilters['BoothIds'].join(',');
+    if (this.currentFilters['VillageIds']?.length) params.VillageId = this.currentFilters['VillageIds'].join(',');
+    if (this.currentFilters['CastIds']?.length) params.CastId = this.currentFilters['CastIds'].join(',');
+
     const request = format === 'excel'
-      ? this.mandalService.exportCombinedReportExcel()
-      : this.mandalService.exportCombinedReportPdf();
+      ? this.mandalService.exportCombinedMandalExcel(params)
+      : this.mandalService.exportCombinedMandalPdf(params);
 
     request.subscribe({
       next: (blob: Blob) => {

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using VidhanSabha.Application.Common.Dtos;
+using VidhanSabha.Application.Common.ExportPdfExcel.Dtos;
 using VidhanSabha.Application.Pannels.Admin.Sector.DTOs;
 using VidhanSabha.Domain.Entities.Admin;
 
@@ -11,6 +12,9 @@ namespace VidhanSabha.Application.Pannels.Admin.Sector.Interface
 {
     public interface ISectorRepository
     {
+       Task<List<SectorReportExportRow>> GetSectorReportExportAsync(
+     SectorReportFilter filter,
+     CancellationToken ct = default);
         Task<PagedResult<SectorResponseDto>> GetAllAsync(SectorQueryParams qp,int? vidhanID,CancellationToken ct);
         Task<PagedResult<SectorReportDto>> GetAllSectorReports(SectorQueryParams qp,int? VidhanSabhaId, CancellationToken ct);
         Task<PagedResult<AdminSectorReportsDto>> GetAllAdminSectorReports(SectorQueryParams qp,CancellationToken ct);

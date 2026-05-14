@@ -69,7 +69,7 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
             var CastIds = qp.GetCastIds();
             var villageIds = qp.GetVillageIds();
 
-            // ✅ FIX 1: query = assign karo, sirf query.Where nahi
+           
             query = query.Where(b =>
              
                 (!qp.Id.HasValue || b.Id == qp.Id) && (b.Booth.Mandal.Status && b.Booth.Sector.Status) &&
@@ -94,9 +94,10 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
             {
                 var term = qp.SearchTerm.Trim().ToLower();
                 search = b =>
-                    b.Booth.BoothNumber.Equals(Convert.ToInt32(term)) ||
+                 
                     b.Name.ToLower().Contains(term) ||
                     b.Address.ToLower().Contains(term) ||
+                     b.Mobile.ToLower().Contains(term) ||
                     b.Cast.CastName.ToLower().Contains(term) ||
                     //b.Village.Id.ToLower().Contains(term) ||
                     b.VoterId.ToLower().Contains(term);

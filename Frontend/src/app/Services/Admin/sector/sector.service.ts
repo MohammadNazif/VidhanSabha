@@ -37,7 +37,7 @@ export class SectorService extends BaseApiService {
   }
 
   exportAdminSectorReport(format: 'excel' | 'pdf', params: any = {}): Observable<Blob> {
-    return this.export(`${this.entity}/adminReport`, format, params);
+    return this.export('sectorreport', format, params);
   }
 
   exportSectorReportExcel(): Observable<Blob> {

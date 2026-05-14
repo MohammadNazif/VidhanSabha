@@ -45,7 +45,7 @@ namespace VidhanSabha.Application.Pannels.Admin.Sector.Commands
                     request.CreatedBy,
                     request.CreatedByUserId,
                     dto.MandalId,
-                    dto.VillageId,
+                    dto.VillageIds,
                     dto.SectorName
                 );
             }
@@ -74,7 +74,7 @@ namespace VidhanSabha.Application.Pannels.Admin.Sector.Commands
                     request.CreatedBy,
                     request.CreatedByUserId,
                     dto.MandalId,
-                    dto.VillageId,
+                    dto.VillageIds,
                     dto.SectorName,
                     userId, 
                     dto.InchargeName,

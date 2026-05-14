@@ -1,0 +1,241 @@
+<!-- NAVBAR -->
+<nav class="navbar" [class.scrolled]="isScrolled">
+  <div class="nav-container">
+    <div class="nav-brand" (click)="scrollTo('home')">
+      <div class="brand-icon">DK</div>
+      <div class="brand-text">
+        <span class="brand-name">Dinesh Khatik</span>
+        <span class="brand-sub">Bharatiya Janata Party</span>
+      </div>
+    </div>
+
+    <ul class="nav-links" [class.open]="isMenuOpen">
+      <li *ngFor="let link of navLinks">
+        <a (click)="scrollTo(link.target)" [class.active]="activeSection === link.target">
+          {{ link.label }}
+        </a>
+      </li>
+      <li><button class="btn-primary" routerLink="/login">Administrative Login</button></li>
+    </ul>
+
+    <button class="hamburger" (click)="toggleMenu()">
+      <span [class.open]="isMenuOpen"></span>
+      <span [class.open]="isMenuOpen"></span>
+      <span [class.open]="isMenuOpen"></span>
+    </button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="home" class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-content">
+    <div class="hero-text">
+      <div class="hero-badge">
+        <span class="dot"></span> Strong Leadership · Continuous Development
+      </div>
+      <h1 class="hero-title">
+        Public Service<br>
+        <span class="accent">Is Our</span> Resolve
+      </h1>
+      <p class="hero-desc">
+        Shri Dinesh Khatik — a dedicated worker, grassroots leader, and a steady force for development. The voice of the
+        people, the trust of all.
+      </p>
+      <div class="hero-btns">
+        <button class="btn-primary" (click)="scrollTo('contact')">Connect With Us</button>
+        <button class="btn-outline" (click)="scrollTo('development')">View Development Work</button>
+      </div>
+      <div class="hero-stats">
+        <div class="hstat">
+          <strong>15+</strong><span>Years Service</span>
+        </div>
+        <div class="hstat">
+          <strong>500+</strong><span>Villages Reached</span>
+        </div>
+        <div class="hstat">
+          <strong>10L+</strong><span>Citizens Helped</span>
+        </div>
+      </div>
+    </div>
+    <div class="hero-image">
+      <div class="hero-img-card">
+        <img src="/assets/images/Dinesh.jpeg" alt="Dinesh Khatik" />
+        <div class="img-label">Dinesh Khatik</div>
+      </div>
+      <div class="hero-img-card secondary">
+        <img src="/assets/images/YogiAdityanath.jpeg" alt="Yogi Adityanath" />
+        <div class="img-label">Yogi Adityanath</div>
+      </div>
+    </div>
+  </div>
+  <div class="ticker">
+    <span>🏛 Foundation laid for new ZHC in Haathpur &nbsp;•&nbsp; 🌾 Samman Nidhi distributed to 3,500 farmers
+      &nbsp;•&nbsp; 🎓 Youth Employment Fair — 1,200+ selected &nbsp;•&nbsp; 🙏 Jai Jawan Mission — top
+      contribution</span>
+  </div>
+</section>
+
+<!-- STATS -->
+<section id="stats" class="stats-section">
+  <div class="section-label">People's Trust</div>
+  <h2 class="section-title">Numbers That Speak</h2>
+  <div class="stats-grid">
+    <div class="stat-card" *ngFor="let s of stats">
+      <div class="stat-icon">{{ s.icon }}</div>
+      <div class="stat-value">{{ s.value }}</div>
+      <div class="stat-label">{{ s.label }}</div>
+    </div>
+  </div>
+</section>
+
+<!-- DEVELOPMENT -->
+<section id="development" class="dev-section">
+  <div class="dev-header">
+    <div class="section-label">Development Work</div>
+    <h2 class="section-title left">Progress in <span class="accent">Every Sector</span></h2>
+    <p class="section-desc">Visible change on the ground — continuous effort across roads, education, healthcare and
+      employment.</p>
+  </div>
+  <div class="dev-grid">
+    <div class="dev-card" *ngFor="let s of sectors">
+      <div class="dev-img-wrap">
+        <img [src]="s.img" [alt]="s.title" />
+        <div class="dev-tag">{{ s.tag }}</div>
+      </div>
+      <div class="dev-body">
+        <h3>{{ s.title }}</h3>
+        <p>{{ s.desc }}</p>
+        <a class="read-more">Read more →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SCHEMES -->
+<section id="schemes" class="schemes-section">
+  <div class="section-label">Government Schemes</div>
+  <h2 class="section-title">Public Welfare <span class="accent">Schemes</span></h2>
+  <div class="schemes-grid">
+    <div class="scheme-card" *ngFor="let sc of schemes">
+      <div class="scheme-icon">{{ sc.icon }}</div>
+      <div class="scheme-body">
+        <h3>{{ sc.title }}</h3>
+        <p>{{ sc.desc }}</p>
+        <div class="verified-badge" *ngIf="sc.verified">
+          <span>✅ Government Verified</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- GALLERY -->
+<section id="gallery" class="gallery-section">
+  <div class="section-label">Public Engagement</div>
+  <h2 class="section-title">Event <span class="accent">Gallery</span></h2>
+  <div class="gallery-hero">
+    <img src="https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=1200&q=80" alt="Rally" />
+    <div class="gallery-caption">
+      <span class="event-num">Event 1 / 4</span>
+      <h3>Public Rally & Development Programs</h3>
+    </div>
+  </div>
+  <div class="gallery-thumbs">
+    <img src="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=300&q=80" alt="Event 2" />
+    <img src="https://images.unsplash.com/photo-1517457373958-b7bdd4587205?w=300&q=80" alt="Event 3" />
+    <img src="https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?w=300&q=80" alt="Event 4" />
+  </div>
+</section>
+
+<!-- QUOTE -->
+<section class="quote-section">
+  <div class="quote-inner">
+    <div class="quote-img">
+      <img src="/assets/images/Dinesh.jpeg" alt="Dinesh Khatik" />
+    </div>
+    <div class="quote-body">
+      <div class="quote-mark">"</div>
+      <blockquote>My resolve is to bring the light of development to every citizen. Your trust is my greatest strength.
+      </blockquote>
+      <cite>— Dinesh Khatik, Public Servant</cite>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section id="testimonials" class="testimonials-section">
+  <div class="section-label">Voice of the People</div>
+  <h2 class="section-title">Citizen <span class="accent">Feedback</span></h2>
+  <div class="testimonials-grid">
+    <div class="testimonial-card" *ngFor="let t of testimonials">
+      <div class="testi-quote">"</div>
+      <p>{{ t.text }}</p>
+      <div class="testi-author">
+        <div class="testi-avatar">{{ t.name[0] }}</div>
+        <div>
+          <strong>{{ t.name }}</strong>
+          <small>{{ t.location }}</small>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact" style="background-color: #0d0d0d; width: 100%;">
+  <div class="contact-section">
+    <div class="contact-left">
+      <div class="section-label">Stay in Touch</div>
+      <h2 class="section-title left">Your Voice, <span class="accent">Our Priority</span></h2>
+      <p>Send us your concerns, suggestions, or any matter for public outreach. Every message reaches us.</p>
+      <div class="contact-info">
+        <div class="info-item">📞 +91 98888 99999</div>
+        <div class="info-item">✉️ office&#64;dineshkhatik.in</div>
+        <div class="info-item">📍 Public Outreach Office, Haathpur, Uttar Pradesh</div>
+      </div>
+    </div>
+    <div class="contact-right">
+      <div class="form-group">
+        <input type="text" placeholder="Your Name" />
+        <input type="text" placeholder="Mobile Number" />
+      </div>
+      <input type="email" placeholder="Email Address" />
+      <input type="text" placeholder="Subject" />
+      <textarea placeholder="Write your message here..."></textarea>
+      <button class="btn-primary full">Send Message →</button>
+    </div>
+
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <div class="brand-icon">DK</div>
+      <strong>Dinesh Khatik</strong>
+      <p>Together all, development for all. Strong leadership, continuous development.</p>
+      <div class="social-links">
+        <a href="#">f</a><a href="#">in</a><a href="#">tw</a><a href="#">yt</a>
+      </div>
+    </div>
+    <div class="footer-col">
+      <h4>Quick Links</h4>
+      <a *ngFor="let link of navLinks" (click)="scrollTo(link.target)">{{ link.label }}</a>
+    </div>
+    <div class="footer-col">
+      <h4>Schemes</h4>
+      <a *ngFor="let sc of schemes.slice(0,4)">{{ sc.title }}</a>
+    </div>
+    <div class="footer-col">
+      <h4>Contact</h4>
+      <p>+91 98888 99999</p>
+      <p>office&#64;dineshkhatik.in</p>
+      <p>Haathpur, Uttar Pradesh</p>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2024 Dinesh Khatik — All rights reserved. Designed with dedication.</p>
+  </div>
+</footer>

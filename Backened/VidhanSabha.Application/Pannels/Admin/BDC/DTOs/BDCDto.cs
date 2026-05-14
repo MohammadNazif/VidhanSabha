@@ -4,12 +4,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using VidhanSabha.Application.Common.Dtos;
 
 namespace VidhanSabha.Application.Pannels.Admin.BDC.DTOs
 {
-    public class CreateBDCReqDto
+    public class CreateBDCReqDto : BaseQueryParams
     {
-        public string Block { get; set; }
+        public int BlockId { get; set; }
         public string Name { get; set; }
         public string WardNumber { get; set; }
         public List<int> VillageId { get; set; } = new();
@@ -25,6 +26,7 @@ namespace VidhanSabha.Application.Pannels.Admin.BDC.DTOs
     {
         public int Id { get; set; }
         public string Block { get; set; }
+        public int BlockId { get; set; }
         public string Name { get; set; }
         public string WardNumber { get; set; }
         public List<VillageResponseDto> Villages { get; set; } = new();
@@ -36,6 +38,7 @@ namespace VidhanSabha.Application.Pannels.Admin.BDC.DTOs
         public string Mobile { get; set; }
         public int PartyId { get; set; }
         public string PartyName { get; set; }
+        public string? Profile { get; set; }
         public string Education { get; set; }
 
     }

@@ -36,7 +36,7 @@ export class InfluencerComponent implements OnInit {
   sortBy = '';
   isDescending = false;
   isListView = false;
-  pageTitle = 'Influencer Management';
+  pageTitle = 'Influencer Person Management';
   pageSubtitle = 'Manage master data for influential people';
 
   canManage(): boolean {
@@ -75,7 +75,7 @@ export class InfluencerComponent implements OnInit {
   ];
 
   formConfig: FormConfig = {
-    title: 'Register Prabhavshali Vyakt',
+    title: 'Influencer Person Registration',
     submitLabel: 'Save Entry',
     fields: [
       {
@@ -261,7 +261,7 @@ export class InfluencerComponent implements OnInit {
         this.pageTitle = 'Influencer Person List';
         this.pageSubtitle = 'View and export influential people list';
       } else {
-        this.pageTitle = 'Master Data - Influencer';
+        this.pageTitle = 'Influencer Person Management';
         this.pageSubtitle = 'Manage master data for influential people';
       }
 

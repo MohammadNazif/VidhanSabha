@@ -4,7 +4,8 @@ import { HttpClient } from '@angular/common/http';
 import { PageHeaderComponent } from '../../shared/page-header/page-header.component';
 import { GenericTableComponent } from '../../shared/generic-table/generic-table.component';
 import { TableAction, TableColumn, TableConfig } from '../../shared/generic-table/generic-table.types';
-import { BoothSamitiService } from '../../../Services/Admin/booth-voter/booth-samiti.service';
+import { MandalSamitiService } from '../../../Services/Admin/mandal/mandal-samiti.service';
+import { MandalService } from '../../../Services/Admin/mandal/mandal.service';
 import { CrudHandlerService } from '../../../Services/common/crud-handler.service';
 import { ModulePermission } from '../../../models/module-permission.enum';
 import { LucideAngularModule } from 'lucide-angular';
@@ -106,7 +107,7 @@ export class MandalSamitiComponent implements OnInit {
       );
       return {
         value: String(item.id),
-        label: item.designationName,
+        label: item.name || item.designationName,
         disabled: isTakenInList
       };
     });
@@ -142,6 +143,7 @@ export class MandalSamitiComponent implements OnInit {
         { key: 'designationName', label: 'Designation', sortable: true },
         { key: 'categoryName', label: 'Category', sortable: true },
         { key: 'contact', label: 'Contact', sortable: true },
+        { key: 'occupation', label: 'Occupation', sortable: true },
         { key: 'age', label: 'Age', sortable: true }
       ];
       this.actions = [
@@ -167,10 +169,22 @@ export class MandalSamitiComponent implements OnInit {
     submitLabel: 'Save Member',
     fields: [
       { id: 'id', name: 'id', label: 'ID', type: 'hidden' },
-      { id: 'mandalIdMem', name: 'mandalIdMem', label: 'Mandal ID', type: 'hidden' },
+      { id: 'MemberId', name: 'MemberId', label: 'Member ID', type: 'hidden' },
+      { id: 'mandalId', name: 'mandalId', label: 'Mandal ID', type: 'hidden' },
+      {
+        id: 'designationId',
+        name: 'designationId',
+        label: 'Designation',
+        type: 'select',
+        placeholder: '-- Select Designation --',
+        options: this.designationOptions$,
+        validations: [Validators.required],
+        gridColSpan: 12
+      },
       { id: 'name', name: 'name', label: 'Full Name', type: 'text', placeholder: 'Enter name', validations: [Validators.required], gridColSpan: 6 },
       { id: 'contact', name: 'contact', label: 'Contact', type: 'text', placeholder: 'Enter phone', validations: [Validators.required], gridColSpan: 6 },
       { id: 'age', name: 'age', label: 'Age', type: 'number', placeholder: 'Enter age', validations: [Validators.required], gridColSpan: 6 },
+      { id: 'occupation', name: 'occupation', label: 'Occupation', type: 'text', placeholder: 'Enter occupation', validations: [Validators.required], gridColSpan: 6 },
       {
         id: 'categoryId',
         name: 'categoryId',
@@ -182,14 +196,16 @@ export class MandalSamitiComponent implements OnInit {
         gridColSpan: 6
       },
       {
-        id: 'designationId',
-        name: 'designationId',
-        label: 'Designation',
+        id: 'casteId',
+        name: 'casteId',
+        label: 'Caste',
         type: 'select',
-        placeholder: '-- Select Designation --',
-        options: this.designationOptions$,
+        placeholder: '-- Select Caste --',
+        dependsOn: 'categoryId',
+        apiUrl: (catId: string) => `common/cast?id=${catId}`,
+        apiMapper: (data: any) => (data.data || data).map((item: any) => ({ value: String(item.id), label: item.name })),
         validations: [Validators.required],
-        gridColSpan: 12
+        gridColSpan: 6
       }
     ]
   };
@@ -211,19 +227,35 @@ export class MandalSamitiComponent implements OnInit {
         label: 'Mandal',
         type: 'select',
         placeholder: '-- Select Mandal --',
-        apiUrl: () => 'mandal/getAll',
+        apiUrl: () => 'mandal/getAll?pageNumber=1&pageSize=1000&search=&sortBy=&isDescending=true',
         apiMapper: (data: any) => {
-          const list = data.data || data || [];
+          const list = data.data?.items || data.data || data || [];
           return list.map((item: any) => ({ value: String(item.id), label: item.name }));
         },
         validations: [Validators.required],
-        gridColSpan: 12
+        gridColSpan: 6
+      },
+      {
+        id: 'sanyojakId',
+        name: 'sanyojakId',
+        label: 'Sanyojak',
+        type: 'select',
+        placeholder: '-- Select Sanyojak --',
+        dependsOn: 'mandalId',
+        apiUrl: (mandalId: any) => `mandal/getsanyojak?id=${mandalId}`,
+        apiMapper: (data: any) => {
+          const item = data.data;
+          return item ? [{ value: String(item.id), label: item.inchargeName }] : [];
+        },
+        validations: [Validators.required],
+        gridColSpan: 6
       }
     ]
   };
 
   constructor(
-    private boothSamitiService: BoothSamitiService,
+    private mandalSamitiService: MandalSamitiService,
+    private mandalService: MandalService,
     private crudHandler: CrudHandlerService,
     private route: ActivatedRoute,
     private toastService: ToastService,
@@ -240,7 +272,7 @@ export class MandalSamitiComponent implements OnInit {
       this.loadMembers();
     });
 
-    this.boothSamitiService.getDesignations().subscribe(res => {
+    this.http.get(`${environment.apiUrl}/mandalsamiti/designations/getAll`).subscribe((res: any) => {
       this.designations = res.data || res || [];
       this.updateDropdownOptions();
     });
@@ -252,33 +284,135 @@ export class MandalSamitiComponent implements OnInit {
 
   loadMembers() {
     this.loading = true;
-    // Mocking load for now as per user request for "only frontend design"
-    setTimeout(() => {
-      this.memberList = []; // Start with empty list
-      this.loading = false;
-    }, 500);
+    if (this.isMemberView && this.selectedMandalId) {
+      this.mandalSamitiService.getAllMembers(this.selectedMandalId).subscribe({
+        next: (res) => {
+          this.memberList = res.data || res || [];
+          this.totalCount = this.memberList.length;
+          this.loading = false;
+        },
+        error: () => {
+          this.loading = false;
+          this.toastService.showError('Error', 'Failed to load members');
+        }
+      });
+    } else {
+      const params = {
+        pageNumber: this.pageNumber,
+        pageSize: this.pageSize,
+        searchTerm: this.searchTerm,
+        sortBy: this.sortBy,
+        isDescending: this.isDescending
+      };
+      this.mandalSamitiService.getMandalSamiti(params).subscribe({
+        next: (res) => {
+          this.memberList = res.data?.items || res.data || res || [];
+          this.totalCount = res.data?.totalCount || res.totalCount || this.memberList.length;
+          this.loading = false;
+        },
+        error: () => {
+          this.loading = false;
+          this.toastService.showError('Error', 'Failed to load samitis');
+        }
+      });
+    }
   }
 
   handleAction(event: { action: TableAction, row: any }) {
     if (event.action.id === 'view') {
       this.isMemberView = true;
       this.updateTableConfig();
-      this.selectedMandalId = event.row.id;
+      this.selectedMandalId = event.row.mandalId;
       this.selectedMandalName = event.row.mandalName;
       this.loadMembers();
     } else if (event.action.id === 'add_samiti') {
-      this.memberModal.openModal({ mandalIdMem: event.row.id });
+      this.memberModal.openModal({
+        id: event.row.id,
+        mandalId: event.row.mandalId
+      });
+    } else if (event.action.id === 'edit_mem') {
+      const editData = {
+        ...event.row,
+        MemberId: event.row.id // Map member id to MemberId for editing
+      };
+      ['MemberId', 'categoryId', 'casteId', 'designationId', 'mandalId', 'id'].forEach(key => {
+        if (editData[key]) editData[key] = String(editData[key]);
+      });
+      this.memberModal.openModal(editData);
+    } else if (event.action.id === 'delete_mem') {
+      if (confirm('Are you sure you want to delete this member?')) {
+        this.mandalSamitiService.deleteMandalSamitiMem(event.row.id, event.row.mandalId).subscribe({
+          next: () => {
+            this.toastService.showSuccess('Success', 'Member deleted successfully');
+            this.loadMembers();
+          },
+          error: (err) => this.toastService.showError('Error', err.error?.message || 'Delete failed')
+        });
+      }
     }
   }
 
   handleMemberSubmit(result: FormResult) {
     if (!result.status) return;
-    this.toastService.showSuccess('Success', 'Member updated successfully (Mock)');
+    const rawData = result.data;
+    const isUpdate = rawData.MemberId && Number(rawData.MemberId) > 0;
+
+    if (isUpdate) {
+      // Align with UpdateMandalSamitiMemberRequestDto
+      const updateData = {
+        Id: Number(rawData.MemberId),
+        Name: rawData.name || '',
+        CategoryId: Number(rawData.categoryId || 0),
+        CasteId: Number(rawData.casteId || 0),
+        Age: Number(rawData.age || 0),
+        Contact: rawData.contact || '',
+        Occupation: rawData.occupation || '',
+        DesignationId: Number(rawData.designationId || 0)
+      };
+
+      this.mandalSamitiService.updateMandalSamitiMem(updateData).subscribe({
+        next: () => {
+          this.toastService.showSuccess('Success', 'Member updated successfully');
+          this.memberModal.closeModal();
+          this.loadMembers();
+        },
+        error: (err) => this.toastService.showError('Error', err.error?.message || 'Update failed')
+      });
+    } else {
+      // For creation, the 'id' field from the row represents the Mandal Samiti record ID
+      const createData = {
+        MemberId: Number(rawData.id || 0),
+        MandalId: Number(rawData.mandalId || this.selectedMandalId || 0),
+        CategoryId: Number(rawData.categoryId || 0),
+        CasteId: Number(rawData.casteId || 0),
+        DesignationId: Number(rawData.designationId || 0),
+        Age: Number(rawData.age || 0),
+        Name: rawData.name || '',
+        Contact: rawData.contact || '',
+        Occupation: rawData.occupation || ''
+      };
+
+      this.mandalSamitiService.createMandalSamitiMem(createData).subscribe({
+        next: () => {
+          this.toastService.showSuccess('Success', 'Member created successfully');
+          this.memberModal.closeModal();
+          this.loadMembers();
+        },
+        error: (err) => this.toastService.showError('Error', err.error?.message || 'Creation failed')
+      });
+    }
   }
 
   handleFormSubmit(result: FormResult) {
     if (!result.status) return;
-    this.toastService.showSuccess('Success', 'Samiti created successfully (Mock)');
+    this.mandalSamitiService.createMandalSamiti(result.data).subscribe({
+      next: () => {
+        this.toastService.showSuccess('Success', 'Samiti created successfully');
+        this.samitiModal.closeModal();
+        this.loadMembers();
+      },
+      error: (err) => this.toastService.showError('Error', err.error?.message || 'Operation failed')
+    });
   }
 
   handlePageChange(event: any) { this.loadMembers(); }

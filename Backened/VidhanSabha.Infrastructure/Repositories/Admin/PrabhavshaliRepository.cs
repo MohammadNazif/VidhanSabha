@@ -96,8 +96,13 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
                 {
                     var term = qp.SearchTerm.Trim().ToLower();
                     search = b =>
-                        b.Booth.BoothNumber.Equals(Convert.ToInt32(term)) ||
-                        b.Name.ToLower().Contains(term);
+                        
+                        b.Name.ToLower().Contains(term) ||
+                        b.Mobile.ToLower().Contains(term) ||
+                        b.Cast.CastName.ToLower().Contains(term) ||
+                        b.Category.Name.ToLower().Contains(term) ||
+                        b.Mobile.ToLower().Contains(term) ||
+                        b.Designation.DesignationName.ToLower().Contains(term);
                 }
 
                 return await query.ToPagedResultAsync(

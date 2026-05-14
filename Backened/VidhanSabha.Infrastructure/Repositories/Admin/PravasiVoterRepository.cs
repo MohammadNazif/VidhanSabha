@@ -98,6 +98,8 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
                     b.Booth.BoothNumber.ToString().Contains(term) ||
                     b.Name.ToLower().Contains(term) ||
                     b.Cast.CastName.ToLower().Contains(term) ||
+                    b.Category.Name.ToLower().Contains(term) ||
+                    b.Occupation.Occupation.ToLower().Contains(term) ||
                     b.VoterId.ToLower().Contains(term);
             }
 
@@ -164,6 +166,8 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
                     b.Booth.BoothNumber.ToString().Contains(term) ||
                     b.Name.ToLower().Contains(term) ||
                     b.Cast.CastName.ToLower().Contains(term) ||
+                    b.Category.Name.ToLower().Contains(term) ||
+                    b.Occupation.Occupation.ToLower().Contains(term) ||
                     b.VoterId.ToLower().Contains(term));
             }
 

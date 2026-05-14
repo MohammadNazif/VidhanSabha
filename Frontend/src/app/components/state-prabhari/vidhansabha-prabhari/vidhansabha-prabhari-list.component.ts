@@ -96,7 +96,7 @@ export class VidhanSabhaPrabhariListComponent implements OnInit {
         type: 'select',
         apiUrl: 'common/getstates',
         apiMapper: (data: any) => {
-          const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
+          const list = Array.isArray(data?.data?.items) ? data.data.items : (Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []));
           return list.map((item: any) => ({
             value: String(item.id),
             label: item.stateName
@@ -114,7 +114,7 @@ export class VidhanSabhaPrabhariListComponent implements OnInit {
         placeholder: '-- Select District --',
         apiUrl: () => `vidhansabhacount/districtwise/getAll?userId=${this.authService.getUserId()}`,
         apiMapper: (data: any) => {
-          const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
+          const list = Array.isArray(data?.data?.items) ? data.data.items : (Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []));
           return list.map((item: any) => ({
             value: String(item.districtId || item.id),
             label: item.dsitrictName || item.districtName || item.name
@@ -133,7 +133,7 @@ export class VidhanSabhaPrabhariListComponent implements OnInit {
         dependsOn: 'districtId',
         apiUrl: (distId: any) => `stateprabhari/vidhansabha/getAll?districtId=${distId}&pageNumber=1&pageSize=100000&sortBy=id&IsDescending=true`,
         apiMapper: (data: any) => {
-          const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
+          const list = Array.isArray(data?.data?.items) ? data.data.items : (Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []));
           return list.map((item: any) => ({
             value: String(item.id),
             label: item.vidhanSabhaName + (item.hasPrabhari ? ' (Already Assigned)' : ''),
@@ -191,7 +191,7 @@ export class VidhanSabhaPrabhariListComponent implements OnInit {
         placeholder: '-- Select Category --',
         apiUrl: 'common/category',
         apiMapper: (data: any) => {
-          const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
+          const list = Array.isArray(data?.data?.items) ? data.data.items : (Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []));
           return list.map((item: any) => ({
             value: String(item.id),
             label: item.name
@@ -209,7 +209,7 @@ export class VidhanSabhaPrabhariListComponent implements OnInit {
         dependsOn: 'categoryId',
         apiUrl: (catId: any) => `common/cast?id=${catId}`,
         apiMapper: (data: any) => {
-          const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
+          const list = Array.isArray(data?.data?.items) ? data.data.items : (Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []));
           return list.map((item: any) => ({
             value: String(item.id),
             label: item.name

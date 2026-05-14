@@ -31,6 +31,6 @@ namespace VidhanSabha.Application.Pannels.Admin.Booth.Dtos
         public string? EducationLevel { get; set; }
         public string PhoneNumber { get; set; } = string.Empty;
         public string? Address { get; set; }
-        public string? ProfileImageUrl { get; set; }
+        public string? Profile { get; set; }
     }
 }

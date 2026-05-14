@@ -23,8 +23,8 @@ export class DynamicFormModalComponent implements OnInit, OnDestroy {
   form!: FormGroup;
   fieldOptions: { [key: string]: DropdownOption[] } = {};
   fieldVisibility: { [key: string]: boolean } = {};
-  fileData: { [key: string]: File } = {};
-  previews: { [key: string]: string | ArrayBuffer | null } = {};
+  fileData: { [key: string]: any } = {};
+  previews: { [key: string]: any } = {};
 
   private subscriptions: Subscription = new Subscription();
   private isInitializing = true;
@@ -373,11 +373,26 @@ export class DynamicFormModalComponent implements OnInit, OnDestroy {
   private lastApiUrl: { [key: string]: string } = {};
 
   onFileChange(event: any, fieldId: string): void {
-    const file = event.target.files[0];
-    if (file) {
-      this.fileData[fieldId] = file;
+    const field = this.config.fields.find(f => f.id === fieldId);
+    const files = Array.from(event.target.files) as File[];
+    
+    if (files.length === 0) return;
 
-      // Create preview
+    if (field?.multiple) {
+      this.fileData[fieldId] = files;
+      this.previews[fieldId] = [];
+      
+      files.forEach(file => {
+        const reader = new FileReader();
+        reader.onload = e => {
+          if (!Array.isArray(this.previews[fieldId])) this.previews[fieldId] = [];
+          this.previews[fieldId].push(reader.result);
+        };
+        reader.readAsDataURL(file);
+      });
+    } else {
+      const file = files[0];
+      this.fileData[fieldId] = file;
       const reader = new FileReader();
       reader.onload = e => this.previews[fieldId] = reader.result;
       reader.readAsDataURL(file);

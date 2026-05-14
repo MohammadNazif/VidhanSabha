@@ -95,7 +95,7 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
 
                 // ✅ FIX 1: query = assign karo, sirf query.Where nahi
                 query = query.Where(b =>
-                  b.Status &&
+                  b.Status && b.UserId == qp.UserId &&
                     (!qp.Id.HasValue || b.Id == qp.Id));
                     //b.UserId == qp.UserId);                 // ✅ FIX 2: closing brace sahi jagah
 
@@ -131,7 +131,7 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
                    DesignationId = p.DesignationId,
                    DesignationName = p.Designation.DesignationName,
                    Contact = p.Contact,
-
+                  
                    Gender = p.Gender,
                    GenderValue = ((VidhanSabha.Domain.Enums.Gender)p.Gender).ToString(),
 

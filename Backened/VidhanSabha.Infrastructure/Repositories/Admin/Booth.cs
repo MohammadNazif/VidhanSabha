@@ -52,7 +52,7 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
                 .ToListAsync();
 
             var res = await _context.Tbl_Booth
-                .Where(b => mandalIds.Contains(b.MandalId) && b.Status)
+                .Where(b => mandalIds.Contains(b.MandalId) && b.Status || b.CreatedToSectorUserId == userId)
                 .Select(b => new BoothNumberDto
                 {
                     BoothId = b.Id,
@@ -127,6 +127,8 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
                     b.PollingStationName.ToLower().Contains(term) ||
                     b.PollingStationLocation.ToLower().Contains(term) ||
                     b.Mandal.Name.ToLower().Contains(term) ||
+                     b.Sanyojak.InchargeName.ToLower().Contains(term) ||
+                       b.Sanyojak.Cast.CastName.ToLower().Contains(term) ||
                     b.Sector.SectorName.ToLower().Contains(term);
             }
 
@@ -163,6 +165,7 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
                         CastName = b.Sanyojak.Cast.CastName,
                         EducationLevel = b.Sanyojak.EducationLevel,
                         PhoneNumber = b.Sanyojak.PhoneNumber,
+                        Profile = b.Sanyojak.ProfileImagePath,
                         Address = b.Sanyojak.Address
                     } : null
                 },
@@ -344,6 +347,75 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
             );
         }
 
+        public async Task<List<BoothReportExportRow>> GetBoothReportExportAsync(
+      BoothReportFilter filter,
+      CancellationToken ct = default)
+        {
+            // =========================
+            // 🔹 BASE QUERY
+            // =========================
+            var query = _context.Tbl_Booth
+                .AsNoTracking()
+                .Where(b => b.UserId == filter.UserId);
+
+            if (filter.MandalId.HasValue)
+                query = query.Where(b => b.MandalId == filter.MandalId.Value);
+
+            if (filter.SectorId.HasValue)
+                query = query.Where(b => b.SectorId == filter.SectorId.Value);
+
+            if (filter.BoothId.HasValue)
+                query = query.Where(b => b.Id == filter.BoothId.Value);
+
+            // =========================
+            // 📦 PROJECTION FOR EXPORT
+            // =========================
+            var result = await query
+                .Select(b => new BoothReportExportRow
+                {
+                    BoothNumber = b.BoothNumber,
+                    PollingStation = b.PollingStationName,
+                    //MandalName = b.Mandal != null ? b.Mandal.Name : "",
+                    //SectorName = b.Sector != null ? b.Sector.SectorName : "",
+
+                    // Booth In-charge
+                    BoothAdhyaksh = b.Sanyojak != null ? b.Sanyojak.InchargeName : null,
+                    Mobile = b.Sanyojak != null ? b.Sanyojak.PhoneNumber : null,
+                    Cast = b.Sanyojak != null && b.Sanyojak.Cast != null ? b.Sanyojak.Cast.CastName : null,
+
+                    // Villages
+                    Villages = b.Villages != null
+                        ? b.Villages.Select(v => new VillageExpResponseDto
+                        {
+                            VillageId = v.VillageId,
+                            VillageName = v.Village != null ? v.Village.VillageName : null,
+                            HasAnshik = v.HasAnshik
+                        }).ToList()
+                        : new List<VillageExpResponseDto>(),
+
+                    // Counts
+                    TotalVotes = _context.Tbl_BoothVoter
+                        .Where(x => x.BoothId == b.Id && x.UserId == filter.UserId && x.Status)
+                        .Select(x => x.TotalVoter)
+                        .FirstOrDefault(),
+
+                    SeniorCitizen = _context.Tbl_SeniorDisabled
+                        .Count(x => x.BoothId == b.Id && x.TypeId == 1 && x.Status && x.UserId == filter.UserId),
+
+                    Handicap = _context.Tbl_SeniorDisabled
+                        .Count(x => x.BoothId == b.Id && x.TypeId == 2 && x.Status && x.UserId == filter.UserId),
+
+                    DoubleVotes = _context.Tbl_DoubleVoter
+                        .Count(x => x.BoothId == b.Id && x.Status && x.UserId == filter.UserId),
+
+                    Pravasi = _context.Tbl_PravasiVoter
+                        .Count(x => x.BoothId == b.Id && x.Status && x.UserId == filter.UserId)
+                })
+                .ToListAsync(ct);
+
+            return result;
+        }
+
         public Task<Tbl_BoothSanyojak?> GetByBoothIdAsync(int boothId, CancellationToken ct)
         {
             throw new NotImplementedException();
@@ -404,10 +476,24 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
                .FirstOrDefaultAsync();
         }
 
+        public async Task<string> GetadminUseridbySectorUserId(int sectorId)
+        {
+            return await _context.Tbl_Sector
+               .Where(m => m.Id == sectorId)
+               .Select(b => b.CreatedByUserId)
+               .FirstOrDefaultAsync();
+        }
+
         public async Task<string> GetSectorUseridbyBoothId(int boothId)
         {
             var sectorId = await _context.Tbl_Booth.Where(x => x.Id == boothId).Select(b => b.SectorId).FirstOrDefaultAsync();
 
+            return await _context.Tbl_Sector.Where(x => x.Id == sectorId).Select(b => b.UserId).FirstOrDefaultAsync();
+        }
+
+        public async Task<string> GetSectorUseridbySectorId(int sectorId)
+        {
+           
             return await _context.Tbl_Sector.Where(x => x.Id == sectorId).Select(b => b.UserId).FirstOrDefaultAsync();
         }
     }

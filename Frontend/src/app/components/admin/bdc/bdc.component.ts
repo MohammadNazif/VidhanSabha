@@ -111,11 +111,19 @@ export class BdcComponent implements OnInit {
         validations: [Validators.required]
       },
       {
-        id: 'block',
-        name: 'block',
+        id: 'blockId',
+        name: 'blockId',
         label: 'Block',
-        type: 'text',
-        placeholder: 'Enter block name',
+        type: 'select',
+        placeholder: '-- Select Block --',
+        apiUrl: 'block/getAllBlockName',
+        apiMapper: (data: any) => {
+          const list = data?.data || data?.items || data || [];
+          return list.map((item: any) => ({
+            value: String(item.id || item.blockId),
+            label: item.blockName || item.name || item
+          }));
+        },
         gridColSpan: 6,
         validations: [Validators.required]
       },
@@ -220,6 +228,13 @@ export class BdcComponent implements OnInit {
             label: item.villageName || item.name,
           }));
         }
+      },
+      {
+        id: 'profile',
+        name: 'profile',
+        label: 'Profile Image',
+        type: 'file',
+        gridColSpan: 12
       }
     ]
   };
@@ -267,7 +282,7 @@ export class BdcComponent implements OnInit {
     } else if (action.id === 'edit') {
       const editData = { ...row };
       // Standardize IDs for select controls
-      ['categoryId', 'castId', 'partyId'].forEach(key => {
+      ['blockId', 'categoryId', 'castId', 'partyId'].forEach(key => {
         if (editData[key]) editData[key] = String(editData[key]);
       });
       // Map all assigned villages for multi-select binding
@@ -287,30 +302,38 @@ export class BdcComponent implements OnInit {
     if (!result.status) return;
 
     const raw = result.data;
-    const isUpdate = !!(raw.id || (this.bdcModal.initialData && this.bdcModal.initialData.id));
+    const files = result.files;
+    const rowId = raw.id || (this.bdcModal.initialData && this.bdcModal.initialData.id);
 
-    const submitData: any = {
-      block: raw.block,
-      name: raw.name,
-      wardNumber: raw.wardNumber,
-      villageId: Array.isArray(raw.villageId)
-        ? raw.villageId.map((v: any) => Number(v.id || v))
-        : [Number(raw.villageId)],
-      categoryId: Number(raw.categoryId),
-      castId: Number(raw.castId),
-      age: Number(raw.age),
-      mobile: String(raw.mobile),
-      partyId: Number(raw.partyId),
-      education: raw.education
-    };
+    const formData = new FormData();
+    if (rowId) formData.append('Id', String(rowId));
+    formData.append('BlockId', String(raw.blockId || 0));
+    formData.append('Name', raw.name || '');
+    formData.append('WardNumber', raw.wardNumber || '');
+    formData.append('CategoryId', String(raw.categoryId || 0));
+    formData.append('CastId', String(raw.castId || 0));
+    formData.append('Age', String(raw.age || 0));
+    formData.append('Mobile', String(raw.mobile || ''));
+    formData.append('PartyId', String(raw.partyId || 0));
+    formData.append('Education', raw.education || '');
 
-    if (isUpdate) {
-      submitData.id = Number(raw.id || this.bdcModal.initialData.id);
+    // Handle multiple VillageId
+    if (Array.isArray(raw.villageId)) {
+      raw.villageId.forEach((v: any) => {
+        formData.append('VillageId', String(v.id || v));
+      });
+    } else if (raw.villageId) {
+      formData.append('VillageId', String(raw.villageId));
     }
 
+    if (files && files['profile']) {
+      formData.append('Profile', files['profile']);
+    }
+
+    const isUpdate = !!rowId;
     const request = isUpdate
-      ? this.bdcService.updateBdc(submitData)
-      : this.bdcService.createBdc(submitData);
+      ? this.bdcService.updateBdc(formData)
+      : this.bdcService.createBdc(formData);
 
     this.crudHandler.handleRequest(
       request,

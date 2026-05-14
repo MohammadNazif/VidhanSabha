@@ -37,7 +37,7 @@ namespace VidhanSabha.Application.Pannels.Admin.Block.Command
 
                 newImagePath = await _imageService.SaveImageAsync(
                     dto.Profile,
-                    subFolder: "profiles/sector"
+                    subFolder: "profiles/block"
                 );
 
                 // Delete old image only after new one saved successfully

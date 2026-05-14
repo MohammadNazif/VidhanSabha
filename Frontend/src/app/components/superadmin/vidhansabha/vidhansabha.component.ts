@@ -32,6 +32,7 @@ export class VidhanSabhaComponent implements OnInit {
   defaultStateId: string | null = null;
   isListMode = false;
   listTitle = 'Vidhan Sabha Management';
+  isExporting = false;
 
   // Server-side state
   pageNumber = 1;
@@ -92,7 +93,7 @@ export class VidhanSabhaComponent implements OnInit {
         placeholder: '-- Select District --',
         apiUrl: () => `vidhansabhacount/districtwise/getAll?userId=${this.authService.getUserId()}`,
         apiMapper: (data: any) => {
-          const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
+          const list = Array.isArray(data?.data?.items) ? data.data.items : (Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []));
           return list.map((item: any) => ({
             value: String(item.districtId || item.id),
             label: item.districtName || item.dsitrictName || item.name
@@ -325,7 +326,31 @@ export class VidhanSabhaComponent implements OnInit {
   }
 
   handleExport(format: string) {
-    if (!format) return;
-    this.toastService.showSuccess('Export Started', `Successfully generated ${format.toUpperCase()} export!`);
+    if (!format || this.isExporting) return;
+    this.isExporting = true;
+    
+    const params = {
+      searchTerm: this.searchTerm
+    };
+
+    this.vidhanService.export('vidhansabha', format as 'excel' | 'pdf', params).subscribe({
+      next: (blob: Blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `VidhanSabha_List.${format === 'excel' ? 'xlsx' : 'pdf'}`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        this.isExporting = false;
+        this.toastService.showSuccess('Success', `Vidhan Sabha list exported to ${format.toUpperCase()} successfully!`);
+      },
+      error: (err) => {
+        console.error(`Error exporting to ${format}:`, err);
+        this.toastService.showError('Error', `Failed to export Vidhan Sabha list to ${format.toUpperCase()}`);
+        this.isExporting = false;
+      }
+    });
   }
 }

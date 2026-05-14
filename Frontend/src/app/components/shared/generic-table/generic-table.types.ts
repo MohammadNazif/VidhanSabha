@@ -44,6 +44,8 @@ export interface TableColumn {
   badgeVariant?: (value: any, row: any) => BadgeVariant;
   /** Format function for display value */
   formatter?: (value: any, row: any) => string;
+  /** Max characters to display before truncating (only for text/default type) */
+  truncate?: number;
   /** Avatar fallback field (for avatar type, uses initials) */
   avatarFallbackKey?: string;
   /** Progress max value (for progress type, default 100) */

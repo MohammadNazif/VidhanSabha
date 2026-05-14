@@ -93,6 +93,7 @@ export class BoothSamitiComponent implements OnInit {
   // Cached options to minimize API calls
   designations: any[] = [];
   categories: any[] = [];
+  existingBoothIds = new Set<number>();
 
   // Observables for form fields
   private designationSubject = new BehaviorSubject<DropdownOption[]>([]);
@@ -248,10 +249,14 @@ export class BoothSamitiComponent implements OnInit {
         },
         apiMapper: (data: any) => {
           const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
-          return list.map((item: any) => ({
-            value: String(item.boothId || item.id),
-            label: `Booth No. ${item.boothNumber}`
-          }));
+          return list.map((item: any) => {
+            const bId = Number(item.boothId || item.id);
+            return {
+              value: String(bId),
+              label: `Booth No. ${item.boothNumber}`,
+              disabled: this.existingBoothIds.has(bId)
+            };
+          });
         },
         validations: [Validators.required],
         gridColSpan: 6
@@ -306,6 +311,16 @@ export class BoothSamitiComponent implements OnInit {
     this.http.get(`${environment.apiUrl}/common/category`).subscribe((res: any) => {
       this.categories = res.data || res || [];
       this.updateDropdownOptions();
+    });
+
+    this.loadExistingSamitis();
+  }
+
+  loadExistingSamitis() {
+    this.boothSamitiService.getBoothSamiti({ PageNumber: 1, PageSize: 10000 }).subscribe(res => {
+      const dataWrap = res.data || res;
+      const list = Array.isArray(dataWrap) ? dataWrap : (dataWrap.items || []);
+      this.existingBoothIds = new Set(list.map((m: any) => Number(m.id || m.boothId)));
     });
   }
 
@@ -433,8 +448,13 @@ export class BoothSamitiComponent implements OnInit {
       };
     } else {
       // Create logic - ONLY send boothId as requested
+      const bId = Number(raw.boothId);
+      if (this.existingBoothIds.has(bId)) {
+        this.toastService.showError('Duplicate', 'A samiti for this booth already exists!');
+        return;
+      }
       submitData = {
-        boothId: Number(raw.boothId)
+        boothId: bId
       };
     }
 
@@ -446,7 +466,10 @@ export class BoothSamitiComponent implements OnInit {
       request,
       submitData.id ? 'Updated' : 'Created',
       `Member ${submitData.id ? 'updated' : 'added'} successfully!`,
-      () => this.loadMembers(),
+      () => {
+        this.loadMembers();
+        this.loadExistingSamitis();
+      },
       true,
       ModulePermission.BoothSamiti
     );

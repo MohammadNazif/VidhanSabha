@@ -14,9 +14,9 @@ namespace VidhanSabha.Application.Pannels.Admin.Mandal.Commands.Create
         {
           
 
-            RuleFor(x => x.Name)
-                .NotEmpty().WithMessage("Mandal name is required.")
-                .MaximumLength(255).WithMessage("Mandal name cannot exceed 255 characters.");
+            //RuleFor(x => x.dto.Name)
+            //    .NotEmpty().WithMessage("Mandal name is required.")
+            //    .MaximumLength(255).WithMessage("Mandal name cannot exceed 255 characters.");
         }
     }
 }

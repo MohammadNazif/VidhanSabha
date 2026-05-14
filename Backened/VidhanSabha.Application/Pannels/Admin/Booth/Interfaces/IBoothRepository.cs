@@ -13,6 +13,9 @@ namespace VidhanSabha.Application.Pannels.Admin.Booth.Interfaces
 {
     public interface IBoothRepository
     {
+        Task<List<BoothReportExportRow>> GetBoothReportExportAsync(
+      BoothReportFilter filter,
+      CancellationToken ct = default);
          Task<List<BoothExportRow>> GetAllForExportAsync(
          BoothQueryParams qp,
           CancellationToken ct = default);
@@ -28,9 +31,13 @@ namespace VidhanSabha.Application.Pannels.Admin.Booth.Interfaces
         Task<string> GetSectorUseridbyBoothId(int boothId);
 
         Task<string> GetadminUseridbyUserId(int boothId);
+
+        Task<string> GetadminUseridbySectorUserId(int sectorId);
         Task<int> AddAsync(Tbl_Booth booth, CancellationToken ct = default);
         Task UpdateAsync(Tbl_Booth booth, CancellationToken ct);
         Task Delete(Tbl_Booth booth);
         Task SaveAsync(CancellationToken ct = default);
+
+        Task<string> GetSectorUseridbySectorId(int sectorId);
     }
 }

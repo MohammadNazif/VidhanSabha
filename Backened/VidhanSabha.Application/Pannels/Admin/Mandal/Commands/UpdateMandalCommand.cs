@@ -10,8 +10,12 @@ namespace VidhanSabha.Application.Pannels.Admin.Mandal.Commands
 {
     public class UpdateMandalCommand : IRequest<MandalResponseDto>
     {
-        public int Id { get; init; }
-        public string Name { get; init; }
-        
+        public UpdateMandalRequestDto Dto { get; set; }
+        public UpdateMandalCommand(UpdateMandalRequestDto dto)
+        {
+            Dto = dto;
+        }
+
+
     }
 }

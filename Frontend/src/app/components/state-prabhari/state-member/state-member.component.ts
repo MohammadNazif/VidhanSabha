@@ -95,7 +95,7 @@ export class StateMemberMgmtComponent implements OnInit {
         dependsOn: 'designationId',
         apiUrl: 'common/designationType',
         apiMapper: (data: any, formValues: any) => {
-          const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
+          const list = Array.isArray(data?.data?.items) ? data.data.items : (Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []));
           const selectedDesignationId = formValues?.designationId;
 
           return list.map((item: any) => {

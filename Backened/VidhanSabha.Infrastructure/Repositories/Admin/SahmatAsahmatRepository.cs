@@ -112,7 +112,7 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
             {
                 var term = qp.SearchTerm.Trim().ToLower();
                 search = b =>
-                    b.Booth.BoothNumber.Equals(Convert.ToInt32(term)) ||
+                    b.Mobile.ToLower().Contains(term)||
                     b.Name.ToLower().Contains(term) ||
                     b.Occupation.Occupation.ToLower().Contains(term) ||
                     b.Party.Party.ToLower().Contains(term) ||

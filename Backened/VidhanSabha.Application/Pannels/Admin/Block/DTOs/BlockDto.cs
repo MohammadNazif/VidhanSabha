@@ -4,10 +4,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using VidhanSabha.Application.Common.Dtos;
 
 namespace VidhanSabha.Application.Pannels.Admin.Block.DTOs
 {
-    public class CreateBlockReqDto
+    public class CreateBlockReqDto : BaseQueryParams
     {
         public string BlockName { get; set; }
         public string BlockPramukh { get; set; }

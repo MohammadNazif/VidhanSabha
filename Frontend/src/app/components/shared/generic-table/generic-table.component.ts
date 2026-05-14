@@ -149,7 +149,7 @@ export class GenericTableComponent implements OnInit, OnChanges, OnDestroy {
         return true;
       }
     }
-    return this.actions.some(action => 
+    return this.actions.some(action =>
       this.displayedData.some(row => this.isActionVisible(action, row))
     );
   }
@@ -280,7 +280,7 @@ export class GenericTableComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     this.sortChange.emit(this.sortState);
-    
+
     if (!this.mergedConfig.serverSide) {
       this.processData();
     }
@@ -310,7 +310,7 @@ export class GenericTableComponent implements OnInit, OnChanges, OnDestroy {
   onFilterChange(filter: any, event: any) {
     const value = event && event.target ? event.target.value : event;
     filter.value = value;
-    
+
     // Build filter map to emit
     const filterState: Record<string, any> = {};
     if (this.mergedConfig.filters) {
@@ -320,11 +320,11 @@ export class GenericTableComponent implements OnInit, OnChanges, OnDestroy {
         }
       });
     }
-    
+
     // Reset to page 1
     this.pageState.currentPage = 1;
     this.filterChange.emit(filterState);
-    
+
     if (!this.mergedConfig.serverSide) {
       // Local filtering logic could be implemented here in the future
       this.processData();
@@ -350,21 +350,21 @@ export class GenericTableComponent implements OnInit, OnChanges, OnDestroy {
 
   toggleMultiFilterOption(filter: any, value: any, event?: Event): void {
     if (event) event.stopPropagation();
-    
+
     if (!Array.isArray(filter.value)) {
       filter.value = filter.value ? [filter.value] : [];
     }
-    
+
     const index = filter.value.findIndex((v: any) => String(v) === String(value));
     if (index > -1) {
       filter.value.splice(index, 1);
     } else {
       filter.value.push(value);
     }
-    
+
     // Create new array reference for change detection
     filter.value = [...filter.value];
-    
+
     this.onFilterChange(filter, filter.value);
   }
 
@@ -384,7 +384,7 @@ export class GenericTableComponent implements OnInit, OnChanges, OnDestroy {
     if (page < 1 || page > this.pageState.totalPages) return;
     this.pageState.currentPage = page;
     this.pageChange.emit(this.pageState);
-    
+
     if (!this.mergedConfig.serverSide) {
       this.updateDisplayedData();
     }
@@ -394,7 +394,7 @@ export class GenericTableComponent implements OnInit, OnChanges, OnDestroy {
     this.pageState.pageSize = size;
     this.pageState.currentPage = 1;
     this.pageChange.emit(this.pageState);
-    
+
     if (!this.mergedConfig.serverSide) {
       this.processData();
     }
@@ -490,10 +490,16 @@ export class GenericTableComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   getCellValue(row: any, column: TableColumn): any {
-    const value = this.getNestedValue(row, column.key);
+    let value = this.getNestedValue(row, column.key);
+
     if (column.formatter) {
-      return column.formatter(value, row);
+      value = column.formatter(value, row);
     }
+
+    if (column.truncate && typeof value === 'string' && value.length > column.truncate) {
+      return value.substring(0, column.truncate) + '...';
+    }
+
     return value;
   }
 

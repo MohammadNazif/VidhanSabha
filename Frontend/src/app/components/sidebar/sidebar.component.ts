@@ -89,26 +89,31 @@ export class SidebarComponent implements OnInit {
         { label: 'Pradesh Karyakarini List', route: '/state-prabhari/pradesh-karyakarini-list', roles: ['StatePrabhari'] },
 
         // Ground Level Lists (Synced with Dashboard Cards)
-        { label: 'Mandal List', route: '/mandal-list', roles: ['VidhanSabhaPrabhari'] },
-        { label: 'Sector List', route: '/sector-list', roles: ['VidhanSabhaPrabhari'] },
-        { label: 'Booth List', route: '/booth-list', roles: ['VidhanSabhaPrabhari', 'SectorSanyojak'] },
+        { label: 'Mandal List', route: '/mandal-list', roles: ['dfs'] },
+        { label: 'Sector List', route: '/sector-list', roles: ['sds'] },
+        { label: 'Booth List', route: '/booth-list', roles: ['SectorSanyojak', 'VidhanSabhaPrabhari'] },
         { label: 'Panna Pramukh List', route: '/panna-pramukh-list', roles: ['VidhanSabhaPrabhari', 'BoothSanyojak', 'SectorSanyojak'], moduleId: ModulePermission.PannaPramukh },
         { label: 'Sahmat List', route: '/sahmat-list', roles: ['VidhanSabhaPrabhari', 'BoothSanyojak', 'SectorSanyojak'], moduleId: ModulePermission.Sahmat },
         { label: 'Asahmat List', route: '/asahmat-list', roles: ['VidhanSabhaPrabhari', 'BoothSanyojak', 'SectorSanyojak'], moduleId: ModulePermission.Asahmat },
-        { label: 'Activity List', route: '/activity', roles: ['VidhanSabhaPrabhari', 'BoothSanyojak', 'SectorSanyojak'], moduleId: ModulePermission.Activity },
+        { label: 'Activity List', route: '/activity', roles: ['BoothSanyojak', 'SectorSanyojak'], moduleId: ModulePermission.Activity },
         { label: 'Pravasi Voter List', route: '/pravasi-voter-list', roles: ['VidhanSabhaPrabhari', 'BoothSanyojak', 'SectorSanyojak'], moduleId: ModulePermission.PravashiVoter },
         { label: 'New Voter List', route: '/new-voter-list', roles: ['VidhanSabhaPrabhari', 'BoothSanyojak', 'SectorSanyojak'], moduleId: ModulePermission.NewVoter },
         { label: 'Double Voter List', route: '/double-voter-list', roles: ['VidhanSabhaPrabhari', 'BoothSanyojak', 'SectorSanyojak'], moduleId: ModulePermission.DoubleVoter },
-        { label: 'Prabhavshali Vyakti List', route: '/prabhavshali-vyakt-list', roles: ['VidhanSabhaPrabhari', 'BoothSanyojak', 'SectorSanyojak'], moduleId: ModulePermission.EffectivePersion },
+        { label: 'Prabhavshali Vyakti List', route: '/prabhavshali-vyakt-list', roles: ['BoothSanyojak', 'SectorSanyojak', 'VidhanSabhaPrabhari'], moduleId: ModulePermission.EffectivePersion },
         { label: 'Block List', route: '/block-list', roles: ['VidhanSabhaPrabhari'] },
         { label: 'BDC List', route: '/bdc-list', roles: ['VidhanSabhaPrabhari'] },
+        { label: 'Pradhan List', route: '/pradhan-list', roles: ['VidhanSabhaPrabhari'] },
         { label: 'Influencer Person List', route: '/influencer-person-list', roles: ['VidhanSabhaPrabhari'] },
-        { label: 'Booth Voter Desc. List', route: '/booth-voter-description-list', roles: ['BoothSanyojak', 'SectorSanyojak', 'VidhanSabhaPrabhari'], moduleId: ModulePermission.BoothVoterDescrition },
-        { label: 'Booth Samiti List', route: '/booth-samiti-list', roles: ['BoothSanyojak', 'SectorSanyojak', 'VidhanSabhaPrabhari'], moduleId: ModulePermission.BoothSamiti },
-        { label: 'Mandal Samiti List', route: '/mandal-samiti-list', roles: ['VidhanSabhaPrabhari'] },
-        { label: 'Senior Citizen List', route: '/senior-citizen-list', roles: ['BoothSanyojak', 'SectorSanyojak', 'VidhanSabhaPrabhari'], moduleId: ModulePermission.SeniororDisabled },
-        { label: 'Disabled List', route: '/disabled-list', roles: ['BoothSanyojak', 'SectorSanyojak', 'VidhanSabhaPrabhari'], moduleId: ModulePermission.SeniororDisabled },
-        { label: 'Post List', route: '/social-media-list', roles: ['BoothSanyojak', 'SectorSanyojak', 'VidhanSabhaPrabhari'], moduleId: ModulePermission.SocialMedia },
+        { label: 'Booth Voter Desc. List', route: '/booth-voter-description-list', roles: ['BoothSanyojak', 'SectorSanyojak',], moduleId: ModulePermission.BoothVoterDescrition },
+        { label: 'Booth Samiti List', route: '/booth-samiti-list', roles: ['BoothSanyojak', 'SectorSanyojak'], moduleId: ModulePermission.BoothSamiti },
+        { label: 'Mandal Samiti List', route: '/mandal-samiti-list', roles: [''] },
+        { label: 'Varishth  List', route: '/senior-citizen-list', roles: ['BoothSanyojak', 'SectorSanyojak', 'VidhanSabhaPrabhari'], moduleId: ModulePermission.SeniororDisabled },
+        { label: 'Viklang List', route: '/disabled-list', roles: ['BoothSanyojak', 'SectorSanyojak', 'VidhanSabhaPrabhari'], moduleId: ModulePermission.SeniororDisabled },
+        { label: 'Doctor List', route: '/doctor-list', roles: ['VidhanSabhaPrabhari'] },
+        { label: 'Advocate List', route: '/advocate-list', roles: ['VidhanSabhaPrabhari'] },
+        { label: 'Government Employee List', route: '/government-employee-list', roles: ['VidhanSabhaPrabhari'] },
+        { label: 'Social Media List', route: '/social-media-list', roles: ['BoothSanyojak', 'SectorSanyojak', ''], moduleId: ModulePermission.SocialMedia },
+
       ]
     },
 
@@ -136,7 +141,7 @@ export class SidebarComponent implements OnInit {
     },
 
     { icon: 'share-2', label: 'Social Media', route: '/social-media', roles: ['VidhanSabhaPrabhari', 'BoothSanyojak', 'SectorSanyojak'], moduleId: ModulePermission.SocialMedia },
-    // { icon: 'calendar', label: 'Activity', route: '/activity', roles: [], moduleId: ModulePermission.Activity },
+    { icon: 'calendar', label: 'Activity', route: '/activity', roles: ['VidhanSabhaPrabhari', 'BoothSanyojak', 'SectorSanyojak'], moduleId: ModulePermission.Activity },
   ];
 
   renderedNavItems: NavItem[] = [];

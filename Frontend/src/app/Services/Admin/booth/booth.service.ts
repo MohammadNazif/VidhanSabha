@@ -33,7 +33,7 @@ export class BoothService extends BaseApiService {
   }
 
   exportBoothReport(format: 'excel' | 'pdf', params: any = {}): Observable<Blob> {
-    return this.export(`${this.entity}/report`, format, params);
+    return this.export('boothreport', format, params);
   }
 
   exportToExcel(): Observable<Blob> {

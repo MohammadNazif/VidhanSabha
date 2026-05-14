@@ -47,7 +47,17 @@ export class SectorComponent implements OnInit {
 
   columns: TableColumn[] = [
     { key: 'mandalName', label: 'Mandal', sortable: true },
-    { key: 'villageName', label: 'Village', sortable: true },
+    {
+      key: 'villageName',
+      label: 'Village',
+      sortable: true,
+      formatter: (val: any, row: any) => {
+        if (row.villages && Array.isArray(row.villages)) {
+          return row.villages.map((v: any) => v.villageName || v.name).join(', ');
+        }
+        return val || 'N/A';
+      }
+    },
     { key: 'sectorName', label: 'Sector', sortable: true },
     { key: 'inchargeName', label: 'Sector Sanyojak', sortable: true },
     { key: 'phoneNumber', label: 'Contact', sortable: true },
@@ -111,7 +121,7 @@ export class SectorComponent implements OnInit {
         },
         validations: [Validators.required],
         gridColSpan: 6,
-        multiple: false
+        multiple: true
       },
       {
         id: 'sectorName',
@@ -355,7 +365,15 @@ export class SectorComponent implements OnInit {
 
     const formData = new FormData();
     formData.append('MandalId', String(raw.mandalId));
-    formData.append('VillageId', String(raw.villageId));
+
+    // Support multiple village IDs as per new DTO
+    if (raw.villageId) {
+      const vIds = Array.isArray(raw.villageId) ? raw.villageId : [raw.villageId];
+      vIds.forEach((id: any) => {
+        formData.append('VillageIds', String(id));
+      });
+    }
+
     formData.append('SectorName', raw.sectorName || "");
     formData.append('IsSectorSanyojak', String(isSanyojak));
 
@@ -410,14 +428,15 @@ export class SectorComponent implements OnInit {
     } else if (action.id === 'edit') {
       const editData = { ...row };
 
+      // Map villages array to villageId field for the form
+      if (row.villages && Array.isArray(row.villages)) {
+        editData.villageId = row.villages.map((v: any) => String(v.villageId || v.id));
+      }
+
       // Convert IDs to strings to ensure matching with dropdown values
-      ['id', 'mandalId', 'villageId', 'categoryId', 'castId'].forEach(key => {
+      ['id', 'mandalId', 'categoryId', 'castId'].forEach(key => {
         if (editData[key]) {
-          if (key === 'villageId' && Array.isArray(editData[key])) {
-            editData[key] = String(editData[key][0]);
-          } else {
-            editData[key] = String(editData[key]);
-          }
+          editData[key] = String(editData[key]);
         }
       });
 

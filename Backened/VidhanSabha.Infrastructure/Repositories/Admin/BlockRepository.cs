@@ -53,9 +53,9 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
             throw new NotImplementedException();
         }
 
-        public async Task<List<BlockNameResponse>> GetAllBlockNameAsync(int? Id = null, CancellationToken ct = default)
+        public async Task<List<BlockNameResponse>> GetAllBlockNameAsync(string? userId = null, CancellationToken ct = default)
         {
-            var result = await _context.Tbl_Block
+            var result = await _context.Tbl_Block.Where(x => x.UserId ==userId)
                 .Select(m => new BlockNameResponse
                 {
                     Id = m.Id,
@@ -69,6 +69,7 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
             var query = _context.Tbl_Block
                 .AsNoTracking()
                 .Where(b =>
+                b.UserId == qp.UserId &&
                     (!qp.Id.HasValue || b.Id == qp.Id) &&
                     (!qp.CastId.HasValue || b.Cast.Id == qp.CastId));
 
@@ -80,7 +81,9 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
                 search = b =>
                     b.BlockName.ToLower().Contains(term) ||
                     b.BlockPramukh.ToLower().Contains(term) ||
+                    b.Mobile.ToLower().Contains(term) ||
                     b.Cast.CastName.ToLower().Contains(term) ||
+                    b.Occupation.Occupation.ToLower().Contains(term) ||
                     b.Party.Party.ToLower().Contains(term) ||
                     b.Address.ToLower().Contains(term);
             }
@@ -104,6 +107,7 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
                      CastName = m.Cast.CastName,
                      OccupationId = m.OccupationId,
                      Occupation = m.Occupation.Occupation,
+                     Profile = m.Profile
                  },
                  ct: ct
                  );

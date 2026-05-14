@@ -37,11 +37,15 @@ import { StateMemberMgmtComponent } from './components/state-prabhari/state-memb
 import { BoothReportComponent } from './components/admin/reports/booth-report/booth-report.component';
 import { SectorReportComponent } from './components/admin/reports/sector-report/sector-report.component';
 import { MandalSamitiComponent } from './components/admin/mandal-samiti/mandal-samiti.component';
+import { LandingPageComponent } from './components/landing-page/landing-page.component';
+import { ActivityComponent } from './components/admin/activity/activity.component';
+
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: 'dashboard', component: DashboardComponent },
-  { path: '', redirectTo: 'login', pathMatch: 'full' },
+  { path: '', component: LandingPageComponent, pathMatch: 'full' },
+
   { path: 'combined-report', component: CombinedReportComponent },
   { path: 'mandal-report', component: MandalReportComponent },
   { path: 'sector-with-booth-report', component: SectorWithBoothReportComponent },
@@ -76,7 +80,6 @@ export const routes: Routes = [
   { path: 'doctor-list', component: PrabhavshaliComponent },
   { path: 'advocate-list', component: PrabhavshaliComponent },
   { path: 'government-employee-list', component: PrabhavshaliComponent },
-  { path: 'pradhan-list', component: PrabhavshaliComponent },
   { path: 'block', component: BlockComponent },
   { path: 'block-list', component: BlockComponent },
   { path: 'block-pramukh-list', component: BlockComponent },
@@ -113,5 +116,6 @@ export const routes: Routes = [
   { path: 'state-prabhari/vidhansabha-prabhari-list', component: VidhanSabhaPrabhariListComponent, data: { mode: 'list' } },
   { path: 'mandal-samiti', component: MandalSamitiComponent },
   { path: 'mandal-samiti-list', component: MandalSamitiComponent },
+  { path: 'activity', component: ActivityComponent },
   { path: '**', redirectTo: '' }
 ];

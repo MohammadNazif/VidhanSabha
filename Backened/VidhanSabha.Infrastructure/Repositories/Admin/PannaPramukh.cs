@@ -75,12 +75,13 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
             {
                 var term = qp.SearchTerm.Trim().ToLower();
                 search = b =>
-                    b.Booth.BoothNumber.Equals(Convert.ToInt32(term)) ||
+               
                     b.PannaPramukhName.ToLower().Contains(term) ||
-                    b.PannaNumber.Equals(Convert.ToInt32(term)) ||
                     b.Address.ToLower().Contains(term) ||
+                    b.Cast.CastName.ToLower().Contains(term) ||
                     //b.Village.VillageName.ToLower().Contains(term) ||
                     b.VoterId.ToLower().Contains(term);
+
             }
 
             return await query.ToPagedResultAsync(
@@ -112,7 +113,7 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
         }
         public async Task<List<PannaPramukhExportRow>> GetPannaPramukhExportAsync(PannaPramukhQueryParams qp)
         {
-            return await _context.Tbl_PannaPramukh   // 👈 replace with your actual DbSet name
+            return await _context.Tbl_PannaPramukh 
                 .AsNoTracking()
                 .Where(m => m.Status == true && 
                       (m.UserId == qp.UserId || m.CreatedToUserId == qp.UserId || m.CreatedsectorUserId == qp.UserId) &&

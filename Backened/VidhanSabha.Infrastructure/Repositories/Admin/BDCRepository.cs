@@ -71,7 +71,7 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
         {
             var query = _context.Tbl_BDC
                 .AsNoTracking()
-                .Where(b =>
+                .Where(b => b.UserId == qp.UserId &&
                     (!qp.Id.HasValue || b.Id == qp.Id) &&
                     (!qp.PartyId.HasValue || b.PartyId == qp.PartyId));
 
@@ -81,7 +81,7 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
             {
                 var term = qp.SearchTerm.Trim().ToLower();
                 search = b =>
-                    b.Block.ToLower().Contains(term) ||
+                    //b.Block.bloc ToLower().Contains(term) ||
                     b.Name.ToLower().Contains(term) ||
                     b.Cast.CastName.ToLower().Contains(term) ||
                     b.Party.Party.ToLower().Contains(term) ||
@@ -95,7 +95,8 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
                 projection: m => new BDCResponseDto
                 {
                     Id = m.Id,
-                    Block = m.Block,
+                    BlockId = m.Block,
+                    Block = m.Blocknav.BlockName,
                     Name = m.Name,
                     WardNumber = m.WardNumber,
                     CategoryId = m.CategoryId,
@@ -106,6 +107,7 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
                     Mobile = m.Mobile,
                     PartyId = m.PartyId,
                     PartyName = m.Party.Party,
+                    Profile = m.Profile,
                     Education = m.Education,
                     Villages = m.Villages.Select(v => new VillageResponseDto
                     {

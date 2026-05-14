@@ -35,6 +35,14 @@ export class DistrictComponent implements OnInit {
   defaultStateId: string | null = null;
   isListMode = false;
   listTitle = 'District Management';
+  isExporting = false;
+  searchTerm = '';
+  pageNumber = 1;
+  pageSize = 10;
+  sortBy = '';
+  isDescending = false;
+  totalCount = 0;
+  loading = false;
 
   isStatePrabhari(): boolean {
     return (this.authService.getRole() || '').toUpperCase().trim() === 'STATEPRABHARI';
@@ -59,7 +67,6 @@ export class DistrictComponent implements OnInit {
   };
 
   actions: TableAction[] = [
-    // { id: 'add_vidhansabha', label: 'Vidhan Sabha', variant: 'primary', icon: 'layout' },
     { id: 'edit', label: '', variant: 'default', icon: 'edit' },
     { id: 'delete', label: '', variant: 'danger', icon: 'delete' }
   ];
@@ -74,7 +81,10 @@ export class DistrictComponent implements OnInit {
         label: 'Select State',
         type: 'select',
         apiUrl: () => `state/getAll`,
-        apiMapper: (list: any[]) => list.map(item => ({ value: String(item.id || item.stateId), label: item.name || item.stateName })),
+        apiMapper: (data: any) => {
+          const list = Array.isArray(data?.data?.items) ? data.data.items : (Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []));
+          return list.map((item: any) => ({ value: String(item.id || item.stateId), label: item.name || item.stateName }));
+        },
         validations: [Validators.required],
         gridColSpan: 6
       },
@@ -86,7 +96,7 @@ export class DistrictComponent implements OnInit {
         dependsOn: 'stateId',
         apiUrl: (stateId: any) => `common/getdistrict?id=${stateId}`,
         apiMapper: (data: any) => {
-          const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
+          const list = Array.isArray(data?.data?.items) ? data.data.items : (Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []));
           return list.map((item: any) => ({
             value: String(item.id),
             label: item.districtName
@@ -268,7 +278,6 @@ export class DistrictComponent implements OnInit {
     ]
   };
 
-
   constructor(
     private districtService: DistrictService,
     private districtPrabhariService: DistrictPrabhariService,
@@ -291,8 +300,8 @@ export class DistrictComponent implements OnInit {
         this.actions = [];
       }
     });
+
     if (this.isStatePrabhari()) {
-      // Automatically hide state selection for State Prabhari
       const stateField = this.addDistrictConfig.fields.find(f => f.id === 'stateId');
       if (stateField) {
         stateField.type = 'hidden';
@@ -307,7 +316,7 @@ export class DistrictComponent implements OnInit {
           delete (districtField as any).dependsOn;
           districtField.apiUrl = () => `common/getdistrict?id=${this.defaultStateId}`;
           districtField.apiMapper = (data: any) => {
-            const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
+            const list = Array.isArray(data?.data?.items) ? data.data.items : (Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []));
             return list.map((item: any) => ({
               value: String(item.id),
               label: item.districtName,
@@ -317,23 +326,18 @@ export class DistrictComponent implements OnInit {
         }
         this.loadDistricts();
       } else {
-        // Fetch the assigned state ID and configure modal
         this.stateService.getAllStates().subscribe({
           next: (response) => {
             const list = response?.data || response || [];
             if (list.length > 0) {
               this.defaultStateId = String(list[0].stateId || list[0].id);
-
-              // Standardize Add District configuration for State Prabhari
               this.addDistrictConfig.fields = this.addDistrictConfig.fields.filter(f => f.id !== 'stateId');
               const districtField = this.addDistrictConfig.fields.find(f => f.id === 'districtId');
               if (districtField) {
                 delete (districtField as any).dependsOn;
-                districtField.id = 'districtId';
-                districtField.name = 'districtId';
                 districtField.apiUrl = () => `common/getdistrict?id=${this.defaultStateId}`;
                 districtField.apiMapper = (data: any) => {
-                  const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
+                  const list = Array.isArray(data?.data?.items) ? data.data.items : (Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []));
                   return list.map((item: any) => ({
                     value: String(item.id),
                     label: item.districtName,
@@ -341,7 +345,6 @@ export class DistrictComponent implements OnInit {
                   }));
                 };
               }
-              // Load districts after we have the defaultStateId
               this.loadDistricts();
             } else {
               this.loadDistricts();
@@ -356,30 +359,62 @@ export class DistrictComponent implements OnInit {
   }
 
   loadDistricts() {
+    this.loading = true;
     const userId = this.authService.getUserId();
     const isPrabhari = this.isStatePrabhari();
 
+    const params = {
+      pageNumber: this.pageNumber,
+      pageSize: this.pageSize,
+      searchTerm: this.searchTerm,
+      sortBy: this.sortBy,
+      isDescending: this.isDescending
+    };
+
     const request = (isPrabhari && userId)
       ? this.vidhanSabhaCountService.getDistrictCountAllByUserId(userId)
-      : this.districtService.getAllDistricts();
+      : this.districtService.getAllDistricts(params);
 
     request.subscribe({
       next: (response) => {
-        const rawList = response?.data || response || [];
+        const rawList = response?.data?.items || response?.data || response || [];
         if (Array.isArray(rawList)) {
           this.districtList = rawList.map((item: any) => ({
             ...item,
-            // Standardize district name key if typo exists in data
             districtName: item.districtName || item.dsitrictName || item.name,
-            // Ensure stateId is present, falling back to multiple possible naming conventions
             stateId: item.stateId || item.stateID || item.StateId || (item.state ? (item.state.id || item.state.stateId) : null) || (isPrabhari ? this.defaultStateId : null)
           }));
+          this.totalCount = response?.data?.totalCount || this.districtList.length;
         } else {
           this.districtList = [];
+          this.totalCount = 0;
         }
+        this.loading = false;
       },
-      error: (err) => console.error('Error fetching districts:', err)
+      error: (err) => {
+        console.error('Error fetching districts:', err);
+        this.loading = false;
+      }
     });
+  }
+
+  handlePageChange(event: any) {
+    this.pageNumber = event.currentPage;
+    this.pageSize = event.pageSize;
+    this.loadDistricts();
+  }
+
+  handleSortChange(event: any) {
+    this.sortBy = event.column;
+    this.isDescending = event.direction === 'desc';
+    this.pageNumber = 1;
+    this.loadDistricts();
+  }
+
+  handleSearchChange(term: string) {
+    this.searchTerm = term;
+    this.pageNumber = 1;
+    this.loadDistricts();
   }
 
   handleAction(event: any) {
@@ -397,17 +432,10 @@ export class DistrictComponent implements OnInit {
         ...row,
         stateId: String(stateId || '')
       });
-    } else if (action.id === 'add_vidhansabha') {
-      const stateId = row.stateId || row.stateID || row.StateId || this.defaultStateId;
-      this.vidhanSabhaModal.openModal({
-        districtId: row.districtId || row.id,
-        stateId: stateId
-      });
     }
   }
 
   handleFormSubmit(result: FormResult) {
-    console.log(this.districtModal.initialData, "result");
     if (!result.status) return;
 
     const raw = result.data;
@@ -466,8 +494,8 @@ export class DistrictComponent implements OnInit {
     if (isPrabhari) {
       submitData.prabhari = {
         stateId: stateId,
-        vidhanSanhaId: 0, // Assigned by backend during creation
-        prabhariRole: 2,  // Hardcoded as per specification for VS Prabhari
+        vidhanSanhaId: 0,
+        prabhariRole: 2,
         prabhariName: raw.prabhariName,
         prabhariEmail: raw.prabhariEmail,
         gender: raw.gender,
@@ -489,7 +517,31 @@ export class DistrictComponent implements OnInit {
   }
 
   handleExport(format: string) {
-    if (!format) return;
-    this.toastService.showSuccess('Export Started', `Successfully generated ${format.toUpperCase()} export!`);
+    if (!format || this.isExporting) return;
+    this.isExporting = true;
+
+    const params = {
+      searchTerm: this.searchTerm
+    };
+
+    this.districtService.export('district', format as 'excel' | 'pdf', params).subscribe({
+      next: (blob: Blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Districts_List.${format === 'excel' ? 'xlsx' : 'pdf'}`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        this.isExporting = false;
+        this.toastService.showSuccess('Success', `District list exported to ${format.toUpperCase()} successfully!`);
+      },
+      error: (err) => {
+        console.error(`Error exporting to ${format}:`, err);
+        this.toastService.showError('Error', `Failed to export district list to ${format.toUpperCase()}`);
+        this.isExporting = false;
+      }
+    });
   }
 }

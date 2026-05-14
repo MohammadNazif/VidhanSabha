@@ -14,7 +14,7 @@ namespace VidhanSabha.Application.Pannels.Admin.Block.Interfaces
     {
         Task<Tbl_Block?> GetByIdAsync(int id);
         Task<PagedResult<BlockResponseDto>> GetAllAsync(BlockQueryParams qp, CancellationToken ct = default);
-        Task<List<BlockNameResponse>> GetAllBlockNameAsync(int? Id = null, CancellationToken ct = default);
+        Task<List<BlockNameResponse>> GetAllBlockNameAsync(string? userId = null, CancellationToken ct = default);
         Task<int> AddAsync(Tbl_Block block, CancellationToken ct = default);
         int Update(Tbl_Block block);
         void Delete(Tbl_Block block);

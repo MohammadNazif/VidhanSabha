@@ -176,6 +176,13 @@ export class BlockComponent implements OnInit {
         type: 'textarea',
         placeholder: 'Enter address...',
         gridColSpan: 12
+      },
+      {
+        id: 'profile',
+        name: 'profile',
+        label: 'Profile Image',
+        type: 'file',
+        gridColSpan: 12
       }
     ]
   };
@@ -270,24 +277,28 @@ export class BlockComponent implements OnInit {
     if (!result.status) return;
 
     const raw = result.data;
+    const files = result.files;
     const rowId = raw.id || (this.blockModal.initialData && this.blockModal.initialData.id);
 
-    const submitData: any = {
-      id: rowId ? Number(rowId) : null,
-      blockName: raw.blockName,
-      blockPramukh: raw.blockPramukh,
-      partyId: Number(raw.partyId),
-      mobile: raw.mobile,
-      address: raw.address,
-      categoryId: Number(raw.categoryId),
-      castId: Number(raw.castId),
-      occupationId: Number(raw.occupationId)
-    };
+    const formData = new FormData();
+    if (rowId) formData.append('Id', String(rowId));
+    formData.append('BlockName', raw.blockName || '');
+    formData.append('BlockPramukh', raw.blockPramukh || '');
+    formData.append('PartyId', String(raw.partyId || 0));
+    formData.append('Mobile', raw.mobile || '');
+    formData.append('Address', raw.address || '');
+    formData.append('CategoryId', String(raw.categoryId || 0));
+    formData.append('CastId', String(raw.castId || 0));
+    formData.append('OccupationId', String(raw.occupationId || 0));
 
-    const isUpdate = !!submitData.id;
+    if (files && files['profile']) {
+      formData.append('Profile', files['profile']);
+    }
+
+    const isUpdate = !!rowId;
     const request = isUpdate
-      ? this.blockService.updateBlock(submitData)
-      : this.blockService.createBlock(submitData);
+      ? this.blockService.updateBlock(formData)
+      : this.blockService.createBlock(formData);
 
     this.crudHandler.handleRequest(
       request,

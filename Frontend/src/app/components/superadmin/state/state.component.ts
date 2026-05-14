@@ -14,11 +14,12 @@ import { StatePrabhariService } from '../../../Services/Admin/state-prabhari/sta
 import { AuthServiceService } from '../../../Services/Auth/auth.service';
 import { DistrictService } from '../../../Services/Admin/district/district.service';
 import { VidhanSabhaCountService } from '../../../Services/Admin/vidhansabha-count/vidhansabha-count.service';
+import { GenericExportComponent } from '../../shared/generic-export/generic-export.component';
 
 @Component({
   selector: 'app-state',
   standalone: true,
-  imports: [CommonModule, PageHeaderComponent, GenericTableComponent, GenericModalButtonComponent],
+  imports: [CommonModule, PageHeaderComponent, GenericTableComponent, GenericModalButtonComponent, GenericExportComponent],
   templateUrl: './state.component.html',
   styleUrl: './state.component.css'
 })
@@ -28,6 +29,12 @@ export class StateComponent implements OnInit {
   @ViewChild('districtModal') districtModal!: GenericModalButtonComponent;
 
   stateList: any[] = [];
+  isExporting = false;
+  searchTerm = '';
+  pageNumber = 1;
+  pageSize = 10;
+  sortBy = '';
+  isDescending = false;
 
   columns: TableColumn[] = [
     { key: 'stateName', label: 'State Name' },
@@ -36,7 +43,6 @@ export class StateComponent implements OnInit {
 
   config: TableConfig = {
     selectable: false,
-    // filterable: true,
     paginated: true,
     defaultPageSize: 10,
     pageSizeOptions: [10, 20, 50],
@@ -122,7 +128,6 @@ export class StateComponent implements OnInit {
         options: [
           { label: 'Male', value: 'Male' },
           { label: 'Female', value: 'Female' }
-
         ],
         validations: [Validators.required],
         gridColSpan: 6
@@ -251,7 +256,6 @@ export class StateComponent implements OnInit {
     ]
   };
 
-
   constructor(
     private stateService: StateService,
     private statePrabhariService: StatePrabhariService,
@@ -270,7 +274,6 @@ export class StateComponent implements OnInit {
         { key: 'vidhanSabhaCount', label: 'Vidhansabha Count', sortable: true },
         { key: 'remainingCount', label: 'Remaining Count', sortable: true }
       ];
-
     }
     this.loadStates();
   }
@@ -279,9 +282,17 @@ export class StateComponent implements OnInit {
     const userId = this.authService.getUserId();
     const isPrabhari = this.isStatePrabhari();
 
+    const params = {
+      pageNumber: this.pageNumber,
+      pageSize: this.pageSize,
+      searchTerm: this.searchTerm,
+      sortBy: this.sortBy,
+      isDescending: this.isDescending
+    };
+
     const request = (isPrabhari && userId)
       ? this.vidhanSabhaCountService.getAllByUserId(userId)
-      : this.stateService.getAllStates();
+      : this.stateService.getAllStates(params);
 
     request.subscribe({
       next: (response) => {
@@ -295,7 +306,6 @@ export class StateComponent implements OnInit {
           this.stateList = [];
         }
 
-        // Set default state ID and simplify fields for State Prabhari
         if (isPrabhari && this.stateList.length > 0) {
           const stateRecord = this.stateList[0];
           this.defaultStateId = String(stateRecord.stateId || stateRecord.id);
@@ -303,7 +313,7 @@ export class StateComponent implements OnInit {
           this.addDistrictConfig.fields = this.addDistrictConfig.fields.filter(f => f.id !== 'stateId');
           const districtField = this.addDistrictConfig.fields.find(f => f.id === 'districtId');
           if (districtField) {
-            delete districtField.dependsOn;
+            delete (districtField as any).dependsOn;
             districtField.apiUrl = () => `common/getdistrict?id=${this.defaultStateId}`;
             districtField.apiMapper = (data: any) => {
               const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
@@ -322,9 +332,27 @@ export class StateComponent implements OnInit {
     });
   }
 
+  handlePageChange(event: any) {
+    this.pageNumber = event.currentPage;
+    this.pageSize = event.pageSize;
+    this.loadStates();
+  }
+
+  handleSortChange(event: any) {
+    this.sortBy = event.column;
+    this.isDescending = event.direction === 'desc';
+    this.pageNumber = 1;
+    this.loadStates();
+  }
+
+  handleSearchChange(term: string) {
+    this.searchTerm = term;
+    this.pageNumber = 1;
+    this.loadStates();
+  }
+
   handleAction(event: any) {
     const { action, row } = event;
-    console.log(row, "sasdd");
     if (action.id === 'delete') {
       this.crudHandler.handleRequest(
         this.stateService.deleteState(row.id),
@@ -338,16 +366,13 @@ export class StateComponent implements OnInit {
         stateId: row.stateId || row.id ? String(row.stateId || row.id) : null
       });
     } else if (action.id === 'add_prabhari') {
-      console.log(row, "sd");
       this.prabhariModal.openModal({
         stateId: row.stateId || row.id,
         ...(row.prabhari || {})
       });
     } else if (action.id === 'assign_district') {
-      console.log(row, "sd");
       this.districtModal.openModal({
         stateId: row.stateId || row.id,
-
       });
     }
   }
@@ -378,7 +403,6 @@ export class StateComponent implements OnInit {
     const raw = result.data;
     const stateId = this.prabhariModal.initialData?.stateId;
 
-
     if (!stateId) {
       this.toastService.showError('Error', 'State ID missing');
       return;
@@ -406,8 +430,32 @@ export class StateComponent implements OnInit {
   }
 
   handleExport(format: string) {
-    if (!format) return;
-    this.toastService.showSuccess('Export Started', `Successfully generated ${format.toUpperCase()} export!`);
+    if (!format || this.isExporting) return;
+    this.isExporting = true;
+    
+    const params = {
+      searchTerm: this.searchTerm
+    };
+
+    this.stateService.export('state', format as 'excel' | 'pdf', params).subscribe({
+      next: (blob: Blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `States_List.${format === 'excel' ? 'xlsx' : 'pdf'}`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        this.isExporting = false;
+        this.toastService.showSuccess('Success', `State list exported to ${format.toUpperCase()} successfully!`);
+      },
+      error: (err) => {
+        console.error(`Error exporting to ${format}:`, err);
+        this.toastService.showError('Error', `Failed to export state list to ${format.toUpperCase()}`);
+        this.isExporting = false;
+      }
+    });
   }
 
   handleDistrictSubmit(result: FormResult) {

@@ -20,7 +20,7 @@ namespace VidhanSabha.Application.Pannels.Admin.Block.Queries
         }
         public async Task<List<BlockNameResponse>> Handle(GetAllBlockNameQuery request, CancellationToken cancellationToken)
         {
-            var res = await _repo.GetAllBlockNameAsync();
+            var res = await _repo.GetAllBlockNameAsync(request.UserId);
             if (res == null)
             {
                 throw new NotFoundException("Block Not Found");
