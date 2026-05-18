@@ -19,25 +19,28 @@ import { GenericExportComponent } from '../../shared/generic-export/generic-expo
   standalone: true,
   imports: [CommonModule, FormsModule, GenericTableComponent, GenericModalButtonComponent, PageHeaderComponent, GenericExportComponent],
   template: `
-    <div class="h-full flex flex-col p-4 gap-4 overflow-hidden">
+    <div class="h-screen p-4 flex flex-col overflow-hidden bg-slate-50/50">
       <app-page-header [title]="isListView ? 'BDC List' : 'BDC Management'" subtitle="Manage Block Development Council members and assignments">
-        <app-generic-modal-button 
-            *ngIf="canManage()"
-            #bdcModal 
-            [config]="addBdcConfig" 
-            label="Add BDC" 
-            icon="+"
-            variant="primary" 
-            (formSubmit)="handleFormSubmit($event)">
-        </app-generic-modal-button>
+        <div class="flex items-center gap-3">
+          <app-generic-modal-button 
+              *ngIf="canManage()"
+              #bdcModal 
+              [config]="addBdcConfig" 
+              label="Add BDC" 
+              icon="+"
+              variant="primary" 
+              (formSubmit)="handleFormSubmit($event)">
+          </app-generic-modal-button>
 
-        <app-generic-export [show]="isListView && bdcs && bdcs.length > 0" 
-            [isExporting]="isExporting" (export)="handleExport($event)">
-        </app-generic-export>
+          <app-generic-export [show]="isListView && bdcs && bdcs.length > 0" 
+              [isExporting]="isExporting" (export)="handleExport($event)">
+          </app-generic-export>
+        </div>
       </app-page-header>
 
-      <div class="flex-1 min-h-0 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col p-2">
+      <div class="flex-1 min-h-0 mt-4 bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
         <app-generic-table
+          class="flex-1 min-h-0"
           [config]="tableConfig"
           [columns]="columns"
           [actions]="actions"
@@ -68,6 +71,7 @@ export class BdcComponent implements OnInit {
   }
 
   columns: TableColumn[] = [
+    { key: 'profile', label: 'Profile', type: 'avatar', align: 'center', sortable: false, avatarFallbackKey: 'name' },
     { key: 'name', label: 'Name', sortable: true },
     { key: 'block', label: 'Block', sortable: true },
     { key: 'wardNumber', label: 'Ward No.', sortable: true },
@@ -302,7 +306,6 @@ export class BdcComponent implements OnInit {
     if (!result.status) return;
 
     const raw = result.data;
-    const files = result.files;
     const rowId = raw.id || (this.bdcModal.initialData && this.bdcModal.initialData.id);
 
     const formData = new FormData();
@@ -317,7 +320,6 @@ export class BdcComponent implements OnInit {
     formData.append('PartyId', String(raw.partyId || 0));
     formData.append('Education', raw.education || '');
 
-    // Handle multiple VillageId
     if (Array.isArray(raw.villageId)) {
       raw.villageId.forEach((v: any) => {
         formData.append('VillageId', String(v.id || v));
@@ -326,8 +328,8 @@ export class BdcComponent implements OnInit {
       formData.append('VillageId', String(raw.villageId));
     }
 
-    if (files && files['profile']) {
-      formData.append('Profile', files['profile']);
+    if (result.files && result.files['profile']) {
+      formData.append('Profile', result.files['profile']);
     }
 
     const isUpdate = !!rowId;
@@ -346,9 +348,28 @@ export class BdcComponent implements OnInit {
   handleExport(format: string) {
     if (!format) return;
     this.isExporting = true;
-    setTimeout(() => {
-      this.isExporting = false;
-      this.toastService.showSuccess('Export Started', `Successfully generated ${format.toUpperCase()} export!`);
-    }, 1000);
+    const exportFormat = format as 'excel' | 'pdf';
+    const request = exportFormat === 'excel' ? this.bdcService.exportToExcel() : this.bdcService.exportToPdf();
+
+    request.subscribe({
+      next: (blob: Blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `BDC_List.${format === 'excel' ? 'xlsx' : 'pdf'}`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        this.isExporting = false;
+        this.toastService.showSuccess('Success', `BDC list exported to ${format.toUpperCase()} successfully!`);
+      },
+      error: (err: any) => {
+        console.error(`Error exporting to ${format}:`, err);
+        this.toastService.showError('Error', `Failed to export BDC list to ${format.toUpperCase()}`);
+        this.isExporting = false;
+      }
+    });
   }
 }
+

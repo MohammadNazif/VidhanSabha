@@ -50,6 +50,7 @@ export class DoubleVoterComponent implements OnInit {
     { key: 'fatherName', label: 'Father Name', sortable: true },
     { key: 'voterId', label: 'Voter ID', sortable: true },
     { key: 'currentAddress', label: 'Current Address', sortable: true },
+    { key: 'previousAddress', label: 'Previous Address', sortable: true },
     { key: 'description', label: 'Description', sortable: true }
   ];
 
@@ -97,7 +98,7 @@ export class DoubleVoterComponent implements OnInit {
           const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
           return list.map((item: any) => ({
             value: String(item.boothId || item.id),
-            label: `Booth No. ${item.boothNumber} - ${item.boothName || item.pollingStationName || ''}`
+            label: `Booth No.- ${item.boothNumber}}`
           }));
         },
         validations: [Validators.required],
@@ -228,7 +229,7 @@ export class DoubleVoterComponent implements OnInit {
         if (filter) {
           const list = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
           filter.options = list.map((b: any) => ({
-            label: `Booth No. ${b.boothNumber} - ${b.pollingStationName || ''}`,
+            label: `Booth No.- ${b.boothNumber}`,
             value: String(b.boothId || b.id)
           }));
         }

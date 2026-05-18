@@ -27,8 +27,10 @@ namespace VidhanSabha.Application.Pannels.Admin.Booth.Dtos
         public string FatherName { get; set; } = string.Empty;
         public int CategoryId { get; set; }
         public string CastName { get; set; }
+        public string? CategoryName { get; set; }
         public int CastId { get; set; }
         public string? EducationLevel { get; set; }
+        public string? Designation { get; set; }
         public string PhoneNumber { get; set; } = string.Empty;
         public string? Address { get; set; }
         public string? Profile { get; set; }

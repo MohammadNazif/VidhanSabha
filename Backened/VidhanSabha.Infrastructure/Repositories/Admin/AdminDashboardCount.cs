@@ -58,7 +58,11 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
                  ),
                  BDC  = await _context.Tbl_Block.CountAsync(x => x.Status && x.UserId ==userId),
                 InfluencerPerson = await _context.Tbl_Influencer.CountAsync(x => boothIds.Contains(x.BoothId) && x.Status && x.UserId == userId),
-                Pradhan = await _context.Tbl_Pradhan.CountAsync(x => x.Status && x.UserId == userId)
+                Pradhan = await _context.Tbl_Pradhan.CountAsync(x => x.Status && x.UserId == userId),
+
+                vidhanSabhaName = await _context.Tbl_StatePrabhari.Where(x => x.userId == userId).Select(b => b.Vidhansabha.VidhanSabhaName).FirstOrDefaultAsync(),
+
+                  vidhanSabhaNumber = await _context.Tbl_StatePrabhari.Where(x => x.userId == userId).Select(b => b.Vidhansabha.VidhanSabhaNumber).FirstOrDefaultAsync()
 
 
             };

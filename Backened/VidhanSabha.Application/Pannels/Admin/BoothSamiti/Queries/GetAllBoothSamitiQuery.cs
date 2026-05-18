@@ -8,7 +8,7 @@ using VidhanSabha.Application.Pannels.Admin.BoothSamiti.Dtos;
 
 namespace VidhanSabha.Application.Pannels.Admin.BoothSamiti.Queries
 {
-    public class GetAllBoothSamitiQuery : IRequest<List<BoothSamitiResponseDto>>
+    public class GetAllBoothSamitiQuery : IRequest<BoothSamitiResponseDto>
     {
         public int Id { get; set; }
         public GetAllBoothSamitiQuery(int id)

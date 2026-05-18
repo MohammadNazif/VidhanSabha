@@ -41,7 +41,7 @@ import { GenericExportComponent } from '../../shared/generic-export/generic-expo
             label="Add Samiti" icon="+" variant="primary">
           </app-generic-modal-button>
 
-          <app-generic-export [show]="isListView && memberList && memberList.length > 0" 
+          <app-generic-export [show]="(isListView || isMemberView) && memberList && memberList.length > 0" 
               [isExporting]="isExporting" (export)="handleExport($event)">
           </app-generic-export>
         </div>
@@ -161,15 +161,29 @@ export class BoothSamitiComponent implements OnInit {
         { id: 'delete_mem', label: '', variant: 'danger', icon: 'delete', show: () => this.canManage() }
       ];
     } else {
-      this.columns = [
-
-        { key: 'boothNo', label: 'Booth No.', sortable: true },
-        { key: 'village', label: 'Village', sortable: true },
-        { key: 'pollingStation', label: 'Polling Station', sortable: true },
-        { key: 'boothAdhayaksh', label: 'Booth Adhayaksh', sortable: true },
-        { key: 'totalMember', label: 'Total Members', sortable: true },
-        { key: 'contact', label: 'Contact', sortable: true }
-      ];
+      if (this.isListView) {
+        this.columns = [
+          { key: 'boothNo', label: 'Booth No.', sortable: true },
+          { key: 'village', label: 'Village', sortable: true },
+          { key: 'pollingStation', label: 'Polling Station', sortable: true },
+          { key: 'boothAdhayaksh', label: 'Booth Adhayaksh', sortable: true },
+          { key: 'designation', label: 'Designation', sortable: true },
+          { key: 'categoryName', label: 'Category', sortable: true },
+          { key: 'castName', label: 'Caste', sortable: true },
+          { key: 'age', label: 'Age', sortable: true },
+          { key: 'contact', label: 'Contact', sortable: true },
+          { key: 'totalMember', label: 'Total Members', sortable: true }
+        ];
+      } else {
+        this.columns = [
+          { key: 'boothNo', label: 'Booth No.', sortable: true },
+          { key: 'village', label: 'Village', sortable: true },
+          { key: 'pollingStation', label: 'Polling Station', sortable: true },
+          { key: 'boothAdhayaksh', label: 'Booth Adhayaksh', sortable: true },
+          { key: 'totalMember', label: 'Total Members', sortable: true },
+          { key: 'contact', label: 'Contact', sortable: true }
+        ];
+      }
       this.actions = [
         { id: 'view', label: 'View', variant: 'primary', icon: 'view' },
         { id: 'add_samiti', label: 'Add Member', variant: 'primary', icon: 'user', show: () => this.canManage() }
@@ -330,11 +344,31 @@ export class BoothSamitiComponent implements OnInit {
       this.boothSamitiService.getAllMembers(this.selectedBoothId).subscribe({
         next: (res) => {
           const dataWrap = res.data || res;
-          const list = Array.isArray(dataWrap) ? dataWrap : (dataWrap.items || []);
-          this.memberList = list.map((item: any, index: number) => ({
+          const apiMembers = dataWrap.members || (Array.isArray(dataWrap) ? dataWrap : []);
+          const sanyojak = dataWrap.boothSanyojak;
+
+          const mapped = apiMembers.map((item: any, index: number) => ({
             ...item,
             srNo: index + 1
           }));
+
+          if (this.isListView && sanyojak) {
+            const adhyaksh = {
+              id: -1,
+              name: sanyojak.inchargeName,
+              designationName: sanyojak.designation,
+              categoryName: sanyojak.categoryName,
+              casteName: sanyojak.castName,
+              age: sanyojak.age,
+              contact: sanyojak.phoneNumber,
+              occupation: 'Booth Adhayaksh',
+              isAdhyakshRow: true
+            };
+            this.memberList = [adhyaksh, ...mapped];
+          } else {
+            this.memberList = mapped;
+          }
+
           this.totalCount = this.memberList.length;
           this.updateDropdownOptions();
           this.loading = false;
@@ -495,6 +529,46 @@ export class BoothSamitiComponent implements OnInit {
 
   handleExport(format: string) {
     if (!format) return;
-    this.toastService.showSuccess('Export Started', `Successfully generated ${format.toUpperCase()} export!`);
+    this.isExporting = true;
+
+    // Determine entity and parameters
+    // isMemberView: exports members of a specific booth
+    // !isMemberView (ListView or Management): exports the list of samitis/booths
+    const entity = this.isMemberView ? 'boothsamitimembers' : 'boothsamiti';
+    const params: any = {
+      UserId: this.authService.getUserId()
+    };
+
+    if (this.isMemberView && this.selectedBoothId) {
+      params.BoothMemId = this.selectedBoothId;
+    }
+
+    // Use the generic export service from BaseApiService
+    this.boothSamitiService.export(entity, format as 'pdf' | 'excel', params).subscribe({
+      next: (blob: Blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        
+        let fileName = 'Booth_Samiti_List';
+        if (this.isMemberView) {
+          fileName = this.selectedBoothName ? `${this.selectedBoothName}_Members` : 'Booth_Members';
+        }
+
+        a.download = `${fileName}.${format === 'excel' ? 'xlsx' : 'pdf'}`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+
+        this.isExporting = false;
+        this.toastService.showSuccess('Success', `List exported to ${format.toUpperCase()} successfully!`);
+      },
+      error: (err) => {
+        console.error(`Error exporting to ${format}:`, err);
+        this.toastService.showError('Error', `Failed to export list to ${format.toUpperCase()}`);
+        this.isExporting = false;
+      }
+    });
   }
 }

@@ -26,7 +26,7 @@ namespace VidhanSabha.Application.Common.ExportPdfExcel.Dtos
     }
     public sealed class newvoterExportDef : IExportDefinition<newvoterExportRow>
     {
-        public string ReportTitle => "Double Voter List";
+        public string ReportTitle => "New Voter List";
 
         public IReadOnlyList<ExportColumn<newvoterExportRow>> Columns =>
         [

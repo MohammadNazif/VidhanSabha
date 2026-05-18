@@ -20,6 +20,9 @@ export class AuthServiceService {
   private stateIdSubject = new BehaviorSubject<string | null>(localStorage.getItem('stateId'));
   stateId$ = this.stateIdSubject.asObservable();
 
+  private profileDataSubject = new BehaviorSubject<any>(null);
+  profileData$ = this.profileDataSubject.asObservable();
+
   constructor() { }
 
   setRole(role: string) {
@@ -67,6 +70,14 @@ export class AuthServiceService {
     return this.stateIdSubject.value;
   }
 
+  setProfileData(data: any) {
+    this.profileDataSubject.next(data);
+  }
+
+  getProfileData(): any {
+    return this.profileDataSubject.value;
+  }
+
   clearRole() {
     localStorage.removeItem('userRole');
     localStorage.removeItem('userId');
@@ -78,5 +89,6 @@ export class AuthServiceService {
     this.tokenSubject.next(null);
     this.boothIdSubject.next(null);
     this.stateIdSubject.next(null);
+    this.profileDataSubject.next(null);
   }
 }

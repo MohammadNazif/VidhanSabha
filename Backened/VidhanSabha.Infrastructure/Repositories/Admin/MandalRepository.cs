@@ -102,6 +102,7 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
 
                     (string.IsNullOrWhiteSpace(term) ||
                         (s.SectorName != null && s.SectorName.ToLower().Contains(term)) ||
+                         s.Booth.BoothNumber.ToString().Contains(term) ||
                         (s.InchargeName != null && s.InchargeName.ToLower().Contains(term)) ||
                         (s.FatherName != null && s.FatherName.ToLower().Contains(term)) ||
                         (s.Booth != null && s.Booth.PollingStationName != null && s.Booth.PollingStationName.ToLower().Contains(term)) ||
@@ -182,11 +183,11 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
        CombinedReportFilter qp,
        int? vidhansabhaId,
        CancellationToken ct = default)
-        {
-            var sectorIds = qp.GetSectorIds();
-            var mandalIds = qp.GetMandalIds();
-            var castIds = qp.GetCastIds();
-            var villageIds = qp.GetVillageIds();
+           {
+            //var sectorIds = qp.GetSectorIds();
+            //var mandalIds = qp.GetMandalIds();
+            //var castIds = qp.GetCastIds();
+            //var villageIds = qp.GetVillageIds();
             var term = qp.SearchTerm?.Trim().ToLower();
 
             var query = _context.Tbl_Sector
@@ -195,10 +196,10 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
                     !string.IsNullOrWhiteSpace(s.SectorName) &&
                     (vidhansabhaId == null || s.Mandal.VidhanId == vidhansabhaId) &&
                     (!qp.Id.HasValue || s.Mandal.Id == qp.Id) &&
-                    (!mandalIds.Any() || mandalIds.Contains(s.Mandal.Id)) &&
-                    (!sectorIds.Any() || sectorIds.Contains(s.Id)) &&
-                    (!castIds.Any() || (s.Booth != null && s.Booth.Sanyojak != null && castIds.Contains(s.Booth.Sanyojak.CastId))) &&
-                    (!villageIds.Any() || (s.Booth != null && s.Booth.Villages.Any(v => villageIds.Contains(v.VillageId)))) &&
+                    //(!mandalIds.Any() || mandalIds.Contains(s.Mandal.Id)) &&
+                    //(!sectorIds.Any() || sectorIds.Contains(s.Id)) &&
+                    //(!castIds.Any() || (s.Booth != null && s.Booth.Sanyojak != null && castIds.Contains(s.Booth.Sanyojak.CastId))) &&
+                    //(!villageIds.Any() || (s.Booth != null && s.Booth.Villages.Any(v => villageIds.Contains(v.VillageId)))) &&
                     (string.IsNullOrWhiteSpace(term) ||
                         (s.SectorName != null && s.SectorName.ToLower().Contains(term)) ||
                         (s.InchargeName != null && s.InchargeName.ToLower().Contains(term)) ||

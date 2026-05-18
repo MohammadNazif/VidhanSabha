@@ -22,7 +22,13 @@ namespace VidhanSabha.Application.Common.ExportPdfExcel.Dtos
     }
     public sealed class seniordisabledExportDef : IExportDefinition<seniordisabledExportRow>
     {
-        public string ReportTitle => "Senior_Disabled List";
+        private string _title;
+
+        public seniordisabledExportDef(string title)
+        {
+            _title = title;
+        }
+        public string ReportTitle => _title;
 
         public IReadOnlyList<ExportColumn<seniordisabledExportRow>> Columns =>
         [

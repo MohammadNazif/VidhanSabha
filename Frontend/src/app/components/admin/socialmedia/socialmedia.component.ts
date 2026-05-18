@@ -47,6 +47,7 @@ export class SocialMediaComponent implements OnInit {
   }
 
   columns: TableColumn[] = [
+    { key: 'postImagePath', label: 'Post Image', type: 'avatar', align: 'center', sortable: false },
     { key: 'title', label: 'Title', sortable: true },
     {
       key: 'platforms', label: 'Platforms', sortable: false, formatter: (val: any, row: any) => {
@@ -314,8 +315,12 @@ export class SocialMediaComponent implements OnInit {
     }
 
     const isUpdate = !!raw.id && raw.id !== '0';
+    if (isUpdate) {
+      formData.append('id', String(raw.id));
+    }
+
     const request = isUpdate
-      ? this.socialMediaService.updateSocialMedia(formData)
+      ? this.socialMediaService.updateSocialMedia(formData, raw.id)
       : this.socialMediaService.createSocialMedia(formData);
 
     this.crudHandler.handleRequest(

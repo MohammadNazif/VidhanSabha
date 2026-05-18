@@ -9,6 +9,7 @@ using VidhanSabha.Application.Common.Dtos;
 using VidhanSabha.Application.Pannels.SuperAdmin.StatePrabhari.Dtos;
 using VidhanSabha.Application.Pannels.SuperAdmin.StatePrabhari.Interfaces;
 using VidhanSabha.Domain.Entities.SuperAdmin;
+using VidhanSabha.Domain.Enums;
 using VidhanSabha.Infrastructure.Extensions;
 using VidhanSabha.Infrastructure.Persistence;
 using VidhanSabha.Infrastructure.Repositories.Common;
@@ -58,6 +59,7 @@ namespace VidhanSabha.Infrastructure.Repositories.SuperAdmin
                 Gender = b.Gender,
                 ContactNumber = b.ContactNumber,
                 CurrentAddress = b.CurrentAddress,
+                Password = b.Login.Password
             }).ToListAsync(ct);
         }
 
@@ -74,6 +76,7 @@ namespace VidhanSabha.Infrastructure.Repositories.SuperAdmin
         {
             var query = _context.Tbl_StatePrabhari
                 .AsNoTracking()
+                 .Include(x => x.Login) 
                 .Where(m => m.StateId == stateId && m.Vidhansabha.Status &&
                             m.CreatedByUserId == userId &&
                             m.PrabhariRole == Domain.Enums.PrabhariRole.VidhanSabhaPrabhari);
@@ -117,10 +120,173 @@ namespace VidhanSabha.Infrastructure.Repositories.SuperAdmin
                     CastName = x.Cast != null ? x.Cast.CastName : string.Empty,
                     Education = x.Education,
                     Profession = x.Profession,
-                    CurrentAddress = x.CurrentAddress
+                    CurrentAddress = x.CurrentAddress,
+                    Password = x.Login != null ? x.Login.Password : null
                 },
                 ct: ct
             );
+        }
+
+
+        public async Task<StatePrabhariResponseDto?> GetProfileByUserIdAsync(
+     string userId,
+     string role,
+     CancellationToken ct = default)
+        {
+            // Fetch login credentials first
+            var loginData = await _context.Tbl_LoginCredential
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.UserId == userId, ct);
+
+            // ================= STATE / VIDHANSABHA PRABHARI =================
+            if (role == "StatePrabhari" || role == "VidhanSabhaPrabhari")
+            {
+                // Map role string to enum
+                PrabhariRole requiredRole = role switch
+                {
+                    "StatePrabhari" => PrabhariRole.StatePrabhari,
+                    "VidhanSabhaPrabhari" => PrabhariRole.VidhanSabhaPrabhari,
+                    _ => throw new ArgumentException("Invalid role")
+                };
+
+                return await (
+                    from sp in _context.Tbl_StatePrabhari
+
+                    join s in _context.Tbl_State
+                        on sp.StateId equals s.Id into stateJoin
+                    from state in stateJoin.DefaultIfEmpty()
+
+                    join vs in _context.Tbl_VidhanSabha
+                        on sp.VidhansabhaId equals vs.Id into vsJoin
+                    from vidhan in vsJoin.DefaultIfEmpty()
+
+                    join d in _context.Tbl_District
+                        on vidhan.DistrictId equals d.Id into districtJoin
+                    from district in districtJoin.DefaultIfEmpty()
+
+                    join c in _context.Tbl_Category
+                        on sp.CategoryId equals c.Id into categoryJoin
+                    from category in categoryJoin.DefaultIfEmpty()
+
+                    join cast in _context.Tbl_Cast
+                        on sp.CastId equals cast.Id into castJoin
+                    from caste in castJoin.DefaultIfEmpty()
+
+                    where sp.userId == userId
+                          && sp.PrabhariRole == requiredRole
+
+                    select new StatePrabhariResponseDto
+                    {
+                        Id = sp.Id,
+                        userId = sp.userId,
+
+                        StateId = sp.StateId,
+                        StateName = state.StateName,
+
+                        DistrictId = district.Id,
+                        DistrictName = district.DistrictName,
+
+                        VidhanSabhaId = sp.VidhansabhaId,
+                        VidhanSabhaName = vidhan.VidhanSabhaName,
+                        VidhanSabhaNumber = vidhan.VidhanSabhaNumber,
+
+                        PrabhariName = sp.PrabhariName,
+                        PrabhariEmail = sp.PrabhariEmail,
+                        Gender = sp.Gender,
+                        ContactNumber = sp.ContactNumber,
+
+                        CategoryId = sp.CategoryId,
+                        CategoryName = category.Name,
+
+                        CastId = sp.CastId,
+                        CastName = caste.CastName,
+
+                        Education = sp.Education,
+                        Profession = sp.Profession,
+                        CurrentAddress = sp.CurrentAddress,
+                        Password = loginData.Password
+                    })
+                    .FirstOrDefaultAsync(ct);
+            }
+
+            // ================= BOOTH SANYOJAK =================
+            if (role == "BoothSanyojak")
+            {
+                return await (
+                    from bs in _context.Tbl_BoothSanyojak
+
+                    join c in _context.Tbl_Category
+                        on bs.CategoryId equals c.Id into categoryJoin
+                    from category in categoryJoin.DefaultIfEmpty()
+
+                    join cast in _context.Tbl_Cast
+                        on bs.CastId equals cast.Id into castJoin
+                    from caste in castJoin.DefaultIfEmpty()
+
+                    where bs.UserId == userId
+
+                    select new StatePrabhariResponseDto
+                    {
+                        Id = bs.Id,
+                        userId = bs.UserId,
+                        BoothName = bs.Booth.PollingStationName,
+                        BoothNumber = bs.Booth.BoothNumber,
+                        PrabhariName = bs.InchargeName,
+                        ContactNumber = bs.PhoneNumber,
+
+                        CategoryId = bs.CategoryId,
+                        CategoryName = category.Name,
+
+                        CastId = bs.CastId,
+                        CastName = caste.CastName,
+
+                        Education = bs.EducationLevel,
+                        CurrentAddress = bs.Address,
+                        Profile = bs.ProfileImagePath,
+                        Password = loginData.Password
+                    })
+                    .FirstOrDefaultAsync(ct);
+            }
+
+            // ================= SECTOR SANYOJAK =================
+            if (role == "SectorSanyojak")
+            {
+                return await (
+                    from ss in _context.Tbl_Sector
+
+                    join c in _context.Tbl_Category
+                        on ss.CategoryId equals c.Id into categoryJoin
+                    from category in categoryJoin.DefaultIfEmpty()
+
+                    join cast in _context.Tbl_Cast
+                        on ss.CastId equals cast.Id into castJoin
+                    from caste in castJoin.DefaultIfEmpty()
+
+                    where ss.UserId == userId
+
+                    select new StatePrabhariResponseDto
+                    {
+                        Id = ss.Id,
+                        userId = ss.UserId,
+                        SectorName = ss.SectorName,
+                        PrabhariName = ss.InchargeName,
+                        ContactNumber = ss.PhoneNumber,
+
+                        CategoryId = ss.CategoryId,
+                        CategoryName = category.Name,
+
+                        CastId = ss.CastId,
+                        CastName = caste.CastName,
+
+                        Education = ss.EducationLevel,
+                        CurrentAddress = ss.Address,
+                        Profile = ss.ProfileImage,
+                        Password = loginData.Password
+                    })
+                    .FirstOrDefaultAsync(ct);
+            }
+
+            return null;
         }
 
         public Task SaveAsync(CancellationToken ct = default)

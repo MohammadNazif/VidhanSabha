@@ -27,7 +27,7 @@ namespace VidhanSabha.Infrastructure.Repositories.Common
 
        
         public async Task<string?> SaveImageAsync(IFormFile? file, string subFolder)
-        {
+            {
             if (file == null || file.Length == 0) return null;
 
             var uploadFolder = Path.Combine(_env.WebRootPath, "uploads", subFolder);

@@ -4,8 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using VidhanSabha.Application.Common.Dtos;
+using VidhanSabha.Application.Common.ExportPdfExcel.Dtos;
 using VidhanSabha.Application.Pannels.Admin.Influencer.DTOs;
 using VidhanSabha.Domain.Entities.Admin;
+using static VidhanSabha.Application.Common.ExportPdfExcel.Dtos.InfluencerExportDef;
 
 namespace VidhanSabha.Application.Pannels.Admin.Influencer.Interfaces
 {
@@ -16,6 +18,8 @@ namespace VidhanSabha.Application.Pannels.Admin.Influencer.Interfaces
         Task<PagedResult<InfluencerResponseDto>> GetAllAsync(
         InfluencerQueryParams qp,
         CancellationToken ct = default);
+
+        Task<List<InfluencerExportRow>> GetInfluencerExportAsync(InfluencerExportFilter qp);
 
         Task<int> AddAsync(Tbl_Influencer entity, CancellationToken ct = default);
 

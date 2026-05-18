@@ -39,8 +39,8 @@
         <span class="accent">Is Our</span> Resolve
       </h1>
       <p class="hero-desc">
-        Shri Dinesh Khatik — a dedicated worker, grassroots leader, and a steady force for development. The voice of the
-        people, the trust of all.
+        Shri Dinesh Khatik — Minister of State for Jal Shakti, UP Government, and a dedicated grassroots leader
+        representing Hastinapur. A steady force driving flood control, infrastructure, and empowerment for all.
       </p>
       <div class="hero-btns">
         <button class="btn-primary" (click)="scrollTo('contact')">Connect With Us</button>
@@ -51,28 +51,35 @@
           <strong>15+</strong><span>Years Service</span>
         </div>
         <div class="hstat">
-          <strong>500+</strong><span>Villages Reached</span>
+          <strong>500+</strong><span>Village Reports</span>
         </div>
         <div class="hstat">
-          <strong>10L+</strong><span>Citizens Helped</span>
+          <strong>10L+</strong><span>Citizens Impacted</span>
         </div>
       </div>
     </div>
     <div class="hero-image">
       <div class="hero-img-card">
-        <img src="/assets/images/Dinesh.jpeg" alt="Dinesh Khatik" />
-        <div class="img-label">Dinesh Khatik</div>
+        <img src="/assets/images/yogi_adityanath.jpeg" alt="Yogi Adityanath" />
+        <div class="img-label">Yogi Adityanath</div>
       </div>
       <div class="hero-img-card secondary">
-        <img src="/assets/images/YogiAdityanath.jpeg" alt="Yogi Adityanath" />
-        <div class="img-label">Yogi Adityanath</div>
+        <img src="/assets/images/dinesh.jpeg" alt="Dinesh Khatik" />
+        <div class="img-label">Dinesh Khatik</div>
+
       </div>
     </div>
   </div>
   <div class="ticker">
-    <span>🏛 Foundation laid for new ZHC in Haathpur &nbsp;•&nbsp; 🌾 Samman Nidhi distributed to 3,500 farmers
-      &nbsp;•&nbsp; 🎓 Youth Employment Fair — 1,200+ selected &nbsp;•&nbsp; 🙏 Jai Jawan Mission — top
-      contribution</span>
+    <div class="ticker-content">
+      <span *ngFor="let item of tickerItems; let last = last">
+        {{ item }} <span class="separator">&nbsp;•&nbsp;</span>
+      </span>
+      <!-- Duplicate for seamless looping -->
+      <span *ngFor="let item of tickerItems; let last = last">
+        {{ item }} <span class="separator">&nbsp;•&nbsp;</span>
+      </span>
+    </div>
   </div>
 </section>
 
@@ -82,7 +89,7 @@
   <h2 class="section-title">Numbers That Speak</h2>
   <div class="stats-grid">
     <div class="stat-card" *ngFor="let s of stats">
-      <div class="stat-icon">{{ s.icon }}</div>
+      <div class="stat-icon"><i [class]="s.icon"></i></div>
       <div class="stat-value">{{ s.value }}</div>
       <div class="stat-label">{{ s.label }}</div>
     </div>
@@ -90,25 +97,28 @@
 </section>
 
 <!-- DEVELOPMENT -->
-<section id="development" class="dev-section">
-  <div class="dev-header">
-    <div class="section-label">Development Work</div>
-    <h2 class="section-title left">Progress in <span class="accent">Every Sector</span></h2>
-    <p class="section-desc">Visible change on the ground — continuous effort across roads, education, healthcare and
-      employment.</p>
-  </div>
-  <div class="dev-grid">
-    <div class="dev-card" *ngFor="let s of sectors">
-      <div class="dev-img-wrap">
-        <img [src]="s.img" [alt]="s.title" />
-        <div class="dev-tag">{{ s.tag }}</div>
-      </div>
-      <div class="dev-body">
-        <h3>{{ s.title }}</h3>
-        <p>{{ s.desc }}</p>
-        <a class="read-more">Read more →</a>
+<section id="development" class="schemes-section">
+  <div class="dev-section">
+    <div class="dev-header mx-auto">
+      <div class="section-label">Development Work</div>
+      <h2 class="section-title">Progress in <span class="accent">Every Sector</span></h2>
+      <p class="section-desc">Visible change on the ground — continuous effort across roads, education, healthcare and
+        employment.</p>
+    </div>
+    <div class="dev-grid">
+      <div class="dev-card" *ngFor="let s of sectors">
+        <div class="dev-img-wrap">
+          <img [src]="s.img" [alt]="s.title" />
+          <div class="dev-tag">{{ s.tag }}</div>
+        </div>
+        <div class="dev-body">
+          <h3>{{ s.title }}</h3>
+          <p>{{ s.desc }}</p>
+          <a class="read-more" [href]="s.link" target="_blank">Read more →</a>
+        </div>
       </div>
     </div>
+
   </div>
 </section>
 
@@ -134,17 +144,23 @@
 <section id="gallery" class="gallery-section">
   <div class="section-label">Public Engagement</div>
   <h2 class="section-title">Event <span class="accent">Gallery</span></h2>
-  <div class="gallery-hero">
-    <img src="https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=1200&q=80" alt="Rally" />
-    <div class="gallery-caption">
-      <span class="event-num">Event 1 / 4</span>
-      <h3>Public Rally & Development Programs</h3>
+
+  <div class="gallery-exchange-grid">
+    <div *ngFor="let img of galleryImages; let i = index" class="gallery-slot" [attr.data-slot]="getSlotIndex(i)"
+      (click)="setGalleryIndex(i)">
+      <div class="slot-inner">
+        <img [src]="img.url" [alt]="img.title" />
+        <div class="slot-overlay" *ngIf="getSlotIndex(i) === 0">
+          <span class="event-num">Event {{ i + 1 }} / {{ galleryImages.length }}</span>
+          <h3>{{ img.title }}</h3>
+        </div>
+      </div>
     </div>
   </div>
-  <div class="gallery-thumbs">
-    <img src="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=300&q=80" alt="Event 2" />
-    <img src="https://images.unsplash.com/photo-1517457373958-b7bdd4587205?w=300&q=80" alt="Event 3" />
-    <img src="https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?w=300&q=80" alt="Event 4" />
+
+  <div class="carousel-dots">
+    <span *ngFor="let img of galleryImages; let i = index" [class.active]="i === activeGalleryIndex"
+      (click)="setGalleryIndex(i)"></span>
   </div>
 </section>
 
@@ -152,13 +168,15 @@
 <section class="quote-section">
   <div class="quote-inner">
     <div class="quote-img">
-      <img src="/assets/images/Dinesh.jpeg" alt="Dinesh Khatik" />
+      <img src="/assets/images/dinesh.jpeg" alt="Dinesh Khatik" />
     </div>
     <div class="quote-body">
       <div class="quote-mark">"</div>
-      <blockquote>My resolve is to bring the light of development to every citizen. Your trust is my greatest strength.
+      <blockquote>
+        The people of Hastinapur have always stood by us. My top priority is to restore Hastinapur's lost historical
+        identity, build the Krishna-Pandava temple, and connect this great land to the railway network.
       </blockquote>
-      <cite>— Dinesh Khatik, Public Servant</cite>
+      <cite>— Dinesh Khatik, Minister of State (Jal Shakti), Uttar Pradesh</cite>
     </div>
   </div>
 </section>
@@ -190,9 +208,27 @@
       <h2 class="section-title left">Your Voice, <span class="accent">Our Priority</span></h2>
       <p>Send us your concerns, suggestions, or any matter for public outreach. Every message reaches us.</p>
       <div class="contact-info">
-        <div class="info-item">📞 +91 98888 99999</div>
-        <div class="info-item">✉️ office&#64;dineshkhatik.in</div>
-        <div class="info-item">📍 Public Outreach Office, Haathpur, Uttar Pradesh</div>
+        <div class="contact-item">
+          <div class="c-icon"><i class="fa-solid fa-phone"></i></div>
+          <div class="c-text">
+            <strong>+91 99999 99999</strong>
+            Public Helpline
+          </div>
+        </div>
+        <div class="contact-item">
+          <div class="c-icon"><i class="fa-solid fa-envelope"></i></div>
+          <div class="c-text">
+            <strong>office&#64;dineshkhatik.in</strong>
+            Official Email
+          </div>
+        </div>
+        <div class="contact-item">
+          <div class="c-icon"><i class="fa-solid fa-location-dot"></i></div>
+          <div class="c-text">
+            <strong>Public Outreach Office, Hastinapur, Uttar Pradesh</strong>
+            Walk-in hours: Mon–Sat 10am–5pm
+          </div>
+        </div>
       </div>
     </div>
     <div class="contact-right">
@@ -203,7 +239,7 @@
       <input type="email" placeholder="Email Address" />
       <input type="text" placeholder="Subject" />
       <textarea placeholder="Write your message here..."></textarea>
-      <button class="btn-primary full">Send Message →</button>
+      <button class="btn-primary">Send Message →</button>
     </div>
 
   </div>
@@ -236,6 +272,6 @@
     </div>
   </div>
   <div class="footer-bottom">
-    <p>© 2024 Dinesh Khatik — All rights reserved. Designed with dedication.</p>
+    <p>Designed by Macreel Infosoft PVT LTD.</p>
   </div>
 </footer>

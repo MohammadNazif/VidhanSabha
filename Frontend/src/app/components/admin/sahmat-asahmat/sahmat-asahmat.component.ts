@@ -358,7 +358,8 @@ export class SahmatAsahmatComponent implements OnInit {
       isDescending: this.isDescending,
       boothIds: this.boothIds,
       villageIds: this.villageIds,
-      partyIds: this.partyIds
+      partyIds: this.partyIds,
+      roleFilterFlag: !this.isListView
     };
 
     // Set id and TypeId parameters only if we are in a specific list view

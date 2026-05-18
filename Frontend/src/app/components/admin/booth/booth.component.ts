@@ -52,8 +52,8 @@ export class BoothComponent implements OnInit {
   pageNumber = 1;
   pageSize = 10;
   searchTerm = '';
-  sortBy = '';
-  isDescending = true;
+  sortBy = 'boothNumber';
+  isDescending = false;
   mandalId: string | number | null = null;
   sectorId: string | number | null = null;
 
@@ -454,6 +454,15 @@ export class BoothComponent implements OnInit {
   };
 
   columns: TableColumn[] = [
+    {
+      key: 'photo',
+      label: 'Profile',
+      type: 'avatar',
+      align: 'center',
+      sortable: false,
+      formatter: (val: any, row: any) => row.sanyojak?.profile || '',
+      avatarFallbackKey: 'inchargeName'
+    },
     { key: 'mandalName', label: 'Mandal', sortable: true },
     { key: 'sectorName', label: 'Sector', sortable: true },
     { key: 'boothNumber', label: 'Booth No.', sortable: true },

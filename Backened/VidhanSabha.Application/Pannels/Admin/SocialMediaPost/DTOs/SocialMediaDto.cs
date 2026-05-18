@@ -14,6 +14,7 @@ namespace VidhanSabha.Application.Pannels.Admin.SocialMediaPost.DTOs
         public string Title { get; set; }
         public IFormFile? PostImagePath { get; set; }
         public string Description { get; set; }
+        public string? UserId { get; set; }
         public List<int> PlatformIds { get; set; } = new();
         public List<int> BoothIds { get; set; } = new();
         public List<int> SectorIds { get; set; } = new();

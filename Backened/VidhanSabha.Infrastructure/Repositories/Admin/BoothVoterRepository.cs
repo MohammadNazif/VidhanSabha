@@ -99,7 +99,7 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
             {
                 var term = qp.SearchTerm.Trim().ToLower();
                 search = b =>
-                   
+                    b.Booth.BoothNumber.ToString().Contains(term) ||
                     b.Booth.PollingStationName.ToLower().Contains(term) ||
                     b.Villages.Select(v=>v.Village.VillageName).FirstOrDefault().ToLower().Contains(term)
                     ;

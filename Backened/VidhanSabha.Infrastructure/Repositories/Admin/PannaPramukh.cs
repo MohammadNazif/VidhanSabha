@@ -13,6 +13,7 @@ using VidhanSabha.Application.Common.ExportPdfExcel.Dtos;
 using VidhanSabha.Application.Pannels.Admin.PannaPramukh.Dtos;
 using VidhanSabha.Application.Pannels.Admin.PannaPramukh.Interfaces;
 using VidhanSabha.Domain.Entities.Admin;
+using VidhanSabha.Domain.Enums;
 using VidhanSabha.Infrastructure.Extensions;
 using VidhanSabha.Infrastructure.Persistence;
 using VidhanSabha.Infrastructure.Repositories.Common;
@@ -52,7 +53,11 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
               var villageIds = qp.GetVillageIds();
               var boothIds = qp.GetBoothIds();
 
-                   if (villageIds?.Count > 0)
+            if (qp.rolefilterflag && (qp.Role == PrabhariRole.BoothSanyojak.ToString() || qp.Role == PrabhariRole.SectorSanyojak.ToString()))
+            {
+                query = query.Where(f => f.Role == qp.Role.ToString());
+            }
+            if (villageIds?.Count > 0)
                      query = query.Where(b =>
                     b.Villages.Any(v => villageIds.Contains(v.VillageId)));
 
@@ -75,7 +80,7 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
             {
                 var term = qp.SearchTerm.Trim().ToLower();
                 search = b =>
-               
+                    b.Booth.BoothNumber.ToString().Contains(term) ||
                     b.PannaPramukhName.ToLower().Contains(term) ||
                     b.Address.ToLower().Contains(term) ||
                     b.Cast.CastName.ToLower().Contains(term) ||
@@ -107,6 +112,7 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
                     }).ToList(),
                     VoterId = m.VoterId,
                     PhoneNumber = m.PhoneNumber,
+                    ProfilePictureUrl  = m.ProfilePicturePath
                 },
                 ct: ct
                 );

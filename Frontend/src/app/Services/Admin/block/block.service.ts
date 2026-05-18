@@ -23,4 +23,12 @@ export class BlockService extends BaseApiService {
   updateBlock(data: any): Observable<any> {
     return this.update(this.entity, data);
   }
+
+  exportToExcel(): Observable<Blob> {
+    return this.export(this.entity, 'excel');
+  }
+
+  exportToPdf(): Observable<Blob> {
+    return this.export(this.entity, 'pdf');
+  }
 }

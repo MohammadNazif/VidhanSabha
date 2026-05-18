@@ -37,7 +37,7 @@ export interface SelectionField {
   ],
   template: `
     <div class="h-full flex flex-col p-4 gap-4 overflow-hidden">
-      <app-page-header title="Allow Access" subtitle="Manage module-level permissions for different roles">
+      <app-page-header title="Allow Access Management" subtitle="Manage module-level permissions for different roles">
         <button 
           class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm font-medium flex items-center gap-2" 
           (click)="savePermissions()">

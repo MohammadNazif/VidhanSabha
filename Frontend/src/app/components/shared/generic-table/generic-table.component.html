@@ -2,83 +2,92 @@
 <div class="table-toolbar" *ngIf="mergedConfig.searchable || mergedConfig.selectable">
   <!-- Search & Filters -->
   <div class="search-box-wrapper flex-1 flex flex-wrap items-center gap-3" *ngIf="mergedConfig.searchable">
-    <div class="search-box relative w-full sm:w-36 sm:focus-within:w-80 max-w-md group transition-all duration-300 ease-in-out shrink-0">
-      <span class="search-icon absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-slate-600 transition-colors" *ngIf="!loading">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+    <div
+      class="search-box relative w-full sm:w-36 sm:focus-within:w-80 max-w-md group transition-all duration-300 ease-in-out shrink-0">
+      <span
+        class="search-icon absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-slate-600 transition-colors"
+        *ngIf="!loading">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
       </span>
       <div class="search-spinner absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" *ngIf="loading"></div>
       <input type="text" [placeholder]="mergedConfig.searchPlaceholder || 'Search...'" [(ngModel)]="searchTerm"
-        (ngModelChange)="onSearch()" class="search-input w-full pl-9 pr-8 py-2 bg-slate-50 hover:bg-slate-100 focus:bg-white border border-slate-200 rounded-lg focus:border-slate-600 focus:ring-2 focus:ring-slate-600/20 outline-none transition-all text-sm font-medium text-slate-700 shadow-sm" />
-      <button *ngIf="searchTerm && !loading" (click)="clearSearch()" class="search-clear absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none" title="Clear search">✕</button>
+        (ngModelChange)="onSearch()"
+        class="search-input w-full pl-9 pr-8 py-2 bg-slate-50 hover:bg-slate-100 focus:bg-white border border-slate-200 rounded-lg focus:border-slate-600 focus:ring-2 focus:ring-slate-600/20 outline-none transition-all text-sm font-medium text-slate-700 shadow-sm" />
+      <button *ngIf="searchTerm && !loading" (click)="clearSearch()"
+        class="search-clear absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none"
+        title="Clear search">✕</button>
     </div>
 
     <!-- Custom Generic Filters -->
     <ng-container *ngIf="mergedConfig.filters?.length">
       <ng-container *ngFor="let filter of mergedConfig.filters">
-        <div class="generic-filter-item relative flex items-center shrink-0 min-w-[160px]" *ngIf="filter.visible !== false">
-        <!-- Single Select Filter -->
-        <select *ngIf="filter.type === 'select' && !filter.multiple"
-                class="filter-select w-full px-3 py-2 bg-white border border-slate-300 rounded-lg focus:border-slate-600 focus:ring-2 focus:ring-slate-600/10 outline-none transition-all text-sm font-medium text-slate-700 hover:border-slate-400 appearance-none bg-[url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%2394a3b8\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'%3e%3cpolyline points=\'6 9 12 15 18 9\'%3e%3c/polyline%3e%3c/svg%3e')] bg-no-repeat bg-[right_8px_center] bg-[length:14px] shadow-sm"
-                [ngModel]="filter.value"
-                (change)="onFilterChange(filter, $event)">
-          <option [ngValue]="null" disabled selected>{{ filter.placeholder || 'Select ' + filter.label }}</option>
-          <option [ngValue]="null">All {{ filter.label }}s</option>
-          <option *ngFor="let opt of filter.options" [value]="opt.value">{{ opt.label }}</option>
-        </select>
-        
-        <!-- Multi Select Filter -->
-        <div *ngIf="filter.type === 'select' && filter.multiple" class="relative w-full">
-          <div (click)="toggleFilterDropdown(filter.key, $event)"
-               class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg focus-within:border-slate-600 focus-within:ring-2 focus-within:ring-slate-600/10 transition-all text-sm font-medium text-slate-700 min-h-[38px] flex items-center justify-between cursor-pointer hover:border-slate-400 shadow-sm">
-            <div class="flex flex-wrap gap-1 items-center overflow-hidden h-5">
-              <span class="text-slate-400 font-normal truncate" *ngIf="!filter.value?.length">
-                {{ filter.placeholder || 'Select ' + filter.label }}
-              </span>
-              <div *ngFor="let val of filter.value"
-                   class="flex items-center gap-1 px-1.5 py-0.5 bg-slate-100 border border-slate-200 rounded text-[11px] text-slate-600 font-semibold group transition-all shrink-0">
-                {{ getFilterOptionLabel(filter, val) }}
-                <span (click)="toggleMultiFilterOption(filter, val, $event)"
-                      class="cursor-pointer hover:text-red-500 ml-0.5 text-slate-400">×</span>
+        <div class="generic-filter-item relative flex items-center shrink-0 min-w-[160px]"
+          *ngIf="filter.visible !== false">
+          <!-- Single Select Filter -->
+          <select *ngIf="filter.type === 'select' && !filter.multiple"
+            class="filter-select w-full px-3 py-2 bg-white border border-slate-300 rounded-lg focus:border-slate-600 focus:ring-2 focus:ring-slate-600/10 outline-none transition-all text-sm font-medium text-slate-700 hover:border-slate-400 appearance-none bg-[url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%2394a3b8\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'%3e%3cpolyline points=\'6 9 12 15 18 9\'%3e%3c/polyline%3e%3c/svg%3e')] bg-no-repeat bg-[right_8px_center] bg-[length:14px] shadow-sm"
+            [ngModel]="filter.value" (change)="onFilterChange(filter, $event)">
+            <option [ngValue]="null" disabled selected>{{ filter.placeholder || 'Select ' + filter.label }}</option>
+            <option [ngValue]="null">All {{ filter.label }}s</option>
+            <option *ngFor="let opt of filter.options" [value]="opt.value">{{ opt.label }}</option>
+          </select>
+
+          <!-- Multi Select Filter -->
+          <div *ngIf="filter.type === 'select' && filter.multiple" class="relative w-full">
+            <div (click)="toggleFilterDropdown(filter.key, $event)"
+              class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg focus-within:border-slate-600 focus-within:ring-2 focus-within:ring-slate-600/10 transition-all text-sm font-medium text-slate-700 min-h-[38px] flex items-center justify-between cursor-pointer hover:border-slate-400 shadow-sm">
+              <div class="flex flex-wrap gap-1 items-center overflow-hidden h-5">
+                <span class="text-slate-400 font-normal truncate" *ngIf="!filter.value?.length">
+                  {{ filter.placeholder || 'Select ' + filter.label }}
+                </span>
+                <div *ngFor="let val of filter.value"
+                  class="flex items-center gap-1 px-1.5 py-0.5 bg-slate-100 border border-slate-200 rounded text-[11px] text-slate-600 font-semibold group transition-all shrink-0">
+                  {{ getFilterOptionLabel(filter, val) }}
+                  <span (click)="toggleMultiFilterOption(filter, val, $event)"
+                    class="cursor-pointer hover:text-red-500 ml-0.5 text-slate-400">×</span>
+                </div>
+              </div>
+              <span class="text-slate-400 text-[10px] transition-all ml-2"
+                [class.rotate-180]="activeFilterDropdown === filter.key">▼</span>
+            </div>
+            <!-- Dropdown Option List -->
+            <div *ngIf="activeFilterDropdown === filter.key"
+              class="absolute top-full mt-1 left-0 w-[240px] bg-white border border-slate-200 rounded-lg shadow-xl p-1.5 max-h-56 overflow-y-auto custom-scrollbar z-[100] animate-scale-in">
+              <div *ngFor="let opt of filter.options" (click)="toggleMultiFilterOption(filter, opt.value, $event)"
+                class="flex items-center gap-2 px-2 py-1.5 hover:bg-slate-50 rounded-md cursor-pointer transition-colors group">
+                <div
+                  class="w-4 h-4 border border-slate-300 rounded flex items-center justify-center transition-all group-hover:border-slate-400 shrink-0"
+                  [class.bg-slate-600]="isFilterOptionSelected(filter, opt.value)"
+                  [class.border-slate-600]="isFilterOptionSelected(filter, opt.value)">
+                  <span *ngIf="isFilterOptionSelected(filter, opt.value)" class="text-[10px] text-white">✓</span>
+                </div>
+                <span class="text-sm text-slate-700 font-medium truncate"
+                  [class.text-slate-800]="isFilterOptionSelected(filter, opt.value)">
+                  {{ opt.label }}
+                </span>
+              </div>
+              <div *ngIf="!filter.options?.length" class="p-3 text-center text-[11px] text-slate-400 italic">
+                No options available
               </div>
             </div>
-            <span class="text-slate-400 text-[10px] transition-all ml-2"
-                  [class.rotate-180]="activeFilterDropdown === filter.key">▼</span>
           </div>
-          <!-- Dropdown Option List -->
-          <div *ngIf="activeFilterDropdown === filter.key"
-               class="absolute top-full mt-1 left-0 w-[240px] bg-white border border-slate-200 rounded-lg shadow-xl p-1.5 max-h-56 overflow-y-auto custom-scrollbar z-[100] animate-scale-in">
-             <div *ngFor="let opt of filter.options"
-                  (click)="toggleMultiFilterOption(filter, opt.value, $event)"
-                  class="flex items-center gap-2 px-2 py-1.5 hover:bg-slate-50 rounded-md cursor-pointer transition-colors group">
-               <div class="w-4 h-4 border border-slate-300 rounded flex items-center justify-center transition-all group-hover:border-slate-400 shrink-0"
-                    [class.bg-slate-600]="isFilterOptionSelected(filter, opt.value)"
-                    [class.border-slate-600]="isFilterOptionSelected(filter, opt.value)">
-                 <span *ngIf="isFilterOptionSelected(filter, opt.value)" class="text-[10px] text-white">✓</span>
-               </div>
-               <span class="text-sm text-slate-700 font-medium truncate"
-                     [class.text-slate-800]="isFilterOptionSelected(filter, opt.value)">
-                 {{ opt.label }}
-               </span>
-             </div>
-             <div *ngIf="!filter.options?.length" class="p-3 text-center text-[11px] text-slate-400 italic">
-               No options available
-             </div>
-          </div>
-        </div>
 
-        <!-- Text Filter -->
-        <input *ngIf="filter.type === 'text'"
-               type="text"
-               class="filter-input w-full px-3 py-2 bg-white border border-slate-300 rounded-lg focus:border-slate-600 focus:ring-2 focus:ring-slate-600/10 outline-none transition-all text-sm font-medium text-slate-700 hover:border-slate-400 shadow-sm"
-               [placeholder]="filter.placeholder || filter.label"
-               [ngModel]="filter.value"
-               (input)="onFilterChange(filter, $event)" />
-      </div>
+          <!-- Text Filter -->
+          <input *ngIf="filter.type === 'text'" type="text"
+            class="filter-input w-full px-3 py-2 bg-white border border-slate-300 rounded-lg focus:border-slate-600 focus:ring-2 focus:ring-slate-600/10 outline-none transition-all text-sm font-medium text-slate-700 hover:border-slate-400 shadow-sm"
+            [placeholder]="filter.placeholder || filter.label" [ngModel]="filter.value"
+            (input)="onFilterChange(filter, $event)" />
+        </div>
+      </ng-container>
     </ng-container>
-  </ng-container>
 
     <!-- Filter Button (Optional generic toggle if needed) -->
-    <button *ngIf="mergedConfig.filterable && !mergedConfig.filters?.length" class="filter-btn shrink-0" title="Advanced Filters">
+    <button *ngIf="mergedConfig.filterable && !mergedConfig.filters?.length" class="filter-btn shrink-0"
+      title="Advanced Filters">
       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
         stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
         <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
@@ -125,11 +134,11 @@
 
         <!-- Column Headers -->
         <th *ngFor="let col of visibleColumns" [style.width]="col.width || 'auto'"
-          [style.min-width]="col.minWidth || 'auto'" 
-          [style.text-align]="col.align || (isNumericColumn(col) ? 'center' : 'left')"
-          [class.sortable]="col.sortable" [class.sorted]="sortState.column === col.key" [class]="col.cssClass || ''"
-          (click)="onSort(col)">
-          <div class="th-content" [style.justify-content]="(col.align === 'center' || (!col.align && isNumericColumn(col))) ? 'center' : (col.align === 'right' ? 'flex-end' : 'flex-start')">
+          [style.min-width]="col.minWidth || 'auto'"
+          [style.text-align]="col.align || (isNumericColumn(col) ? 'center' : 'left')" [class.sortable]="col.sortable"
+          [class.sorted]="sortState.column === col.key" [class]="col.cssClass || ''" (click)="onSort(col)">
+          <div class="th-content"
+            [style.justify-content]="(col.align === 'center' || (!col.align && isNumericColumn(col))) ? 'center' : (col.align === 'right' ? 'flex-end' : 'flex-start')">
             <span>{{ col.label }}</span>
             <span *ngIf="col.sortable" class="sort-icon" [class.active]="sortState.column === col.key">
               {{ getSortIcon(col) }}
@@ -184,9 +193,8 @@
           </td>
 
           <!-- Data Cells -->
-          <td *ngFor="let col of visibleColumns" 
-              [style.text-align]="col.align || (isNumericColumn(col) ? 'center' : 'left')" 
-              [class]="col.cssClass || ''">
+          <td *ngFor="let col of visibleColumns"
+            [style.text-align]="col.align || (isNumericColumn(col) ? 'center' : 'left')" [class]="col.cssClass || ''">
             <!-- Custom template via content projection -->
             <ng-container *ngIf="cellTemplate; else defaultCell">
               <ng-container
@@ -215,16 +223,18 @@
               <ng-container *ngIf="col.type === 'avatar'">
                 <div class="cell-avatar">
                   <div class="avatar-circle" *ngIf="getCellValue(row, col)">
-                    <img [src]="getImageUrl(getCellValue(row, col))" 
-                         (error)="handleImageError($event)"
-                         class="avatar-img" />
-                    <div class="avatar-placeholder hidden">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="opacity-40"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                    </div>
+                    <img [src]="getImageUrl(getCellValue(row, col))" (error)="handleImageError($event)"
+                      class="avatar-img" />
+
                   </div>
                   <div class="avatar-fallback" *ngIf="!getCellValue(row, col)">
                     <div class="avatar-circle bg-slate-50 border-slate-100">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-slate-300"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="text-slate-300">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                        <circle cx="12" cy="7" r="4" />
+                      </svg>
                     </div>
                   </div>
                 </div>
@@ -248,7 +258,8 @@
           <td *ngIf="hasVisibleActions" class="actions-cell">
             <div class="actions-container">
               <ng-container *ngFor="let action of actions">
-                <button [class]="'action-btn action-' + (action.variant || 'default') + (action.label ? '' : ' icon-only')"
+                <button
+                  [class]="'action-btn action-' + (action.variant || 'default') + (action.label ? '' : ' icon-only')"
                   [class.disabled]="isActionDisabled(action, row)" [title]="action.label"
                   (click)="onActionClick(action, row, i, $event)" *ngIf="isActionVisible(action, row)">
                   <span *ngIf="action.icon" class="action-icon" [innerHTML]="getSafeIcon(action.icon)"></span>

@@ -36,6 +36,7 @@ export class StatePrabhariDashboardComponent implements OnInit, AfterViewInit {
   currentDate = new Date();
   vidhanSabhaData: any[] = [];
   loadingCounts = true;
+  userRole = '';
   private chart: Chart | null = null;
 
   statCards: StatCard[] = [
@@ -107,6 +108,10 @@ export class StatePrabhariDashboardComponent implements OnInit, AfterViewInit {
   ) { }
 
   ngOnInit() {
+    this.authService.userRole$.subscribe(role => {
+      this.userRole = role || '';
+    });
+
     this.authService.userId$.subscribe(userId => {
       console.log('[StatePrabhariDashboard] userId:', userId);
       if (userId) {

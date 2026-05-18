@@ -12,6 +12,7 @@ namespace VidhanSabha.Application.Pannels.SuperAdmin.StatePrabhari.Interfaces
     public interface IStatePrabhariRepository
     {
         Task<Tbl_StatePrabhari?> GetByIdAsync(int id, CancellationToken ct = default);
+        Task<StatePrabhariResponseDto?> GetProfileByUserIdAsync(string  userId,string role, CancellationToken ct = default);
         Task<IReadOnlyList<StatePrabhariResponseDto>> GetAllAsync(CancellationToken ct = default);
         Task<bool> EmailExistsAsync(string email, int? excludeId, CancellationToken ct = default);
         Task<int> AddAsync(Tbl_StatePrabhari prabhari, CancellationToken ct = default);

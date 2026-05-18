@@ -5,9 +5,11 @@
                 icon="+" (formSubmit)="handleFormSubmit($event)" variant="primary">
             </app-generic-modal-button>
 
-            <app-generic-export [show]="isListView && personList && personList.length > 0" [isExporting]="isExporting"
+            <app-generic-export [show]="isListView" [options]="exportOptions" [isExporting]="isExporting"
                 (export)="handleExport($event)">
             </app-generic-export>
+
+            <input type="file" id="importFileInput" class="hidden" accept=".xlsx, .xls" (change)="onFileImport($event)">
         </div>
     </app-page-header>
 

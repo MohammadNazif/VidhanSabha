@@ -43,10 +43,11 @@ namespace VidhanSabha.Application.Common.ExportPdfExcel.Dtos
 
         public IReadOnlyList<ExportColumn<BoothReportExportRow>> Columns => new List<ExportColumn<BoothReportExportRow>>
         {
-            new() { Header = "Booth Number",      Value = r => r.BoothNumber.ToString(), PdfRelativeWidth = 1f, ExcelWidth = 10 },
+          
             //new() { Header = "Mandal Name",       Value = r => r.MandalName, PdfRelativeWidth = 2f, ExcelWidth = 25 },
             //new() { Header = "Sector Name",       Value = r => r.SectorName, PdfRelativeWidth = 2f, ExcelWidth = 25 },
             new() { Header = "Polling Station",   Value = r => r.PollingStation, PdfRelativeWidth = 2f, ExcelWidth = 25 },
+            new() { Header = "B No.",      Value = r => r.BoothNumber.ToString(), PdfRelativeWidth = 1f, ExcelWidth = 10 },
             new() { Header = "Booth Adhyaksh",    Value = r => r.BoothAdhyaksh ?? "", PdfRelativeWidth = 1.5f, ExcelWidth = 20 },
             new() { Header = "Mobile",            Value = r => r.Mobile ?? "", PdfRelativeWidth = 1.5f, ExcelWidth = 20 },
             new() { Header = "Cast",              Value = r => r.Cast ?? "", PdfRelativeWidth = 1.5f, ExcelWidth = 20 },

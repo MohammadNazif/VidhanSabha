@@ -19,7 +19,7 @@ namespace VidhanSabha.Application.Pannels.Admin.Booth.Queries
         }
         public async Task<IReadOnlyList<BoothInchargeResponse>> Handle(getAllBoothInchargeQuery request, CancellationToken cancellationToken)
         {
-             return  await _repo.GetInchargeByBoothIdAsync(request.BoothId,cancellationToken);
+             return  await _repo.GetInchargeByBoothIdAsync(request.BoothId,request.UserId ,cancellationToken);
         }
     }
 }

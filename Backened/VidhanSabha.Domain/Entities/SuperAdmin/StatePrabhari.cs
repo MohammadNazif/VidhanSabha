@@ -17,6 +17,7 @@ namespace VidhanSabha.Domain.Entities.SuperAdmin
         public int? StateId { get; set; }
         public int? VidhansabhaId { get; set; }
         public PrabhariRole PrabhariRole { get; private set; }
+        //public int? role { get; private set; }
         public string PrabhariName { get; private set; } = string.Empty;
         public string PrabhariEmail { get; private set; } = string.Empty;
         public string Gender { get; private set; } = string.Empty;
@@ -34,6 +35,7 @@ namespace VidhanSabha.Domain.Entities.SuperAdmin
         // Navigation
         public Tbl_Category Category { get; set; } = null!;
         public Tbl_Cast Cast { get; set; } = null!;
+        public Tbl_LoginCredential Login { get; set; } = null!;
         public Tbl_VidhanSabha Vidhansabha { get; set; }
         public Tbl_State State { get; set; } = null!;
 

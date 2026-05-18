@@ -11,6 +11,7 @@ namespace VidhanSabha.Application.Pannels.Admin.SeniorDisabled.DTOs
     public class SeniorDisabledQueryParams:BaseQueryParams
     {
         public int? Id { get; set; }
+        public bool rolefilterflag { get; set; }
         public int? TypeId { get; set; }
         public string? BoothIds { get; set; }
         public string? VillageIds { get; set; }

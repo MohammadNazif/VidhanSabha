@@ -19,6 +19,7 @@ namespace VidhanSabha.Domain.Entities.Admin
         public string Title { get; private set; }
         public string? PostImagePath { get; private set; }
         public string Description { get; private set; }
+        public string UserId { get; private set; }
         public bool Status { get; private set; } = true;
 
         private readonly List<Tbl_SocialPostPlatform> _platforms = new();
@@ -32,13 +33,14 @@ namespace VidhanSabha.Domain.Entities.Admin
 
         private Tbl_SocialMediaPost() { }
 
-        public static Tbl_SocialMediaPost Create(
+        public static Tbl_SocialMediaPost Create(string userId,
             string Title,string? PostImagePath,string Description,
             List<int> platformIds,List<int> boothIds,List<int> sectorIds
             )
         {
             var social = new Tbl_SocialMediaPost
             {
+                UserId = userId,
                 Title = Title,
                 PostImagePath = PostImagePath,
                 Description = Description,

@@ -108,7 +108,7 @@ export class GenericTableComponent implements OnInit, OnChanges, OnDestroy {
   private defaultConfig: TableConfig = {
     selectable: false,
     paginated: true,
-    pageSizeOptions: [5, 10, 25, 50],
+    pageSizeOptions: [50, 100, 150, 200],
     defaultPageSize: 50,
     searchable: true,
     searchPlaceholder: 'Search records...',
@@ -478,9 +478,39 @@ export class GenericTableComponent implements OnInit, OnChanges, OnDestroy {
     this.rowDoubleClick.emit({ row, index });
   }
 
-  onActionClick(action: TableAction, row: any, index: number, event: Event) {
+  async onActionClick(action: TableAction, row: any, index: number, event: Event) {
     event.stopPropagation();
     if (action.disabled && action.disabled(row)) return;
+
+    if (action.id === 'delete') {
+      const { default: Swal } = await import('sweetalert2');
+      const result = await Swal.fire({
+        title: 'Delete record?',
+        text: "This action cannot be undone.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Delete',
+        cancelButtonText: 'Cancel',
+        reverseButtons: true,
+        background: '#ffffff',
+        color: '#333',
+        iconColor: '#ef4444',
+        width: '320px',
+        padding: '1.25rem',
+        customClass: {
+          title: 'swal2-compact-title',
+          htmlContainer: 'swal2-compact-text',
+          actions: 'swal2-compact-actions',
+          confirmButton: 'swal2-compact-btn',
+          cancelButton: 'swal2-compact-btn'
+        }
+      });
+
+      if (!result.isConfirmed) return;
+    }
+
     this.actionClick.emit({ action, row, index });
   }
 

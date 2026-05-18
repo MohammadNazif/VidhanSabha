@@ -31,7 +31,7 @@ namespace VidhanSabha.Application.Pannels.Admin.SocialMediaPost.Command
      );
             var req = request.Dto;
 
-            var data = Tbl_SocialMediaPost.Create(
+            var data = Tbl_SocialMediaPost.Create(req.UserId,
                 req.Title,imagePath,req.Description,req.PlatformIds,req.BoothIds,req.SectorIds
                 );
 

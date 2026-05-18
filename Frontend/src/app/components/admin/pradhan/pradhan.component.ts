@@ -20,7 +20,7 @@ import { GenericExportComponent } from '../../shared/generic-export/generic-expo
   imports: [CommonModule, FormsModule, GenericTableComponent, GenericModalButtonComponent, PageHeaderComponent, GenericExportComponent],
   template: `
     <div class="h-full flex flex-col p-4 gap-4 overflow-hidden">
-      <app-page-header [title]="isListView ? 'Pradhan List' : 'Master Data - Pradhan'" subtitle="Manage village pradhans and their assignments">
+      <app-page-header [title]="isListView ? 'Pradhan List' : 'Pradhan Management'" subtitle="Manage village pradhans and their assignments">
         <app-generic-modal-button 
             *ngIf="canManage()"
             #pradhanModal 
@@ -31,9 +31,11 @@ import { GenericExportComponent } from '../../shared/generic-export/generic-expo
             (formSubmit)="handleFormSubmit($event)">
         </app-generic-modal-button>
 
-        <app-generic-export [show]="isListView && pradhans && pradhans.length > 0" 
+        <app-generic-export [show]="isListView" [options]="exportOptions"
             [isExporting]="isExporting" (export)="handleExport($event)">
         </app-generic-export>
+
+        <input type="file" id="importFileInput" class="hidden" accept=".xlsx, .xls" (change)="onFileImport($event)">
       </app-page-header>
 
       <div class="flex-1 min-h-0 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col p-2">
@@ -62,6 +64,11 @@ export class PradhanComponent implements OnInit {
   searchTerm = '';
   isListView = false;
   isExporting = false;
+  exportOptions = [
+    { label: 'Export PDF', value: 'pdf' },
+    { label: 'Export Excel', value: 'excel' },
+    { label: 'Import Excel', value: 'import' }
+  ];
 
   canManage(): boolean {
     if (this.isListView) return false;
@@ -71,7 +78,6 @@ export class PradhanComponent implements OnInit {
 
   columns: TableColumn[] = [
     { key: 'name', label: 'Name', sortable: true },
-    { key: 'designationName', label: 'Designation' },
     { key: 'contact', label: 'Contact' },
     { key: 'genderValue', label: 'Gender' },
     {
@@ -289,10 +295,53 @@ export class PradhanComponent implements OnInit {
 
   handleExport(format: string) {
     if (!format) return;
+    if (format === 'import') {
+      const fileInput = document.getElementById('importFileInput') as HTMLInputElement;
+      if (fileInput) fileInput.click();
+      return;
+    }
+
     this.isExporting = true;
-    setTimeout(() => {
-      this.isExporting = false;
-      this.toastService.showSuccess('Export Started', `Successfully generated ${format.toUpperCase()} export!`);
-    }, 1000);
+    const request = format === 'excel' ? this.pradhanService.exportToExcel() : this.pradhanService.exportToPdf();
+
+    request.subscribe({
+      next: (blob: Blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Pradhan_List.${format === 'excel' ? 'xlsx' : 'pdf'}`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        this.isExporting = false;
+        this.toastService.showSuccess('Success', `List exported to ${format.toUpperCase()} successfully!`);
+      },
+      error: (err: any) => {
+        console.error(`Error exporting to ${format}:`, err);
+        this.toastService.showError('Error', `Failed to export list to ${format.toUpperCase()}`);
+        this.isExporting = false;
+      }
+    });
+  }
+
+  onFileImport(event: any) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    this.loading = true;
+    this.pradhanService.importExcel(file).subscribe({
+      next: (res: any) => {
+        this.toastService.showSuccess('Success', 'Pradhan data imported successfully!');
+        this.loadPradhans();
+        event.target.value = '';
+      },
+      error: (err: any) => {
+        console.error('Import error:', err);
+        this.toastService.showError('Error', 'Failed to import pradhan data');
+        this.loading = false;
+        event.target.value = '';
+      }
+    });
   }
 }

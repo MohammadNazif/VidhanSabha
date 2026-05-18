@@ -5,9 +5,7 @@ using VidhanSabha.Application.Common.multiplefilterparse;
 
 namespace VidhanSabha.Application.Common.ExportPdfExcel.Dtos
 {
-    // =========================
-    // 📦 Full Mandal-Sector-Booth Export DTO
-    // =========================
+
     public sealed class CombinedReportExportRow
     {
         public string MandalName { get; set; } = "";
@@ -48,35 +46,34 @@ namespace VidhanSabha.Application.Common.ExportPdfExcel.Dtos
         {
             new() { Header = "Mandal Name", Value = r => r.MandalName, PdfRelativeWidth = 2f, ExcelWidth = 25 },
             new() { Header = "Sector Name", Value = r => r.SectorName, PdfRelativeWidth = 2f, ExcelWidth = 25 },
-            new() { Header = "Sector Phone", Value = r => r.SectorPhone ?? "", PdfRelativeWidth = 1.5f, ExcelWidth = 15 },
-            new() { Header = "Sector Incharge", Value = r => r.SectorInchargeName ?? "", PdfRelativeWidth = 2f, ExcelWidth = 20 },
-            new() { Header = "Sector Father Name", Value = r => r.SectorFatherName ?? "", PdfRelativeWidth = 2f, ExcelWidth = 20 },
-            new() { Header = "Booth Number", Value = r => r.BoothNumber?.ToString() ?? "", PdfRelativeWidth = 1f, ExcelWidth = 10 },
+            new() { Header = "Sanyojak Phone", Value = r => r.SectorPhone ?? "", PdfRelativeWidth = 2f, ExcelWidth = 15 },
+            new() { Header = "Sanyojak Name", Value = r => r.SectorInchargeName ?? "", PdfRelativeWidth = 2f, ExcelWidth = 20 },
+            new() { Header = "S FatherName", Value = r => r.SectorFatherName ?? "", PdfRelativeWidth = 2f, ExcelWidth = 20 },
+            new() { Header = "B No.", Value = r => r.BoothNumber?.ToString() ?? "", PdfRelativeWidth = 1f, ExcelWidth = 10 },
             new() { Header = "Polling Station", Value = r => r.PollingStationName ?? "", PdfRelativeWidth = 2f, ExcelWidth = 25 },
-            new() { Header = "Sanyojak Name", Value = r => r.SanyojakName ?? "", PdfRelativeWidth = 2f, ExcelWidth = 25 },
-            new() { Header = "Sanyojak Phone", Value = r => r.SanyojakPhone ?? "", PdfRelativeWidth = 2f, ExcelWidth = 15 },
-            new() { Header = "Sanyojak Father", Value = r => r.SanyojakFatherName ?? "", PdfRelativeWidth = 2f, ExcelWidth = 20 },
-            new() { Header = "Sanyojak Age", Value = r => r.SanyojakAge?.ToString() ?? "", PdfRelativeWidth = 1f, ExcelWidth = 10 },
-            new() { Header = "Sanyojak Caste", Value = r => r.SanyojakCaste ?? "", PdfRelativeWidth = 2f, ExcelWidth = 20 },
-            new() { Header = "Sanyojak Address", Value = r => r.SanyojakAddress ?? "", PdfRelativeWidth = 3f, ExcelWidth = 40 },
-            new() { Header = "Sanyojak Education", Value = r => r.SanyojakEducation ?? "", PdfRelativeWidth = 2f, ExcelWidth = 25 },
+            new() { Header = "Adhyaksh Name", Value = r => r.SanyojakName ?? "", PdfRelativeWidth = 2f, ExcelWidth = 25 },
+            new() { Header = "Adhyaksh Phone", Value = r => r.SanyojakPhone ?? "", PdfRelativeWidth = 2f, ExcelWidth = 15 },
+            new() { Header = "B FatherName", Value = r => r.SanyojakFatherName ?? "", PdfRelativeWidth = 2f, ExcelWidth = 20 },
+            new() { Header = "Age", Value = r => r.SanyojakAge?.ToString() ?? "", PdfRelativeWidth = 1f, ExcelWidth = 10 },
+            new() { Header = "Caste", Value = r => r.SanyojakCaste ?? "", PdfRelativeWidth = 2f, ExcelWidth = 20 },
+            new() { Header = "Address", Value = r => r.SanyojakAddress ?? "", PdfRelativeWidth = 3f, ExcelWidth = 40 },
+            new() { Header = "Education", Value = r => r.SanyojakEducation ?? "", PdfRelativeWidth = 2f, ExcelWidth = 25 },
             new() { Header = "Villages", Value = r => r.VillageNames ?? "", PdfRelativeWidth = 3f, ExcelWidth = 40 },
         };
     }
 
-    public class CombinedReportFilter  
+    public class CombinedReportFilter  : BaseFilter
     {
         public string? UserId { get; set; } = "";
         public int? Id { get; set; }
-        public string? SectorIds { get; set; } = "";
-        public string? MandalIds { get; set; } = "";
-        public string? CastIds { get; set; } = "";
-        public string? VillageIds { get; set; } = "";
+        //public string? SectorIds { get; set; } = "";
+        //public string? MandalIds { get; set; } = "";
+        //public string? CastIds { get; set; } = "";
+        //public string? VillageIds { get; set; } = "";
         public string? SearchTerm { get; set; } = "";
-
-        public List<int> GetVillageIds() => FilterParse.ParseIds(VillageIds);
-        public List<int> GetMandalIds() => FilterParse.ParseIds(MandalIds);
-        public List<int> GetCastIds() => FilterParse.ParseIds(CastIds);
-        public List<int> GetSectorIds() => FilterParse.ParseIds(SectorIds);
+        //public List<int> GetVillageIds() => FilterParse.ParseIds(VillageIds);
+        //public List<int> GetMandalIds() => FilterParse.ParseIds(MandalIds);
+        //public List<int> GetCastIds() => FilterParse.ParseIds(CastIds);
+        //public List<int> GetSectorIds() => FilterParse.ParseIds(SectorIds);
     }
 }

@@ -32,6 +32,7 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
             {
                 var term = qp.SearchTerm.Trim().ToLower();
                 search = b => b.SectorName.ToLower().Contains(term) ||
+                            b.Booth.BoothNumber.ToString().Contains(term) ||
                    b.Mandal.Name.ToLower().Contains(term) ||
                    b.InchargeName.ToLower().Contains(term) 
                 ;
@@ -224,6 +225,85 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
                 },
                 ct: ct
             );
+        }
+
+        public async Task<List<SectorWithBoothReportExportRow>> GetAllSectorWithBoothReportsForExportAsync(
+SectorWithBoothReportExportFilter qp,
+int? vidhanSabhaId,
+CancellationToken ct = default)
+        {
+            var term = qp.SearchTerm?.Trim().ToLower();
+
+            var query = _context.Tbl_Sector
+                .AsNoTracking()
+                .Where(s =>
+                    s.Status &&
+                    s.CreatedByUserId == qp.UserId &&
+                    (vidhanSabhaId == null || s.Mandal.VidhanId == vidhanSabhaId) &&
+                    (!qp.MandalId.HasValue || s.MandalId == qp.MandalId) &&
+                    (!qp.SectorId.HasValue || s.Id == qp.SectorId) &&
+                    (!qp.BoothId.HasValue || s.Booth.Id == qp.BoothId) &&
+                    (!qp.VillageId.HasValue ||
+                        s.Villages.Any(v => v.VillageId == qp.VillageId) ||
+                        (s.Booth != null && s.Booth.Villages.Any(v => v.VillageId == qp.VillageId)))
+                );
+
+            if (qp.CastId.HasValue)
+                query = query.Where(s => s.CastId == qp.CastId.Value);
+
+            if (!string.IsNullOrWhiteSpace(term))
+            {
+                query = query.Where(s =>
+                    (s.SectorName != null && s.SectorName.ToLower().Contains(term)) ||
+                    (s.InchargeName != null && s.InchargeName.ToLower().Contains(term)) ||
+                    (s.PhoneNumber != null && s.PhoneNumber.Contains(term)) ||
+                    (s.Mandal != null && s.Mandal.Name != null && s.Mandal.Name.ToLower().Contains(term)) ||
+                    (s.Booth != null && s.Booth.PollingStationName != null &&
+                        s.Booth.PollingStationName.ToLower().Contains(term)) ||
+                    (s.Booth != null && s.Booth.Sanyojak != null &&
+                        ((s.Booth.Sanyojak.InchargeName != null &&
+                          s.Booth.Sanyojak.InchargeName.ToLower().Contains(term)) ||
+                         (s.Booth.Sanyojak.PhoneNumber != null &&
+                          s.Booth.Sanyojak.PhoneNumber.Contains(term)))) ||
+                    (s.Booth != null && s.Booth.Villages.Any(v => v.Village != null &&
+                        v.Village.VillageName != null &&
+                        v.Village.VillageName.ToLower().Contains(term)))
+                );
+            }
+
+            var data = await query
+                .OrderBy(s => s.Booth.BoothNumber) // ✅ Descending order by BoothNumber
+                .Select(s => new SectorWithBoothReportExportRow
+                {
+                    MandalName = s.Mandal.Name,
+                    SectorName = s.SectorName,
+                    InchargeName = s.InchargeName,
+                    Age = s.Age.ToString(),
+                    FatherName = s.FatherName,
+                    CastName = s.Cast != null ? s.Cast.CastName : "",
+                    EducationLevel = s.EducationLevel,
+                    PhoneNumber = s.PhoneNumber,
+                    Address = s.Address,
+                    ProfileImage = s.ProfileImage,
+                    BoothNumber = s.Booth != null ? (int?)s.Booth.BoothNumber : null,
+                    BoothPollingStation = s.Booth != null ? s.Booth.PollingStationName : "",
+                    SanyojakName = s.Booth != null && s.Booth.Sanyojak != null ? s.Booth.Sanyojak.InchargeName : "",
+                    SanyojakPhone = s.Booth != null && s.Booth.Sanyojak != null ? s.Booth.Sanyojak.PhoneNumber : "",
+                    SanyojakFatherName = s.Booth != null && s.Booth.Sanyojak != null ? s.Booth.Sanyojak.FatherName : "",
+                    SanyojakAge = s.Booth != null && s.Booth.Sanyojak != null ? s.Booth.Sanyojak.Age.ToString() : "",
+                    SanyojakCastName = s.Booth != null && s.Booth.Sanyojak != null && s.Booth.Sanyojak.Cast != null ? s.Booth.Sanyojak.Cast.CastName : "",
+                    SanyojakAddress = s.Booth != null && s.Booth.Sanyojak != null ? s.Booth.Sanyojak.Address : "",
+                    SanyojakEducation = s.Booth != null && s.Booth.Sanyojak != null ? s.Booth.Sanyojak.EducationLevel : "",
+                    SectorVillages = s.Villages != null
+                        ? string.Join(", ", s.Villages.Select(v => v.Village != null ? v.Village.VillageName : ""))
+                        : "",
+                    BoothVillages = s.Booth != null && s.Booth.Villages != null
+                        ? string.Join(", ", s.Booth.Villages.Select(v => v.Village != null ? v.Village.VillageName : ""))
+                        : ""
+                })
+                .ToListAsync(ct);
+
+            return data;
         }
         public async Task<PagedResult<AdminSectorReportsDto>> GetAllAdminSectorReports(
      SectorQueryParams qp,

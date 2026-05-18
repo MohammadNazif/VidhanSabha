@@ -248,7 +248,7 @@ export class PrabhavshaliComponent implements OnInit {
         this.pageTitle = 'Pradhan List';
         this.pageSubtitle = 'Manage registered pradhans across the assembly';
       } else {
-        this.pageTitle = this.isListView ? 'Prabhavshali Vyakt List' : 'Prabhavshali Vyakt Management';
+        this.pageTitle = this.isListView ? 'Prabhavshali Vyakti List' : 'Prabhavshali Vyakti Management';
         this.pageSubtitle = 'Manage influential people across booths and villages';
       }
 
@@ -382,9 +382,9 @@ export class PrabhavshaliComponent implements OnInit {
       designationIds: this.designationIds
     };
 
-    if (this.isDoctorView) params.designationId = 8;
-    if (this.isAdvocateView) params.designationId = 9;
-    if (this.isGovtEmployeeView) params.designationId = 10;
+    if (this.isDoctorView) params.designationIds = 8;
+    if (this.isAdvocateView) params.designationIds = 9;
+    if (this.isGovtEmployeeView) params.designationIds = 10;
     if (this.isPradhanView) params.designationId = 1;
 
     const userId = this.authService.getUserId();
@@ -392,9 +392,11 @@ export class PrabhavshaliComponent implements OnInit {
       params.userId = userId;
     }
 
-    const request = (this.isDoctorView || this.isAdvocateView || this.isGovtEmployeeView || this.isPradhanView)
-      ? this.prabhavshaliService.getPrabhavshaliByDesignation(params)
-      : this.prabhavshaliService.getAllPrabhavshali(params);
+    const request = (this.isDoctorView || this.isAdvocateView || this.isGovtEmployeeView)
+      ? this.prabhavshaliService.getAllPrabhavshali(params)
+      : (this.isPradhanView
+        ? this.prabhavshaliService.getPradhans(params)
+        : this.prabhavshaliService.getAllPrabhavshali(params));
 
     request.subscribe({
       next: (response) => {

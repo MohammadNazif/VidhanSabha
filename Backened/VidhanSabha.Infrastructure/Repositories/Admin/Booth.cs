@@ -52,7 +52,7 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
                 .ToListAsync();
 
             var res = await _context.Tbl_Booth
-                .Where(b => mandalIds.Contains(b.MandalId) && b.Status || b.CreatedToSectorUserId == userId)
+                .Where(b => mandalIds.Contains(b.MandalId) && b.Status || b.CreatedToSectorUserId == userId || b.Sanyojak.UserId == userId)
                 .Select(b => new BoothNumberDto
                 {
                     BoothId = b.Id,
@@ -123,12 +123,12 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
             {
                 var term = qp.SearchTerm.Trim().ToLower();
                 search = b =>
-                   b.BoothNumber.ToString().Contains(term) || 
+                    b.BoothNumber.ToString().Contains(term) || 
                     b.PollingStationName.ToLower().Contains(term) ||
                     b.PollingStationLocation.ToLower().Contains(term) ||
                     b.Mandal.Name.ToLower().Contains(term) ||
-                     b.Sanyojak.InchargeName.ToLower().Contains(term) ||
-                       b.Sanyojak.Cast.CastName.ToLower().Contains(term) ||
+                    b.Sanyojak.InchargeName.ToLower().Contains(term) || 
+                    b.Sanyojak.Cast.CastName.ToLower().Contains(term) ||
                     b.Sector.SectorName.ToLower().Contains(term);
             }
 
@@ -267,6 +267,7 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
             if (!string.IsNullOrWhiteSpace(term))
             {
                 query = query.Where(b =>
+                    b.BoothNumber.ToString().Contains(term) ||
                     (b.PollingStationName != null && b.PollingStationName.ToLower().Contains(term)) ||
                     (b.PollingStationLocation != null && b.PollingStationLocation.ToLower().Contains(term)) ||
                     (b.Mandal != null && b.Mandal.Name != null && b.Mandal.Name.ToLower().Contains(term)) ||
@@ -429,7 +430,7 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
                 .FirstOrDefaultAsync(b => b.Id == id, ct);
         }
 
-        public async Task<List<BoothInchargeResponse>> GetInchargeByBoothIdAsync(int? boothId, CancellationToken ct)
+        public async Task<List<BoothInchargeResponse>> GetInchargeByBoothIdAsync(int? boothId,string userId, CancellationToken ct)
         {
             var query = _context.Tbl_BoothSanyojak.AsQueryable();
 
@@ -439,7 +440,7 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
             }
 
             return await query
-                .Where( x =>x.Status)
+                .Where( x =>x.Status && x.Booth.UserId ==userId )
                 .Select(x => new BoothInchargeResponse
                 {
                     UserId = x.UserId,

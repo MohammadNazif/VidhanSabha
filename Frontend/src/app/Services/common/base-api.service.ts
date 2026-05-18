@@ -20,14 +20,15 @@ export class BaseApiService {
     // 1. Handle Mandatory Parameters with Defaults
     const pageNumber = queryParams.PageNumber || queryParams.pageNumber || 1;
     const pageSize = queryParams.PageSize || queryParams.pageSize || 50;
-    const isDescending = queryParams.IsDescending ?? queryParams.isDescending ?? true;
+    const isDescending = queryParams.IsDescending ?? queryParams.isDescending ?? false;
+    const rolefilterflag = queryParams.RoleFilterFlag ?? queryParams.roleFilterFlag ?? queryParams.rolefilterflag ?? false;
 
     params = params.set('PageNumber', String(pageNumber));
     params = params.set('PageSize', String(pageSize));
     params = params.set('IsDescending', String(isDescending));
-
+    params = params.set('rolefilterflag', String(rolefilterflag));
     // 2. Handle Standard Optional Parameters (PascalCase)
-    const sortBy = queryParams.sortBy || queryParams.SortBy || 'id';
+    const sortBy = queryParams.sortBy || queryParams.SortBy || 'boothNumber';
     params = params.set('SortBy', String(sortBy));
 
     if (queryParams.searchTerm || queryParams.SearchTerm) {
@@ -40,7 +41,8 @@ export class BaseApiService {
       'pageSize', 'PageSize',
       'isDescending', 'IsDescending',
       'searchTerm', 'SearchTerm',
-      'sortBy', 'SortBy'
+      'sortBy', 'SortBy',
+      'rolefilterflag', 'RoleFilterFlag', 'roleFilterFlag'
     ];
 
     Object.keys(queryParams).forEach(key => {
@@ -111,5 +113,12 @@ export class BaseApiService {
    */
   getCustom<T>(endpoint: string): Observable<T> {
     return this.http.get<T>(`${this.apiUrl}/${endpoint}`);
+  }
+
+  /**
+   * Generic POST request for custom endpoints.
+   */
+  postCustom<T>(endpoint: string, body: any = {}): Observable<T> {
+    return this.http.post<T>(`${this.apiUrl}/${endpoint}`, body);
   }
 }

@@ -85,8 +85,10 @@ export class SeniorDisabledComponent implements OnInit {
   }
 
   get pageTitle() {
-    const base = this.isDisabledView ? 'Disabled' : 'Senior Citizen';
-    return this.isListView ? `${base} List` : `${base} Management`;
+    if (this.isListView) {
+      return this.isDisabledView ? 'Viklang Nagarik List' : 'Varisth Nagarik List';
+    }
+    return 'Varisth Nagarik/Viklang Management';
   }
   get pageSubtitle() { return `Manage and view all ${this.isDisabledView ? 'disabled persons' : 'senior citizens'} in the assembly.`; }
 
@@ -396,7 +398,8 @@ export class SeniorDisabledComponent implements OnInit {
       isDescending: this.isDescending,
       boothIds: this.boothIds,
       villageIds: this.villageIds,
-      castIds: this.castIds
+      castIds: this.castIds,
+      roleFilterFlag: !this.isListView
     };
 
     const userId = this.authService.getUserId();

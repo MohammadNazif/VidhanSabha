@@ -1,6 +1,6 @@
 <div class="h-screen p-4 flex flex-col overflow-hidden bg-slate-50/50">
   <app-page-header
-    [title]="isListView ? (isAsahmatView ? 'Asahmat Voter List' : 'Sahmat Voter List') : (isAsahmatView ? 'Asahmat Voters' : 'Sahmat Voters')"
+    [title]="isListView ? (isAsahmatView ? 'Asahmat List' : 'Sahmat List') : 'Sahmat/Asahmat Management'"
     [subtitle]="isAsahmatView ? 'Manage voters who are asahmat' : 'Manage voters who are sahmat'">
     <div class="flex items-center gap-3">
       <app-generic-modal-button *ngIf="canManageVoters()" #voterModal [config]="addVoterConfig"

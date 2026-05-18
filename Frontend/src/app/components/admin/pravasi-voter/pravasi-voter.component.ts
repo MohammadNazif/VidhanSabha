@@ -347,7 +347,8 @@ export class PravasiVoterComponent implements OnInit {
       boothIds: this.boothIds,
       villageIds: this.villageIds,
       castIds: this.castIds,
-      occupationIds: this.occupationIds
+      occupationIds: this.occupationIds,
+      roleFilterFlag: !this.isListView
     };
 
     const userId = this.authService.getUserId();

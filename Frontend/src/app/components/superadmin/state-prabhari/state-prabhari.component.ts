@@ -29,6 +29,7 @@ export class StatePrabhariListComponent implements OnInit {
     { key: 'prabhariEmail', label: 'Email', sortable: true },
     { key: 'gender', label: 'Gender', sortable: true },
     { key: 'contactNumber', label: 'Contact', sortable: true },
+    { key: 'password', label: 'Password', sortable: false },
     { key: 'categoryName', label: 'Category', sortable: true },
     { key: 'castName', label: 'Caste', sortable: true },
     { key: 'education', label: 'Education', sortable: true },

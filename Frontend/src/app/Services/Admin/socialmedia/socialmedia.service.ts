@@ -16,8 +16,10 @@ export class SocialMediaService extends BaseApiService {
     return this.create(this.entity, data);
   }
 
-  updateSocialMedia(data: any): Observable<any> {
-    return this.update(this.entity, data);
+  updateSocialMedia(data: any, id: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/${this.entity}/update`, data, {
+      params: { id: String(id) }
+    });
   }
 
   deleteSocialMedia(id: number): Observable<any> {

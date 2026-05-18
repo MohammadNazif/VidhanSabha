@@ -163,6 +163,7 @@ namespace VidhanSabha.Domain.Entities.Admin
         public string? Address { get; private set; }
         public string? ProfileImagePath { get; private set; }
         public Tbl_Cast? Cast { get; private set; }
+        public Tbl_Category? Category { get; private set; }
 
         public Tbl_Booth? Booth { get; set; }
 

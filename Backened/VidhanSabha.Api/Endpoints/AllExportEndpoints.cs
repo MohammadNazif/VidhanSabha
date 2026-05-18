@@ -3,10 +3,14 @@ using VidhanSabha.Api.ExportExtension;
 using VidhanSabha.Application.Common.ExportPdfExcel;
 using VidhanSabha.Application.Common.ExportPdfExcel.Dtos;
 using VidhanSabha.Application.Common.ExportPdfExcel.Dtos.VidhanSabha.Application.Common.ExportPdfExcel.Dtos;
+using VidhanSabha.Application.Pannels.Admin.BDC.Interfaces;
+using VidhanSabha.Application.Pannels.Admin.Block.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.Booth.Dtos;
 using VidhanSabha.Application.Pannels.Admin.Booth.Interfaces;
+using VidhanSabha.Application.Pannels.Admin.BoothSamiti.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.DoubleVoter.DTOs;
 using VidhanSabha.Application.Pannels.Admin.DoubleVoter.Interfaces;
+using VidhanSabha.Application.Pannels.Admin.Influencer.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.Mandal.DTOs;
 using VidhanSabha.Application.Pannels.Admin.Mandal.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.NewVoter.DTOs;
@@ -15,14 +19,19 @@ using VidhanSabha.Application.Pannels.Admin.PannaPramukh.Dtos;
 using VidhanSabha.Application.Pannels.Admin.PannaPramukh.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.PrabhavshaliVyakti.DTOs;
 using VidhanSabha.Application.Pannels.Admin.PrabhavshaliVyakti.Interfaces;
+using VidhanSabha.Application.Pannels.Admin.Pradhan.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.PravasiVoters.DTOs;
 using VidhanSabha.Application.Pannels.Admin.PravasiVoters.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.SahmatAsahmat.DTOs;
 using VidhanSabha.Application.Pannels.Admin.SahmatAsahmat.Interfaces;
+using VidhanSabha.Application.Pannels.Admin.Sector.DTOs;
 using VidhanSabha.Application.Pannels.Admin.Sector.Interface;
 using VidhanSabha.Application.Pannels.Admin.SeniorDisabled.DTOs;
 using VidhanSabha.Application.Pannels.Admin.SeniorDisabled.Interfaces;
 using VidhanSabha.Domain.Enums;
+using static VidhanSabha.Application.Common.ExportPdfExcel.Dtos.BDCExportDef;
+using static VidhanSabha.Application.Common.ExportPdfExcel.Dtos.BlockExportDef;
+using static VidhanSabha.Application.Common.ExportPdfExcel.Dtos.InfluencerExportDef;
 
 namespace VidhanSabha.Api.Endpoints
 {
@@ -88,6 +97,23 @@ namespace VidhanSabha.Api.Endpoints
             var sectorReportExport = app.MapGroup("/api/sectorreport")
             .RequireAuthorization();
 
+            var blockExport = app.MapGroup("/api/block")
+            .RequireAuthorization();
+            var bdcExport = app.MapGroup("/api/bdc")
+            .RequireAuthorization();
+
+            var influencerExport = app.MapGroup("/api/influencer")
+            .RequireAuthorization();
+
+            var boothSamitiMemExport = app.MapGroup("/api/boothsamitimembers")
+            .RequireAuthorization();
+
+            var boothSamitiExport = app.MapGroup("/api/boothsamiti")
+            .RequireAuthorization();
+
+            var sectorWithBoothReportExport = app.MapGroup("/api/sectorwithboothreport")
+            .RequireAuthorization();
+
 
             // ── PDF Export ────────────────────────────────────────────────────────
             pravsiExport.MapGroup("")
@@ -141,9 +167,9 @@ namespace VidhanSabha.Api.Endpoints
 
                   return await repo.GetAllForExportAsync(qp);
 
-              });
+                });
 
-            sectorExport.MapGroup("")
+               sectorExport.MapGroup("")
               .RequireAuthorization()
               .AddExportEndpoints<BoothExportRow, BoothFilter>(
                new BoothExportDef(),
@@ -207,7 +233,7 @@ namespace VidhanSabha.Api.Endpoints
             sahmatExport.MapGroup("")
          .RequireAuthorization()
          .AddExportEndpoints<sahmatExportRow, sahmatFilter>(
-          new sahmatExportDef(),
+          new sahmatExportDef("Sahmat List"),
          async (sahmatFilter f, CancellationToken ct) =>
          {
              var repo = app.Services
@@ -229,7 +255,7 @@ namespace VidhanSabha.Api.Endpoints
             asahmatExport.MapGroup("")
      .RequireAuthorization()
      .AddExportEndpoints<sahmatExportRow, sahmatFilter>(
-      new sahmatExportDef(),
+      new sahmatExportDef("Asahmat List"),
      async (sahmatFilter f, CancellationToken ct) =>
      {
          var repo = app.Services
@@ -251,7 +277,7 @@ namespace VidhanSabha.Api.Endpoints
             prabhavsaliExport.MapGroup("")
            .RequireAuthorization()
            .AddExportEndpoints<prabhavsaliExportRow, prabhavsaliFilter>(
-            new prabhavsaliExportDef(),
+            new prabhavsaliExportDef("Prabhavsali List"),
            async (prabhavsaliFilter f, CancellationToken ct) =>
            {
                var repo = app.Services
@@ -271,9 +297,9 @@ namespace VidhanSabha.Api.Endpoints
            });
 
             doctorExport.MapGroup("")
-     .RequireAuthorization()
-     .AddExportEndpoints<prabhavsaliExportRow, prabhavsaliFilter>(
-      new prabhavsaliExportDef(),
+           .RequireAuthorization()
+          .AddExportEndpoints<prabhavsaliExportRow, prabhavsaliFilter>(
+      new prabhavsaliExportDef("Doctor's List"),
      async (prabhavsaliFilter f, CancellationToken ct) =>
      {
          var repo = app.Services
@@ -295,7 +321,7 @@ namespace VidhanSabha.Api.Endpoints
             advocateExport.MapGroup("")
 .RequireAuthorization()
 .AddExportEndpoints<prabhavsaliExportRow, prabhavsaliFilter>(
-new prabhavsaliExportDef(),
+new prabhavsaliExportDef("Advocate's List"),
 async (prabhavsaliFilter f, CancellationToken ct) =>
 {
     var repo = app.Services
@@ -315,10 +341,10 @@ async (prabhavsaliFilter f, CancellationToken ct) =>
 });
 
 
-            governmentemoloyeeExport.MapGroup("")
+ governmentemoloyeeExport.MapGroup("")
 .RequireAuthorization()
 .AddExportEndpoints<prabhavsaliExportRow, prabhavsaliFilter>(
-new prabhavsaliExportDef(),
+new prabhavsaliExportDef("Goverment Employees List"),
 async (prabhavsaliFilter f, CancellationToken ct) =>
 {
     var repo = app.Services
@@ -338,33 +364,31 @@ async (prabhavsaliFilter f, CancellationToken ct) =>
 });
 
 
-            pradhanExport.MapGroup("")
+ pradhanExport.MapGroup("")
 .RequireAuthorization()
-.AddExportEndpoints<prabhavsaliExportRow, prabhavsaliFilter>(
-new prabhavsaliExportDef(),
-async (prabhavsaliFilter f, CancellationToken ct) =>
+.AddExportEndpoints<PradhanExportRow, PradhanExportFilter>(
+new PradhanExportDef(),
+async (PradhanExportFilter f, CancellationToken ct) =>
 {
     var repo = app.Services
               .CreateScope().ServiceProvider
-              .GetRequiredService<IPrabhavshaliRepository>();
-    f.designationId = 1;
-    var qp = new PrabhavshaliQueryParams
+              .GetRequiredService<IPradhanRepository>();
+    var qp = new PradhanExportFilter
     {
         UserId = f.UserId,
         SearchTerm = f.Search,
-        designationId = f.designationId,
 
     };
 
-    return await repo.GetExportByDesgIdAsync(qp);
+    return await repo.GetPradhanExportAsync(qp);
 
 });
 
 
-            seniorcitizenExport.MapGroup("")
+ seniorcitizenExport.MapGroup("")
 .RequireAuthorization()
 .AddExportEndpoints<seniordisabledExportRow, seniordisabledFilter>(
-new seniordisabledExportDef(),
+new seniordisabledExportDef("VaristhNagarik List"),
 async (seniordisabledFilter f, CancellationToken ct) =>
 {
     var repo = app.Services
@@ -385,9 +409,9 @@ async (seniordisabledFilter f, CancellationToken ct) =>
 
 
             disabledExport.MapGroup("")
-.RequireAuthorization()
-.AddExportEndpoints<seniordisabledExportRow, seniordisabledFilter>(
-new seniordisabledExportDef(),
+         .RequireAuthorization()
+      .AddExportEndpoints<seniordisabledExportRow, seniordisabledFilter>(
+new seniordisabledExportDef("ViklangNagarik List"),
 async (seniordisabledFilter f, CancellationToken ct) =>
 {
     var repo = app.Services
@@ -434,42 +458,42 @@ async (PannaPramukhFilter f, CancellationToken ct) =>
 new MandalReportExportDef(),
 async (MandalReportFilter f, CancellationToken ct) =>
 {
-    
-   var repo = app.Services
-             .CreateScope().ServiceProvider
-             .GetRequiredService<IMandalRepository>();
-   
-    var qp = new MandalQueryParams
-   {
-       UserId = f.UserId,
-       SearchTerm = f.Search,
-       //TypeId = f.TypeId,
 
-   };
-    int? vidhanId = await repo.GetVidhansabhaIdByuserIdAsync(qp.UserId);
-    return await repo.GetAllMandalReportsForExport(qp,vidhanId);
-
-});
-    combinedMandalReportExport.MapGroup("")
-     .RequireAuthorization()
-    .AddExportEndpoints<CombinedReportExportRow, CombinedReportFilter>(
-new CombinedReportExportDef(),
-async (CombinedReportFilter f, CancellationToken ct) =>
-{
-
-   var repo = app.Services
+    var repo = app.Services
               .CreateScope().ServiceProvider
               .GetRequiredService<IMandalRepository>();
 
-   var qp = new CombinedReportFilter
-   {
-       UserId = f.UserId,
+    var qp = new MandalQueryParams
+    {
+        UserId = f.UserId,
+        SearchTerm = f.Search,
+        //TypeId = f.TypeId,
 
-   };
-   int? vidhanId = await repo.GetVidhansabhaIdByuserIdAsync(qp.UserId);
-   return await repo.GetAllCombinedMandalReportsExp(qp,vidhanId);
+    };
+    int? vidhanId = await repo.GetVidhansabhaIdByuserIdAsync(qp.UserId);
+    return await repo.GetAllMandalReportsForExport(qp, vidhanId);
 
 });
+        //    combinedMandalReportExport.MapGroup("")
+        //     .RequireAuthorization()
+        //    .AddExportEndpoints<CombinedReportExportRow, CombinedReportFilter>(
+        //new CombinedReportExportDef(),
+        //async (CombinedReportFilter f, CancellationToken ct) =>
+        //{
+
+        //    var repo = app.Services
+        //       .CreateScope().ServiceProvider
+        //       .GetRequiredService<IMandalRepository>();
+
+        //    var qp = new CombinedReportFilter
+        //    {
+        //        UserId = f.UserId,
+
+        //    };
+        //    int? vidhanId = await repo.GetVidhansabhaIdByuserIdAsync(qp.UserId);
+        //    return await repo.GetAllCombinedMandalReportsExp(qp, vidhanId);
+
+        //});
 
 
             mandalExport.MapGroup("")
@@ -496,7 +520,7 @@ async (MandalFilter f, CancellationToken ct) =>
 });
 
             boothReportExport.MapGroup("")
-.RequireAuthorization()
+           .RequireAuthorization()
 .AddExportEndpoints<BoothReportExportRow, BoothReportFilter>(
 new BoothReportExportDef(),
 async (BoothReportFilter f, CancellationToken ct) =>
@@ -511,33 +535,181 @@ async (BoothReportFilter f, CancellationToken ct) =>
         UserId = f.UserId,
 
     };
-      return await repo.GetBoothReportExportAsync(qp);
+    return await repo.GetBoothReportExportAsync(qp);
 
 });
 
             sectorReportExport.MapGroup("")
-.RequireAuthorization()
-.AddExportEndpoints<SectorReportExportRow, SectorReportFilter>(
+           .RequireAuthorization()
+           .AddExportEndpoints<SectorReportExportRow, SectorReportFilter>(
 new SectorReportExportDef(),
 async (SectorReportFilter f, CancellationToken ct) =>
 {
 
-var repo = app.Services
-           .CreateScope().ServiceProvider
-           .GetRequiredService<ISectorRepository>();
+    var repo = app.Services
+               .CreateScope().ServiceProvider
+               .GetRequiredService<ISectorRepository>();
 
-var qp = new SectorReportFilter
-{
- UserId = f.UserId,
-    //SearchTerm = f.Search,
-    //TypeId = f.TypeId,
+    var qp = new SectorReportFilter
+    {
+        UserId = f.UserId,
+        //SearchTerm = f.Search,
+        //TypeId = f.TypeId,
 
-};
-return await repo.GetSectorReportExportAsync(qp);
+    };
+    return await repo.GetSectorReportExportAsync(qp);
 
-});
+   });
+
+            combinedMandalReportExport.MapGroup("")
+         .RequireAuthorization()
+         .AddExportEndpoints<CombinedReportExportRow, CombinedReportFilter>(
+         new CombinedReportExportDef(),
+         async (CombinedReportFilter f, CancellationToken ct) =>
+       {
+
+              var repo = app.Services
+             .CreateScope().ServiceProvider
+             .GetRequiredService<IMandalRepository>();
+
+     var qp = new CombinedReportFilter
+     {
+      UserId = f.UserId,
+      //SearchTerm = f.Search,
+      //TypeId = f.TypeId,
+
+     };
+           int? vidhanId = await repo.GetVidhansabhaIdByuserIdAsync(qp.UserId);
+           return await repo.GetAllCombinedMandalReportsExp(qp,vidhanId);
+
+      });
 
 
+            blockExport.MapGroup("")
+         .RequireAuthorization()
+         .AddExportEndpoints<BlockExportRow, BlockExportFilter>(
+         new BlockExportDef(),
+         async (BlockExportFilter f, CancellationToken ct) =>
+         {
+
+             var repo = app.Services
+            .CreateScope().ServiceProvider
+            .GetRequiredService<IBlockRepository>();
+
+             var qp = new BlockExportFilter
+             {
+                 UserId = f.UserId,
+                
+
+             };
+             
+             return await repo.GetBlockExportAsync(qp);
+
+         });
+
+            bdcExport.MapGroup("")
+       .RequireAuthorization()
+       .AddExportEndpoints<BDCExportRow, BDCExportFilter>(
+       new BDCExportDef(),
+       async (BDCExportFilter f, CancellationToken ct) =>
+       {
+
+           var repo = app.Services
+          .CreateScope().ServiceProvider
+          .GetRequiredService<IBDCRepository>();
+
+           var qp = new BDCExportFilter
+           {
+               UserId = f.UserId,
+
+
+           };
+
+           return await repo.GetBDCExportAsync(qp);
+
+       });
+
+            influencerExport.MapGroup("")
+       .RequireAuthorization()
+       .AddExportEndpoints<InfluencerExportRow, InfluencerExportFilter>(
+       new InfluencerExportDef(),
+       async (InfluencerExportFilter f, CancellationToken ct) =>
+       {
+
+           var repo = app.Services
+          .CreateScope().ServiceProvider
+          .GetRequiredService<IInfluencerRepository>();
+
+           var qp = new InfluencerExportFilter
+           {
+               UserId = f.UserId,
+           };
+
+           return await repo.GetInfluencerExportAsync(qp);
+
+       });
+
+            boothSamitiMemExport.MapGroup("")
+    .RequireAuthorization()
+    .AddExportEndpoints<BoothSamitiMemberExportRow, BoothSamitiMemberFilter>(
+     new BoothSamitiMemberExportDef("Booth Samiti List"),
+    async (BoothSamitiMemberFilter f, CancellationToken ct) =>
+    {
+
+        var repo = app.Services
+       .CreateScope().ServiceProvider
+       .GetRequiredService<IBoothSamitiRepository>();
+
+        var qp = new BoothSamitiMemberFilter
+        {
+           BoothMemId = f.BoothMemId
+        };
+
+        return await repo.GetAllMemberForExportAsync(qp);
+
+    });
+
+            boothSamitiExport.MapGroup("")
+    .RequireAuthorization()
+    .AddExportEndpoints<BoothSamitiExportRow, BoothSamitiFilter>(
+        new BoothSamitiExportDef("Booth Samiti List"),
+        async (BoothSamitiFilter f, CancellationToken ct) =>
+        {
+            var repo = app.Services
+                .CreateScope()
+                .ServiceProvider
+                .GetRequiredService<IBoothSamitiRepository>();
+
+            var qp = new BoothSamitiMemberFilter
+            {
+                UserId = f.UserId
+            };
+
+            return await repo.GetAllSamitiForExportAsync(f, ct);
+        });
+
+            sectorWithBoothReportExport.MapGroup("")
+    .RequireAuthorization()
+    .AddExportEndpoints<SectorWithBoothReportExportRow, SectorWithBoothReportExportFilter>(
+        new SectorWithBoothReportExportDef("Sector With Booth Report"),
+        async (SectorWithBoothReportExportFilter f, CancellationToken ct) =>
+        {
+            var repo = app.Services
+                .CreateScope()
+                .ServiceProvider
+                .GetRequiredService<ISectorRepository>();
+            var mandal = app.Services
+              .CreateScope()
+              .ServiceProvider
+              .GetRequiredService<IMandalRepository>();
+
+            var qp = new SectorWithBoothReportExportFilter
+            {
+                UserId = f.UserId
+            };
+            int? vidhanId = await mandal.GetVidhansabhaIdByuserIdAsync(qp.UserId);
+            return await repo.GetAllSectorWithBoothReportsForExportAsync(qp, vidhanId, ct);
+        });
 
         }
     }

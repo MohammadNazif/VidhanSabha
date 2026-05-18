@@ -46,6 +46,7 @@ export class SectorComponent implements OnInit {
   }
 
   columns: TableColumn[] = [
+    { key: 'profile', label: 'Profile', type: 'avatar', align: 'center', sortable: false, avatarFallbackKey: 'inchargeName' },
     { key: 'mandalName', label: 'Mandal', sortable: true },
     {
       key: 'villageName',

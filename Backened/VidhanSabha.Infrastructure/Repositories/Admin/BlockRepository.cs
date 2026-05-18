@@ -1,12 +1,13 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using VidhanSabha.Application.Common.Dtos;
+using VidhanSabha.Application.Common.ExportPdfExcel.Dtos;
 using VidhanSabha.Application.Pannels.Admin.Block.DTOs;
 using VidhanSabha.Application.Pannels.Admin.Block.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.PravasiVoters.DTOs;
@@ -14,10 +15,11 @@ using VidhanSabha.Domain.Entities.Admin;
 using VidhanSabha.Infrastructure.Extensions;
 using VidhanSabha.Infrastructure.Persistence;
 using VidhanSabha.Infrastructure.Repositories.Common;
+using static VidhanSabha.Application.Common.ExportPdfExcel.Dtos.BlockExportDef;
 
 namespace VidhanSabha.Infrastructure.Repositories.Admin
 {
-    public class BlockRepository:BaseRepository<Tbl_Block>,IBlockRepository
+    public class BlockRepository : BaseRepository<Tbl_Block>, IBlockRepository
     {
         public BlockRepository(DatabaseContext context) : base(context)
         {
@@ -55,7 +57,7 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
 
         public async Task<List<BlockNameResponse>> GetAllBlockNameAsync(string? userId = null, CancellationToken ct = default)
         {
-            var result = await _context.Tbl_Block.Where(x => x.UserId ==userId)
+            var result = await _context.Tbl_Block.Where(x => x.UserId == userId)
                 .Select(m => new BlockNameResponse
                 {
                     Id = m.Id,
@@ -112,6 +114,45 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
                  ct: ct
                  );
         }
+
+        public async Task<List<BlockExportRow>> GetBlockExportAsync(BlockExportFilter qp)
+        {
+            var query = _context.Tbl_Block
+                .AsNoTracking()
+                .Where(b =>
+                    b.UserId == qp.UserId &&
+                    (!qp.Id.HasValue || b.Id == qp.Id) &&
+                    (!qp.CastId.HasValue || b.Cast.Id == qp.CastId)
+                );
+
+            if (!string.IsNullOrWhiteSpace(qp.SearchTerm))
+            {
+                var term = qp.SearchTerm.Trim().ToLower();
+                query = query.Where(b =>
+                    b.BlockName.ToLower().Contains(term) ||
+                    b.BlockPramukh.ToLower().Contains(term) ||
+                    b.Mobile.ToLower().Contains(term) ||
+                    b.Cast.CastName.ToLower().Contains(term) ||
+                    b.Occupation.Occupation.ToLower().Contains(term) ||
+                    b.Party.Party.ToLower().Contains(term) ||
+                    b.Address.ToLower().Contains(term)
+                );
+            }
+
+            return await query.Select(m => new BlockExportRow
+            {
+                BlockName = m.BlockName,
+                BlockPramukh = m.BlockPramukh,
+                Party = m.Party.Party,
+                Mobile = m.Mobile,
+                Address = m.Address,
+                Category = m.Category.Name,
+                Cast = m.Cast.CastName,
+                Occupation = m.Occupation.Occupation,
+            }).ToListAsync();
+        }
+
+
 
         public async Task<Tbl_Block?> GetByIdAsync(int id)
         {

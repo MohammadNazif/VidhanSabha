@@ -39,11 +39,12 @@ import { SectorReportComponent } from './components/admin/reports/sector-report/
 import { MandalSamitiComponent } from './components/admin/mandal-samiti/mandal-samiti.component';
 import { LandingPageComponent } from './components/landing-page/landing-page.component';
 import { ActivityComponent } from './components/admin/activity/activity.component';
-
+import { ProfileComponent } from './components/profile/profile.component';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: 'dashboard', component: DashboardComponent },
+  { path: 'profile', component: ProfileComponent },
   { path: '', component: LandingPageComponent, pathMatch: 'full' },
 
   { path: 'combined-report', component: CombinedReportComponent },

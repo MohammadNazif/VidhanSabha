@@ -44,6 +44,15 @@ export class BoothVoterDescriptionComponent implements OnInit {
   isListView = false;
 
   columns: TableColumn[] = [
+    { 
+      key: 'profile', 
+      label: 'Profile', 
+      type: 'avatar', 
+      align: 'center', 
+      sortable: false, 
+      formatter: (val: any, row: any) => row.booth?.sanyojak?.profilePath || val || '',
+      avatarFallbackKey: 'boothNumber' 
+    },
     { key: 'boothNumber', label: 'Booth No.', sortable: true },
     { key: 'villageName', label: 'Village', sortable: true },
     { key: 'totalVoter', label: 'Total Voters', sortable: true },

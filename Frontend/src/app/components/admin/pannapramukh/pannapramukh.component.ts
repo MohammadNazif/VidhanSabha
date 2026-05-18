@@ -41,6 +41,7 @@ export class PannapramukhComponent implements OnInit {
   isListView = false;
 
   columns: TableColumn[] = [
+    { key: 'profilePictureUrl', label: 'Profile', type: 'avatar', align: 'center', sortable: false, avatarFallbackKey: 'pannaPramukhName' },
     { key: 'boothNumber', label: 'Booth No.', sortable: true },
     {
       key: 'villageName', label: 'Village', sortable: true, formatter: (val: any, row: any) => {
@@ -357,7 +358,8 @@ export class PannapramukhComponent implements OnInit {
       isDescending: this.isDescending,
       boothIds: this.boothIds,
       villageIds: this.villageIds,
-      castIds: this.castIds
+      castIds: this.castIds,
+      roleFilterFlag: !this.isListView
     };
 
     const userId = this.authService.getUserId();

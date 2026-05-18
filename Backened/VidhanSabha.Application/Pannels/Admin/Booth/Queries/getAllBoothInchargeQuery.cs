@@ -11,10 +11,12 @@ namespace VidhanSabha.Application.Pannels.Admin.Booth.Queries
     public class getAllBoothInchargeQuery : IRequest<IReadOnlyList<BoothInchargeResponse>>
     {
         public int? BoothId { get; set; }
+        public string? UserId { get; set; }
 
-        public getAllBoothInchargeQuery(int? boothId)
+        public getAllBoothInchargeQuery(int? boothId,string? userId)
         {
             BoothId = boothId;
+            UserId = userId;
         }
     }
 }

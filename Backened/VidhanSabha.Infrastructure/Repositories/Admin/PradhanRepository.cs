@@ -1,11 +1,13 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
+using DocumentFormat.OpenXml.Spreadsheet;
+using Microsoft.EntityFrameworkCore;
 using VidhanSabha.Application.Common.Dtos;
+using VidhanSabha.Application.Common.ExportPdfExcel.Dtos;
 using VidhanSabha.Application.Pannels.Admin.Booth.Dtos;
 using VidhanSabha.Application.Pannels.Admin.NewVoter.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.Pradhan.DTOs;
@@ -85,6 +87,7 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
         {
             try
             {
+                var totalCount = await _context.Tbl_Pradhan.CountAsync(x => x.Status && x.UserId == qp.UserId);
                 var query = _context.Tbl_Pradhan
                .AsNoTracking()
                .AsQueryable();
@@ -114,14 +117,15 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
                 {
                     var term = qp.SearchTerm.Trim().ToLower();
                     search = b =>
-                        //b.Booth.BoothNumber.Equals(Convert.ToInt32(term)) ||
+                                    //b.Booth.BoothNumber.Equals(Convert.ToInt32(term)) ||
+                       
                         b.Name.ToLower().Contains(term) ||
                         b.Villages.Select(v => v.Village.VillageName).FirstOrDefault().ToLower().Contains(term) ||
                         b.Designation.DesignationName.ToLower().Contains(term);
                 }
 
                 return await query.ToPagedResultAsync(
-               queryParams: qp,
+                queryParams: qp,
                searchPredicate: search,
                defaultSort: b => b.Id,
                projection: p => new PradhanResponseDto
@@ -131,7 +135,7 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
                    DesignationId = p.DesignationId,
                    DesignationName = p.Designation.DesignationName,
                    Contact = p.Contact,
-                  
+                   TotalCount = totalCount,
                    Gender = p.Gender,
                    GenderValue = ((VidhanSabha.Domain.Enums.Gender)p.Gender).ToString(),
 
@@ -147,6 +151,43 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
                 Console.WriteLine(ex.InnerException?.Message);
                 throw;
             }
+        }
+
+        public async Task<List<PradhanExportRow>> GetPradhanExportAsync(PradhanExportFilter qp)
+        {
+            var query = _context.Tbl_Pradhan
+                .AsNoTracking()
+                .AsQueryable();
+
+            query = query.Where(b =>
+                b.Status &&
+                ( b.UserId == qp.UserId) &&
+                (!qp.Id.HasValue || b.Id == qp.Id));
+
+            // Optional filters if implemented
+            var boothIds = qp.BoothId.HasValue ? new[] { qp.BoothId.Value } : Array.Empty<int>();
+            if (boothIds.Any())
+                query = query.Where(b => b.Villages.Any(v => boothIds.Contains(v.VillageId)));
+
+            if (!string.IsNullOrWhiteSpace(qp.SearchTerm))
+            {
+                var term = qp.SearchTerm.Trim().ToLower();
+                query = query.Where(b =>
+                    b.Name.ToLower().Contains(term) ||
+                    b.Designation.DesignationName.ToLower().Contains(term) ||
+                    b.Villages.Any(v => v.Village.VillageName.ToLower().Contains(term))
+                );
+            }
+
+            return await query.Select(p => new PradhanExportRow
+            {
+                Id = p.Id,
+                Name = p.Name,
+                Designation = p.Designation.DesignationName,
+                Gender = ((VidhanSabha.Domain.Enums.Gender)p.Gender).ToString(),
+                Contact = p.Contact,
+                Villages = string.Join(", ", p.Villages.Select(v => v.Village.VillageName))
+            }).ToListAsync();
         }
 
     }

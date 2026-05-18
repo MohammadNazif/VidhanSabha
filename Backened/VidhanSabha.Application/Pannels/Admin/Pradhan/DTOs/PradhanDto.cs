@@ -22,6 +22,7 @@ namespace VidhanSabha.Application.Pannels.Admin.Pradhan.DTOs
         public string DesignationName { get; set; }
         public string Contact { get; set; }
         public int Gender { get; set; }
+        public int TotalCount { get; set; }
         public string GenderValue { get; set; }
         public List<VillageResponseDtos> Villages { get; set; } = new();
         }

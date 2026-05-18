@@ -23,6 +23,8 @@ namespace VidhanSabha.Application.Pannels.Admin.Dashboard.Dtos
         public int BDC { get; set; }
         public int InfluencerPerson { get; set; }
         public int Pradhan { get; set; }
+        public string vidhanSabhaName { get; set; }
+        public int vidhanSabhaNumber { get; set; }
     }
     public class BoothDashboardCountsDto
     {

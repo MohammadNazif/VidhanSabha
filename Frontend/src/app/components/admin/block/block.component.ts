@@ -44,10 +44,11 @@ export class BlockComponent implements OnInit {
   }
 
   columns: TableColumn[] = [
+    { key: 'profile', label: 'Profile', type: 'avatar', align: 'center', sortable: false, avatarFallbackKey: 'blockPramukh' },
     { key: 'blockName', label: 'Block Name', sortable: true },
     { key: 'blockPramukh', label: 'Block Pramukh', sortable: true },
     { key: 'mobile', label: 'Mobile No.', sortable: true },
-    { key: 'partyName', label: 'Party', sortable: true },
+    { key: 'party', label: 'Party', sortable: true },
     { key: 'categoryName', label: 'Category', sortable: true },
     { key: 'castName', label: 'Caste', sortable: true },
     { key: 'occupation', label: 'Occupation', sortable: true }
@@ -311,11 +312,27 @@ export class BlockComponent implements OnInit {
   handleExport(format: string) {
     if (!format) return;
     this.isExporting = true;
-    console.log(`Generating ${format.toUpperCase()} export...`);
-    // Simulate export delay
-    setTimeout(() => {
-      this.isExporting = false;
-      this.toastService.showSuccess('Export Started', `Successfully generated ${format.toUpperCase()} export!`);
-    }, 1000);
+    const exportFormat = format as 'excel' | 'pdf';
+    const request = exportFormat === 'excel' ? this.blockService.exportToExcel() : this.blockService.exportToPdf();
+
+    request.subscribe({
+      next: (blob: Blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Block_List.${format === 'excel' ? 'xlsx' : 'pdf'}`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        this.isExporting = false;
+        this.toastService.showSuccess('Success', `Block list exported to ${format.toUpperCase()} successfully!`);
+      },
+      error: (err: any) => {
+        console.error(`Error exporting to ${format}:`, err);
+        this.toastService.showError('Error', `Failed to export Block list to ${format.toUpperCase()}`);
+        this.isExporting = false;
+      }
+    });
   }
 }

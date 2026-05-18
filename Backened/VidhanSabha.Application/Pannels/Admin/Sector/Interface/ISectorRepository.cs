@@ -15,6 +15,11 @@ namespace VidhanSabha.Application.Pannels.Admin.Sector.Interface
        Task<List<SectorReportExportRow>> GetSectorReportExportAsync(
      SectorReportFilter filter,
      CancellationToken ct = default);
+
+   Task<List<SectorWithBoothReportExportRow>> GetAllSectorWithBoothReportsForExportAsync(
+    SectorWithBoothReportExportFilter qp,
+    int? vidhanSabhaId,
+    CancellationToken ct = default);
         Task<PagedResult<SectorResponseDto>> GetAllAsync(SectorQueryParams qp,int? vidhanID,CancellationToken ct);
         Task<PagedResult<SectorReportDto>> GetAllSectorReports(SectorQueryParams qp,int? VidhanSabhaId, CancellationToken ct);
         Task<PagedResult<AdminSectorReportsDto>> GetAllAdminSectorReports(SectorQueryParams qp,CancellationToken ct);

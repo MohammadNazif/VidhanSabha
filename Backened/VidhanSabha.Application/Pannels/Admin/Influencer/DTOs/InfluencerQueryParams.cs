@@ -11,9 +11,6 @@ namespace VidhanSabha.Application.Pannels.Admin.Influencer.DTOs
     {
         
             public int? Id { get; set; }
-
-
-
             public int? BoothId { get; set; }
 
     }

@@ -67,7 +67,7 @@ public static class ExportService
     // ─────────────────────────────────────────────────────────────────────────
     //  PDF
     // ─────────────────────────────────────────────────────────────────────────
-    public static byte[] ToPdf<T>(
+    public static byte[]    ToPdf<T>(
         IReadOnlyList<T> rows,
         IExportDefinition<T> def)
     {
@@ -109,7 +109,7 @@ public static class ExportService
                     .Text("Sr.")
                   .Bold()
                   .FontColor(Colors.White)
-                 .FontSize(9)
+                 .FontSize(8)
                   .AlignCenter();
                     foreach (var col in def.Columns)
                     {
@@ -117,7 +117,7 @@ public static class ExportService
                             .Background(Colors.Blue.Darken3)
                             .Padding(4)
                             .Text(col.Header)
-                            .Bold().FontColor(Colors.White).FontSize(8);
+                            .Bold().FontColor(Colors.White).FontSize(6);
                     }
                 });
 

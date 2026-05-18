@@ -88,7 +88,7 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
             {
                 var term = qp.SearchTerm.Trim().ToLower();
                 search = b =>
-                   
+                    b.Booth.BoothNumber.ToString().Contains(term) ||
                     b.Name.ToLower().Contains(term) ||
                     b.FatherName.ToLower().Contains(term) ||
                     //b.Village.VillageName.ToLower().Contains(term) ||

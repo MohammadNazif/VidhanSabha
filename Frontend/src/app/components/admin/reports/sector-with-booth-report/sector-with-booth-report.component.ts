@@ -31,7 +31,7 @@ export class SectorWithBoothReportComponent implements OnInit {
   pageSize = 50;
   searchTerm: string = '';
   sortBy: string = 'mandalName';
-  isDescending: boolean = true;
+  isDescending: boolean = false;
   totalPages = 0;
 
   columns: TableColumn[] = [
@@ -216,11 +216,16 @@ export class SectorWithBoothReportComponent implements OnInit {
   handleExport(format: string) {
     if (!format) return;
     this.exporting = true;
-    const request = format === 'excel'
-      ? this.sectorService.exportSectorReportExcel()
-      : this.sectorService.exportSectorReportPdf();
 
-    request.subscribe({
+    // Use current filters and search term for the export
+    const params = {
+      searchTerm: this.searchTerm,
+      sortBy: this.sortBy,
+      isDescending: this.isDescending,
+      ...this.currentFilters
+    };
+
+    this.sectorService.export('sectorwithboothreport', format as 'pdf' | 'excel', params).subscribe({
       next: (blob: Blob) => {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');

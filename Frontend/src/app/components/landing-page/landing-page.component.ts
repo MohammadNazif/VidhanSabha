@@ -1,6 +1,5 @@
 import { Component, HostListener, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-
 import { RouterModule } from '@angular/router';
 
 @Component({
@@ -11,69 +10,194 @@ import { RouterModule } from '@angular/router';
   styleUrl: './landing-page.component.css'
 })
 export class LandingPageComponent implements OnInit {
+
   isScrolled = false;
   activeSection = 'home';
   isMenuOpen = false;
 
+  galleryImages = [
+    { url: '/assets/images/4.jpg', title: 'Public Rally & Development Programs' },
+    { url: '/assets/images/5.jpg', title: 'Ministerial Meeting in Lucknow' },
+    { url: '/assets/images/6.jpg', title: 'Inauguration of New Bridge' },
+    { url: '/assets/images/7.jpg', title: 'Connecting with Local Citizens' },
+    { url: '/assets/images/13.jpg', title: 'Infrastructure Review Visit' },
+    { url: '/assets/images/train.jpg', title: 'Railway Project Discussion' },
+    { url: '/assets/images/jal.jpg', title: 'Jal Shakti Mission Review' },
+    { url: '/assets/images/dinesh.jpeg', title: 'Public Interaction Session' }
+  ];
+  activeGalleryIndex = 0;
+  galleryInterval: any;
+
+  tickerItems = [
+    '63.5 KM Meerut–Hastinapur–Bijnor Rail Line Proposal',
+    'Flood Control & Embankment Work in Ganga Belt',
+    'Rail Connectivity Push for Hastinapur Tourism',
+    'Development of Rural Roads & Bridges',
+    'Support for Flood-Affected Farmers',
+    'Public Welfare Schemes Implementation in Hastinapur'
+  ];
+
   stats = [
-    { icon: '👥', value: '10,00,000+', label: 'Citizens Reached' },
-    { icon: '📋', value: '520+', label: 'Projects' },
-    { icon: '🏆', value: '45+', label: 'Awards' },
-    { icon: '⭐', value: '98%', label: 'Satisfaction' }
+    {
+      icon: 'fa-solid fa-train-subway',
+      value: '63.5 KM',
+      label: 'Meerut–Hastinapur–Bijnor Rail Proposal'
+    },
+    {
+      icon: 'fa-solid fa-water',
+      value: 'Flood Control',
+      label: 'Ganga Embankment & Protection Works'
+    },
+    {
+      icon: 'fa-solid fa-road',
+      value: 'Road Network',
+      label: 'Rural Connectivity Development'
+    },
+    {
+      icon: 'fa-solid fa-bridge',
+      value: 'Public Works',
+      label: 'Bridge & Infrastructure Support'
+    }
   ];
 
   sectors = [
     {
-      img: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&q=80',
-      title: 'Rural Road Network',
-      desc: '900+ km of new roads connecting every village in the region.',
-      tag: 'Infrastructure'
+      img: '/assets/images/train.jpg',
+      title: 'Meerut–Hastinapur–Bijnor Rail Line',
+      desc: 'Dinesh Khatik met Railway Minister Ashwini Vaishnaw and pushed for the proposed 63.5 KM Meerut–Hastinapur–Bijnor railway line to improve tourism, connectivity, and local economic growth in the Hastinapur region.',
+      tag: 'Rail Project',
+      link: 'https://timesofindia.indiatimes.com/city/meerut/dinesh-khatik-meets-rail-minister-ashwani-vaishnav-urges-him-to-start-hastinapur-bijnor-rail-link/articleshow/97015247.cms'
     },
     {
-      img: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=400&q=80',
-      title: 'Jan Sunwai & Resolutions',
-      desc: 'Swift action on every citizen complaint through digital platforms.',
-      tag: 'Governance'
+      img: '/assets/images/jal.jpg',
+      title: 'Flood Control & Ganga Protection',
+      desc: 'As Minister of State for Jal Shakti and Flood Control, Dinesh Khatik worked on flood protection measures, embankment strengthening, and relief efforts for villages affected by Ganga flooding in Hastinapur areas.',
+      tag: 'Flood Control',
+      link: 'https://www.amarujala.com/photo-gallery/uttar-pradesh/meerut/hastinapur-minister-of-state-dinesh-khatik-visited-the-flood-affected-area-with-a-bullet?utm_source=chatgpt.com'
     },
     {
-      img: 'https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=400&q=80',
-      title: 'New Schools & Colleges',
-      desc: "Empowering girls education as a top priority across all districts.",
-      tag: 'Education'
+      img: '/assets/images/13.jpg',
+      title: 'Road & Rural Connectivity',
+      desc: 'Focus on improving rural roads, local connectivity, and public infrastructure development across villages and nearby regions of Hastinapur constituency.',
+      tag: 'Infrastructure',
+      link: 'https://www.thedailyjagran.com/uttar-pradesh/up-govt-approves-rs-10-28-crore-for-hastinapur-pilgrimage-route-widening-details-40050619?utm_source=chatgpt.com'
     }
   ];
 
   schemes = [
-    { icon: '🏠', title: 'PM Awas Yojana', desc: 'A pucca home for every family — 10,000+ beneficiaries served.', verified: true },
-    { icon: '📚', title: 'Education Mission', desc: 'Smart classrooms and digital laboratories in every government school.', verified: true },
-    { icon: '🏥', title: 'Ayushman Bharat', desc: 'Free treatment up to 5 lakh for every eligible family member.', verified: true },
-    { icon: '🌾', title: 'Kisan Samman Nidhi', desc: 'Direct financial support to farmers bank accounts every quarter.', verified: true },
-    { icon: '💧', title: 'Jal Jeevan Mission', desc: 'Tap water in every home — government clean supply guaranteed.', verified: true },
-    { icon: '⚡', title: 'Ujjwala Yojana', desc: 'LPG connections and uninterrupted power supply for every household.', verified: true }
+    {
+      icon: '💧',
+      title: 'Jal Jeevan Mission',
+      desc: 'Providing tap water connections to rural households under the Government of India mission.',
+      verified: true
+    },
+    {
+      icon: '🏠',
+      title: 'PM Awas Yojana',
+      desc: 'Affordable housing support for eligible rural and urban families.',
+      verified: true
+    },
+    {
+      icon: '🏥',
+      title: 'Ayushman Bharat',
+      desc: 'Free healthcare coverage up to ₹5 lakh for eligible families.',
+      verified: true
+    },
+    {
+      icon: '💰',
+      title: 'PM Kisan Samman Nidhi',
+      desc: 'Direct financial support provided annually to eligible farmers.',
+      verified: true
+    },
+    {
+      icon: '🔥',
+      title: 'Ujjwala Yojana',
+      desc: 'Free LPG gas connections for economically weaker households.',
+      verified: true
+    },
+    {
+      icon: '⚡',
+      title: 'Energy Conservation Initiative',
+      desc: 'Promotion of energy-saving awareness and efficient electricity usage.',
+      verified: true
+    }
   ];
 
   testimonials = [
-    { name: 'Ramesh Mahiwar', location: 'Village Resident', text: 'Khatik ji ne hamare gaon ki sadak banwayi. Unka kaam sach mein qaabil-e-taareef hai.' },
-    { name: 'Sunita Devi', location: 'Beneficiary', text: 'PM Awas ke tahat mujhe ghar mila. Dil se shukriya is madad ke liye.' },
-    { name: 'Ankit Sharma', location: 'Youth Participant', text: 'Skill training program se mujhe nayi raah mili. Ek poora naya safar shuru hua.' }
+    {
+      name: 'Rakesh Kumar',
+      location: 'Hastinapur',
+      text: 'The railway proposal can become a major boost for tourism and employment opportunities in our region.'
+    },
+    {
+      name: 'Sunita Devi',
+      location: 'Meerut Rural',
+      text: 'Flood control work and embankment support have helped many villages during difficult monsoon seasons.'
+    },
+    {
+      name: 'Ankit Sharma',
+      location: 'Bijnor',
+      text: 'Road connectivity and infrastructure development have improved transportation in nearby rural areas.'
+    }
   ];
 
   navLinks = [
     { label: 'Home', target: 'home' },
+    { label: 'Numbers', target: 'stats' },
     { label: 'Development', target: 'development' },
     { label: 'Schemes', target: 'schemes' },
     { label: 'Gallery', target: 'gallery' },
     { label: 'Contact', target: 'contact' }
   ];
 
-  ngOnInit() { }
+  ngOnInit() {
+    this.startGalleryAutoPlay();
+  }
+
+  ngOnDestroy() {
+    if (this.galleryInterval) {
+      clearInterval(this.galleryInterval);
+    }
+  }
+
+  startGalleryAutoPlay() {
+    this.galleryInterval = setInterval(() => {
+      this.nextGallery();
+    }, 5000);
+  }
+
+  nextGallery() {
+    this.activeGalleryIndex = (this.activeGalleryIndex + 1) % this.galleryImages.length;
+  }
+
+  setGalleryIndex(index: number) {
+    this.activeGalleryIndex = index;
+    clearInterval(this.galleryInterval);
+    this.startGalleryAutoPlay();
+  }
+
+  getSlotIndex(index: number) {
+    const total = this.galleryImages.length;
+    return (index - this.activeGalleryIndex + total) % total;
+  }
 
   @HostListener('window:scroll', [])
   onScroll() {
     this.isScrolled = window.scrollY > 60;
-    const sections = ['home', 'stats', 'development', 'schemes', 'gallery', 'testimonials', 'contact'];
+
+    const sections = [
+      'home',
+      'stats',
+      'development',
+      'schemes',
+      'gallery',
+      'testimonials',
+      'contact'
+    ];
+
     for (const sec of [...sections].reverse()) {
       const el = document.getElementById(sec);
+
       if (el && window.scrollY >= el.offsetTop - 120) {
         this.activeSection = sec;
         break;
@@ -83,9 +207,14 @@ export class LandingPageComponent implements OnInit {
 
   scrollTo(sectionId: string) {
     const el = document.getElementById(sectionId);
+
     if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      el.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      });
     }
+
     this.isMenuOpen = false;
   }
 

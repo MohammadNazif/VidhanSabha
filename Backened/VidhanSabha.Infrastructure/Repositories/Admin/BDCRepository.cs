@@ -1,11 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using VidhanSabha.Application.Common.Dtos;
+using VidhanSabha.Application.Common.ExportPdfExcel.Dtos;
 using VidhanSabha.Application.Pannels.Admin.BDC.DTOs;
 using VidhanSabha.Application.Pannels.Admin.BDC.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.Block.DTOs;
@@ -14,6 +15,7 @@ using VidhanSabha.Domain.Entities.Admin;
 using VidhanSabha.Infrastructure.Extensions;
 using VidhanSabha.Infrastructure.Persistence;
 using VidhanSabha.Infrastructure.Repositories.Common;
+using static VidhanSabha.Application.Common.ExportPdfExcel.Dtos.BDCExportDef;
 
 namespace VidhanSabha.Infrastructure.Repositories.Admin
 {
@@ -117,6 +119,38 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
                 },
                 ct : ct
                 );
+        }
+
+        public async Task<List<BDCExportRow>> GetBDCExportAsync(BDCExportFilter qp)
+        {
+            var query = _context.Tbl_BDC
+                .AsNoTracking()
+                .Where(b => b.UserId == qp.UserId &&
+                            (!qp.Id.HasValue || b.Id == qp.Id) &&
+                            (!qp.PartyId.HasValue || b.PartyId == qp.PartyId));
+
+            if (!string.IsNullOrWhiteSpace(qp.SearchTerm))
+            {
+                var term = qp.SearchTerm.Trim().ToLower();
+                query = query.Where(b =>
+                    b.Name.ToLower().Contains(term) ||
+                    b.Cast.CastName.ToLower().Contains(term) ||
+                    b.Party.Party.ToLower().Contains(term) ||
+                    b.WardNumber.ToLower().Contains(term)
+                );
+            }
+
+            return await query.Select(m => new BDCExportRow
+            {
+                Block = m.Blocknav.BlockName,
+                Name = m.Name,
+                WardNumber = m.WardNumber,
+                Category = m.Category.Name,
+                Cast = m.Cast.CastName,
+                Party = m.Party.Party,
+                Mobile = m.Mobile,
+                Villages = string.Join(", ", m.Villages.Select(v => v.Village.VillageName))
+            }).ToListAsync();
         }
     }
 }

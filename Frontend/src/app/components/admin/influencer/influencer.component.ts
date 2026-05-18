@@ -38,6 +38,11 @@ export class InfluencerComponent implements OnInit {
   isListView = false;
   pageTitle = 'Influencer Person Management';
   pageSubtitle = 'Manage master data for influential people';
+  exportOptions = [
+    { label: 'Export PDF', value: 'pdf' },
+    { label: 'Export Excel', value: 'excel' },
+    { label: 'Import Excel', value: 'import' }
+  ];
 
   canManage(): boolean {
     if (this.isListView) return false;
@@ -394,6 +399,12 @@ export class InfluencerComponent implements OnInit {
 
   handleExport(format: string) {
     if (!format) return;
+    if (format === 'import') {
+      const fileInput = document.getElementById('importFileInput') as HTMLInputElement;
+      if (fileInput) fileInput.click();
+      return;
+    }
+
     this.isExporting = true;
     const exportFormat = format as 'excel' | 'pdf';
     const request = exportFormat === 'excel' ? this.influencerService.exportToExcel() : this.influencerService.exportToPdf();
@@ -415,6 +426,26 @@ export class InfluencerComponent implements OnInit {
         console.error(`Error exporting:`, err);
         this.toastService.showError('Error', `Failed to export list`);
         this.isExporting = false;
+      }
+    });
+  }
+
+  onFileImport(event: any) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    this.loading = true;
+    this.influencerService.importExcel(file).subscribe({
+      next: (res: any) => {
+        this.toastService.showSuccess('Success', 'Influencer data imported successfully!');
+        this.loadData();
+        event.target.value = '';
+      },
+      error: (err: any) => {
+        console.error('Import error:', err);
+        this.toastService.showError('Error', 'Failed to import influencer data');
+        this.loading = false;
+        event.target.value = '';
       }
     });
   }

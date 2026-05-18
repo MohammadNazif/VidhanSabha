@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using VidhanSabha.Application.Common.Dtos;
+using VidhanSabha.Application.Common.ExportPdfExcel.Dtos;
 using VidhanSabha.Application.Pannels.Admin.Pradhan.DTOs;
 using VidhanSabha.Domain.Entities.Admin;
 
@@ -16,5 +17,7 @@ namespace VidhanSabha.Application.Pannels.Admin.Pradhan.Interfaces
         Task<int> AddAsync(Tbl_Pradhan pradhan, CancellationToken ct = default);
         int Update(Tbl_Pradhan pradhan);
         void Delete(Tbl_Pradhan pradhan);
+
+        Task<List<PradhanExportRow>> GetPradhanExportAsync(PradhanExportFilter qp);
     }
 }

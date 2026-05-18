@@ -10,6 +10,7 @@ import { ActivityService } from '../../../Services/Admin/activity/activity.servi
 import { ToastService } from '../../../Services/common/toast/toast.service';
 import { CrudHandlerService } from '../../../Services/common/crud-handler.service';
 import { AuthServiceService } from '../../../Services/Auth/auth.service';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-activity',
@@ -17,7 +18,7 @@ import { AuthServiceService } from '../../../Services/Auth/auth.service';
   imports: [CommonModule, FormsModule, GenericTableComponent, GenericModalButtonComponent, PageHeaderComponent],
   template: `
     <div class="h-full flex flex-col p-4 gap-4 overflow-hidden">
-      <app-page-header title="Activity Management" subtitle="Manage and publish legislative activities">
+      <app-page-header [title]="canManage() ? 'Activity Management' : 'Activity List'" subtitle="Manage and publish legislative activities">
         <app-generic-modal-button 
             *ngIf="canManage()"
             #activityModal 
@@ -187,7 +188,8 @@ export class ActivityComponent implements OnInit {
     private activityService: ActivityService,
     private toastService: ToastService,
     private crudHandler: CrudHandlerService,
-    private authService: AuthServiceService
+    private authService: AuthServiceService,
+    private route: ActivatedRoute
   ) { }
 
   ngOnInit() {
