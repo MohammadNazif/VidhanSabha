@@ -42,6 +42,7 @@ export class DynamicFormModalComponent implements OnInit, OnDestroy {
     this.createForm();
     this.initializeOptions();
     this.setupFieldInteractions();
+    this.setupCalculationLogic();
     this.updateCascadingOptions();
 
     // Disable reset logic for first 500ms to allow APIs to load
@@ -161,6 +162,39 @@ export class DynamicFormModalComponent implements OnInit, OnDestroy {
         this.updateCascadingOptions();
       })
     );
+  }
+
+  private setupCalculationLogic(): void {
+    const hasTotal = this.config.fields.some(f => f.id === 'totalVoter');
+    const hasMale = this.config.fields.some(f => f.id === 'male');
+    const hasFemale = this.config.fields.some(f => f.id === 'female');
+    const hasOther = this.config.fields.some(f => f.id === 'other');
+
+    if (hasTotal && hasMale && hasFemale && hasOther) {
+      const totalCtrl = this.form.get('totalVoter');
+      const maleCtrl = this.form.get('male');
+      const femaleCtrl = this.form.get('female');
+      const otherCtrl = this.form.get('other');
+
+      if (totalCtrl && maleCtrl && femaleCtrl && otherCtrl) {
+        const updateOther = () => {
+          const total = Number(totalCtrl.value || 0);
+          const male = Number(maleCtrl.value || 0);
+          const female = Number(femaleCtrl.value || 0);
+          const calculatedOther = Math.max(0, total - male - female);
+          
+          if (otherCtrl.value !== calculatedOther) {
+            otherCtrl.setValue(calculatedOther, { emitEvent: false });
+          }
+        };
+
+        updateOther();
+
+        this.subscriptions.add(totalCtrl.valueChanges.subscribe(updateOther));
+        this.subscriptions.add(maleCtrl.valueChanges.subscribe(updateOther));
+        this.subscriptions.add(femaleCtrl.valueChanges.subscribe(updateOther));
+      }
+    }
   }
 
   private updateVisibility(): void {

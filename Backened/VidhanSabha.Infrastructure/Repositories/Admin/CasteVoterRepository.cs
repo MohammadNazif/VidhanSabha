@@ -61,7 +61,7 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
             var query = _context.Tbl_CasteVoter
     .AsNoTracking()
     .Where(b =>
-    (!qp.Id.HasValue || b.Id == qp.Id) &&
+    (!qp.Id.HasValue || b.CasteVoterId == qp.Id) &&
     (!qp.BoothId.HasValue || b.CasteVoterId == qp.BoothId) &&
     (!qp.SectorId.HasValue ||
         _context.Tbl_Booth

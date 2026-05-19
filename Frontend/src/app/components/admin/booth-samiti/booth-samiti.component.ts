@@ -378,13 +378,14 @@ export class BoothSamitiComponent implements OnInit {
       return;
     }
 
-    const params = {
+    const params: any = {
       PageNumber: this.pageNumber,
       PageSize: this.pageSize,
       SearchTerm: this.searchTerm,
       SortBy: this.sortBy || 'id',
       IsDescending: this.isDescending,
-      userId: this.authService.getRole() === 'BoothSanyojak' ? this.authService.getUserId() : null
+      userId: this.authService.getRole() === 'BoothSanyojak' ? this.authService.getUserId() : null,
+      roleFilterFlag: !this.isListView
     };
 
     this.boothSamitiService.getBoothSamiti(params).subscribe({

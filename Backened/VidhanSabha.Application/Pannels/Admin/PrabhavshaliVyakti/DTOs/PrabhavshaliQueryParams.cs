@@ -11,6 +11,7 @@ namespace VidhanSabha.Application.Pannels.Admin.PrabhavshaliVyakti.DTOs
     public class PrabhavshaliQueryParams:BaseQueryParams
     {
         public int? Id { get; set; }
+        public bool rolefilterflag { get; set; }
         public int? BoothId { get; set; }
         public int? designationId { get; set; }
         public string? VillageIds { get; set; }

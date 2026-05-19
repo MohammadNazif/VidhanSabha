@@ -63,6 +63,10 @@ export class GenericTableComponent implements OnInit, OnChanges, OnDestroy {
     }
     return _iconCache.get(key)!;
   }
+
+  getSafeHtml(html: string): SafeHtml {
+    return this.sanitizer.bypassSecurityTrustHtml(html || '');
+  }
   // ── Inputs ──
   @Input() data: any[] = [];
   @Input() columns: TableColumn[] = [];

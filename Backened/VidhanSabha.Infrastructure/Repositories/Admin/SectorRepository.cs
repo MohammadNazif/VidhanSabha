@@ -535,7 +535,7 @@ CancellationToken ct = default)
 
         public  async Task<IReadOnlyList<SectorIncahrgeDto>> GetIncahrgeByIdAsync(string userId)
         {
-            return  await _context.Tbl_Sector.Where(m => m.CreatedByUserId == userId).Select(s => new SectorIncahrgeDto
+            return  await _context.Tbl_Sector.Where(m => m.CreatedByUserId == userId && m.IsSectorSanyojak).Select(s => new SectorIncahrgeDto
             {
                 UserId = s.UserId,
                 SectorId = s.Id,

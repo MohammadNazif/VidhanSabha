@@ -312,12 +312,13 @@ export class SectorComponent implements OnInit {
 
   loadSectors() {
     this.loading = true;
-    const params = {
+    const params: any = {
       PageNumber: this.pageNumber,
       PageSize: this.pageSize,
       SearchTerm: this.searchTerm,
       SortBy: this.sortBy,
-      IsDescending: this.isDescending
+      IsDescending: this.isDescending,
+      roleFilterFlag: !this.isListView
     };
 
     this.sectorService.getAllSectors(params).subscribe({

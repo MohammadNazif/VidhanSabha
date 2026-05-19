@@ -61,7 +61,7 @@ export class BoothComponent implements OnInit {
     if (this.isListView) return false;
     const role = (this.authService.getRole() || '').toUpperCase().trim();
     if (role === 'VIDHANSABHAPRABHARI') return true;
-    return this.permissionService.hasPermission(ModulePermission.BoothVoterDescrition);
+    return this.permissionService.hasPermission(ModulePermission.Booth);
   }
 
   isStatePrabhari(): boolean {
@@ -71,6 +71,22 @@ export class BoothComponent implements OnInit {
   defaultStateId: string | null = null;
 
   ngOnInit() {
+    const role = (this.authService.getRole() || '').toUpperCase().trim();
+    const isSectorSanyojak = role === 'SECTORSANYOJAK';
+
+    if (isSectorSanyojak) {
+      const mandalId = this.authService.getMandalId();
+      // Hide mandalId and sectorId fields
+      this.addBoothConfig.fields = this.addBoothConfig.fields.filter(f => f.id !== 'mandalId' && f.id !== 'sectorId');
+      
+      // Simplify villageId field
+      const villageField = this.addBoothConfig.fields.find(f => f.id === 'villageId');
+      if (villageField) {
+        delete (villageField as any).dependsOn;
+        villageField.apiUrl = () => `common/village?id=${mandalId}`;
+      }
+    }
+
     this.route.url.subscribe((url: UrlSegment[]) => {
       const path = url[0]?.path || '';
       this.isListView = path.includes('-list');
@@ -201,14 +217,18 @@ export class BoothComponent implements OnInit {
 
   loadBooths() {
     this.loading = true;
+    const role = (this.authService.getRole() || '').toUpperCase().trim();
+    const isSectorSanyojak = role === 'SECTORSANYOJAK';
+
     const params: any = {
       PageNumber: this.pageNumber,
       PageSize: this.pageSize,
       SearchTerm: this.searchTerm,
       SortBy: this.sortBy,
       IsDescending: this.isDescending,
-      mandalIds: this.mandalId,
-      sectorIds: this.sectorId
+      mandalIds: isSectorSanyojak ? this.authService.getMandalId() : this.mandalId,
+      sectorIds: isSectorSanyojak ? this.authService.getSectorId() : this.sectorId,
+      roleFilterFlag: !this.isListView
     };
 
     const userId = this.authService.getUserId();
@@ -526,7 +546,7 @@ export class BoothComponent implements OnInit {
         'Booth deleted successfully!',
         () => this.loadBooths(),
         true,
-        ModulePermission.BoothVoterDescrition
+        ModulePermission.Booth
       );
     } else if (action.id === 'edit') {
       // Flatten nested data for form editing
@@ -589,9 +609,15 @@ export class BoothComponent implements OnInit {
     const isSanyojak = raw.isBoothSanyojak === 'Yes';
     const isUpdate = !!(raw.id || (this.boothModal.initialData && this.boothModal.initialData.id));
 
+    const role = (this.authService.getRole() || '').toUpperCase().trim();
+    const isSectorSanyojak = role === 'SECTORSANYOJAK';
+
+    const mandalId = isSectorSanyojak ? this.authService.getMandalId() : raw.mandalId;
+    const sectorId = isSectorSanyojak ? this.authService.getSectorId() : raw.sectorId;
+
     const formData = new FormData();
-    formData.append('MandalId', String(raw.mandalId));
-    formData.append('SectorId', String(raw.sectorId));
+    formData.append('MandalId', String(mandalId));
+    formData.append('SectorId', String(sectorId));
     formData.append('BoothNumber', String(raw.boothNumber));
     formData.append('PollingStationName', raw.pollingStationName || "");
     formData.append('PollingStationLocation', raw.pollingStationLocation || "");
@@ -654,7 +680,7 @@ export class BoothComponent implements OnInit {
       `Booth ${isUpdate ? 'updated' : 'created'} successfully!`,
       () => this.loadBooths(),
       true,
-      ModulePermission.BoothVoterDescrition
+      ModulePermission.Booth
     );
   }
 

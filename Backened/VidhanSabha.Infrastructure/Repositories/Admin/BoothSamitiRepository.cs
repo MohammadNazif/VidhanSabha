@@ -14,6 +14,7 @@ using VidhanSabha.Application.Pannels.Admin.BoothSamiti.Dtos;
 using VidhanSabha.Application.Pannels.Admin.BoothSamiti.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.Sector.DTOs;
 using VidhanSabha.Domain.Entities.Admin;
+using VidhanSabha.Domain.Enums;
 using VidhanSabha.Infrastructure.Extensions;
 using VidhanSabha.Infrastructure.Persistence;
 using VidhanSabha.Infrastructure.Repositories.Common;
@@ -307,13 +308,18 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
         //.Where(u => u.userId == qp.UserId)
         //.Select(u => u.VidhansabhaId)
         //.FirstOrDefaultAsync();
+
+
                 var query = _context.Tbl_BoothSamitiMem
                .AsNoTracking()
                .Where(b =>
                    (!qp.Id.HasValue || b.Id == qp.Id) && (b.Booth.Mandal.Status && b.Booth.Sector.Status ) &&  (b.UserId == qp.UserId || b.CreatedToUserId == qp.UserId || b.CreatedsectorUserId == qp.UserId) &&
                    (!qp.BoothId.HasValue || b.Booth.Id == qp.BoothId)
                    );
-
+                if (qp.rolefilterflag && (qp.Role == PrabhariRole.BoothSanyojak.ToString() || qp.Role == PrabhariRole.SectorSanyojak.ToString()))
+                {
+                    query = query.Where(f => f.Role == qp.Role.ToString());
+                }
                 Expression<Func<Tbl_BoothSamitiMem, bool>>? search = null;
 
                 if (!string.IsNullOrWhiteSpace(qp.SearchTerm))

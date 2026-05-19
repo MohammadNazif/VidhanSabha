@@ -17,6 +17,12 @@ export class AuthServiceService {
   private boothIdSubject = new BehaviorSubject<string | null>(localStorage.getItem('boothId'));
   boothId$ = this.boothIdSubject.asObservable();
 
+  private sectorIdSubject = new BehaviorSubject<string | null>(localStorage.getItem('sectorId'));
+  sectorId$ = this.sectorIdSubject.asObservable();
+
+  private mandalIdSubject = new BehaviorSubject<string | null>(localStorage.getItem('mandalId'));
+  mandalId$ = this.mandalIdSubject.asObservable();
+
   private stateIdSubject = new BehaviorSubject<string | null>(localStorage.getItem('stateId'));
   stateId$ = this.stateIdSubject.asObservable();
 
@@ -61,6 +67,24 @@ export class AuthServiceService {
     return this.boothIdSubject.value;
   }
 
+  setSectorId(sectorId: string) {
+    localStorage.setItem('sectorId', sectorId);
+    this.sectorIdSubject.next(sectorId);
+  }
+
+  getSectorId(): string | null {
+    return this.sectorIdSubject.value;
+  }
+
+  setMandalId(mandalId: string) {
+    localStorage.setItem('mandalId', mandalId);
+    this.mandalIdSubject.next(mandalId);
+  }
+
+  getMandalId(): string | null {
+    return this.mandalIdSubject.value;
+  }
+
   setStateId(stateId: string) {
     localStorage.setItem('stateId', stateId);
     this.stateIdSubject.next(stateId);
@@ -83,11 +107,15 @@ export class AuthServiceService {
     localStorage.removeItem('userId');
     localStorage.removeItem('token');
     localStorage.removeItem('boothId');
+    localStorage.removeItem('sectorId');
+    localStorage.removeItem('mandalId');
     localStorage.removeItem('stateId');
     this.userRoleSubject.next(null);
     this.userIdSubject.next(null);
     this.tokenSubject.next(null);
     this.boothIdSubject.next(null);
+    this.sectorIdSubject.next(null);
+    this.mandalIdSubject.next(null);
     this.stateIdSubject.next(null);
     this.profileDataSubject.next(null);
   }

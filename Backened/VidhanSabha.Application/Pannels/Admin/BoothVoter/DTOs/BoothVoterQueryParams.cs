@@ -14,6 +14,7 @@ namespace VidhanSabha.Application.Pannels.Admin.BoothVoter.DTOs
         public int? BoothId { get; set; }
         //public int? BoothIds { get; set; }
         public int? SectorId { get; set; }
+        public bool rolefilterflag { get; set; }
 
         public string? VillageIds { get; set; }
         public string? BoothIds { get; set; }

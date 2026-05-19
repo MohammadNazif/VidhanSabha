@@ -9,7 +9,7 @@ import { DynamicFormModalComponent } from './dynamic-form-modal.component';
   imports: [CommonModule, DynamicFormModalComponent],
   template: `
     <button *ngIf="!hideButton"
-            (click)="openModal()" 
+            (click)="openModal(null)" 
             [class]="buttonClass"
             class="flex items-center gap-2 px-3.5 py-1.5 rounded-lg font-medium text-sm transition-all duration-200 active:scale-95 shadow-sm hover:shadow-md"
     >
@@ -41,8 +41,8 @@ export class GenericModalButtonComponent implements OnChanges {
   @Output() formSubmit = new EventEmitter<FormResult>();
 
   isModalOpen = false;
-  @Input() initialData: any;
-  private baseData: any;
+  @Input() initialData: any = null;
+  private baseData: any = null;
 
   constructor(private cdr: ChangeDetectorRef) { }
 
@@ -65,10 +65,10 @@ export class GenericModalButtonComponent implements OnChanges {
   }
 
   openModal(data?: any): void {
-    if (data !== undefined) {
+    if (data !== undefined && data !== null && !(data instanceof Event)) {
       this.initialData = data;
     } else {
-      this.initialData = this.baseData;
+      this.initialData = this.baseData || null;
     }
 
     console.log('Modal Opening Data:', this.initialData);
@@ -80,7 +80,7 @@ export class GenericModalButtonComponent implements OnChanges {
 
   closeModal(): void {
     this.isModalOpen = false;
-    this.initialData = this.baseData;
+    this.initialData = this.baseData || null;
     document.body.style.overflow = 'auto';
   }
 

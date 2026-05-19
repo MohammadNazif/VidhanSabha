@@ -14,6 +14,7 @@ using VidhanSabha.Application.Common.ExportPdfExcel.Dtos;
 using VidhanSabha.Application.Pannels.Admin.Booth.Dtos;
 using VidhanSabha.Application.Pannels.Admin.Booth.Interfaces;
 using VidhanSabha.Domain.Entities.Admin;
+using VidhanSabha.Domain.Enums;
 using VidhanSabha.Infrastructure.Extensions;
 using VidhanSabha.Infrastructure.Persistence;
 using VidhanSabha.Infrastructure.Repositories.Common;
@@ -117,6 +118,11 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
 
             if (!string.IsNullOrEmpty(qp.UserId))
                 query = query.Where(b => b.UserId == qp.UserId || b.Sector.UserId == qp.UserId);
+
+            if (qp.rolefilterflag && (qp.Role == PrabhariRole.BoothSanyojak.ToString() || qp.Role == PrabhariRole.SectorSanyojak.ToString()))
+            {
+                query = query.Where(f => f.Role == qp.Role.ToString());
+            }
             Expression<Func<Tbl_Booth, bool>>? search = null;
 
             if (!string.IsNullOrWhiteSpace(qp.SearchTerm))

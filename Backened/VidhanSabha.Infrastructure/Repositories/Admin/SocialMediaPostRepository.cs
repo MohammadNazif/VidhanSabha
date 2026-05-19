@@ -92,7 +92,7 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
             var query = _context.Tbl_SocialMediaPost
                .AsNoTracking()
                .Where(b =>
-                   (!qp.Id.HasValue || b.Id == qp.Id) &&
+                   (!qp.Id.HasValue || b.Id == qp.Id) && (b.UserId == qp.UserId) &&
                    (!qp.BoothId.HasValue || b.Booths.Any(v=>v.BoothId == qp.BoothId)) &&
                    (!qp.SectorId.HasValue || b.Sectors.Any(v=>v.SectorId == qp.SectorId)) 
                    );

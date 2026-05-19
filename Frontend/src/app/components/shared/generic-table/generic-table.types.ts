@@ -3,7 +3,7 @@
  * Reusable across the entire project
  */
 
-export type ColumnType = 'text' | 'number' | 'date' | 'badge' | 'avatar' | 'progress' | 'actions' | 'custom';
+export type ColumnType = 'text' | 'number' | 'date' | 'badge' | 'badge-html' | 'avatar' | 'progress' | 'actions' | 'custom';
 export type SortDirection = 'asc' | 'desc' | null;
 export type BadgeVariant = 'success' | 'warning' | 'danger' | 'info' | 'default';
 

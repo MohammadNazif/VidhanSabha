@@ -356,6 +356,7 @@ public static class AdminEndpoints
            IMediator mediator, HttpContext httpContext) =>
         {
             q.UserId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            q.Role = httpContext.User.FindFirst(ClaimTypes.Role)?.Value;
             var result = await mediator.Send(new GetAllBoothsQuery(q,q.UserId));
 
             return Results.Ok(ApiResponse<PagedResult<BoothResponseDto>>.Ok(result));
@@ -521,6 +522,7 @@ public static class AdminEndpoints
             IMediator mediator, HttpContext httpContext) =>
         {
             q.UserId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            q.Role = httpContext.User.FindFirst(ClaimTypes.Role)?.Value;
             var result = await mediator.Send(new GetAllNewVoterQuery(q));
             return Results.Ok(ApiResponse<PagedResult<NewVoterResponseDto>>.Ok(result));
         }).RequireAuthorization();
@@ -560,6 +562,7 @@ public static class AdminEndpoints
             IMediator mediator, HttpContext http) =>
         {
             q.UserId = http.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            q.Role = http.User.FindFirst(ClaimTypes.Role)?.Value;
             var result = await mediator.Send(new GetAllBoothVoterQuery(q));
             return Results.Ok(ApiResponse<PagedResult<BoothVoterResponseDto>>.Ok(result));
         }).RequireAuthorization();
@@ -738,6 +741,7 @@ public static class AdminEndpoints
          IMediator mediator, HttpContext http) =>
         {
             q.UserId = http.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            q.Role = http.User.FindFirst(ClaimTypes.Role)?.Value;
             var result = await mediator.Send(new GetAllMemQuery(q));
             return Results.Ok(ApiResponse<PagedResult<BoothSamitiMemResponseDto>>.Ok(result));
         })
@@ -939,6 +943,7 @@ public static class AdminEndpoints
             IMediator mediator, HttpContext httpContext) =>
         {
             q.UserId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            q.Role = httpContext.User.FindFirst(ClaimTypes.Role)?.Value;
             var result = await mediator.Send(new GetAllDoubleVoterQuery(q));
             return Results.Ok(ApiResponse<PagedResult<DoubleVoterResponseDto>>.Ok(result));
         }).RequireAuthorization();
@@ -982,6 +987,7 @@ public static class AdminEndpoints
             IMediator mediator,HttpContext httpContext) =>
         {
             q.UserId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            q.Role = httpContext.User.FindFirst(ClaimTypes.Role)?.Value;
             var result = await mediator.Send(new GetAllPrabhavQuery(q));
             return Results.Ok(ApiResponse<PagedResult<PrabhavshaliResponseDto>>.Ok(result));
         }).RequireAuthorization();
@@ -1161,11 +1167,13 @@ public static class AdminEndpoints
 
         socialmedia.MapGet("/getAll", async (
             [AsParameters] SocialMediaQueryParams q,
-            IMediator mediator) =>
+            IMediator mediator,HttpContext httpContext) =>
         {
+            q.UserId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var result = await mediator.Send(new GetAllSocialMediaPostQuery(q));
             return Results.Ok(ApiResponse<PagedResult<SocialMediaPostReponse>>.Ok(result));
-        }).WithName("getallSocailMediaPost");
+        }).RequireAuthorization()
+            .WithName("getallSocailMediaPost");
 
         socialmedia.MapGet("/getAllPlatform", async (
             IMediator mediator) =>

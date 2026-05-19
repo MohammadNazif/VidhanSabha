@@ -219,6 +219,12 @@
                 </span>
               </ng-container>
 
+              <!-- Badge HTML -->
+              <ng-container *ngIf="col.type === 'badge-html'">
+                <span class="cell-badge" [attr.data-variant]="getBadgeVariant(getCellValue(row, col), row, col)" [innerHTML]="getSafeHtml(getCellValue(row, col))">
+                </span>
+              </ng-container>
+
               <!-- Avatar -->
               <ng-container *ngIf="col.type === 'avatar'">
                 <div class="cell-avatar">

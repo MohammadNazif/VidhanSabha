@@ -15,6 +15,7 @@ import { ModulePermission } from '../../../models/module-permission.enum';
 import { PermissionService } from '../../../Services/common/permission.service';
 
 import { GenericExportComponent } from '../../shared/generic-export/generic-export.component';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-socialmedia',
@@ -25,6 +26,23 @@ import { GenericExportComponent } from '../../shared/generic-export/generic-expo
 })
 export class SocialMediaComponent implements OnInit {
   @ViewChild('socialMediaModal') socialMediaModal!: GenericModalButtonComponent;
+
+  selectedImage: string | null = null;
+
+  getImageUrl(path: string): string {
+    if (!path) return '';
+    if (path.startsWith('http')) return path;
+    const baseUrl = environment.apiUrl.replace('/api', '');
+    return `${baseUrl}/${path}`;
+  }
+
+  openImageModal(imageUrl: string) {
+    this.selectedImage = imageUrl;
+  }
+
+  closeImageModal() {
+    this.selectedImage = null;
+  }
 
   socialMediaList: any[] = [];
   totalCount = 0;

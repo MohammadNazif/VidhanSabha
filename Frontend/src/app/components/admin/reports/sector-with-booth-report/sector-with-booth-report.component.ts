@@ -35,7 +35,7 @@ export class SectorWithBoothReportComponent implements OnInit {
   totalPages = 0;
 
   columns: TableColumn[] = [
-    { key: 'mandalName', label: 'Mandal', sortable: true },
+    // { key: 'mandalName', label: 'Mandal', sortable: true },
     { key: 'sectorName', label: 'Sector', sortable: true },
     { key: 'inchargeProfile', label: 'Sector Sanyojak Photo', type: 'avatar', align: 'center', sortable: false, avatarFallbackKey: 'inchargeName' },
     { key: 'inchargeName', label: 'Sector Sanyojak', sortable: true },

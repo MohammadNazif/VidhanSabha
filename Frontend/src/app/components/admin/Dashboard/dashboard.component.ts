@@ -187,20 +187,6 @@ export class DashboardComponent implements OnInit, AfterViewInit {
         this.vidhanSabhaNumber = data.vidhanSabhaNumber?.toString() || '';
       }
     });
-
-    // If profile data hasn't been fetched yet, fetch it now to populate the header
-    if (!this.authService.getProfileData()) {
-      this.baseApi.postCustom<any>('common/profile', {}).subscribe({
-        next: (res: any) => {
-          if (res && res.data) {
-            this.authService.setProfileData(res.data);
-          }
-        },
-        error: (err: any) => {
-          console.error('Error pre-fetching profile in dashboard:', err);
-        }
-      });
-    }
   }
 
   initializeCards(role: string) {
@@ -248,6 +234,12 @@ export class DashboardComponent implements OnInit, AfterViewInit {
           const counts = res.data;
           if (counts.boothId) {
             this.authService.setBoothId(String(counts.boothId));
+          }
+          if (counts.sectorId) {
+            this.authService.setSectorId(String(counts.sectorId));
+          }
+          if (counts.mandalId) {
+            this.authService.setMandalId(String(counts.mandalId));
           }
           this.statCards = this.statCards.map(card => {
             const key = this.getMapKey(card.title);

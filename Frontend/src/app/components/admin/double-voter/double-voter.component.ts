@@ -288,7 +288,8 @@ export class DoubleVoterComponent implements OnInit {
       sortBy: this.sortBy,
       isDescending: this.isDescending,
       boothIds: this.boothIds,
-      villageIds: this.villageIds
+      villageIds: this.villageIds,
+      roleFilterFlag: !this.isListView
     };
 
     // Clean up empty params

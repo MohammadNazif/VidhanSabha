@@ -342,7 +342,8 @@ export class NewVoterComponent implements OnInit {
       isDescending: this.isDescending,
       boothIds: this.boothIds,
       villageIds: this.villageIds,
-      castIds: this.castIds
+      castIds: this.castIds,
+      roleFilterFlag: !this.isListView
     };
 
     // Clean up empty params

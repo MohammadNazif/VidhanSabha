@@ -43,6 +43,7 @@ namespace VidhanSabha.Application.Pannels.Admin.Dashboard.Dtos
         public int VaristhNagrik { get; set; }
         public int Viklaang { get; set; }
         public int Post { get; set; }
+        public int MandalId { get; set; }
     }
     public class SectorDashboardCountsDto
     {
@@ -62,6 +63,8 @@ namespace VidhanSabha.Application.Pannels.Admin.Dashboard.Dtos
         public int VaristhNagrik { get; set; }
         public int Viklaang { get; set; }
         public int Post { get; set; }
+
+        public int MandalId { get; set; }
     }
     public class StateDashboardCountsDto
     {

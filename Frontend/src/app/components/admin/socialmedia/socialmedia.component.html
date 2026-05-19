@@ -18,6 +18,41 @@
             [actions]="actions" [totalItems]="totalCount" [loading]="loading" (actionClick)="handleAction($event)"
             (pageChange)="handlePageChange($event)" (sortChange)="handleSortChange($event)"
             (searchChange)="handleSearchChange($event)">
+
+            <ng-template #cellTemplate let-value let-row="row" let-column="column">
+                <!-- Custom renderer for postImagePath avatar/image column -->
+                <ng-container *ngIf="column.key === 'postImagePath'">
+                    <div class="cell-avatar cursor-pointer" *ngIf="value" (click)="openImageModal(getImageUrl(value)); $event.stopPropagation()">
+                        <div class="avatar-circle hover:scale-105 hover:ring-2 hover:ring-slate-500/20 transition-all duration-200">
+                            <img [src]="getImageUrl(value)" class="avatar-img" />
+                        </div>
+                    </div>
+                    <div class="avatar-fallback" *ngIf="!value">
+                        <div class="avatar-circle bg-slate-50 border-slate-100">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                class="text-slate-300">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                                <circle cx="12" cy="7" r="4" />
+                            </svg>
+                        </div>
+                    </div>
+                </ng-container>
+
+                <!-- Default cells -->
+                <ng-container *ngIf="column.key !== 'postImagePath'">
+                    {{ value }}
+                </ng-container>
+            </ng-template>
+
         </app-generic-table>
+    </div>
+
+    <!-- Image Modal Overlay -->
+    <div *ngIf="selectedImage" class="image-preview-modal" (click)="closeImageModal()">
+        <div class="image-modal-content" (click)="$event.stopPropagation()">
+            <button class="image-modal-close" (click)="closeImageModal()">✕</button>
+            <img [src]="selectedImage" class="image-modal-img" />
+        </div>
     </div>
 </div>

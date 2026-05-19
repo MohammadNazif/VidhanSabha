@@ -127,7 +127,7 @@ export class AllowAccessListComponent implements OnInit {
   ];
 
   loading = false;
-  permissionData: any[] = [
+  basePermissions: any[] = [
     { id: ModulePermission.PannaPramukh, moduleName: 'Create Panna Pramukh', hasPermission: false },
     { id: ModulePermission.NewVoter, moduleName: 'Create New Voters', hasPermission: false },
     { id: ModulePermission.BoothVoterDescrition, moduleName: 'Create Booth Voter Description', hasPermission: false },
@@ -138,6 +138,8 @@ export class AllowAccessListComponent implements OnInit {
     { id: ModulePermission.Activity, moduleName: 'Create Activity', hasPermission: false },
     { id: ModulePermission.SeniororDisabled, moduleName: 'Create Senior Or Disabled', hasPermission: false }
   ];
+
+  permissionData: any[] = [...this.basePermissions];
 
   columns: TableColumn[] = [
     { key: 'moduleName', label: 'Allow Permission', sortable: false },
@@ -189,6 +191,16 @@ export class AllowAccessListComponent implements OnInit {
     entityField.visible = false;
     entityField.value = '';
     entityField.options = [];
+
+    // Rebuild permission list dynamically
+    if (typeField.value === 'sector') {
+      this.permissionData = [
+        ...this.basePermissions,
+        { id: ModulePermission.Booth, moduleName: 'Create Booth', hasPermission: false }
+      ];
+    } else {
+      this.permissionData = [...this.basePermissions];
+    }
     this.resetPermissions();
 
     if (!typeField.value) return;

@@ -12,5 +12,15 @@ export class CasteVoterService extends BaseApiService {
     return this.create(this.entity, data);
   }
 
-  // Add other methods if needed
+  getCasteVotersByBoothVoterId(boothVoterId: number | string): Observable<any> {
+    return this.getAllByParams(this.entity, { Id: boothVoterId, PageNumber: 1, PageSize: 100, IsDescending: true });
+  }
+
+  updateCasteVoter(data: any): Observable<any> {
+    return this.update(this.entity, data);
+  }
+
+  deleteCasteVoter(id: number | string): Observable<any> {
+    return this.delete(this.entity, id);
+  }
 }

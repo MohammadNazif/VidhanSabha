@@ -379,7 +379,8 @@ export class PrabhavshaliComponent implements OnInit {
       isDescending: this.isDescending,
       boothIds: this.boothIds,
       villageIds: this.villageIds,
-      designationIds: this.designationIds
+      designationIds: this.designationIds,
+      roleFilterFlag: !this.isListView
     };
 
     if (this.isDoctorView) params.designationIds = 8;

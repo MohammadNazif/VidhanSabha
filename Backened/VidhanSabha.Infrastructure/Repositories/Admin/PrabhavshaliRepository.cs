@@ -11,6 +11,7 @@ using VidhanSabha.Application.Pannels.Admin.PrabhavshaliVyakti.DTOs;
 using VidhanSabha.Application.Pannels.Admin.PrabhavshaliVyakti.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.PravasiVoters.DTOs;
 using VidhanSabha.Domain.Entities.Admin;
+using VidhanSabha.Domain.Enums;
 using VidhanSabha.Infrastructure.Extensions;
 using VidhanSabha.Infrastructure.Persistence;
 using VidhanSabha.Infrastructure.Repositories.Common;
@@ -71,7 +72,11 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
                 var boothIds = qp.GetBoothIds();
                 var designationIds = qp.GetDesignationIds();
 
-                if(villageIds.Any())
+                if (qp.rolefilterflag && (qp.Role == PrabhariRole.BoothSanyojak.ToString() || qp.Role == PrabhariRole.SectorSanyojak.ToString()))
+                {
+                    query = query.Where(f => f.Role == qp.Role.ToString());
+                }
+                if (villageIds.Any())
                 {
                     query = query.Where(b => b.Villages.Any(v => villageIds.Contains(v.VillageId)));
                 }

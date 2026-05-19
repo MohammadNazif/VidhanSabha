@@ -33,7 +33,7 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
             // Base query: only active activities
             var query = _context.Tbl_Activity
                 .Include(a => a.Images)
-                .Where(a => a.Status)
+                .Where(a => a.Status && a.UserId == qp.UserId)
                 .AsNoTracking();
 
             // Optional search

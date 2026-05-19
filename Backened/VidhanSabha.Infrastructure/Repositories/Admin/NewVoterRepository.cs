@@ -10,6 +10,7 @@ using VidhanSabha.Application.Common.ExportPdfExcel.Dtos;
 using VidhanSabha.Application.Pannels.Admin.NewVoter.DTOs;
 using VidhanSabha.Application.Pannels.Admin.NewVoter.Interfaces;
 using VidhanSabha.Domain.Entities.Admin;
+using VidhanSabha.Domain.Enums;
 using VidhanSabha.Infrastructure.Extensions;
 using VidhanSabha.Infrastructure.Persistence;
 using VidhanSabha.Infrastructure.Repositories.Common;
@@ -69,9 +70,12 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
             var castids = qp.GetCastIds();
             var villageIds = qp.GetVillageIds();
 
-          
+            if (qp.rolefilterflag && (qp.Role == PrabhariRole.BoothSanyojak.ToString() || qp.Role == PrabhariRole.SectorSanyojak.ToString()))
+            {
+                query = query.Where(f => f.Role == qp.Role.ToString());
+            }
             // ✅ FIX 1: query = assign karo, sirf query.Where nahi
-        query = query.Where(b =>
+            query = query.Where(b =>
                 (!qp.Id.HasValue || b.Id == qp.Id) && (b.Booth.Mandal.Status && b.Booth.Sector.Status && b.Booth.Mandal.VidhanId == vidhanSabhaId) &&
                 b.UserId == qp.UserId || b.CreatedToUserId == qp.UserId || b.CreatedsectorUserId == qp.UserId);                 // ✅ FIX 2: closing brace sahi jagah
 

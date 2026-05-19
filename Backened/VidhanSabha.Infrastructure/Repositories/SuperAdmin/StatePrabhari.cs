@@ -239,7 +239,6 @@ namespace VidhanSabha.Infrastructure.Repositories.SuperAdmin
 
                         CastId = bs.CastId,
                         CastName = caste.CastName,
-
                         Education = bs.EducationLevel,
                         CurrentAddress = bs.Address,
                         Profile = bs.ProfileImagePath,
@@ -271,7 +270,7 @@ namespace VidhanSabha.Infrastructure.Repositories.SuperAdmin
                         SectorName = ss.SectorName,
                         PrabhariName = ss.InchargeName,
                         ContactNumber = ss.PhoneNumber,
-
+                        
                         CategoryId = ss.CategoryId,
                         CategoryName = category.Name,
 

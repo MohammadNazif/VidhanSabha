@@ -62,7 +62,7 @@ export class SidebarComponent implements OnInit {
         // Requested Order
         { label: 'Mandal', route: '/mandal', roles: ['VidhanSabhaPrabhari'] },
         { label: 'Sector', route: '/sector', roles: ['VidhanSabhaPrabhari'] },
-        { label: 'Booth', route: '/booth', roles: ['VidhanSabhaPrabhari'] },
+        { label: 'Booth', route: '/booth', roles: ['VidhanSabhaPrabhari', 'SectorSanyojak'], moduleId: ModulePermission.Booth },
         { label: 'PannaPramukh', route: '/panna-pramukh', roles: ['VidhanSabhaPrabhari', 'BoothSanyojak', 'SectorSanyojak'], moduleId: ModulePermission.PannaPramukh },
         { label: 'Pravasi Voter', route: '/pravasi-voter', roles: ['VidhanSabhaPrabhari', 'BoothSanyojak', 'SectorSanyojak'], moduleId: ModulePermission.PravashiVoter },
         { label: 'New Voter', route: '/new-voter', roles: ['VidhanSabhaPrabhari', 'BoothSanyojak', 'SectorSanyojak'], moduleId: ModulePermission.NewVoter },

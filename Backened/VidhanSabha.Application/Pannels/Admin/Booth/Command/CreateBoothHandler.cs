@@ -35,13 +35,7 @@ namespace VidhanSabha.Application.Pannels.Admin.Booth.Command
 
         public async Task<int> Handle(CreateBoothCommand request, CancellationToken ct)
         {
-
-
-
             var cmd = request.Dto;
-
-          
-
             await _uow.BeginTransactionAsync();
             try
             {
@@ -58,7 +52,7 @@ namespace VidhanSabha.Application.Pannels.Admin.Booth.Command
 
                     createdsectorUserId = request.UserId;
 
-                    request.UserId = await _booth.GetadminUseridbyUserId(request.Dto.SectorId);
+                    request.UserId = await _booth.GetadminUseridbySectorUserId(request.Dto.SectorId);
 
                 }
                 // ── Step 1: Build villages (no DB call, just domain objects) ──────
@@ -104,6 +98,7 @@ namespace VidhanSabha.Application.Pannels.Admin.Booth.Command
                 // ── Step 3: Build Booth aggregate and persist ─────────────────────
                 var booth = Tbl_Booth.Create(
                     request.UserId,
+                    request.Role,
                     createdsectorUserId,
                     cmd.MandalId,
                     cmd.SectorId,

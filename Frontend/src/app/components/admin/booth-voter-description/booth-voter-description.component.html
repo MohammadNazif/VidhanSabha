@@ -1,5 +1,5 @@
 <div class="h-screen p-4 flex flex-col overflow-hidden bg-slate-50/50">
-  <app-page-header [title]="isListView ? 'Booth Voter Desc. List' : 'Booth Voter Description Management'" subtitle="Manage voter counts across booths and villages">
+  <app-page-header [title]="isListView ? 'Booth Voter Desc. List' : 'Booth Voter Description Management'" subtitle="Manage voter counts across booths and villages. Click 'View 📊' to see Caste breakdown.">
     <div class="flex items-center gap-3">
       <app-generic-modal-button *ngIf="canManage()" #voterModal [config]="addVoterConfig"
         (formSubmit)="handleFormSubmit($event)" label="Add Description" icon="+" variant="primary">
@@ -20,9 +20,113 @@
   <div class="flex-1 min-h-0 mt-4 bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
     <app-generic-table class="flex-1 min-h-0" [columns]="columns" [data]="voterList" [config]="config"
       [actions]="actions" [totalItems]="totalCount" [loading]="loading" (actionClick)="handleAction($event)"
+      (rowClick)="handleRowClick($event)"
       (pageChange)="handlePageChange($event)" (sortChange)="handleSortChange($event)"
       (searchChange)="handleSearchChange($event)" (filterChange)="handleFilterChange($event)"
       (selectionChange)="handleSelection($event)">
     </app-generic-table>
+  </div>
+
+  <!-- Premium Caste-wise Details Drawer/Modal -->
+  <div *ngIf="showCasteDetailsModal" class="caste-modal-overlay" (click)="closeCasteDetailsModal()">
+    <div class="caste-modal-card" (click)="$event.stopPropagation()">
+      <!-- Modal Header -->
+      <div class="caste-modal-header">
+        <div class="header-left">
+          <div class="header-icon"><i class="fa-solid fa-chart-pie"></i></div>
+          <div>
+            <h3 class="modal-title">Caste-wise Voter Distribution</h3>
+            <p class="modal-subtitle">
+              Booth No. {{ selectedBoothVoter?.boothNumber }} • {{ selectedBoothVoter?.villageName || 'N/A' }}
+            </p>
+          </div>
+        </div>
+        <button class="close-btn" (click)="closeCasteDetailsModal()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="caste-modal-body">
+        <!-- Summary Badges -->
+        <div class="summary-grid">
+          <div class="summary-card total">
+            <span class="card-label">Total Voters</span>
+            <span class="card-value">{{ selectedBoothVoter?.totalVoter || 0 }}</span>
+          </div>
+          <div class="summary-card male">
+            <span class="card-label">Male</span>
+            <span class="card-value"><i class="fa-solid fa-mars text-blue-500 mr-1"></i> {{ selectedBoothVoter?.male || 0 }}</span>
+          </div>
+          <div class="summary-card female">
+            <span class="card-label">Female</span>
+            <span class="card-value"><i class="fa-solid fa-venus text-pink-500 mr-1"></i> {{ selectedBoothVoter?.female || 0 }}</span>
+          </div>
+          <div class="summary-card other">
+            <span class="card-label">Other</span>
+            <span class="card-value"><i class="fa-solid fa-genderless text-purple-500 mr-1"></i> {{ selectedBoothVoter?.other || 0 }}</span>
+          </div>
+        </div>
+
+        <!-- Caste List Section -->
+        <div class="caste-section">
+          <h4 class="section-title">Caste Breakdown</h4>
+
+          <!-- Loading State -->
+          <div *ngIf="loadingCasteWise" class="loading-wrapper">
+            <div class="spinner"></div>
+            <p>Loading breakdown...</p>
+          </div>
+
+          <!-- Empty State -->
+          <div *ngIf="!loadingCasteWise && casteWiseList.length === 0" class="empty-caste-state">
+            <div class="empty-icon text-slate-300"><i class="fa-regular fa-folder-open fa-2x"></i></div>
+            <p class="empty-title">No Caste Data Registered</p>
+            <p class="empty-desc">There are no caste-wise voter entries logged for this booth voter description yet.</p>
+          </div>
+
+          <!-- Caste Breakdown List -->
+          <div *ngIf="!loadingCasteWise && casteWiseList.length > 0" class="caste-list-container">
+            <div *ngFor="let item of casteWiseList" class="caste-item">
+              <div class="caste-info w-full">
+                <!-- Inline edit input controls -->
+                <div *ngIf="editingCasteId === item.id" class="caste-edit-controls w-full">
+                  <select [(ngModel)]="editingSubCasteId" class="caste-inline-select">
+                    <option value="" disabled>--Select Caste--</option>
+                    <option *ngFor="let caste of castesList" [value]="caste.id">
+                      {{ caste.name }}
+                    </option>
+                  </select>
+                  <input type="number" [(ngModel)]="editingNumberValue" min="0" class="caste-inline-input" />
+                  <button class="inline-action-btn save" (click)="saveEditCaste(item)" title="Save"><i class="fa-solid fa-check"></i></button>
+                  <button class="inline-action-btn cancel" (click)="cancelEditCaste()" title="Cancel"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                
+                <!-- Display count with edit/delete icons -->
+                <ng-container *ngIf="editingCasteId !== item.id">
+                  <span class="caste-name">{{ item.subCasteName || 'Unknown Caste' }}</span>
+                  <div class="caste-display-controls">
+                    <span class="caste-count">
+                      <strong>{{ item.number }}</strong> voters
+                      <span class="caste-percentage">({{ calculatePercentage(item.number) }}%)</span>
+                    </span>
+                    
+                    <div class="caste-actions-menu">
+                      <button class="caste-action-icon edit" (click)="startEditCaste(item)" title="Edit">
+                        <i class="fa-solid fa-pen-to-square text-[10px]"></i>
+                      </button>
+                      <button class="caste-action-icon delete" (click)="deleteCasteRecord(item)" title="Delete">
+                        <i class="fa-solid fa-trash-can text-[10px]"></i>
+                      </button>
+                    </div>
+                  </div>
+                </ng-container>
+              </div>
+              <div class="progress-bar-container">
+                <div class="progress-bar-fill" [style.width.%]="calculatePercentage(item.number)"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>

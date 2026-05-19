@@ -20,6 +20,7 @@ namespace VidhanSabha.Application.Pannels.Admin.Booth.Dtos
         public string? BoothIds { get; set; }
         public string? villageIds { get; set; }
         public string? CastIds { get; set; }
+        public bool rolefilterflag { get; set; }
       
 
         // Helper — string ko List<int> mein convert karo
