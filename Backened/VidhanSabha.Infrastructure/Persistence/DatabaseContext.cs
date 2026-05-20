@@ -40,6 +40,7 @@ namespace VidhanSabha.Infrastructure.Persistence
 
         public DbSet<Tbl_State> Tbl_State => Set<Tbl_State>();
         public DbSet<Tbl_District>Tbl_District=>Set<Tbl_District>();
+        public DbSet<Tbl_RefreshToken> Tbl_RefreshTokens => Set<Tbl_RefreshToken>();
 
 
         public DbSet<Tbl_VidhansabhaStatewiseCount> Tbl_VidhansabhaStatewiseCount => Set<Tbl_VidhansabhaStatewiseCount>();

@@ -1,5 +1,6 @@
 ﻿// Endpoints/AuthEndpoints.cs
 using MediatR;
+using Microsoft.AspNetCore.Mvc;
 using VidhanSabha.Api.Responses;
 using VidhanSabha.Application.Common.MemberModulePermission.Command;
 using VidhanSabha.Application.Common.MemberModulePermission.Dtos;
@@ -25,7 +26,7 @@ public static class AuthEndpoints
             IMediator mediator) =>
         {
             var result = await mediator.Send(
-                new LoginCommand(request.MobileNumber, request.Password));
+                new LoginCommand(request.MobileNumber, request.Password,request.DeviceType));
 
             return result is null
                 ? Results.Unauthorized()
@@ -34,6 +35,18 @@ public static class AuthEndpoints
         .WithName("Login")
         .Produces<ApiResponse<LoginResponseDto>>(200)
         .Produces<ApiResponse<LoginResponseDto>>(401);
+
+        auth.MapPost("/refresh", async (
+            string RefreshToken,
+            IMediator mediator) =>
+        {
+            var result = await mediator.Send(new RefreshTokenCommand(RefreshToken));
+            return Results.Ok(ApiResponse<RefereshTokenResponseDto>.Ok(result, "New Token Granted Successfully"));
+        })
+        .AllowAnonymous()
+        .WithName("RefreshToken")
+        .Produces<ApiResponse<TokenResponseDto>>(200)
+        .Produces(401);
 
         // ── GET USER ─────────────────────────────────────────
         auth.MapGet("/user/{mobile}", async (

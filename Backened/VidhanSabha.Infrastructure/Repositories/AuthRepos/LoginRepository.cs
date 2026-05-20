@@ -18,7 +18,7 @@ public class LoginRepository : ILoginRepository
         throw new NotImplementedException();
     }
 
-    public  async Task<Tbl_LoginCredential?> GetByMobileAsync(string mobileNumber)
+    public async Task<Tbl_LoginCredential?> GetByMobileAsync(string mobileNumber)
     {
         try
         {
@@ -55,4 +55,41 @@ public class LoginRepository : ILoginRepository
     {
         throw new NotImplementedException();
     }
+
+    public async Task AddRefreshTokenAsync(Tbl_RefreshToken token)
+    {
+        await _context.Tbl_RefreshTokens.AddAsync(token);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task<Tbl_RefreshToken?> GetRefreshTokenAsync(string token){
+        try
+            {
+            return await _context.Tbl_RefreshTokens
+                   .Include(r => r.User)
+                   .FirstOrDefaultAsync(r => r.Token == token);
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+    }
+      
+    public async Task DeleteExpiredTokensAsync(string userId) =>
+        await _context.Tbl_RefreshTokens
+            .Where(r => r.UserId == userId &&
+                       (r.IsRevoked || r.ExpiresAt < DateTime.UtcNow))
+            .ExecuteDeleteAsync();
+
+    public async Task RevokeTokenAsync(string token) =>
+        await _context.Tbl_RefreshTokens
+            .Where(r => r.Token == token && !r.IsRevoked)
+            .ExecuteUpdateAsync(s =>
+                s.SetProperty(r => r.IsRevoked, true));
+
+    public async Task RevokeAllTokensAsync(string userId) =>
+        await _context.Tbl_RefreshTokens
+            .Where(r => r.UserId == userId && !r.IsRevoked)
+            .ExecuteUpdateAsync(s =>
+                s.SetProperty(r => r.IsRevoked, true));
 }

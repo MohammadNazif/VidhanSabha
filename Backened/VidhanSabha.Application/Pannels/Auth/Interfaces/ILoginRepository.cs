@@ -11,7 +11,11 @@ namespace VidhanSabha.Application.Pannels.Auth.Interfaces
     {
         Task<Tbl_LoginCredential?> GetByMobileAsync(string mobileNumber);
         //Task<Tbl_LoginCredential?> GetByUserIdAsync(int userId);
-
+        Task AddRefreshTokenAsync(Tbl_RefreshToken token);
+        Task<Tbl_RefreshToken?> GetRefreshTokenAsync(string token);
+        Task DeleteExpiredTokensAsync(string userId);
+        Task RevokeTokenAsync(string token);
+        Task RevokeAllTokensAsync(string userId);
         Task<int> GetSectorByUserIdAsync(string userId);
         Task<int> GetBoothByUserIdAsync(string userId);
         Task AddAsync(Tbl_LoginCredential login);

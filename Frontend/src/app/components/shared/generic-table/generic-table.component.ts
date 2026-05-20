@@ -43,6 +43,7 @@ const ICON_MAP: Record<string, string> = {
 
 /** Pre-sanitized SafeHtml icon cache — built once per app lifecycle, never re-created */
 const _iconCache = new Map<string, SafeHtml>();
+const _htmlCache = new Map<string, SafeHtml>();
 
 @Component({
   selector: 'app-generic-table',
@@ -65,7 +66,11 @@ export class GenericTableComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   getSafeHtml(html: string): SafeHtml {
-    return this.sanitizer.bypassSecurityTrustHtml(html || '');
+    const key = html || '';
+    if (!_htmlCache.has(key)) {
+      _htmlCache.set(key, this.sanitizer.bypassSecurityTrustHtml(key));
+    }
+    return _htmlCache.get(key)!;
   }
   // ── Inputs ──
   @Input() data: any[] = [];

@@ -389,20 +389,19 @@ export class BoothVoterDescriptionComponent implements OnInit {
     }
 
     // Load Villages (filtered by booth if BoothSanyojak)
-    const villageUrl = isBoothSanyojak && this.boothIds
-      ? `villagesByBoothId?boothId=${this.boothIds}`
-      : 'village';
-
-    this.boothVoterService.getCommonData(villageUrl, null, 500000).subscribe((res: any) => {
-      const filter = this.config.filters?.find(f => f.key === 'villageIds');
-      if (filter) {
-        const list = Array.isArray(res?.data?.items) ? res.data.items : (Array.isArray(res?.items) ? res.items : (Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : [])));
-        filter.options = list.map((v: any) => ({
-          label: v.name || v.villageName,
-          value: String(v.id || v.villageId)
-        }));
-      }
-    });
+    if (isBoothSanyojak && this.boothIds) {
+      const villageUrl = `villagesByBoothId?boothId=${this.boothIds}`;
+      this.boothVoterService.getCommonData(villageUrl, null, 500000).subscribe((res: any) => {
+        const filter = this.config.filters?.find(f => f.key === 'villageIds');
+        if (filter) {
+          const list = Array.isArray(res?.data?.items) ? res.data.items : (Array.isArray(res?.items) ? res.items : (Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : [])));
+          filter.options = list.map((v: any) => ({
+            label: v.name || v.villageName,
+            value: String(v.id || v.villageId)
+          }));
+        }
+      });
+    }
   }
 
   boothIds: string | null = null;

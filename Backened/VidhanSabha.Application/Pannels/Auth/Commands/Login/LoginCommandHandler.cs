@@ -1,43 +1,71 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
+using Microsoft.Extensions.Options;
 using VidhanSabha.Application.Pannels.Auth.DTOs;
 using VidhanSabha.Application.Pannels.Auth.Interfaces;
+using VidhanSabha.Domain.Entities.Auth;
 
 namespace VidhanSabha.Application.Pannels.Auth.Commands.Login
 {
- 
-        public class LoginCommandHandler : IRequestHandler<LoginCommand, LoginResponseDto>
+
+    public class LoginCommandHandler : IRequestHandler<LoginCommand, LoginResponseDto>
+    {
+        private readonly ILoginRepository _repo;
+        private readonly IJwtService _jwtService;
+        private readonly JwtSettings _jwtSettings;
+
+        public LoginCommandHandler(
+            ILoginRepository repo,
+            IJwtService jwtService,
+            
+            IOptions<JwtSettings> jwtSettings)
         {
-            private readonly ILoginRepository _repo;
-            private readonly IJwtService _jwtService;
+            _repo = repo;
+            _jwtService = jwtService;
+            _jwtSettings = jwtSettings.Value;
+        }
 
-            public LoginCommandHandler(ILoginRepository repo, IJwtService jwtService)
+        public async Task<LoginResponseDto> Handle(
+            LoginCommand command, CancellationToken cancellationToken)
+        {
+            // 1. Validate user
+            var user = await _repo.GetByMobileAsync(command.MobileNumber);
+
+            if (user == null)
+                throw new UnauthorizedAccessException("Mobile number not found.");
+
+            if (user.Password != command.Password)
+                throw new UnauthorizedAccessException("Invalid password.");
+
+            // 2. Cleanup old tokens
+            await _repo.DeleteExpiredTokensAsync(user.UserId);
+
+            // 3. Generate tokens
+            var accessToken = _jwtService.GenerateToken(
+                user.UserId, user.Mobile, user.Role.ToString());
+
+            var refreshToken = _jwtService.GenerateRefreshToken();
+
+            // 4. Save refresh token
+            await _repo.AddRefreshTokenAsync(new Tbl_RefreshToken
             {
-                _repo = repo;
-                _jwtService = jwtService;
-            }
+                Token = refreshToken,
+                UserId = user.UserId,
+                DeviceType = command.DeviceType,
+                ExpiresAt = DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenExpiryDays)
+            });
 
-            public async Task<LoginResponseDto> Handle(LoginCommand command, CancellationToken cancellationToken)
+            // 5. Return response
+            return new LoginResponseDto
             {
-                var user = await _repo.GetByMobileAsync(command.MobileNumber);
-
-                if (user == null)
-                    throw new UnauthorizedAccessException("Mobile number not found.");
-
-                if (user.Password != command.Password)
-                    throw new UnauthorizedAccessException("Invalid password.");
-
-                var token = _jwtService.GenerateToken(user.UserId, user.Mobile, user.Role.ToString());
-
-                return new LoginResponseDto
-                {
-                    UserId = user.UserId,
-                    MobileNumber = user.Mobile,
-                    Role = user.Role,
-                    Token = token,
-                    ExpiresAt = DateTime.UtcNow.AddMinutes(120)
-                };
-            }
+                UserId = user.UserId,
+                MobileNumber = user.Mobile,
+                Role = user.Role,
+                Token = accessToken,
+                RefreshToken = refreshToken,
+                ExpiresAt = DateTime.UtcNow.AddMinutes(_jwtSettings.AccessTokenExpiryMinutes)
+            };
         }
     }
+}

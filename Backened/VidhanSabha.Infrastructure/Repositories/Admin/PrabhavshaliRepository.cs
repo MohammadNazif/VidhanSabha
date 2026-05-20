@@ -61,11 +61,7 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
             try
             {
 
-             //   var vidhanSabhaId = await _context.Tbl_StatePrabhari
-             //.Where(u => u.userId == qp.UserId)
-             //.Select(u => u.VidhansabhaId)
-             //.FirstOrDefaultAsync();
-
+       
                 var query = _context.Tbl_PrabhavshaliVyakti
                 .AsNoTracking();
                 var villageIds = qp.GetVillageIds();

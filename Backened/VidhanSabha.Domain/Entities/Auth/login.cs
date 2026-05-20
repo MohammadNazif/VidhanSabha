@@ -42,6 +42,8 @@ namespace VidhanSabha.Domain.Entities.Auth
 
         public bool CanLogin() => Status;
 
+        public ICollection<Tbl_RefreshToken> RefreshTokens { get; set; }
+
 
     }
 }

@@ -12,11 +12,14 @@ namespace VidhanSabha.Application.Pannels.Auth.Commands.Login
     {
         public string MobileNumber { get; }
         public string Password { get; }
+        public string DeviceType { get; }
 
-        public LoginCommand(string mobileNumber, string password)
+        public LoginCommand(string mobileNumber, string password, string deviceType)
         {
             MobileNumber = mobileNumber;
             Password = password;
+            DeviceType = deviceType;
+
         }
     }
 }

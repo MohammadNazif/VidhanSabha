@@ -32,7 +32,10 @@ export class LoginComponent {
       return;
     }
 
-    const payload = this.loginForm.value;
+    const payload = {
+      ...this.loginForm.value,
+      deviceType: 'Web'
+    };
     const mobile = payload.mobileNumber;
 
     // Static Bypass for Testing
@@ -73,10 +76,14 @@ export class LoginComponent {
           }
           const userId = res.data?.userId || '';
           const token = res.data?.token || '';
+          const refreshToken = res.data?.refreshToken || '';
+          const expiresAt = res.data?.expiresAt || '';
           
           this.authService.setRole(role);
           if (userId) this.authService.setUserId(userId);
           if (token) this.authService.setToken(token);
+          if (refreshToken) this.authService.setRefreshToken(refreshToken);
+          if (expiresAt) this.authService.setExpiresAt(expiresAt);
           
           this.redirectByRole(role);
         },
