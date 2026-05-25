@@ -41,4 +41,9 @@ namespace VidhanSabha.Application.Pannels.Admin.Activity.Dtos
         public int? Id { get; set; }
 
     }
+    public class UpdateActivityDto : CreateActivityDto
+    {
+        public int Id { get; set; }
+    }
+
 }

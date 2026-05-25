@@ -1243,6 +1243,21 @@ public static class AdminEndpoints
         .Produces<ApiResponse<int>>(200)
         .Accepts<CreateActivityDto>("multipart/form-data");   // ✅ tells Swagger it's multipart
 
+        activity.MapPost("/update", async ([FromForm] UpdateActivityDto dto, IMediator mediator, HttpContext httpContext) =>
+        {
+            var result = await mediator.Send(new updateActivityCommand(dto));
+            return Results.Ok(ApiResponse<int>.Ok(result, "Activity Updated Successfully"));
+        }).DisableAntiforgery()
+          .WithName("UpdateActivity")
+          .Produces<int>(200);
+
+        activity.MapPost("/delete", async (int id, IMediator mediator, HttpContext httpContext) =>
+        {
+            var result = await mediator.Send(new deleteActivityCommand(id));
+            return Results.Ok(ApiResponse<int>.Ok(result, "Activity Deleted Successfully"));
+        }).DisableAntiforgery()
+          .WithName("DeleteActivity")
+          .Produces<int>(200);
 
         activity.MapGet("/getAll", async (
           [AsParameters] ActivityQueryParams q,
