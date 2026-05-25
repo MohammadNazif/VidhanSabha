@@ -19,7 +19,7 @@ namespace VidhanSabha.Infrastructure.Repositories.Common
 
         public async Task<List<Tbl_Cast>> GetAllCastAsync()
         {
-            return await _context.Tbl_Cast
+            return await _context.Tbl_Cast.OrderBy(b => b.CastName)
                 .ToListAsync();
         }
 

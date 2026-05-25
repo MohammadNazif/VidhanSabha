@@ -488,6 +488,12 @@ export class BoothSamitiComponent implements OnInit {
         this.toastService.showError('Duplicate', 'A samiti for this booth already exists!');
         return;
       }
+
+      if (!raw.sanyojakName) {
+        this.toastService.showError('Error', 'Booth Adhyaksh is required to create a Booth Samiti. Please assign an Adhyaksh to this booth first.');
+        return;
+      }
+
       submitData = {
         boothId: bId
       };

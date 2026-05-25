@@ -24,6 +24,9 @@ namespace VidhanSabha.Infrastructure.Persistence.Configurations.Auth
             builder.Property(x => x.Role)
              .HasConversion<int>();
             builder.Property(x => x.Mobile).HasMaxLength(15).IsRequired();
+            builder.HasIndex(x => new { x.Username, x.Mobile })
+                 .IsUnique()
+                 .HasFilter("[Status] = 1");
 
         }
     }

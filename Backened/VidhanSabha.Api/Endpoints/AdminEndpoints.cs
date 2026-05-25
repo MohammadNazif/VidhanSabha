@@ -1170,12 +1170,13 @@ public static class AdminEndpoints
             IMediator mediator,HttpContext httpContext) =>
         {
             q.UserId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            q.Role = httpContext.User.FindFirst(ClaimTypes.Role)?.Value;
             var result = await mediator.Send(new GetAllSocialMediaPostQuery(q));
             return Results.Ok(ApiResponse<PagedResult<SocialMediaPostReponse>>.Ok(result));
         }).RequireAuthorization()
             .WithName("getallSocailMediaPost");
 
-        socialmedia.MapGet("/getAllPlatform", async (
+        socialmedia.MapGet("/getAllPlatform", async (  
             IMediator mediator) =>
         {
             var result = await mediator.Send(new GetPlatformQuery());

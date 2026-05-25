@@ -38,6 +38,8 @@ import { BoothReportComponent } from './components/admin/reports/booth-report/bo
 import { SectorReportComponent } from './components/admin/reports/sector-report/sector-report.component';
 import { MandalSamitiComponent } from './components/admin/mandal-samiti/mandal-samiti.component';
 import { LandingPageComponent } from './components/landing-page/landing-page.component';
+import { GlobalLandingComponent } from './components/global-landing/global-landing.component';
+import { ContactUsComponent } from './components/contact-us/contact-us.component';
 import { ActivityComponent } from './components/admin/activity/activity.component';
 import { ProfileComponent } from './components/profile/profile.component';
 
@@ -45,6 +47,8 @@ export const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: 'dashboard', component: DashboardComponent },
   { path: 'profile', component: ProfileComponent },
+  { path: 'global', component: GlobalLandingComponent },
+  { path: 'contact-us', component: ContactUsComponent },
   { path: '', component: LandingPageComponent, pathMatch: 'full' },
 
   { path: 'combined-report', component: CombinedReportComponent },

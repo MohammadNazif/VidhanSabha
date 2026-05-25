@@ -74,9 +74,9 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
         }
 
         public async Task<PagedResult<MandalFullDto>> GetAllCombinedMandalReports(
-          MandalQueryParams qp,
-          int? vidhansabhaId,
-          CancellationToken ct = default)
+      MandalQueryParams qp,
+      int? vidhansabhaId,
+      CancellationToken ct = default)
         {
             var sectorIds = qp.GetSectorIds();
             var mandalIds = qp.GetMandalIds();
@@ -87,7 +87,7 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
             // =====================================================
             // BASE QUERY
             // =====================================================
-            var query = _context.Tbl_Sector
+            var baseQuery = _context.Tbl_Sector
                 .AsNoTracking()
                 .Where(s =>
                     s.SectorName != null &&
@@ -97,25 +97,80 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
                     (!qp.Id.HasValue || s.Mandal.Id == qp.Id) &&
                     (!mandalIds.Any() || mandalIds.Contains(s.Mandal.Id)) &&
                     (!sectorIds.Any() || sectorIds.Contains(s.Id)) &&
-                    (!castIds.Any() || (s.Booth != null && s.Booth.Sanyojak != null && castIds.Contains(s.Booth.Sanyojak.CastId))) &&
-                    (!villageIds.Any() || (s.Booth != null && s.Booth.Villages.Any(v => villageIds.Contains(v.VillageId)))) &&
 
-                    (string.IsNullOrWhiteSpace(term) ||
-                        (s.SectorName != null && s.SectorName.ToLower().Contains(term)) ||
-                         s.Booth.BoothNumber.ToString().Contains(term) ||
-                        (s.InchargeName != null && s.InchargeName.ToLower().Contains(term)) ||
-                        (s.FatherName != null && s.FatherName.ToLower().Contains(term)) ||
-                        (s.Booth != null && s.Booth.PollingStationName != null && s.Booth.PollingStationName.ToLower().Contains(term)) ||
-                        (s.Booth != null && s.Booth.Sanyojak != null &&
-                            ((s.Booth.Sanyojak.InchargeName != null && s.Booth.Sanyojak.InchargeName.ToLower().Contains(term)) ||
-                             (s.Booth.Sanyojak.PhoneNumber != null && s.Booth.Sanyojak.PhoneNumber.Contains(term)))) ||
-                        (s.Booth != null && s.Booth.Villages.Any(v => v.Village != null && v.Village.VillageName != null && v.Village.VillageName.ToLower().Contains(term)))
+                    (!castIds.Any() ||
+                        (s.Booth != null &&
+                         s.Booth.Sanyojak != null &&
+                         castIds.Contains(s.Booth.Sanyojak.CastId))) &&
+
+                    (!villageIds.Any() ||
+                        (s.Booth != null &&
+                         s.Booth.Villages.Any(v => villageIds.Contains(v.VillageId)))) &&
+
+                    (
+                        string.IsNullOrWhiteSpace(term) ||
+
+                        (s.SectorName != null &&
+                         s.SectorName.ToLower().Contains(term)) ||
+
+                        (s.Booth != null &&
+                         s.Booth.BoothNumber.ToString().Contains(term)) ||
+
+                        (s.InchargeName != null &&
+                         s.InchargeName.ToLower().Contains(term)) ||
+
+                        (s.FatherName != null &&
+                         s.FatherName.ToLower().Contains(term)) ||
+
+                        (s.Booth != null &&
+                         s.Booth.PollingStationName != null &&
+                         s.Booth.PollingStationName.ToLower().Contains(term)) ||
+
+                        (s.Booth != null &&
+                         s.Booth.Sanyojak != null &&
+                         (
+                             (s.Booth.Sanyojak.InchargeName != null &&
+                              s.Booth.Sanyojak.InchargeName.ToLower().Contains(term)) ||
+
+                             (s.Booth.Sanyojak.PhoneNumber != null &&
+                              s.Booth.Sanyojak.PhoneNumber.Contains(term))
+                         )) ||
+
+                        (s.Booth != null &&
+                         s.Booth.Villages.Any(v =>
+                             v.Village != null &&
+                             v.Village.VillageName != null &&
+                             v.Village.VillageName.ToLower().Contains(term)))
                     )
-                )
+                );
 
-                // =====================================================
-                // SINGLE ROW DTO
-                // =====================================================
+            // =====================================================
+            // GET DISTINCT BOOTH IDS FIRST
+            // =====================================================
+            var boothIdsQuery = baseQuery
+                .Where(s => s.Booth != null)
+                .Select(s => s.Booth.Id)
+                .Distinct();
+
+            // =====================================================
+            // TOTAL COUNT (BOOTH-WISE)
+            // =====================================================
+            var totalCount = await boothIdsQuery.CountAsync(ct);
+
+            // =====================================================
+            // PAGINATED BOOTH IDS
+            // =====================================================
+            var pagedBoothIds = await boothIdsQuery
+                .OrderBy(x => x)
+                .Skip((qp.PageNumber - 1) * qp.PageSize)
+                .Take(qp.PageSize)
+                .ToListAsync(ct);
+
+            // =====================================================
+            // FINAL DATA
+            // =====================================================
+            var items = await baseQuery
+                .Where(s => s.Booth != null && pagedBoothIds.Contains(s.Booth.Id))
                 .Select(s => new MandalFullDto
                 {
                     // Mandal
@@ -130,43 +185,59 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
                     SectorFatherName = s.FatherName,
 
                     // Booth
-                    BoothId = s.Booth != null ? s.Booth.Id : null,
-                    BoothNumber = s.Booth != null ? s.Booth.BoothNumber : null,
-                    PollingStationName = s.Booth != null ? s.Booth.PollingStationName : null,
+                    BoothId = s.Booth.Id,
+                    BoothNumber = s.Booth.BoothNumber,
+                    PollingStationName = s.Booth.PollingStationName,
 
                     // Sanyojak
-                    SanyojakName = s.Booth != null && s.Booth.Sanyojak != null ? s.Booth.Sanyojak.InchargeName : null,
-                    SanyojakPhone = s.Booth != null && s.Booth.Sanyojak != null ? s.Booth.Sanyojak.PhoneNumber : null,
-                    SanyojakFatherName = s.Booth != null && s.Booth.Sanyojak != null ? s.Booth.Sanyojak.FatherName : null,
-                    SanyojakAge = s.Booth != null && s.Booth.Sanyojak != null ? s.Booth.Sanyojak.Age : null,
-                    SanyojakCaste = s.Booth != null && s.Booth.Sanyojak != null && s.Booth.Sanyojak.Cast != null ? s.Booth.Sanyojak.Cast.CastName : null,
-                    SanyojakAddress = s.Booth != null && s.Booth.Sanyojak != null ? s.Booth.Sanyojak.Address : null,
-                    SanyojakEducation = s.Booth != null && s.Booth.Sanyojak != null ? s.Booth.Sanyojak.EducationLevel : null,
-                    SanyojakProfile = s.Booth != null && s.Booth.Sanyojak != null ? s.Booth.Sanyojak.ProfileImagePath : null,
+                    SanyojakName = s.Booth.Sanyojak != null
+                        ? s.Booth.Sanyojak.InchargeName
+                        : null,
 
-                    // Villages (comma-separated)
-                    VillageNames = s.Booth != null
-                        ? string.Join(", ",
-                            s.Booth.Villages
-                                .Where(v => v.Village != null)
-                                .Select(v => v.Village.VillageName))
-                        : null
-                });
+                    SanyojakPhone = s.Booth.Sanyojak != null
+                        ? s.Booth.Sanyojak.PhoneNumber
+                        : null,
 
-            // =====================================================
-            // TOTAL COUNT (matches projected rows)
-            // =====================================================
-            var totalCount = await query.CountAsync(ct);
+                    SanyojakFatherName = s.Booth.Sanyojak != null
+                        ? s.Booth.Sanyojak.FatherName
+                        : null,
 
-            // =====================================================
-            // PAGINATION
-            // =====================================================
-            var items = await query
-                .OrderBy(x => x.MandalId)
-                .ThenBy(x => x.SectorId)
-                .Skip((qp.PageNumber - 1) * qp.PageSize)
-                .Take(qp.PageSize)
+                    SanyojakAge = s.Booth.Sanyojak != null
+                        ? s.Booth.Sanyojak.Age
+                        : null,
+
+                    SanyojakCaste = s.Booth.Sanyojak != null &&
+                                    s.Booth.Sanyojak.Cast != null
+                        ? s.Booth.Sanyojak.Cast.CastName
+                        : null,
+
+                    SanyojakAddress = s.Booth.Sanyojak != null
+                        ? s.Booth.Sanyojak.Address
+                        : null,
+
+                    SanyojakEducation = s.Booth.Sanyojak != null
+                        ? s.Booth.Sanyojak.EducationLevel
+                        : null,
+
+                    SanyojakProfile = s.Booth.Sanyojak != null
+                        ? s.Booth.Sanyojak.ProfileImagePath
+                        : null,
+
+                    VillageNames = string.Join(", ",
+                        s.Booth.Villages
+                            .Where(v => v.Village != null)
+                            .Select(v => v.Village.VillageName))
+                })
+
+                // remove duplicates in memory
                 .ToListAsync(ct);
+
+            items = items
+                .GroupBy(x => x.BoothId)
+                .Select(g => g.First())
+                .OrderBy(x => x.MandalId)
+                .ThenBy(x => x.BoothNumber)
+                .ToList();
 
             // =====================================================
             // RESULT
@@ -183,60 +254,146 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
        CombinedReportFilter qp,
        int? vidhansabhaId,
        CancellationToken ct = default)
-           {
-            //var sectorIds = qp.GetSectorIds();
-            //var mandalIds = qp.GetMandalIds();
-            //var castIds = qp.GetCastIds();
-            //var villageIds = qp.GetVillageIds();
+        {
             var term = qp.SearchTerm?.Trim().ToLower();
 
-            var query = _context.Tbl_Sector
+            // =====================================================
+            // FETCH DATA
+            // =====================================================
+            var data = await _context.Tbl_Sector
                 .AsNoTracking()
                 .Where(s =>
                     !string.IsNullOrWhiteSpace(s.SectorName) &&
+
                     (vidhansabhaId == null || s.Mandal.VidhanId == vidhansabhaId) &&
                     (!qp.Id.HasValue || s.Mandal.Id == qp.Id) &&
-                    //(!mandalIds.Any() || mandalIds.Contains(s.Mandal.Id)) &&
-                    //(!sectorIds.Any() || sectorIds.Contains(s.Id)) &&
-                    //(!castIds.Any() || (s.Booth != null && s.Booth.Sanyojak != null && castIds.Contains(s.Booth.Sanyojak.CastId))) &&
-                    //(!villageIds.Any() || (s.Booth != null && s.Booth.Villages.Any(v => villageIds.Contains(v.VillageId)))) &&
-                    (string.IsNullOrWhiteSpace(term) ||
-                        (s.SectorName != null && s.SectorName.ToLower().Contains(term)) ||
-                        (s.InchargeName != null && s.InchargeName.ToLower().Contains(term)) ||
-                        (s.FatherName != null && s.FatherName.ToLower().Contains(term)) ||
-                        (s.Booth != null && s.Booth.PollingStationName != null && s.Booth.PollingStationName.ToLower().Contains(term)) ||
-                        (s.Booth != null && s.Booth.Sanyojak != null &&
-                            ((s.Booth.Sanyojak.InchargeName != null && s.Booth.Sanyojak.InchargeName.ToLower().Contains(term)) ||
-                             (s.Booth.Sanyojak.PhoneNumber != null && s.Booth.Sanyojak.PhoneNumber.Contains(term)))) ||
-                        (s.Booth != null && s.Booth.Villages.Any(v => v.Village != null && v.Village.VillageName != null && v.Village.VillageName.ToLower().Contains(term)))
+
+                    (
+                        string.IsNullOrWhiteSpace(term) ||
+
+                        (s.SectorName != null &&
+                         s.SectorName.ToLower().Contains(term)) ||
+
+                        (s.InchargeName != null &&
+                         s.InchargeName.ToLower().Contains(term)) ||
+
+                        (s.FatherName != null &&
+                         s.FatherName.ToLower().Contains(term)) ||
+
+                        (s.Booth != null &&
+                         s.Booth.BoothNumber.ToString().Contains(term)) ||
+
+                        (s.Booth != null &&
+                         s.Booth.PollingStationName != null &&
+                         s.Booth.PollingStationName.ToLower().Contains(term)) ||
+
+                        (s.Booth != null &&
+                         s.Booth.Sanyojak != null &&
+                         (
+                             (s.Booth.Sanyojak.InchargeName != null &&
+                              s.Booth.Sanyojak.InchargeName.ToLower().Contains(term)) ||
+
+                             (s.Booth.Sanyojak.PhoneNumber != null &&
+                              s.Booth.Sanyojak.PhoneNumber.Contains(term))
+                         )) ||
+
+                        (s.Booth != null &&
+                         s.Booth.Villages.Any(v =>
+                             v.Village != null &&
+                             v.Village.VillageName != null &&
+                             v.Village.VillageName.ToLower().Contains(term)))
                     )
                 )
+
                 .Select(s => new CombinedReportExportRow
                 {
+                    // IMPORTANT FOR DISTINCT
+                    BoothId = s.Booth != null ? s.Booth.Id : null,
+
+                    // Mandal
                     MandalId = s.Mandal.Id,
                     MandalName = s.Mandal.Name,
-                   
+
+                    // Sector
                     SectorName = s.SectorName,
                     SectorPhone = s.PhoneNumber,
                     SectorInchargeName = s.InchargeName,
                     SectorFatherName = s.FatherName,
-                
-                    BoothNumber = s.Booth != null ? s.Booth.BoothNumber : null,
-                    PollingStationName = s.Booth != null ? s.Booth.PollingStationName : null,
-                    SanyojakName = s.Booth != null && s.Booth.Sanyojak != null ? s.Booth.Sanyojak.InchargeName : null,
-                    SanyojakPhone = s.Booth != null && s.Booth.Sanyojak != null ? s.Booth.Sanyojak.PhoneNumber : null,
-                    SanyojakFatherName = s.Booth != null && s.Booth.Sanyojak != null ? s.Booth.Sanyojak.FatherName : null,
-                    SanyojakAge = s.Booth != null && s.Booth.Sanyojak != null ? s.Booth.Sanyojak.Age : null,
-                    SanyojakCaste = s.Booth != null && s.Booth.Sanyojak != null && s.Booth.Sanyojak.Cast != null ? s.Booth.Sanyojak.Cast.CastName : null,
-                    SanyojakAddress = s.Booth != null && s.Booth.Sanyojak != null ? s.Booth.Sanyojak.Address : null,
-                    SanyojakEducation = s.Booth != null && s.Booth.Sanyojak != null ? s.Booth.Sanyojak.EducationLevel : null,
-                    SanyojakProfile = s.Booth != null && s.Booth.Sanyojak != null ? s.Booth.Sanyojak.ProfileImagePath : null,
-                    VillageNames = s.Booth != null
-                        ? string.Join(", ", s.Booth.Villages.Where(v => v.Village != null).Select(v => v.Village.VillageName))
-                        : null
-                });
 
-            return await query.OrderBy(r => r.MandalId).ToListAsync(ct);
+                    // Booth
+                    BoothNumber = s.Booth != null
+                        ? s.Booth.BoothNumber
+                        : null,
+
+                    PollingStationName = s.Booth != null
+                        ? s.Booth.PollingStationName
+                        : null,
+
+                    // Sanyojak
+                    SanyojakName = s.Booth != null &&
+                                   s.Booth.Sanyojak != null
+                        ? s.Booth.Sanyojak.InchargeName
+                        : null,
+
+                    SanyojakPhone = s.Booth != null &&
+                                    s.Booth.Sanyojak != null
+                        ? s.Booth.Sanyojak.PhoneNumber
+                        : null,
+
+                    SanyojakFatherName = s.Booth != null &&
+                                         s.Booth.Sanyojak != null
+                        ? s.Booth.Sanyojak.FatherName
+                        : null,
+
+                    SanyojakAge = s.Booth != null &&
+                                  s.Booth.Sanyojak != null
+                        ? s.Booth.Sanyojak.Age
+                        : null,
+
+                    SanyojakCaste = s.Booth != null &&
+                                    s.Booth.Sanyojak != null &&
+                                    s.Booth.Sanyojak.Cast != null
+                        ? s.Booth.Sanyojak.Cast.CastName
+                        : null,
+
+                    SanyojakAddress = s.Booth != null &&
+                                      s.Booth.Sanyojak != null
+                        ? s.Booth.Sanyojak.Address
+                        : null,
+
+                    SanyojakEducation = s.Booth != null &&
+                                        s.Booth.Sanyojak != null
+                        ? s.Booth.Sanyojak.EducationLevel
+                        : null,
+
+                    SanyojakProfile = s.Booth != null &&
+                                      s.Booth.Sanyojak != null
+                        ? s.Booth.Sanyojak.ProfileImagePath
+                        : null,
+
+                    // Villages
+                    VillageNames = s.Booth != null
+                        ? string.Join(", ",
+                            s.Booth.Villages
+                                .Where(v => v.Village != null)
+                                .Select(v => v.Village.VillageName))
+                        : null
+                })
+
+                .ToListAsync(ct);
+
+            // =====================================================
+            // REMOVE DUPLICATE BOOTHS
+            // =====================================================
+            var result = data
+                .Where(x => x.BoothId != null)
+                .GroupBy(x => x.BoothId)
+                .Select(g => g.First())
+                .OrderBy(x => x.MandalId)
+                .ThenBy(x => x.BoothNumber)
+                .ToList();
+
+            return result;
         }
 
         public async Task<Tbl_Mandal> GetByIdAsync(int id)

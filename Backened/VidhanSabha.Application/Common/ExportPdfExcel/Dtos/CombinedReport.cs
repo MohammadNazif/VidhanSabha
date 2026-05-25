@@ -10,6 +10,7 @@ namespace VidhanSabha.Application.Common.ExportPdfExcel.Dtos
     {
         public string MandalName { get; set; } = "";
         public int MandalId { get; set; }
+        public int? BoothId { get; set; }
         
         // Sector
         public string SectorName { get; set; } = "";

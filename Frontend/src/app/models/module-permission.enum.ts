@@ -9,9 +9,10 @@ export enum ModulePermission {
   Activity = 8,
   SeniororDisabled = 9,
   Booth = 10,
-  Sahmat = 10,
-  Asahmat = 11,
-  SocialMedia = 12,
+  Sahmat = 15,
+  Asahmat = 16,
+  SocialMediaPost = 11,
+  SocialMedia = 11,
   SeniorCitizen = 13,
   Disabled = 14
 }

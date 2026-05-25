@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
@@ -32,7 +33,16 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
                     // ✅ Explicit includes = single JOIN query, no lazy-load surprises
                     .Include(x => x.Mandal)
                     .Include(x => x.MandalSanyojak);
+                Expression<Func<Tbl_MandalSamiti, bool>>? search = null;
+                if (!string.IsNullOrWhiteSpace(qp.SearchTerm))
+                {
+                    var term = qp.SearchTerm.Trim().ToLower();
+                    search = b =>
+                        b.MandalSanyojak.InchargeName.ToString().Contains(term) ||
+                        b.Mandal.Name.ToString().Contains(term) ||
+                        b.MandalSanyojak.Contact.ToString().Contains(term);
 
+                }
                 return await query.ToPagedResultAsync(
                     queryParams: qp,
                     searchPredicate: null,

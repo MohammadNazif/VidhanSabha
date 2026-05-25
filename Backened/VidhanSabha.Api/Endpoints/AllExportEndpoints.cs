@@ -169,25 +169,25 @@ namespace VidhanSabha.Api.Endpoints
 
                 });
 
-               sectorExport.MapGroup("")
-              .RequireAuthorization()
-              .AddExportEndpoints<BoothExportRow, BoothFilter>(
-               new BoothExportDef(),
-              async (BoothFilter f, CancellationToken ct) =>
-              {
-                  var repo = app.Services
-                      .CreateScope().ServiceProvider
-                      .GetRequiredService<IBoothRepository>();
+              // sectorExport.MapGroup("")
+              //.RequireAuthorization()
+              //.AddExportEndpoints<SectorExportRow, SectorFilter>(
+              // new SectorExportDef(),
+              //async (SectorFilter f, CancellationToken ct) =>
+              //{
+              //    var repo = app.Services
+              //        .CreateScope().ServiceProvider
+              //        .GetRequiredService<ISectorRepository>();
 
-                  var qp = new BoothQueryParams
-                  {
-                      UserId = f.UserId,
-                      SearchTerm = f.Search
-                  };
+              //    var qp = new SectorQueryParams
+              //    {
+              //        UserId = f.UserId,
+              //        SearchTerm = f.Search
+              //    };
 
-                  return await repo.GetAllForExportAsync(qp);
+              //    //return await repo.GetAllForExportAsync(qp);
 
-              });
+              //});
 
 
             doubleVoterExport.MapGroup("")

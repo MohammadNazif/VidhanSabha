@@ -36,6 +36,10 @@ export class SectorService extends BaseApiService {
     return this.getWithParams(`${this.apiUrl}/${this.entity}/getAllSectorReports`, params);
   }
 
+  exportSector(format: 'excel' | 'pdf', params: any = {}): Observable<Blob> {
+    return this.export(this.entity, format, params);
+  }
+
   exportAdminSectorReport(format: 'excel' | 'pdf', params: any = {}): Observable<Blob> {
     return this.export('sectorreport', format, params);
   }

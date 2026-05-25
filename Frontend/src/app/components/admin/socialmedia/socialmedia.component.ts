@@ -212,6 +212,11 @@ export class SocialMediaComponent implements OnInit {
   ) { }
 
   ngOnInit() {
+    const role = (this.authService.getRole() || '').toUpperCase().trim();
+    if (role.includes('BOOTH') || role.includes('SECTOR')) {
+      this.columns = this.columns.filter(c => c.key !== 'sectors' && c.key !== 'booths');
+    }
+
     this.route.url.subscribe((url: any) => {
       const path = url[0]?.path || '';
       this.isListView = path.includes('-list');
@@ -222,6 +227,8 @@ export class SocialMediaComponent implements OnInit {
 
   loadData() {
     this.loading = true;
+    const role = (this.authService.getRole() || '').toUpperCase().trim();
+
     const params: any = {
       pageNumber: this.pageNumber,
       pageSize: this.pageSize,
@@ -229,6 +236,13 @@ export class SocialMediaComponent implements OnInit {
       sortBy: this.sortBy,
       isDescending: this.isDescending
     };
+
+    if (role.includes('BOOTH')) {
+      params.BoothId = this.authService.getBoothId();
+    } else if (role.includes('SECTOR')) {
+      params.SectorId = this.authService.getSectorId();
+    }
+
 
     this.socialMediaService.getAllSocialMedia(params).subscribe({
       next: (response) => {

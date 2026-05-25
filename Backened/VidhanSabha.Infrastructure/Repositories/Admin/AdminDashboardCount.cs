@@ -84,13 +84,15 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
 
         public async Task<BoothDashboardCountsDto> GetBoothDashboardCountsAsync(string userId)
         {
+            int boothid = await _context.Tbl_BoothSanyojak
+       .Where(x => x.UserId == userId)
+    .Select(b => b.BoothId)
+     .FirstOrDefaultAsync();
             return new BoothDashboardCountsDto
             {
+               
 
-                BoothId = await _context.Tbl_BoothSanyojak
-        .Where(x => x.UserId == userId)
-        .Select(b => b.BoothId)
-         .FirstOrDefaultAsync(),
+                BoothId = boothid,
                 PannaPramukh = await _context.Tbl_PannaPramukh
                                    .CountAsync(x =>x.Status && x.CreatedToUserId == userId),
 
@@ -103,8 +105,8 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
                 BoothSamiti = await _context.Tbl_BoothSamitiMem.CountAsync(x => x.Status && x.CreatedToUserId == userId),
                 VaristhNagrik = await _context.Tbl_SeniorDisabled.CountAsync(x => x.Status && x.CreatedToUserId == userId && x.TypeId == 1),
                 Viklaang = await _context.Tbl_SeniorDisabled.CountAsync(x => x.Status && x.CreatedToUserId == userId && x.TypeId == 2),
-                Post = await _context.Tbl_SocialMediaPost.CountAsync(x => x.Status),
-                Activities = await _context.Tbl_Block.CountAsync(x => x.Status),
+                Post = await _context.Tbl_SocialMediaBooth.CountAsync(x => x.Status && x.BoothId == boothid),
+                Activities = await _context.Tbl_Block.CountAsync(x => x.Status && x.UserId == userId),
                 BoothVoter = await _context.Tbl_BoothVoter.CountAsync(x => x.Status && x.CreatedToUserId == userId)
             };
            
@@ -122,7 +124,7 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
             int mandalId;
             mandalId = await _context.Tbl_Sector
            .Where(x => x.UserId == userId)
-          .Select(b => b.MandalId)
+           .Select(b => b.MandalId)
            .FirstOrDefaultAsync();
             return new SectorDashboardCountsDto
             {
@@ -141,8 +143,8 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
                 BoothSamiti = await _context.Tbl_BoothSamitiMem.CountAsync(x => x.Status && x.CreatedsectorUserId == userId),
                 VaristhNagrik = await _context.Tbl_SeniorDisabled.CountAsync(x => x.Status && x.CreatedsectorUserId == userId && x.TypeId == 1),
                 Viklaang = await _context.Tbl_SeniorDisabled.CountAsync(x => x.Status && x.CreatedsectorUserId == userId && x.TypeId == 2),
-                Post = await _context.Tbl_SocialMediaPost.CountAsync(x => x.Status && x.UserId == userId),
-                Activities = await _context.Tbl_Block.CountAsync(x => x.Status),
+                Post = await _context.Tbl_SocialMediaSector.CountAsync(x => x.Status && x.SectorId == sectorId),
+                Activities = await _context.Tbl_Block.CountAsync(x => x.Status && x.UserId == userId),
                 BoothVoter = await _context.Tbl_BoothVoter.CountAsync(x => x.Status && x.CreatedsectorUserId == userId)
             };
 

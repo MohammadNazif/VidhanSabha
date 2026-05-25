@@ -64,7 +64,7 @@ public class LoginRepository : ILoginRepository
 
     public async Task<Tbl_RefreshToken?> GetRefreshTokenAsync(string token){
         try
-            {
+                {
             return await _context.Tbl_RefreshTokens
                    .Include(r => r.User)
                    .FirstOrDefaultAsync(r => r.Token == token);

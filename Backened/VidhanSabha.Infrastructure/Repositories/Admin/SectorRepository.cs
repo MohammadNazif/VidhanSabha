@@ -85,20 +85,29 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
                 .Where(s =>
                     s.Status &&
                     s.CreatedByUserId == qp.UserId &&
+
                     (vidhanSabhaId == null || s.Mandal.VidhanId == vidhanSabhaId) &&
                     (!qp.MandalId.HasValue || s.MandalId == qp.MandalId) &&
                     (!qp.SectorId.HasValue || s.Id == qp.SectorId) &&
                     (!qp.BoothId.HasValue || s.Booth.Id == qp.BoothId) &&
+
                     (!qp.VillageId.HasValue ||
                         s.Villages.Any(v => v.VillageId == qp.VillageId) ||
-                        (s.Booth != null && s.Booth.Villages.Any(v => v.VillageId == qp.VillageId)))
+                        (s.Booth != null &&
+                         s.Booth.Villages.Any(v => v.VillageId == qp.VillageId)))
                 );
 
-            // ✅ CastId filter separate to avoid null cast rows being dropped
+            // =========================
+            // CAST FILTER
+            // =========================
             if (qp.CastId.HasValue)
+            {
                 query = query.Where(s => s.CastId == qp.CastId.Value);
+            }
 
-
+            // =========================
+            // MULTI FILTERS
+            // =========================
             var mandalIds = qp.GetMandalIds();
             var villageIds = qp.GetVillageIds();
             var castIds = qp.GetCastIds();
@@ -106,35 +115,49 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
 
             if (mandalIds.Any())
             {
-                query = query.Where(b => mandalIds.Contains(b.MandalId));
+                query = query.Where(s => mandalIds.Contains(s.MandalId));
             }
 
             if (villageIds.Any())
             {
-                query = query.Where(b => b.Villages.Any(v => villageIds.Contains(v.VillageId)));
+                query = query.Where(s =>
+                    s.Villages.Any(v => villageIds.Contains(v.VillageId)));
             }
 
             if (castIds.Any())
             {
-                query = query.Where(b => castIds.Contains(b.CastId));
+                query = query.Where(s =>
+                    castIds.Contains(s.CastId));
             }
+
             if (sectorIds.Any())
             {
-                query = query.Where(b => sectorIds.Contains(b.Id));
+                query = query.Where(s =>
+                    sectorIds.Contains(s.Id));
             }
+
             // =========================
-            // 🔍 SEARCH — baked into query directly, null-safe
+            // SEARCH
             // =========================
             if (!string.IsNullOrWhiteSpace(term))
             {
                 query = query.Where(s =>
-                    (s.SectorName != null && s.SectorName.ToLower().Contains(term)) ||
-                    (s.InchargeName != null && s.InchargeName.ToLower().Contains(term)) ||
-                    (s.PhoneNumber != null && s.PhoneNumber.Contains(term)) ||
+
+                    (s.SectorName != null &&
+                     s.SectorName.ToLower().Contains(term)) ||
+
+                    (s.InchargeName != null &&
+                     s.InchargeName.ToLower().Contains(term)) ||
+
+                    (s.PhoneNumber != null &&
+                     s.PhoneNumber.Contains(term)) ||
 
                     (s.Mandal != null &&
                      s.Mandal.Name != null &&
                      s.Mandal.Name.ToLower().Contains(term)) ||
+
+                    (s.Booth != null &&
+                     s.Booth.BoothNumber.ToString().Contains(term)) ||
 
                     (s.Booth != null &&
                      s.Booth.PollingStationName != null &&
@@ -152,44 +175,35 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
 
                     (s.Booth != null &&
                      s.Booth.Villages.Any(v =>
-                        v.Village != null &&
-                        v.Village.VillageName != null &&
-                        v.Village.VillageName.ToLower().Contains(term)))
+                         v.Village != null &&
+                         v.Village.VillageName != null &&
+                         v.Village.VillageName.ToLower().Contains(term)))
                 );
             }
 
-            // =========================
-            // 📦 PAGINATION + PROJECTION
-            // =========================
-            return await query.ToPagedResultAsync(
-                queryParams: qp,
-                searchPredicate: null, // ✅ already applied above
-                defaultSort: s => s.Id,
-                projection: s => new SectorReportDto
+            // =====================================================
+            // FETCH DATA FIRST
+            // =====================================================
+            var data = await query
+                .Select(s => new SectorReportDto
                 {
+                    // Mandal
                     MandalId = s.Mandal.Id,
                     MandalName = s.Mandal.Name,
 
+                    // Sector
                     SectorId = s.Id,
                     SectorName = s.SectorName,
                     InchargeName = s.InchargeName,
                     Age = s.Age,
                     FatherName = s.FatherName,
-                    CastId = s.CastId != null ? (s.CastId != null ? s.CastId : null) : null,
-                    //CastName = s.CastId != null ? (s.Cast != null ? s.Cast.CastName : null) : null,
+                    CastId = s.CastId,
                     EducationLevel = s.EducationLevel,
                     PhoneNumber = s.PhoneNumber,
                     Address = s.Address,
                     ProfileImage = s.ProfileImage,
 
-                    SectorVillages = s.Villages != null
-                        ? s.Villages.Select(v => new VillageDto
-                        {
-                            Id = v.VillageId,
-                            Name = v.Village != null ? v.Village.VillageName : null
-                        }).ToList()
-                        : new List<VillageDto>(),
-
+                    // Booth
                     Booth = s.Booth != null
                         ? new BoothDto
                         {
@@ -217,14 +231,57 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
                                 ? s.Booth.Villages.Select(v => new VillageDto
                                 {
                                     Id = v.VillageId,
-                                    Name = v.Village != null ? v.Village.VillageName : null
+                                    Name = v.Village != null
+                                        ? v.Village.VillageName
+                                        : null
                                 }).ToList()
                                 : new List<VillageDto>()
                         }
-                        : null
-                },
-                ct: ct
-            );
+                        : null,
+
+                    // Sector Villages
+                    SectorVillages = s.Villages != null
+                        ? s.Villages.Select(v => new VillageDto
+                        {
+                            Id = v.VillageId,
+                            Name = v.Village != null
+                                ? v.Village.VillageName
+                                : null
+                        }).ToList()
+                        : new List<VillageDto>()
+                })
+                .ToListAsync(ct);
+
+            // =====================================================
+            // REMOVE DUPLICATE BOOTHS
+            // =====================================================
+            var distinctData = data
+                .GroupBy(x => x.Booth != null ? x.Booth.Id : 0)
+                .Select(g => g.First())
+                .OrderBy(x => x.MandalId)
+                .ThenBy(x => x.Booth != null ? x.Booth.BoothNumber : 0)
+                .ToList();
+
+            // =====================================================
+            // PAGINATION IN MEMORY
+            // =====================================================
+            var totalCount = distinctData.Count;
+
+            var items = distinctData
+                .Skip((qp.PageNumber - 1) * qp.PageSize)
+                .Take(qp.PageSize)
+                .ToList();
+
+            // =====================================================
+            // RESULT
+            // =====================================================
+            return new PagedResult<SectorReportDto>
+            {
+                Items = items,
+                TotalCount = totalCount,
+                PageNumber = qp.PageNumber,
+                PageSize = qp.PageSize
+            };
         }
 
         public async Task<List<SectorWithBoothReportExportRow>> GetAllSectorWithBoothReportsForExportAsync(
@@ -422,7 +479,7 @@ CancellationToken ct = default)
   );
             
         }
-        public async Task<List<SectorReportExportRow>> GetSectorReportExportAsync(
+    public async Task<List<SectorReportExportRow>> GetSectorReportExportAsync(
     SectorReportFilter filter,
     CancellationToken ct = default)
         {

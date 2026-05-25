@@ -121,7 +121,7 @@ namespace VidhanSabha.Api.Endpoints
                 var data = await mediator.Send(new getAllStatePrabhariQuery());
                 return Results.Ok(ApiResponse<IReadOnlyList<StatePrabhariResponseDto>>.Ok(data, "State Prabhari Fetched Successfully"));
             }).WithName("GetAllStatePrabhari")
-     .Produces<ApiResponse<IReadOnlyList<StatePrabhariResponseDto>>>(200);
+            .Produces<ApiResponse<IReadOnlyList<StatePrabhariResponseDto>>>(200);
 
             stateprabhaari.MapGet("/dashboardcount", async (IMediator mediator,HttpContext httpContext) =>
             {
@@ -149,8 +149,6 @@ namespace VidhanSabha.Api.Endpoints
             }).WithName("updateStatePrabhari")
              .Produces(200);
 
-
-
             stateprabhaari.MapPost("/vidhansabha/create", async (IMediator mediator, CreateVidhanSabhaRequestDto requestDto,HttpContext httpContext) =>
             {
                 string userId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -160,7 +158,6 @@ namespace VidhanSabha.Api.Endpoints
               }).RequireAuthorization()
                 .WithName("VidhanSabhaCreated")
                 .Produces(200);
-
 
             stateprabhaari.MapPost("/vidhansabha/update", async (IMediator mediator, UpdateVidhanSabhaRequestDto requestDto, HttpContext httpContext) =>
             {
@@ -181,15 +178,6 @@ namespace VidhanSabha.Api.Endpoints
             }).RequireAuthorization()
                .WithName("VidhanSabhaDeleted")
                .Produces(200);
-
-
-
-
-            //vidhansabhacount.MapPost("/create/", async (int id,string userId, IMediator mediator) =>
-            //{
-            //    var data = await mediator.Send(new DeletePrabhariCommand(id,userId));
-            //    return Results.Ok(ApiResponse<int>.Ok(data, " State Prabhari deleted successfully"));
-            //}).Produces(200);
 
             vidhansabhacount.MapPost("districtwise/create", async (IMediator mediator, VidhansabhaDistrictRequestDto request) =>
             {
@@ -229,9 +217,10 @@ namespace VidhanSabha.Api.Endpoints
                 int result = await mediator.Send(new UpdateStateMembersCommand(dto));
                 return Results.Ok(ApiResponse<int>.Ok(result, "State Member Updated Successfully"));
             })
-                .WithName("UpdateStateMember")
-                 .DisableAntiforgery()
-                .Produces<int>(200);
+              .RequireAuthorization()
+              .WithName("UpdateStateMember")
+              .DisableAntiforgery()
+              .Produces<int>(200);
 
             statemembers.MapPost("/delete", async (int id, IMediator mediator) =>
             {

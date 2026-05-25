@@ -1,4 +1,4 @@
-import { HttpInterceptorFn, HttpErrorResponse, HttpClient, HttpBackend } from '@angular/common/http';
+import { HttpInterceptorFn, HttpErrorResponse, HttpClient } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { AuthServiceService } from '../Services/Auth/auth.service';
 import { catchError, switchMap, throwError, BehaviorSubject, filter, take } from 'rxjs';
@@ -9,8 +9,7 @@ let refreshTokenSubject: BehaviorSubject<any> = new BehaviorSubject<any>(null);
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthServiceService);
-  const httpBackend = inject(HttpBackend);
-  const httpClient = new HttpClient(httpBackend); // Bypasses interceptors to avoid loops
+  const httpClient = inject(HttpClient);
   const token = authService.getToken();
 
   const addToken = (request: any, tkn: string) => {

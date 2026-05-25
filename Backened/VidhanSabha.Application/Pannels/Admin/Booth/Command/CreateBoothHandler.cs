@@ -119,7 +119,7 @@ namespace VidhanSabha.Application.Pannels.Admin.Booth.Command
             {
                 await _uow.RollbackAsync();
                 throw new ApplicationException(
-                    $"Booth registration failed. Rolled back. Reason: {ex.Message}", ex);
+                    $"{ex.Message}", ex);
             }
         }
         private bool IsUserRole(string currentRole, PrabhariRole roleToCheck)

@@ -1,0 +1,252 @@
+<!-- ════════════════════════════════════════
+     NAVBAR
+════════════════════════════════════════ -->
+<nav class="navbar" [class.scrolled]="scrolled">
+  <div class="nav-inner">
+    <!-- Brand -->
+    <div class="nav-brand">
+      <div class="brand-dot"></div>
+      <span class="brand-name">Electoral Suite</span>
+    </div>
+
+    <!-- Desktop Links -->
+    <ul class="nav-links">
+      <li *ngFor="let link of navLinks">
+        <a (click)="scrollTo(link.href)">{{ link.label }}</a>
+      </li>
+    </ul>
+
+    <!-- Right CTA -->
+    <div class="nav-right">
+      <a routerLink="/login" class="btn btn-ghost">Log in</a>
+      <button class="btn btn-primary" (click)="scrollTo('cta')">Request Demo</button>
+      <button class="hamburger" (click)="toggleMenu()" [class.open]="mobileMenuOpen">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile Menu -->
+  <div class="mobile-menu" [class.open]="mobileMenuOpen">
+    <a *ngFor="let link of navLinks" (click)="scrollTo(link.href)">{{ link.label }}</a>
+    <a routerLink="/login" class="btn btn-primary full-w">Log in</a>
+  </div>
+</nav>
+
+<!-- ════════════════════════════════════════
+     HERO
+════════════════════════════════════════ -->
+<section class="hero" id="hero">
+  <div class="hero-inner">
+    <!-- Left content -->
+    <div class="hero-content">
+      <div class="hero-eyebrow">
+        <i class="fa-solid fa-chevron-right"></i> Vidhan Sabha Edition
+      </div>
+      <h1 class="hero-h1">
+        Data-Driven Election Management from State to Booth Level.
+      </h1>
+      <p class="hero-sub">
+        Empowering administrators with real-time voter insights, hierarchical
+        control, and actionable analytics — across every layer of the electoral ladder.
+      </p>
+      <div class="hero-actions">
+        <button class="btn btn-primary btn-lg" (click)="scrollTo('cta')">
+          Request Demo <i class="fa-solid fa-arrow-right"></i>
+        </button>
+        <button class="btn btn-outline btn-lg" (click)="scrollTo('features')">
+          Explore Features
+        </button>
+      </div>
+      <div class="hero-trust">
+        <i class="fa-solid fa-circle-check"></i> 30-day demo &nbsp;·&nbsp;
+        <i class="fa-solid fa-circle-check"></i> Role-based access &nbsp;·&nbsp;
+        <i class="fa-solid fa-circle-check"></i> Secure data
+      </div>
+    </div>
+
+    <!-- Right mock UI panel -->
+    <div class="hero-visual">
+      <img src="/assets/images/hero_dashboard_mockup.png" alt="Election Dashboard UI"
+        style="width: 100%; height: auto; border-radius: var(--radius-lg); box-shadow: 0 20px 40px rgba(0,0,0,0.1); transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);"
+        onmouseover="this.style.transform='translateY(-10px)'" onmouseout="this.style.transform='translateY(0)'" />
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════
+     FEATURES
+════════════════════════════════════════ -->
+<section class="section bg-white" id="features">
+  <div class="container">
+    <div class="section-eyebrow reveal">Platform capabilities</div>
+    <h2 class="section-h2 reveal">Everything an election team needs, in one place.</h2>
+    <p class="section-sub reveal">
+      Built for the depth of Indian electoral hierarchies — from State Prabhari oversight
+      down to Panna Pramukh field action.
+    </p>
+
+    <div class="features-grid">
+      <div class="feature-card reveal" *ngFor="let f of features; let i = index"
+        [style.animation-delay]="(i * 80) + 'ms'">
+        <div class="feature-icon-wrap">
+          <i class="fa-solid {{ f.icon }}"></i>
+        </div>
+        <h3>{{ f.title }}</h3>
+        <p>{{ f.desc }}</p>
+        <a class="learn-more" (click)="scrollTo('cta')">
+          Learn more <i class="fa-solid fa-arrow-right"></i>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════
+     ROLES
+════════════════════════════════════════ -->
+<section class="section bg-gray" id="roles">
+  <div class="container">
+    <div class="section-eyebrow reveal">Hierarchy</div>
+    <h2 class="section-h2 reveal">Role-based access for every administrative layer.</h2>
+    <p class="section-sub reveal">Each role sees exactly what they need — no more, no less.</p>
+
+    <div class="roles-grid">
+      <div class="role-card reveal" *ngFor="let r of roles; let i = index" [style.animation-delay]="(i * 70) + 'ms'">
+        <div class="role-left">
+          <div class="role-avatar" [style.background]="r.bg" [style.color]="r.color">
+            <i class="fa-solid {{ r.icon }}"></i>
+          </div>
+          <div class="role-info">
+            <div class="role-level">{{ r.level }}</div>
+            <div class="role-title">{{ r.title }}</div>
+            <div class="role-sub">{{ r.sub }}</div>
+          </div>
+        </div>
+        <div class="role-settings">
+          <i class="fa-solid fa-gear"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════
+     ANALYTICS / REPORTS
+════════════════════════════════════════ -->
+<section class="section bg-white" id="analytics">
+  <div class="container">
+    <div class="section-eyebrow reveal">Analytics preview</div>
+    <h2 class="section-h2 reveal">Reports that turn data into decisions.</h2>
+
+    <div class="reports-grid">
+      <!-- Mandal Report Mock -->
+      <div class="report-card reveal">
+        <div
+          style="background: linear-gradient(135deg, #f0f7ff, #e8f0fe); padding: 32px 32px 0 32px; border-bottom: 1px solid var(--border); overflow: hidden;">
+          <img src="/assets/images/mandal_report_mockup.png" alt="Mandal Report Mockup"
+            style="width: 100%; height: 260px; object-fit: cover; object-position: top; display: block; border-radius: var(--radius) var(--radius) 0 0; box-shadow: 0 4px 24px rgba(0,0,0,0.06); transform: translateY(4px); transition: transform 0.4s ease;"
+            onmouseover="this.style.transform='translateY(0)'" onmouseout="this.style.transform='translateY(4px)'" />
+        </div>
+        <div class="report-info">
+          <h3>Mandal Report</h3>
+          <p>Trend lines, voter category breakdown and turnout forecast in one view.</p>
+        </div>
+      </div>
+
+      <!-- Booth Report Mock -->
+      <div class="report-card reveal">
+        <div
+          style="background: linear-gradient(135deg, #e0f7fa, #e8f5e9); padding: 32px 32px 0 32px; border-bottom: 1px solid var(--border); overflow: hidden;">
+          <img src="/assets/images/booth_report_mockup.png" alt="Booth Report Mockup"
+            style="width: 100%; height: 260px; object-fit: cover; object-position: top; display: block; border-radius: var(--radius) var(--radius) 0 0; box-shadow: 0 4px 24px rgba(0,0,0,0.06); transform: translateY(4px); transition: transform 0.4s ease;"
+            onmouseover="this.style.transform='translateY(0)'" onmouseout="this.style.transform='translateY(4px)'" />
+        </div>
+        <div class="report-info">
+          <h3>Booth Report</h3>
+          <p>Heatmap, contact activity timeline and sentiment indicator at booth resolution.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Feature badges -->
+    <div class="badges-row reveal">
+      <div class="feature-badge" *ngFor="let b of footerBadges">
+        <i class="fa-solid {{ b.icon }}"></i> {{ b.text }}
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════
+     SECURITY
+════════════════════════════════════════ -->
+<section class="section bg-gray" id="security">
+  <div class="container">
+    <div class="security-grid">
+      <!-- Left content -->
+      <div class="sec-left reveal">
+        <div class="section-eyebrow left">Security &amp; access control</div>
+        <h2 class="sec-h2">Built for election-grade trust.</h2>
+        <p class="sec-sub">
+          Role-based permissions, encrypted data at rest and in transit, and an
+          immutable audit trail for every sensitive action.
+        </p>
+        <ul class="sec-points">
+          <li *ngFor="let pt of securityPoints">
+            <i class="fa-solid fa-circle-check"></i> {{ pt.text }}
+          </li>
+        </ul>
+      </div>
+
+      <!-- Right permissions panel -->
+      <div class="sec-right reveal">
+        <div class="perm-panel">
+          <div class="perm-header">
+            <i class="fa-solid fa-lock"></i>
+            <span>Permissions Matrix</span>
+            <span class="perm-role-tag">Sector Sanyojak</span>
+          </div>
+          <div class="perm-list">
+            <div class="perm-row" *ngFor="let p of permissions" (click)="togglePerm(p)">
+              <span class="perm-label">{{ p.label }}</span>
+              <div class="toggle" [class.on]="p.enabled" [class.locked]="p.locked">
+                <div class="toggle-knob"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════
+     CTA BANNER
+════════════════════════════════════════ -->
+<section class="cta-section" id="cta">
+  <div class="cta-inner">
+    <h2>Get Started with Data-Driven Election Management.</h2>
+    <p>Built for state-level teams. Deployed with care. Compliant with election data policies.</p>
+    <div class="cta-btns">
+      <button class="btn btn-white btn-lg">Schedule a Demo <i class="fa-solid fa-arrow-right"></i></button>
+      <a routerLink="/contact-us" class="btn btn-outline-white btn-lg" style="text-decoration: none;">Contact Sales</a>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════
+     FOOTER
+════════════════════════════════════════ -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="brand-dot sm"></div>
+      <span>Electoral Suite</span>
+      <span class="footer-edition">· Vidhan Sabha Edition</span>
+    </div>
+    <div class="footer-copy">Developed By Macreel Infosoft
+      pvt Ltd
+    </div>
+  </div>
+</footer>

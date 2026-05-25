@@ -457,7 +457,37 @@ export class SectorComponent implements OnInit {
 
   handleExport(format: string) {
     if (!format) return;
-    console.log(`Generating ${format.toUpperCase()} export...`);
-    this.toastService.showSuccess('Export Started', `Successfully generated ${format.toUpperCase()} export!`);
+    this.isExporting = true;
+    
+    const params: any = {
+      SearchTerm: this.searchTerm,
+      SortBy: this.sortBy,
+      IsDescending: this.isDescending,
+      roleFilterFlag: !this.isListView
+    };
+
+    if (this.defaultStateId) {
+       params.stateId = this.defaultStateId;
+    }
+
+    this.sectorService.exportSector(format as 'excel' | 'pdf', params).subscribe({
+      next: (blob: Blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Sectors_${new Date().getTime()}.${format === 'excel' ? 'xlsx' : 'pdf'}`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+        this.isExporting = false;
+        this.toastService.showSuccess('Export Successful', `Successfully downloaded ${format.toUpperCase()} export!`);
+      },
+      error: (err) => {
+        console.error('Export error:', err);
+        this.isExporting = false;
+        this.toastService.showError('Export Failed', 'Failed to generate export file.');
+      }
+    });
   }
 }

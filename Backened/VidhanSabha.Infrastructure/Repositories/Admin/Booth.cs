@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using VidhanSabha.Application.Common.Booth.Dtos;
 using VidhanSabha.Application.Common.Dtos;
 using VidhanSabha.Application.Common.ExportPdfExcel.Dtos;
+using VidhanSabha.Application.Exceptions;
 using VidhanSabha.Application.Pannels.Admin.Booth.Dtos;
 using VidhanSabha.Application.Pannels.Admin.Booth.Interfaces;
 using VidhanSabha.Domain.Entities.Admin;
@@ -33,9 +34,10 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
                 await _context.Tbl_Booth.AddAsync(booth, ct);
                 return await _context.SaveChangesAsync();
             }
-            catch(Exception ex)
+            catch (DbUpdateException ex) when (ex.InnerException is SqlException sqlEx && sqlEx.Number == 2601)
             {
-                throw ex;
+                // 2601 = Violation of unique index
+                throw new NotFoundException("The username or mobile number already exists for an active account.");
             }
         }
 

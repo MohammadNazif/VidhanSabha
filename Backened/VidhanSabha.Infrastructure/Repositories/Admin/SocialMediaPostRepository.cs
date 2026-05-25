@@ -10,6 +10,7 @@ using VidhanSabha.Application.Pannels.Admin.PravasiVoters.DTOs;
 using VidhanSabha.Application.Pannels.Admin.SocialMediaPost.DTOs;
 using VidhanSabha.Application.Pannels.Admin.SocialMediaPost.Interfaces;
 using VidhanSabha.Domain.Entities.Admin;
+using VidhanSabha.Domain.Enums;
 using VidhanSabha.Infrastructure.Extensions;
 using VidhanSabha.Infrastructure.Persistence;
 using VidhanSabha.Infrastructure.Repositories.Common;
@@ -86,57 +87,82 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
                 throw;
             }
         }
-
-        public async Task<PagedResult<SocialMediaPostReponse>> GetAllAsync(SocialMediaQueryParams qp, CancellationToken ct = default)
+        public async Task<PagedResult<SocialMediaPostReponse>> GetAllAsync(
+            SocialMediaQueryParams qp,
+            CancellationToken ct = default)
         {
             var query = _context.Tbl_SocialMediaPost
-               .AsNoTracking()
-               .Where(b =>
-                   (!qp.Id.HasValue || b.Id == qp.Id) && (b.UserId == qp.UserId) &&
-                   (!qp.BoothId.HasValue || b.Booths.Any(v=>v.BoothId == qp.BoothId)) &&
-                   (!qp.SectorId.HasValue || b.Sectors.Any(v=>v.SectorId == qp.SectorId)) 
-                   );
+                .AsNoTracking()
+                .AsQueryable();
 
-            Expression<Func<Tbl_SocialMediaPost, bool>>? search = null;
+            // Admin -> no filter
+            if (qp.Role == PrabhariRole.VidhanSabhaPrabhari.ToString())
+            {
+                query = query.Where(x => x.UserId == qp.UserId);
+            }
+            else
+            {
+                // Booth user
+                if (qp.BoothId.HasValue)
+                {
+                    query = query.Where(x =>
+                        x.Booths.Any(b => b.BoothId == qp.BoothId.Value));
+                }
 
+                // Sector user
+                if (qp.SectorId.HasValue)
+                {
+                    query = query.Where(x =>
+                        x.Sectors.Any(s => s.SectorId == qp.SectorId.Value));
+                }
+            }
+
+            // Optional search
             if (!string.IsNullOrWhiteSpace(qp.SearchTerm))
             {
                 var term = qp.SearchTerm.Trim().ToLower();
-                search = b =>
-                    b.Title.ToLower().Contains(term) ||
-                    b.Platforms.Select(v => v.Platform.Platform).FirstOrDefault().ToLower().Contains(term) ||
-                    b.Description.ToLower().Contains(term);
+
+                query = query.Where(x =>
+                    x.Title.ToLower().Contains(term) ||
+                    x.Description.ToLower().Contains(term) ||
+                    x.Platforms.Any(p =>
+                        p.Platform.Platform.ToLower().Contains(term)));
             }
 
             return await query.ToPagedResultAsync(
-               queryParams: qp,
-               searchPredicate: search,
-               defaultSort: b => b.Id,
-               projection: m => new SocialMediaPostReponse
-               {
-                   Id = m.Id,
-                   Title=m.Title,
-                   PostImagePath=m.PostImagePath,
-                   Description=m.Description,
-                   Platforms = m.Platforms.Select(v => new SocialMediaPlatformResponseDto
-                   {
-                       PlatformId = v.PlatformId,
-                       PlatformName = v.Platform.Platform,
-                   }).ToList(),
-                   Booths = m.Booths.Select(v => new SocialMediaBoothResponseDto
-                   {
-                       BoothId = v.BoothId,
-                       BoothNo = v.Booth.BoothNumber
-                   }).ToList(),
-                   Sectors = m.Sectors.Select(v => new SocialMediaSectorResponseDto
-                   {
-                       SectorId = v.SectorId,
-                       SectorName = v.Sector.SectorName
-                   }).ToList(),
-               },
-               ct: ct
-               );
-        }
+                queryParams: qp,
+                searchPredicate : null,
+                defaultSort: x => x.Id,
+                projection: m => new SocialMediaPostReponse
+                {
+                    Id = m.Id,
+                    Title = m.Title,
+                    PostImagePath = m.PostImagePath,
+                    Description = m.Description,
 
+                    Platforms = m.Platforms.Select(v =>
+                        new SocialMediaPlatformResponseDto
+                        {
+                            PlatformId = v.PlatformId,
+                            PlatformName = v.Platform.Platform
+                        }).ToList(),
+
+                    Booths = m.Booths.Select(v =>
+                        new SocialMediaBoothResponseDto
+                        {
+                            BoothId = v.BoothId,
+                            BoothNo = v.Booth.BoothNumber
+                        }).ToList(),
+
+                    Sectors = m.Sectors.Select(v =>
+                        new SocialMediaSectorResponseDto
+                        {
+                            SectorId = v.SectorId,
+                            SectorName = v.Sector.SectorName
+                        }).ToList()
+                },
+                ct: ct
+            );
+        }
     }
 }

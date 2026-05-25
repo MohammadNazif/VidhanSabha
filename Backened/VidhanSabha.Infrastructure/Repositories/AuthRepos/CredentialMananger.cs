@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Scaffolding.Metadata;
 using Microsoft.IdentityModel.Tokens.Experimental;
 using VidhanSabha.Application.Common.CredentialMananger.Interface;
+using VidhanSabha.Application.Exceptions;
 using VidhanSabha.Domain.Entities.Auth;
 using VidhanSabha.Infrastructure.Persistence;
 using VidhanSabha.Infrastructure.Repositories.Common;
@@ -29,18 +31,27 @@ namespace VidhanSabha.Infrastructure.Repositories.AuthRepos
                    (x => x.UserId == userId);
                 return entity;
             }
-            catch (Exception)
+            catch (DbUpdateException ex) when (ex.InnerException is SqlException sqlEx && sqlEx.Number == 2601)
             {
-                throw;
+                // 2601 = Violation of unique index
+                throw new MobileNumberExistsException();
             }
 
         }
 
         public async Task<Tbl_LoginCredential> InsertAsync(Tbl_LoginCredential login)
         {
-            var entry = await _context.Tbl_LoginCredential.AddAsync(login);
+            try
+            {
+                var entry = await _context.Tbl_LoginCredential.AddAsync(login);
             await _context.SaveChangesAsync();
             return entry.Entity;
+            }
+            catch (DbUpdateException ex) when (ex.InnerException is SqlException sqlEx && sqlEx.Number == 2601)
+            {
+                // 2601 = Violation of unique index
+                throw new MobileNumberExistsException();
+            }
 
         }
         public async Task<Tbl_LoginCredential> UpdateAsync(Tbl_LoginCredential login)

@@ -326,7 +326,10 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
                 {
                     var term = qp.SearchTerm.Trim().ToLower();
                     search = b =>
-                        b.Booth.BoothNumber.Equals(Convert.ToInt32(term)) || b.Id.Equals(Convert.ToInt32(term));
+                        b.Booth.BoothNumber.ToString().Contains(term) ||
+                        b.Booth.PollingStationName.ToString().Contains(term) ||
+                        b.Booth.Sanyojak.InchargeName.ToString().Contains(term) ||
+                        b.Booth.Sanyojak.PhoneNumber.ToString().Contains(term);
                 }
 
 

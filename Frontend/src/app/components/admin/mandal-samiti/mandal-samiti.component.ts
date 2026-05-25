@@ -215,6 +215,7 @@ export class MandalSamitiComponent implements OnInit {
     loading: false,
     searchable: true,
     searchPlaceholder: 'Search Mandal Samiti...',
+    serverSide: true
   };
 
   samitiFormConfig: FormConfig = {
@@ -265,12 +266,10 @@ export class MandalSamitiComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    this.route.url.subscribe((url: any) => {
-      const path = url[0]?.path || '';
-      this.isListView = path.includes('-list');
-      this.updateTableConfig();
-      this.loadMembers();
-    });
+    const path = this.route.snapshot.url[0]?.path || '';
+    this.isListView = path.includes('-list');
+    this.updateTableConfig();
+    this.loadMembers();
 
     this.http.get(`${environment.apiUrl}/mandalsamiti/designations/getAll`).subscribe((res: any) => {
       this.designations = res.data || res || [];
@@ -415,10 +414,73 @@ export class MandalSamitiComponent implements OnInit {
     });
   }
 
-  handlePageChange(event: any) { this.loadMembers(); }
-  handleSortChange(event: any) { this.loadMembers(); }
-  handleSearchChange(term: string) { this.loadMembers(); }
+  handlePageChange(event: any) {
+    this.pageNumber = event.currentPage;
+    this.pageSize = event.pageSize;
+    this.loadMembers();
+  }
+
+  handleSortChange(event: any) {
+    this.sortBy = event.column;
+    this.isDescending = event.direction === 'desc';
+    this.pageNumber = 1;
+    this.loadMembers();
+  }
+
+  handleSearchChange(term: string) {
+    this.searchTerm = term;
+    this.pageNumber = 1;
+    this.loadMembers();
+  }
   handleExport(format: string) {
-    this.toastService.showSuccess('Export Started', `Successfully generated ${format.toUpperCase()} export!`);
+    if (!format) return;
+    this.isExporting = true;
+    
+    const params: any = {
+      SearchTerm: this.searchTerm,
+      SortBy: this.sortBy,
+      IsDescending: this.isDescending
+    };
+
+    if (this.isMemberView && this.selectedMandalId) {
+      params.mandalId = this.selectedMandalId;
+      // You could add an endpoint in service if needed, falling back to generic export
+      this.mandalSamitiService.export('mandalsamiti/members', format as 'excel' | 'pdf', params).subscribe({
+        next: (blob: Blob) => {
+          this.downloadBlob(blob, `Mandal_Samiti_Members_${new Date().getTime()}.${format === 'excel' ? 'xlsx' : 'pdf'}`);
+          this.isExporting = false;
+          this.toastService.showSuccess('Export Successful', `Successfully generated ${format.toUpperCase()} export!`);
+        },
+        error: (err) => {
+          console.error('Export error:', err);
+          this.isExporting = false;
+          this.toastService.showError('Export Failed', 'Failed to generate export file.');
+        }
+      });
+    } else {
+      this.mandalSamitiService.export('mandalsamiti', format as 'excel' | 'pdf', params).subscribe({
+        next: (blob: Blob) => {
+          this.downloadBlob(blob, `Mandal_Samitis_${new Date().getTime()}.${format === 'excel' ? 'xlsx' : 'pdf'}`);
+          this.isExporting = false;
+          this.toastService.showSuccess('Export Successful', `Successfully generated ${format.toUpperCase()} export!`);
+        },
+        error: (err) => {
+          console.error('Export error:', err);
+          this.isExporting = false;
+          this.toastService.showError('Export Failed', 'Failed to generate export file.');
+        }
+      });
+    }
+  }
+
+  private downloadBlob(blob: Blob, filename: string) {
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
   }
 }

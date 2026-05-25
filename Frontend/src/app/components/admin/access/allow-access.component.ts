@@ -137,7 +137,8 @@ export class AllowAccessComponent implements OnInit {
     { id: ModulePermission.BoothSamiti, moduleName: 'Create BoothSamiti', hasPermission: false },
     { id: ModulePermission.EffectivePersion, moduleName: 'Create EffectivePerson', hasPermission: false },
     { id: ModulePermission.Activity, moduleName: 'Create Activity', hasPermission: false },
-    { id: ModulePermission.SeniororDisabled, moduleName: 'Create Senior Or Disabled', hasPermission: false }
+    { id: ModulePermission.SeniororDisabled, moduleName: 'Create Senior Or Disabled', hasPermission: false },
+    { id: ModulePermission.SocialMediaPost, moduleName: 'Create Social Media Post', hasPermission: false }
   ];
 
   permissionData: any[] = [...this.basePermissions];

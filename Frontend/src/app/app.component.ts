@@ -24,7 +24,7 @@ export class AppComponent implements OnInit {
     this.router.events.subscribe(event => {
       if (event instanceof NavigationEnd) {
         const url = event.urlAfterRedirects;
-        this.isLoginPage = url.includes('/login') || url === '/' || url === '';
+        this.isLoginPage = url.includes('/login') || url === '/' || url === '' || url.includes('/global') || url.includes('/contact-us');
       }
     });
     this.checkScreenSize();

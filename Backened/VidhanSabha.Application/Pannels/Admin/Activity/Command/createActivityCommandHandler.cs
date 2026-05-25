@@ -24,7 +24,7 @@ namespace VidhanSabha.Application.Pannels.Admin.NewsEvent.Handlers
         }
 
         public async Task<int> Handle(createActivityCommand request, CancellationToken ct)
-        {
+            {
             var dto = request.Dto;
 
             // Validate: cannot provide both YouTube link and a video file
