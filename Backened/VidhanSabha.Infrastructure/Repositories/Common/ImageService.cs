@@ -44,6 +44,34 @@ namespace VidhanSabha.Infrastructure.Repositories.Common
             return Path.Combine("uploads", subFolder, fileName).Replace("\\", "/");
         }
 
+        public async Task<string?> UpdateImageAsync(IFormFile? newFile, string? oldRelativePath, string subFolder)
+        {
+            // Agar naya file nahi aaya, toh purana path hi return karo
+            if (newFile == null || newFile.Length == 0) return oldRelativePath;
+
+            // Purani image delete karo (agar exist karti hai)
+            if (!string.IsNullOrEmpty(oldRelativePath))
+            {
+                var oldFullPath = Path.Combine(_env.WebRootPath, oldRelativePath.Replace("/", Path.DirectorySeparatorChar.ToString()));
+                if (File.Exists(oldFullPath))
+                    File.Delete(oldFullPath);
+            }
+
+            // Nayi image save karo (same logic as SaveImageAsync)
+            var uploadFolder = Path.Combine(_env.WebRootPath, "uploads", subFolder);
+            if (!Directory.Exists(uploadFolder))
+                Directory.CreateDirectory(uploadFolder);
+
+            var ext = Path.GetExtension(newFile.FileName).ToLowerInvariant();
+            var fileName = $"{Guid.NewGuid()}{ext}";
+            var fullPath = Path.Combine(uploadFolder, fileName);
+
+            await using var stream = new FileStream(fullPath, FileMode.Create);
+            await newFile.CopyToAsync(stream);
+
+            return Path.Combine("uploads", subFolder, fileName).Replace("\\", "/");
+        }
+
         public Task DeleteImageAsync(string? relativePath)
         {
             if (string.IsNullOrWhiteSpace(relativePath)) return Task.CompletedTask;

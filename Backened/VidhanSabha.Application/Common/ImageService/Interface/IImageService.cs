@@ -10,6 +10,7 @@ namespace VidhanSabha.Application.Common.ImageService.Interface
     public interface IImageService
     {
         Task<string?> SaveImageAsync(IFormFile? file, string subFolder);
+        Task<string?> UpdateImageAsync(IFormFile? file, string? oldRelativePath, string subFolder);
         Task DeleteImageAsync(string? relativePath);
         bool IsValidImage(IFormFile? file);
     }

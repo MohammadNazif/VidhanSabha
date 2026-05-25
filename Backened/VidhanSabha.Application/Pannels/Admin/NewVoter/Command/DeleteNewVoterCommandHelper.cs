@@ -20,12 +20,13 @@ namespace VidhanSabha.Application.Pannels.Admin.NewVoter.Command
         public async Task<int> Handle(DeleteNewVoterCommand request,CancellationToken cancellationtoken)
         {
             var newvoter = await _repo.GetByIdAsync(request.Id);
-            if(newvoter==null)
+            if (newvoter == null)
             {
                 throw new NotFoundException("New Voter Not Found");
             }
             newvoter.Delete();
-            return _repo.Update(newvoter);
+            return _repo.Update(newvoter);  
+            
         }
     }
 }
