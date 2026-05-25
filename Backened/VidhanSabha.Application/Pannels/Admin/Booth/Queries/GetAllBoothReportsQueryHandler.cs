@@ -24,8 +24,8 @@ namespace VidhanSabha.Application.Pannels.Admin.Booth.Queries
         }
         public async Task<PagedResult<BoothReportsDto>> Handle(GetAllBoothReportsQuery request , CancellationToken cancellationToken)
         {
-            int? vidhanId = await _man.GetVidhansabhaIdByuserIdAsync(request.userId);
-            var booth = await _repo.GetAllBoothReports(request.QueryParams,vidhanId,cancellationToken);
+            //int? vidhanId = await _man.GetVidhansabhaIdByuserIdAsync(request.userId);
+            var booth = await _repo.GetAllBoothReports(request.QueryParams,request.userId,cancellationToken);
             if (booth == null)
             {
                 throw new NotFoundException("Booth Not Found");

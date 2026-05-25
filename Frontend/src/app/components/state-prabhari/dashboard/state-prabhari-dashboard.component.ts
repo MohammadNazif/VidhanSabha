@@ -36,6 +36,7 @@ export class StatePrabhariDashboardComponent implements OnInit, AfterViewInit {
   currentDate = new Date();
   vidhanSabhaData: any[] = [];
   loadingCounts = true;
+  userRole = '';
   private chart: Chart | null = null;
 
   statCards: StatCard[] = [
@@ -107,10 +108,14 @@ export class StatePrabhariDashboardComponent implements OnInit, AfterViewInit {
   ) { }
 
   ngOnInit() {
+    this.authService.userRole$.subscribe(role => {
+      this.userRole = role || '';
+    });
+
     this.authService.userId$.subscribe(userId => {
       console.log('[StatePrabhariDashboard] userId:', userId);
       if (userId) {
-        this.loadVidhanSabhaData(userId);
+        // this.loadVidhanSabhaData(userId);
         this.loadDashboardCounts(userId);
       }
     });
@@ -160,6 +165,11 @@ export class StatePrabhariDashboardComponent implements OnInit, AfterViewInit {
           if (card.title === 'Pradesh Karyakarini') return { ...card, value: counts.pradeshKaryarkarniSamiti ?? card.value };
           return card;
         });
+
+        if (counts.stateId) {
+          this.authService.setStateId(String(counts.stateId));
+        }
+
         this.loadingCounts = false;
       },
       error: (err) => {

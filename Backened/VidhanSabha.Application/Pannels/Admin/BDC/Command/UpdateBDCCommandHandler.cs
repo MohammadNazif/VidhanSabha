@@ -49,7 +49,7 @@ namespace VidhanSabha.Application.Pannels.Admin.BDC.Command
             {
                 throw new NotFoundException("BDC Not Found");
             }
-            bdc.Update(dto.Block,
+            bdc.Update(dto.BlockId,
                 dto.Name,dto.WardNumber,dto.CategoryId,dto.CastId,dto.Age,dto.Mobile,
                 dto.PartyId,dto.Education,newImagePath,dto.VillageId);
             return _repo.Update(bdc);

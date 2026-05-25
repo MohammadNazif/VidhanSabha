@@ -11,9 +11,11 @@ namespace VidhanSabha.Application.Pannels.Admin.PravasiVoters.DTOs
     public class PravasiQueryParams:BaseQueryParams
     {
         public int? Id { get; set; }
+        public bool rolefilterflag { get; set; }
         public string? BoothIds { get; set; }
         public string? CastIds { get; set; }
         public string? OccupationIds { get; set; }
+
 
         public string? VillageIds { get; set; }
 

@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { GenericTableComponent } from '../../shared/generic-table/generic-table.component';
 import { TableAction, TableColumn, TableConfig } from '../../shared/generic-table/generic-table.types';
 import { GenericModalButtonComponent } from '../../shared/generic-modal-form/generic-modal-button.component';
@@ -20,7 +20,7 @@ import { PermissionService } from '../../../Services/common/permission.service';
 @Component({
   selector: 'app-booth-voter-description',
   standalone: true,
-  imports: [CommonModule, GenericTableComponent, GenericModalButtonComponent, PageHeaderComponent, ReactiveFormsModule, GenericExportComponent],
+  imports: [CommonModule, GenericTableComponent, GenericModalButtonComponent, PageHeaderComponent, FormsModule, ReactiveFormsModule, GenericExportComponent],
   templateUrl: './booth-voter-description.component.html',
   styleUrl: './booth-voter-description.component.css'
 })
@@ -43,13 +43,31 @@ export class BoothVoterDescriptionComponent implements OnInit {
 
   isListView = false;
 
+  // Caste-wise detail modal state
+  selectedBoothVoter: any = null;
+  casteWiseList: any[] = [];
+  loadingCasteWise = false;
+  showCasteDetailsModal = false;
+  editingCasteId: number | null = null;
+  editingNumberValue: number | null = null;
+  editingSubCasteId: number | null = null;
+  castesList: any[] = [];
   columns: TableColumn[] = [
     { key: 'boothNumber', label: 'Booth No.', sortable: true },
     { key: 'villageName', label: 'Village', sortable: true },
     { key: 'totalVoter', label: 'Total Voters', sortable: true },
     { key: 'male', label: 'Male', sortable: true },
     { key: 'female', label: 'Female', sortable: true },
-    { key: 'other', label: 'Other', sortable: true }
+    { key: 'other', label: 'Other', sortable: true },
+    {
+      key: 'casteBreakdown',
+      label: 'Caste breakdown',
+      type: 'badge-html',
+      align: 'center',
+      sortable: false,
+      formatter: () => '<i class="fa-solid fa-chart-pie mr-1"></i> View',
+      badgeVariant: () => 'info'
+    }
   ];
 
   config: TableConfig = {
@@ -82,7 +100,10 @@ export class BoothVoterDescriptionComponent implements OnInit {
   ) { }
 
   canManage(): boolean {
-    return !this.isListView && this.permissionService.hasPermission(ModulePermission.BoothVoterDescrition);
+    if (this.isListView) return false;
+    const role = (this.authService.getRole() || '').toUpperCase().trim();
+    if (role === 'VIDHANSABHAPRABHARI') return true;
+    return this.permissionService.hasPermission(ModulePermission.BoothVoterDescrition);
   }
 
   addVoterConfig: FormConfig = {
@@ -95,7 +116,13 @@ export class BoothVoterDescriptionComponent implements OnInit {
         label: 'Booth',
         type: 'select',
         placeholder: '--Select Booth--',
-        apiUrl: () => `common/boothNumber?PageNumber=1&PageSize=1000&IsDescending=true&SortBy=id&userId=${this.authService.getUserId()}`,
+        apiUrl: () => {
+          const role = (this.authService.getRole() || '').toUpperCase().trim();
+          if (role === 'SECTORSANYOJAK') {
+            return `booth/getAllBoothBySectorid?sectorid=${this.authService.getUserId()}`;
+          }
+          return `common/boothNumber?PageNumber=1&PageSize=1000&IsDescending=true&SortBy=id&userId=${this.authService.getUserId()}`;
+        },
         apiMapper: (data: any) => {
           const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
           return list.map((item: any) => ({
@@ -184,9 +211,9 @@ export class BoothVoterDescriptionComponent implements OnInit {
           {
             id: 'subCasteId',
             name: 'subCasteId',
-            label: 'Select Caste',
+            label: 'Caste',
             type: 'select',
-            apiUrl: 'common/category', // Using category as placeholder if direct cast isn't found
+            apiUrl: 'common/getAllCast', // Using category as placeholder if direct cast isn't found
             apiMapper: (data: any) => {
               const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
               return list.map((item: any) => ({
@@ -330,6 +357,8 @@ export class BoothVoterDescriptionComponent implements OnInit {
       }
       this.loadVoters();
     });
+
+    this.loadAllCastes();
   }
 
   loadFilterOptions(isBoothSanyojak: boolean = false) {
@@ -338,10 +367,16 @@ export class BoothVoterDescriptionComponent implements OnInit {
       { key: 'villageIds', label: 'Village', type: 'select', options: [], placeholder: '-- Select Village --', multiple: true }
     ];
 
-    const userId = this.authService.getUserId();
     // Load Booths
     if (!isBoothSanyojak) {
-      this.boothVoterService.getCommonData('boothNumber', userId).subscribe((res: any) => {
+      const role = (this.authService.getRole() || '').toUpperCase().trim();
+      const isSectorSanyojak = role === 'SECTORSANYOJAK';
+
+      const request = isSectorSanyojak
+        ? this.boothVoterService.getCustom(`booth/getAllBoothBySectorid?sectorid=${this.authService.getUserId()}`)
+        : this.boothVoterService.getCommonData('boothNumber');
+
+      request.subscribe((res: any) => {
         const filter = this.config.filters?.find(f => f.key === 'boothIds');
         if (filter) {
           const list = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
@@ -354,20 +389,19 @@ export class BoothVoterDescriptionComponent implements OnInit {
     }
 
     // Load Villages (filtered by booth if BoothSanyojak)
-    const villageUrl = isBoothSanyojak && this.boothIds
-      ? `villagesByBoothId?boothId=${this.boothIds}`
-      : 'village';
-
-    this.boothVoterService.getCommonData(villageUrl, null, 500000).subscribe((res: any) => {
-      const filter = this.config.filters?.find(f => f.key === 'villageIds');
-      if (filter) {
-        const list = Array.isArray(res?.data?.items) ? res.data.items : (Array.isArray(res?.items) ? res.items : (Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : [])));
-        filter.options = list.map((v: any) => ({
-          label: v.name || v.villageName,
-          value: String(v.id || v.villageId)
-        }));
-      }
-    });
+    if (isBoothSanyojak && this.boothIds) {
+      const villageUrl = `villagesByBoothId?boothId=${this.boothIds}`;
+      this.boothVoterService.getCommonData(villageUrl, null, 500000).subscribe((res: any) => {
+        const filter = this.config.filters?.find(f => f.key === 'villageIds');
+        if (filter) {
+          const list = Array.isArray(res?.data?.items) ? res.data.items : (Array.isArray(res?.items) ? res.items : (Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : [])));
+          filter.options = list.map((v: any) => ({
+            label: v.name || v.villageName,
+            value: String(v.id || v.villageId)
+          }));
+        }
+      });
+    }
   }
 
   boothIds: string | null = null;
@@ -408,7 +442,8 @@ export class BoothVoterDescriptionComponent implements OnInit {
       sortBy: this.sortBy,
       isDescending: this.isDescending,
       boothIds: this.boothIds,
-      villageIds: this.villageIds
+      villageIds: this.villageIds,
+      roleFilterFlag: !this.isListView
     };
 
     const userId = this.authService.getUserId();
@@ -465,6 +500,158 @@ export class BoothVoterDescriptionComponent implements OnInit {
 
   handleSelection(selected: any[]) {
     console.log('Selected items:', selected);
+  }
+
+  handleRowClick(event: any) {
+    if (!event || !event.row) return;
+    const row = event.row;
+    this.selectedBoothVoter = row;
+    this.showCasteDetailsModal = true;
+    this.loadCasteWiseData(row.id);
+  }
+
+  loadCasteWiseData(boothVoterId: number) {
+    this.loadingCasteWise = true;
+    this.casteWiseList = [];
+    this.casteVoterService.getCasteVotersByBoothVoterId(boothVoterId).subscribe({
+      next: (response: any) => {
+        if (response && response.data) {
+          const dataWrap = response.data;
+          if (dataWrap && Array.isArray(dataWrap.items)) {
+            this.casteWiseList = dataWrap.items;
+          } else if (Array.isArray(dataWrap)) {
+            this.casteWiseList = dataWrap;
+          } else {
+            this.casteWiseList = [];
+          }
+        } else {
+          this.casteWiseList = [];
+        }
+        this.loadingCasteWise = false;
+      },
+      error: (err) => {
+        console.error('Error fetching caste-wise voters:', err);
+        this.loadingCasteWise = false;
+        this.toastService.showError('Error', 'Failed to load caste-wise voter details.');
+      }
+    });
+  }
+
+  closeCasteDetailsModal() {
+    this.showCasteDetailsModal = false;
+    this.selectedBoothVoter = null;
+    this.casteWiseList = [];
+  }
+
+  calculatePercentage(casteCount: number): number {
+    const total = this.selectedBoothVoter?.totalVoter || 0;
+    if (!total || !casteCount) return 0;
+    return Math.round((casteCount / total) * 100);
+  }
+
+  loadAllCastes() {
+    this.boothVoterService.getCommonData('getAllCast').subscribe({
+      next: (res: any) => {
+        const list = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
+        this.castesList = list.map((item: any) => ({
+          id: Number(item.id),
+          name: item.name
+        }));
+      },
+      error: (err) => {
+        console.error('Error loading castes:', err);
+      }
+    });
+  }
+
+  startEditCaste(item: any) {
+    this.editingCasteId = item.id;
+    this.editingNumberValue = item.number;
+    this.editingSubCasteId = item.subCasteId;
+  }
+
+  cancelEditCaste() {
+    this.editingCasteId = null;
+    this.editingNumberValue = null;
+    this.editingSubCasteId = null;
+  }
+
+  saveEditCaste(item: any) {
+    if (this.editingNumberValue === null || this.editingNumberValue < 0) {
+      this.toastService.showError('Error', 'Please enter a valid number of voters.');
+      return;
+    }
+    if (!this.editingSubCasteId) {
+      this.toastService.showError('Error', 'Please select a caste.');
+      return;
+    }
+
+    const updatedCasteVoters = this.casteWiseList.map(cv => {
+      if (cv.id === item.id) {
+        return {
+          subCasteId: Number(this.editingSubCasteId),
+          number: Number(this.editingNumberValue)
+        };
+      } else {
+        return {
+          subCasteId: Number(cv.subCasteId),
+          number: Number(cv.number)
+        };
+      }
+    });
+
+    const payload = {
+      casteVoterId: Number(item.casteVoterId),
+      casteVoters: updatedCasteVoters
+    };
+
+    this.casteVoterService.updateCasteVoter(payload).subscribe({
+      next: (res: any) => {
+        this.toastService.showSuccess('Success', 'Caste voter updated successfully!');
+        this.editingCasteId = null;
+        this.editingNumberValue = null;
+        this.editingSubCasteId = null;
+        if (this.selectedBoothVoter) {
+          this.loadCasteWiseData(this.selectedBoothVoter.id);
+        }
+      },
+      error: (err) => {
+        console.error('Error updating caste voter:', err);
+        this.toastService.showError('Error', 'Failed to update caste voter.');
+      }
+    });
+  }
+
+  async deleteCasteRecord(item: any) {
+    const { default: Swal } = await import('sweetalert2');
+    const result = await Swal.fire({
+      title: 'Delete caste entry?',
+      text: `Are you sure you want to delete ${item.subCasteName || 'this caste'}?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#6b7280',
+      confirmButtonText: 'Delete',
+      cancelButtonText: 'Cancel',
+      reverseButtons: true,
+      width: '340px',
+      padding: '1.25rem'
+    });
+
+    if (!result.isConfirmed) return;
+
+    this.casteVoterService.deleteCasteVoter(item.id).subscribe({
+      next: (res: any) => {
+        this.toastService.showSuccess('Success', 'Caste voter entry deleted successfully!');
+        if (this.selectedBoothVoter) {
+          this.loadCasteWiseData(this.selectedBoothVoter.id);
+        }
+      },
+      error: (err) => {
+        console.error('Error deleting caste voter:', err);
+        this.toastService.showError('Error', 'Failed to delete caste voter entry.');
+      }
+    });
   }
 
   handleAction(event: any) {
@@ -595,7 +782,7 @@ export class BoothVoterDescriptionComponent implements OnInit {
         this.isExporting = false;
         this.toastService.showSuccess('Success', `Booth Voter Description exported to ${format.toUpperCase()} successfully!`);
       },
-      error: (err) => {
+      error: (err: any) => {
         console.error(`Error exporting to ${format}:`, err);
         this.toastService.showError('Error', `Failed to export Booth Voter Description to ${format.toUpperCase()}`);
         this.isExporting = false;

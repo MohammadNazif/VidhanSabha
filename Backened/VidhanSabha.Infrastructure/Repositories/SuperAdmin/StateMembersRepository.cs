@@ -68,6 +68,7 @@ namespace VidhanSabha.Infrastructure.Repositories.SuperAdmin
             var query = _context.Tbl_StateMembers
                .AsNoTracking()
                .Where(b =>
+                  ( b.UserId == qp.UserId) &&
                    (!qp.Id.HasValue || b.Id == qp.Id) && (samitiId == null || b.DesignationTypeId == samitiId)
                    );
 

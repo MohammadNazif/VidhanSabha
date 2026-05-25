@@ -12,6 +12,7 @@ using VidhanSabha.Application.Pannels.Admin.PravasiVoters.DTOs;
 using VidhanSabha.Application.Pannels.Admin.SahmatAsahmat.DTOs;
 using VidhanSabha.Application.Pannels.Admin.SahmatAsahmat.Interfaces;
 using VidhanSabha.Domain.Entities.Admin;
+using VidhanSabha.Domain.Enums;
 using VidhanSabha.Infrastructure.Extensions;
 using VidhanSabha.Infrastructure.Persistence;
 using VidhanSabha.Infrastructure.Repositories.Common;
@@ -74,13 +75,24 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
         public async Task<PagedResult<SahmatAsahmatResponseDto>> GetAllAsync(SahmatAsahmatQueryParams qp, CancellationToken ct = default)
         {
 
+         //   var vidhanSabhaId = await _context.Tbl_StatePrabhari
+         //.Where(u => u.userId == qp.UserId)
+         //.Select(u => u.VidhansabhaId)
+         //.FirstOrDefaultAsync();
+
             var query = _context.Tbl_SahmatAsahmat
               .AsNoTracking();
 
             var villageIds = qp.GetVillageIds();
+            var boothIds = qp.GetBoothIds();
             var parties = qp.GetParties();
-              
-              if (villageIds.Any())
+
+            if (qp.rolefilterflag && (qp.Role == PrabhariRole.BoothSanyojak.ToString() || qp.Role == PrabhariRole.SectorSanyojak.ToString()))
+            {
+                query = query.Where(f => f.Role == qp.Role.ToString());
+            }
+
+            if (villageIds.Any())
               {
                   query = query.Where(s => s.Villages.Any(v => villageIds.Contains(v.VillageId)));
             }
@@ -88,10 +100,14 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
                 {
                     query = query.Where(s => parties.Contains(s.PartyId));
             }
+                if (boothIds.Any())
+                  {
+                    query = query.Where(s => boothIds.Contains(s.BoothId));
+            }
 
-           query = query.Where(b =>
-                   (!qp.TypeId.HasValue || b.TypeId == qp.TypeId) &&
-                   (b.UserId == qp.UserId || b.CreatedToUserId == qp.UserId) &&
+            query = query.Where(b =>
+                   (!qp.TypeId.HasValue || b.TypeId == qp.TypeId) && (b.Booth.Mandal.Status && b.Booth.Sector.Status ) && 
+                   (b.UserId == qp.UserId || b.CreatedToUserId == qp.UserId || b.CreatedsectorUserId == qp.UserId) &&
                   (!qp.BoothId.HasValue || b.Booth.Id == qp.BoothId) &&
                   (!qp.OccupationId.HasValue || b.Occupation.Id == qp.OccupationId)
                   );
@@ -102,7 +118,8 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
             {
                 var term = qp.SearchTerm.Trim().ToLower();
                 search = b =>
-                    b.Booth.BoothNumber.Equals(Convert.ToInt32(term)) ||
+                    b.Booth.BoothNumber.ToString().Contains(term) ||
+                    b.Mobile.ToLower().Contains(term)||
                     b.Name.ToLower().Contains(term) ||
                     b.Occupation.Occupation.ToLower().Contains(term) ||
                     b.Party.Party.ToLower().Contains(term) ||
@@ -156,7 +173,7 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
             // ✅ Filters
             query = query.Where(b =>
                 (!qp.BoothId.HasValue || b.BoothId == qp.BoothId) &&
-                (b.UserId == qp.UserId || b.CreatedToUserId == qp.UserId) &&
+                (b.UserId == qp.UserId || b.CreatedToUserId == qp.UserId || b.CreatedsectorUserId == qp.UserId) &&
                
                 (!qp.OccupationId.HasValue || b.OccupationId == qp.OccupationId)
             );

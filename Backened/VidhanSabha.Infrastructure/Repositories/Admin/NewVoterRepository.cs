@@ -10,6 +10,7 @@ using VidhanSabha.Application.Common.ExportPdfExcel.Dtos;
 using VidhanSabha.Application.Pannels.Admin.NewVoter.DTOs;
 using VidhanSabha.Application.Pannels.Admin.NewVoter.Interfaces;
 using VidhanSabha.Domain.Entities.Admin;
+using VidhanSabha.Domain.Enums;
 using VidhanSabha.Infrastructure.Extensions;
 using VidhanSabha.Infrastructure.Persistence;
 using VidhanSabha.Infrastructure.Repositories.Common;
@@ -53,6 +54,12 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
         }
         public async Task<PagedResult<NewVoterResponseDto>> GetAllAsync(NewVoterQueryParams qp, CancellationToken ct = default)
         {
+
+            var vidhanSabhaId = await _context.Tbl_StatePrabhari
+            .Where(u => u.userId == qp.UserId)
+            .Select(u => u.VidhansabhaId)
+            .FirstOrDefaultAsync();
+
             var query = _context.Tbl_NewVoter
                .AsNoTracking()
                .AsQueryable();
@@ -63,11 +70,14 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
             var castids = qp.GetCastIds();
             var villageIds = qp.GetVillageIds();
 
-          
+            if (qp.rolefilterflag && (qp.Role == PrabhariRole.BoothSanyojak.ToString() || qp.Role == PrabhariRole.SectorSanyojak.ToString()))
+            {
+                query = query.Where(f => f.Role == qp.Role.ToString());
+            }
             // ✅ FIX 1: query = assign karo, sirf query.Where nahi
-        query = query.Where(b =>
-                (!qp.Id.HasValue || b.Id == qp.Id) &&
-                b.UserId == qp.UserId || b.CreatedToUserId == qp.UserId);                 // ✅ FIX 2: closing brace sahi jagah
+            query = query.Where(b =>
+                (!qp.Id.HasValue || b.Id == qp.Id) && (b.Booth.Mandal.Status && b.Booth.Sector.Status && b.Booth.Mandal.VidhanId == vidhanSabhaId) &&
+                b.UserId == qp.UserId || b.CreatedToUserId == qp.UserId || b.CreatedsectorUserId == qp.UserId);                 // ✅ FIX 2: closing brace sahi jagah
 
             if (boothIds.Any())
                 query = query.Where(b => boothIds.Contains(b.BoothId));
@@ -84,8 +94,11 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
             {
                 var term = qp.SearchTerm.Trim().ToLower();
                 search = b =>
-                    b.Booth.BoothNumber.Equals(Convert.ToInt32(term)) ||
-                    b.Name.ToLower().Contains(term) ||
+                     b.Booth.BoothNumber.ToString().Contains(term) ||
+                     b.Name.ToLower().Contains(term) ||
+                     b.FatherName.ToLower().Contains(term) ||
+                     b.Category.Name.ToLower().Contains(term) ||
+                     b.Cast.CastName.ToLower().Contains(term) ||
                     //b.Village.VillageName.ToLower().Contains(term) ||
                     b.VoterId.ToLower().Contains(term);
             }
@@ -146,7 +159,7 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
 
             query = query.Where(b =>
                 (!qp.Id.HasValue || b.Id == qp.Id) &&
-                b.UserId == qp.UserId || b.CreatedToUserId == qp.UserId);
+                b.UserId == qp.UserId || b.CreatedToUserId == qp.UserId || b.CreatedsectorUserId == qp.UserId);
 
             if (boothIds?.Count > 0)
                 query = query.Where(b => boothIds.Contains(b.BoothId));

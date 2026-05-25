@@ -12,10 +12,14 @@ namespace VidhanSabha.Application.Pannels.Admin.BoothVoter.DTOs
     {
         public int? Id { get; set; }
         public int? BoothId { get; set; }
+        //public int? BoothIds { get; set; }
         public int? SectorId { get; set; }
+        public bool rolefilterflag { get; set; }
 
         public string? VillageIds { get; set; }
+        public string? BoothIds { get; set; }
 
         public List<int> GetVillageIds() => FilterParse.ParseIds(VillageIds);
+        public List<int> GetBoothIds() => FilterParse.ParseIds(BoothIds);
     }
 }

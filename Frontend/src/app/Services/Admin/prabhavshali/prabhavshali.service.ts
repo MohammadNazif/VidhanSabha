@@ -23,6 +23,10 @@ export class PrabhavshaliService extends BaseApiService {
     return this.getWithParams(`${this.apiUrl}/${this.entity}/getDesgById?desgId=${desgId}`, params);
   }
 
+  getPradhans(params: any = {}): Observable<any> {
+    return this.getWithParams(`${this.apiUrl}/pradhan/getAll`, params);
+  }
+
   deletePrabhavshali(id: number): Observable<any> {
     return this.delete(this.entity, id);
   }

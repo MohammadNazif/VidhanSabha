@@ -25,7 +25,9 @@ namespace VidhanSabha.Application.Pannels.Admin.Block.Command
         }
         public async Task<int> Handle(CreateBlockCommand request, CancellationToken cancellationToken)
         {
-            var imagePath = await request.Dto.ResolveImageAsync(
+            var imagePath = "";
+
+             imagePath = await request.Dto.ResolveImageAsync(
             _imageService,
             subFolder: "profiles/Block",
             imageSelector: dto => dto.Profile
@@ -33,7 +35,7 @@ namespace VidhanSabha.Application.Pannels.Admin.Block.Command
 
             var req = request.Dto;
 
-            var data = Tbl_Block.Create(
+            var data = Tbl_Block.Create(req.UserId,
                 req.BlockName, req.BlockPramukh,req.PartyId, req.Mobile,req.Address, 
                 req.CategoryId, req.CastId, req.OccupationId,imagePath);
 

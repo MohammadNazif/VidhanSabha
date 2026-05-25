@@ -22,7 +22,13 @@ namespace VidhanSabha.Application.Common.ExportPdfExcel.Dtos
     }
     public sealed class prabhavsaliExportDef : IExportDefinition<prabhavsaliExportRow>
     {
-        public string ReportTitle => "Prabhavsali List";
+        private readonly string _reportTitle;
+
+        public prabhavsaliExportDef(string reportTitle)
+        {
+            _reportTitle = reportTitle;
+        }
+        public string ReportTitle => _reportTitle;
 
         public IReadOnlyList<ExportColumn<prabhavsaliExportRow>> Columns =>
         [

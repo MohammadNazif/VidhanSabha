@@ -10,9 +10,9 @@ namespace VidhanSabha.Application.Pannels.Admin.NewVoter.DTOs
 {
     public class NewVoterQueryParams:BaseQueryParams
     {
-     
-   
 
+
+        public bool rolefilterflag { get; set; }
         public int? Id { get; set; }
         public string? BoothIds { get; set; }
         public string? CastIds { get; set; }

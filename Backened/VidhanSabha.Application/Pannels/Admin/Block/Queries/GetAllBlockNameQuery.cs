@@ -10,6 +10,10 @@ namespace VidhanSabha.Application.Pannels.Admin.Block.Queries
 {
     public class GetAllBlockNameQuery:IRequest<List<BlockNameResponse>>
     {
-                
+        public string UserId { get; set; }
+        public GetAllBlockNameQuery(string userId)
+        {
+            UserId = userId;
+        }
     }
 }

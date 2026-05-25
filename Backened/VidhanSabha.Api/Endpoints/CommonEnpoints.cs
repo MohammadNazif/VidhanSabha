@@ -30,6 +30,8 @@ using VidhanSabha.Application.Common.Village.Queries;
 using VidhanSabha.Application.Pannels.Admin.Booth.Dtos;
 using VidhanSabha.Application.Pannels.Admin.Booth.Queries;
 using VidhanSabha.Application.Pannels.Auth.DTOs;
+using VidhanSabha.Application.Pannels.SuperAdmin.StatePrabhari.Dtos;
+using VidhanSabha.Application.Pannels.SuperAdmin.StatePrabhari.Query;
 
 namespace VidhanSabha.Api.Endpoints
 {
@@ -59,6 +61,15 @@ namespace VidhanSabha.Api.Endpoints
              .WithName("GetCast")
              .Produces<ApiResponse<List<CastResponseDto>>>(200);
 
+            common.MapGet("/getAllCast", async (IMediator mediator) =>
+            {
+                var result = await mediator.Send(new getAllCastWithoutCategoryIdQuery());
+                return Results.Ok(ApiResponse<List<CastResponseDto>>.Ok(result));
+
+            })
+             .WithName("GetAllCast")
+             .Produces<ApiResponse<List<CastResponseDto>>>(200);
+
             common.MapGet("/village", async (int id, IMediator mediator) =>
             {
                 var result = await mediator.Send(new GetallVillageByMandalId(id));
@@ -76,7 +87,7 @@ namespace VidhanSabha.Api.Endpoints
              .WithName("GetBoothNumbers")
              .Produces<List<BoothNumberDto>>(200);
 
-            common.MapGet("/villagesByBoothId", async (int boothId, IMediator mediator) =>
+            common.MapGet("/villagesByBoothId", async (int? boothId, IMediator mediator) =>
                {
                    var result = await mediator.Send(new GetallVillageByBoothId(boothId));
                    return Results.Ok(ApiResponse<List<VillageByBoothResponseDto>>.Ok(result));
@@ -108,9 +119,10 @@ namespace VidhanSabha.Api.Endpoints
              .WithName("getstates")
              .Produces<List<StateResponseDto>>(200);
 
-               common.MapGet("/getboothincharge", async (IMediator mediator,int? boothId) =>
+               common.MapGet("/getboothincharge", async (IMediator mediator,int? boothId,HttpContext httpContext) =>
             {
-                var result = await mediator.Send(new getAllBoothInchargeQuery(boothId));
+                string UserId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                var result = await mediator.Send(new getAllBoothInchargeQuery(boothId,UserId));
                 return Results.Ok(ApiResponse<IReadOnlyList<BoothInchargeResponse>>.Ok(result)); 
              })
              .WithName("getboothincharge")
@@ -164,6 +176,29 @@ namespace VidhanSabha.Api.Endpoints
             })
                 .WithName("getseniordisabledtype")
                 .Produces<List<SeniorDisabledTypeResponseDto>>(200);
+
+
+            common.MapPost("/setLocation", async (string latitude,string longitute,string userId, IMediator mediator) =>
+            {
+                var lang = latitude;
+                var lat = longitute;
+                var UserId = userId;
+                
+            })
+                .WithName("Locationn")
+                .Produces(200);
+
+            common.MapPost("/profile", async (IMediator mediator, HttpContext httpContext) =>
+            {
+                string UserId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                string Role = httpContext.User.FindFirst(ClaimTypes.Role)?.Value;
+                var result = await mediator.Send(new getProfileQuery(UserId,Role));
+                return Results.Ok(ApiResponse<StatePrabhariResponseDto>.Ok(result));
+
+            }).RequireAuthorization()
+              .WithName("Profile")
+              .Produces(200);
         }
+
     }
 }

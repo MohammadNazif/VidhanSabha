@@ -15,10 +15,12 @@ import { CrudHandlerService } from '../../../Services/common/crud-handler.servic
 import { ViewChild, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
+import { GenericExportComponent } from '../../shared/generic-export/generic-export.component';
+
 @Component({
   selector: 'app-sector',
   standalone: true,
-  imports: [CommonModule, GenericTableComponent, GenericModalButtonComponent, PageHeaderComponent],
+  imports: [CommonModule, GenericTableComponent, GenericModalButtonComponent, PageHeaderComponent, GenericExportComponent],
   templateUrl: './sector.component.html',
   styleUrl: './sector.component.css'
 })
@@ -28,6 +30,7 @@ export class SectorComponent implements OnInit {
   sectorList: any[] = [];
   totalCount = 0;
   loading = false;
+  isExporting = false;
 
   // Server-side state
   pageNumber = 1;
@@ -43,8 +46,19 @@ export class SectorComponent implements OnInit {
   }
 
   columns: TableColumn[] = [
-    { key: 'mandalName', label: 'Mandal', type: 'avatar', sortable: true, avatarFallbackKey: 'name' },
-    { key: 'villageName', label: 'Village', sortable: true },
+    { key: 'profile', label: 'Profile', type: 'avatar', align: 'center', sortable: false, avatarFallbackKey: 'inchargeName' },
+    { key: 'mandalName', label: 'Mandal', sortable: true },
+    {
+      key: 'villageName',
+      label: 'Village',
+      sortable: true,
+      formatter: (val: any, row: any) => {
+        if (row.villages && Array.isArray(row.villages)) {
+          return row.villages.map((v: any) => v.villageName || v.name).join(', ');
+        }
+        return val || 'N/A';
+      }
+    },
     { key: 'sectorName', label: 'Sector', sortable: true },
     { key: 'inchargeName', label: 'Sector Sanyojak', sortable: true },
     { key: 'phoneNumber', label: 'Contact', sortable: true },
@@ -108,7 +122,7 @@ export class SectorComponent implements OnInit {
         },
         validations: [Validators.required],
         gridColSpan: 6,
-        multiple: false
+        multiple: true
       },
       {
         id: 'sectorName',
@@ -136,9 +150,9 @@ export class SectorComponent implements OnInit {
       {
         id: 'inchargeName',
         name: 'inchargeName',
-        label: 'Incharge Name',
+        label: 'Sector Sanyojak Name',
         type: 'text',
-        placeholder: 'Enter incharge full name',
+        placeholder: 'Enter sector sanyojak full name',
         visibleIf: { field: 'isSectorSanyojak', operator: '==', value: 'Yes' },
         gridColSpan: 6
       },
@@ -246,7 +260,9 @@ export class SectorComponent implements OnInit {
   isListView = false;
 
   canManage(): boolean {
-    return !this.isListView;
+    if (this.isListView) return false;
+    const role = (this.authService.getRole() || '').toUpperCase().trim();
+    return ['SUPERADMIN', 'ADMIN', 'VIDHANSABHAPRABHARI'].includes(role);
   }
 
   ngOnInit() {
@@ -255,26 +271,39 @@ export class SectorComponent implements OnInit {
       this.isListView = path.includes('-list');
 
       if (this.isStatePrabhari()) {
-        // Fetch the assigned state ID
-        this.stateService.getAllStates().subscribe({
-          next: (response) => {
-            const list = response?.data || response || [];
-            if (list.length > 0) {
-              this.defaultStateId = String(list[0].stateId || list[0].id);
+        const savedStateId = this.authService.getStateId();
+        if (savedStateId) {
+          this.defaultStateId = savedStateId;
 
-              // Simplify fields for State Prabhari
-              const districtField = this.addSectorConfig.fields.find(f => f.id === 'districtId');
-              if (districtField) {
-                delete (districtField as any).dependsOn;
-                districtField.apiUrl = () => `district/getAll?stateId=${this.defaultStateId}`;
+          // Simplify fields for State Prabhari
+          const districtField = this.addSectorConfig.fields.find(f => f.id === 'districtId');
+          if (districtField) {
+            delete (districtField as any).dependsOn;
+            districtField.apiUrl = () => `district/getAll?stateId=${this.defaultStateId}`;
+          }
+          this.loadSectors();
+        } else {
+          // Fetch the assigned state ID
+          this.stateService.getAllStates().subscribe({
+            next: (response) => {
+              const list = response?.data || response || [];
+              if (list.length > 0) {
+                this.defaultStateId = String(list[0].stateId || list[0].id);
+
+                // Simplify fields for State Prabhari
+                const districtField = this.addSectorConfig.fields.find(f => f.id === 'districtId');
+                if (districtField) {
+                  delete (districtField as any).dependsOn;
+                  districtField.apiUrl = () => `district/getAll?stateId=${this.defaultStateId}`;
+                }
+                this.loadSectors();
+              } else {
+                this.loadSectors();
               }
-              this.loadSectors();
-            } else {
-              this.loadSectors();
-            }
-          },
-          error: () => this.loadSectors()
-        });
+            },
+            error: () => this.loadSectors()
+          });
+        }
       } else {
         this.loadSectors();
       }
@@ -283,12 +312,13 @@ export class SectorComponent implements OnInit {
 
   loadSectors() {
     this.loading = true;
-    const params = {
-      pageNumber: this.pageNumber,
-      pageSize: this.pageSize,
-      searchTerm: this.searchTerm,
-      sortBy: this.sortBy,
-      isDescending: this.isDescending
+    const params: any = {
+      PageNumber: this.pageNumber,
+      PageSize: this.pageSize,
+      SearchTerm: this.searchTerm,
+      SortBy: this.sortBy,
+      IsDescending: this.isDescending,
+      roleFilterFlag: !this.isListView
     };
 
     this.sectorService.getAllSectors(params).subscribe({
@@ -337,10 +367,18 @@ export class SectorComponent implements OnInit {
 
     const formData = new FormData();
     formData.append('MandalId', String(raw.mandalId));
-    formData.append('VillageId', String(raw.villageId));
+
+    // Support multiple village IDs as per new DTO
+    if (raw.villageId) {
+      const vIds = Array.isArray(raw.villageId) ? raw.villageId : [raw.villageId];
+      vIds.forEach((id: any) => {
+        formData.append('VillageIds', String(id));
+      });
+    }
+
     formData.append('SectorName', raw.sectorName || "");
     formData.append('IsSectorSanyojak', String(isSanyojak));
-    
+
     const userId = this.authService.getUserId();
     if (userId) {
       formData.append('userId', String(userId));
@@ -392,14 +430,15 @@ export class SectorComponent implements OnInit {
     } else if (action.id === 'edit') {
       const editData = { ...row };
 
+      // Map villages array to villageId field for the form
+      if (row.villages && Array.isArray(row.villages)) {
+        editData.villageId = row.villages.map((v: any) => String(v.villageId || v.id));
+      }
+
       // Convert IDs to strings to ensure matching with dropdown values
-      ['id', 'mandalId', 'villageId', 'categoryId', 'castId'].forEach(key => {
+      ['id', 'mandalId', 'categoryId', 'castId'].forEach(key => {
         if (editData[key]) {
-          if (key === 'villageId' && Array.isArray(editData[key])) {
-            editData[key] = String(editData[key][0]);
-          } else {
-            editData[key] = String(editData[key]);
-          }
+          editData[key] = String(editData[key]);
         }
       });
 

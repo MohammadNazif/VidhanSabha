@@ -10,7 +10,7 @@ using VidhanSabha.Application.Pannels.Admin.BoothSamiti.Interfaces;
 namespace VidhanSabha.Application.Pannels.Admin.BoothSamiti.Queries
 {
     public class GetAllBoothSamitiHandler
-        : IRequestHandler<GetAllBoothSamitiQuery, List<BoothSamitiResponseDto>>
+        : IRequestHandler<GetAllBoothSamitiQuery, BoothSamitiResponseDto>
     {
         private readonly IBoothSamitiRepository _repository;
 
@@ -19,7 +19,7 @@ namespace VidhanSabha.Application.Pannels.Admin.BoothSamiti.Queries
             _repository = repository;
         }
 
-        public async Task<List<BoothSamitiResponseDto>> Handle(
+        public async Task<BoothSamitiResponseDto> Handle(
             GetAllBoothSamitiQuery request,
             CancellationToken cancellationToken)
         {

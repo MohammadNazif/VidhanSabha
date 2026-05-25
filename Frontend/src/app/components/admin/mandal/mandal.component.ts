@@ -15,10 +15,12 @@ import { CrudHandlerService } from '../../../Services/common/crud-handler.servic
 import { ActivatedRoute } from '@angular/router';
 
 
+import { GenericExportComponent } from '../../shared/generic-export/generic-export.component';
+
 @Component({
   selector: 'app-mandal',
   standalone: true,
-  imports: [CommonModule, PageHeaderComponent, GenericTableComponent, GenericModalButtonComponent],
+  imports: [CommonModule, PageHeaderComponent, GenericTableComponent, GenericModalButtonComponent, GenericExportComponent],
   templateUrl: './mandal.component.html',
   styleUrl: './mandal.component.css'
 })
@@ -37,6 +39,7 @@ export class MandalComponent implements OnInit {
   isListView = false;
   totalCount = 0;
   loading = false;
+  isExporting = false;
 
   canManage(): boolean {
     const role = (this.authService.getRole() || '').toUpperCase().trim();
@@ -123,6 +126,123 @@ export class MandalComponent implements OnInit {
         type: 'text',
         placeholder: 'Enter mandal name',
         validations: [Validators.required],
+        gridColSpan: 6
+      },
+      {
+        id: 'isMandalSanyojak',
+        name: 'isMandalSanyojak',
+        label: 'Has Mandal Sanyojak?',
+        type: 'select',
+        placeholder: '-- Select Yes/No --',
+        options: [
+          { label: 'Yes', value: 'Yes' },
+          { label: 'No', value: 'No' }
+        ],
+        validations: [Validators.required],
+        gridColSpan: 6
+      },
+      // Sanyojak Fields
+      {
+        id: 'inchargeName',
+        name: 'inchargeName',
+        label: 'Sanyojak Name',
+        type: 'text',
+        placeholder: 'Enter sanyojak name',
+        visibleIf: { field: 'isMandalSanyojak', operator: '==', value: 'Yes' },
+        validations: [Validators.required],
+        gridColSpan: 6
+      },
+      {
+        id: 'age',
+        name: 'age',
+        label: 'Age',
+        type: 'number',
+        placeholder: 'Enter age',
+        visibleIf: { field: 'isMandalSanyojak', operator: '==', value: 'Yes' },
+        validations: [Validators.required, Validators.min(18)],
+        gridColSpan: 6
+      },
+      {
+        id: 'fatherName',
+        name: 'fatherName',
+        label: 'Father Name',
+        type: 'text',
+        placeholder: 'Enter father name',
+        visibleIf: { field: 'isMandalSanyojak', operator: '==', value: 'Yes' },
+        validations: [Validators.required],
+        gridColSpan: 6
+      },
+      {
+        id: 'categoryId',
+        name: 'categoryId',
+        label: 'Category',
+        type: 'select',
+        placeholder: '-- Select Category --',
+        apiUrl: 'common/category',
+        apiMapper: (data: any) => {
+          const list = Array.isArray(data?.data?.items) ? data.data.items : (Array.isArray(data?.items) ? data.items : (Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : [])));
+          return list.map((item: any) => ({
+            value: String(item.id),
+            label: item.name || item.category
+          }));
+        },
+        visibleIf: { field: 'isMandalSanyojak', operator: '==', value: 'Yes' },
+        validations: [Validators.required],
+        gridColSpan: 6
+      },
+      {
+        id: 'castId',
+        name: 'castId',
+        label: 'Caste',
+        type: 'select',
+        placeholder: '-- Select Caste --',
+        dependsOn: 'categoryId',
+        apiUrl: (catId: string) => `common/cast?id=${catId}`,
+        apiMapper: (data: any) => {
+          const list = Array.isArray(data?.data?.items) ? data.data.items : (Array.isArray(data?.items) ? data.items : (Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : [])));
+          return list.map((item: any) => ({
+            value: String(item.id),
+            label: item.name || item.castName
+          }));
+        },
+        visibleIf: { field: 'isMandalSanyojak', operator: '==', value: 'Yes' },
+        validations: [Validators.required],
+        gridColSpan: 6
+      },
+      {
+        id: 'phoneNumber',
+        name: 'phoneNumber',
+        label: 'Phone Number',
+        type: 'text',
+        placeholder: 'Enter phone number',
+        visibleIf: { field: 'isMandalSanyojak', operator: '==', value: 'Yes' },
+        validations: [Validators.required, Validators.pattern('^[0-9]{10}$')],
+        gridColSpan: 6
+      },
+      {
+        id: 'educationLevel',
+        name: 'educationLevel',
+        label: 'Education Level',
+        type: 'text',
+        placeholder: 'Enter education level',
+        visibleIf: { field: 'isMandalSanyojak', operator: '==', value: 'Yes' },
+        gridColSpan: 6
+      },
+      {
+        id: 'address',
+        name: 'address',
+        label: 'Address',
+        type: 'textarea',
+        placeholder: 'Enter address',
+        visibleIf: { field: 'isMandalSanyojak', operator: '==', value: 'Yes' },
+        gridColSpan: 12
+      },
+      {
+        id: 'profileImage',
+        name: 'profileImage',
+        label: 'Profile Image',
+        type: 'file',
+        visibleIf: { field: 'isMandalSanyojak', operator: '==', value: 'Yes' },
         gridColSpan: 12
       }
     ]
@@ -131,7 +251,13 @@ export class MandalComponent implements OnInit {
   mandalList: any[] = []; // Will be populated from API
 
   columns: TableColumn[] = [
-    { key: 'name', label: 'Name', type: 'avatar', sortable: true, avatarFallbackKey: 'name' },
+    { key: 'profile', label: 'Profile', type: 'avatar' },
+    { key: 'name', label: 'Mandal Name', sortable: true },
+    { key: 'mandalSanyojak', label: 'Mandal Adhyakshya', sortable: true },
+    { key: 'fatherName', label: 'Father Name', sortable: true },
+    { key: 'castName', label: 'Cast', sortable: true },
+    { key: 'contact', label: 'Contact', sortable: true }
+
 
   ];
 
@@ -154,9 +280,6 @@ export class MandalComponent implements OnInit {
     { id: 'delete', label: '', variant: 'danger', icon: 'delete', show: () => this.canManage() }
   ];
 
-
-
-
   handleAction(event: any) {
     const { action, row } = event;
     console.log(`Action [${action.id}] triggered for:`, row);
@@ -169,7 +292,35 @@ export class MandalComponent implements OnInit {
         () => this.loadMandals()
       );
     } else if (action.id === 'edit') {
-      this.mandalModal.openModal(row);
+      // Robust mapping for both flat and nested structures
+      const editData: any = {
+        ...row,
+        vidhanId: String(row.vidhanId || 0),
+        isMandalSanyojak: row.isMandalSanyojak ? 'Yes' : 'No',
+        // Flat mapping
+        inchargeName: row.mandalSanyojak || '',
+        phoneNumber: row.contact || '',
+        categoryId: row.categoryId ? String(row.categoryId) : '',
+        castId: row.castId ? String(row.castId) : '',
+        fatherName: row.fatherName || '',
+        age: row.age || null,
+        educationLevel: row.education || row.educationLevel || '',
+        address: row.address || ''
+      };
+
+      // Sub-object fallback
+      if (row.sanyojak) {
+        editData.inchargeName = editData.inchargeName || row.sanyojak.inchargeName;
+        editData.age = editData.age || row.sanyojak.age;
+        editData.fatherName = editData.fatherName || row.sanyojak.fatherName;
+        editData.categoryId = editData.categoryId || (row.sanyojak.categoryId ? String(row.sanyojak.categoryId) : '');
+        editData.castId = editData.castId || (row.sanyojak.castId ? String(row.sanyojak.castId) : '');
+        editData.educationLevel = editData.educationLevel || row.sanyojak.educationLevel;
+        editData.phoneNumber = editData.phoneNumber || row.sanyojak.phoneNumber;
+        editData.address = editData.address || row.sanyojak.address;
+      }
+
+      this.mandalModal.openModal(editData);
     } else {
       this.toastService.showWarning('Action Selected', `Action ${action.id} clicked for ${row.name || 'this item'}`);
     }
@@ -179,20 +330,42 @@ export class MandalComponent implements OnInit {
     if (!result.status) return;
 
     const raw = result.data;
+    const isSanyojak = raw.isMandalSanyojak === 'Yes';
     const isUpdate = !!(raw.id || (this.mandalModal.initialData && this.mandalModal.initialData.id));
 
-    const submitData: any = {
-      VidhanId: 0, // Static VidhanId as requested
-      Name: raw.name
-    };
+    const formData = new FormData();
+
+    // Mandal Base Data
+    formData.append('Name', raw.name);
+    formData.append('IsMandalSanyojak', String(isSanyojak));
+    formData.append('VidhanId', String(raw.vidhanId || 0));
+
+    const userId = this.authService.getUserId();
+    if (userId) formData.append('UserId', userId);
 
     if (isUpdate) {
-      submitData.Id = Number(raw.id || this.mandalModal.initialData.id);
+      formData.append('Id', String(raw.id || this.mandalModal.initialData.id));
+    }
+
+    // Sanyojak Data (Nested structure using dot notation for FormData)
+    if (isSanyojak) {
+      formData.append('Sanyojak.InchargeName', raw.inchargeName || '');
+      formData.append('Sanyojak.Age', String(raw.age || 0));
+      formData.append('Sanyojak.FatherName', raw.fatherName || '');
+      formData.append('Sanyojak.CategoryId', String(raw.categoryId || 0));
+      formData.append('Sanyojak.CastId', String(raw.castId || 0));
+      formData.append('Sanyojak.EducationLevel', raw.educationLevel || '');
+      formData.append('Sanyojak.PhoneNumber', raw.phoneNumber || '');
+      formData.append('Sanyojak.Address', raw.address || '');
+
+      if (result.files && result.files['profileImage']) {
+        formData.append('Sanyojak.ProfileImagePath', result.files['profileImage']);
+      }
     }
 
     const request = isUpdate
-      ? this.mandalService.updateMandal(submitData)
-      : this.mandalService.createMandal(submitData);
+      ? this.mandalService.updateMandal(formData)
+      : this.mandalService.createMandal(formData);
 
     this.crudHandler.handleRequest(
       request,
@@ -206,8 +379,36 @@ export class MandalComponent implements OnInit {
   }
 
   handleExport(format: string) {
-    if (!format) return;
-    console.log(`Generating ${format.toUpperCase()} export...`);
-    this.toastService.showSuccess('Export Started', `Successfully generated ${format.toUpperCase()} export!`);
+    if (format !== 'excel') {
+      this.toastService.showWarning('Format Not Supported', 'Only Excel export is supported for Mandal list.');
+      return;
+    }
+
+    this.isExporting = true;
+    const params = {
+      searchTerm: this.searchTerm,
+      sortBy: this.sortBy,
+      isDescending: this.isDescending
+    };
+
+    this.mandalService.exportMandalExcel(params).subscribe({
+      next: (blob: Blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Mandal_List_${new Date().getTime()}.xlsx`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        this.isExporting = false;
+        this.toastService.showSuccess('Export Successful', 'Mandal list has been exported to Excel.');
+      },
+      error: (err) => {
+        console.error('Export error:', err);
+        this.isExporting = false;
+        this.toastService.showError('Export Failed', 'Failed to generate Excel export for Mandal list.');
+      }
+    });
   }
 }

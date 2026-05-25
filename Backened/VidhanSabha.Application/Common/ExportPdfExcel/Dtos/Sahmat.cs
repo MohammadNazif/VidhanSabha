@@ -26,7 +26,13 @@ namespace VidhanSabha.Application.Common.ExportPdfExcel.Dtos
     }
     public sealed class sahmatExportDef : IExportDefinition<sahmatExportRow>
     {
-        public string ReportTitle => "Sahmat_Asahmat List";
+        private string _title;
+
+        public sahmatExportDef(string title)
+        {
+            _title = title;
+        }
+        public string ReportTitle => _title;
 
         public IReadOnlyList<ExportColumn<sahmatExportRow>> Columns =>
         [

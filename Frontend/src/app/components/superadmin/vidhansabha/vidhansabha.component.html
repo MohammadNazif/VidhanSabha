@@ -1,20 +1,23 @@
 <div class="h-screen p-6 flex flex-col overflow-hidden bg-slate-50/50">
-    <app-page-header [title]="listTitle" subtitle="Manage and view constituency details" icon="landmark">
-        <div class="flex items-center gap-3">
-            <app-generic-export *ngIf="isListMode" [data]="vidhanList" [columns]="columns" fileName="VidhanSabhas">
-            </app-generic-export>
+  <app-page-header [title]="listTitle" subtitle="Manage and view constituency details" icon="landmark">
+    <div class="flex items-center gap-3">
+      <app-generic-export [show]="isListMode" 
+        [isExporting]="isExporting" (export)="handleExport($event)">
+      </app-generic-export>
 
-            <ng-container *ngIf="!isListMode">
-                <app-generic-modal-button #vidhanModal [config]="addVidhanConfig" variant="primary" icon="+"
-                    label="Add Vidhan Sabha" (formSubmit)="handleFormSubmit($event)">
-                </app-generic-modal-button>
-            </ng-container>
-        </div>
-    </app-page-header>
+      <ng-container *ngIf="!isListMode">
+        <app-generic-modal-button #vidhanModal [config]="addVidhanConfig" variant="primary" icon="+"
+          label="Add Vidhan Sabha" (formSubmit)="handleFormSubmit($event)">
+        </app-generic-modal-button>
+      </ng-container>
+    </div>
+  </app-page-header>
 
   <div class="flex-1 min-h-0 mt-6 bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
     <app-generic-table class="flex-1 min-h-0" [data]="vidhanList" [columns]="columns" [config]="config"
-      [actions]="actions" (actionClick)="handleAction($event)" *ngIf="vidhanList.length > 0">
+      [actions]="actions" [totalItems]="totalCount" [loading]="loading" (actionClick)="handleAction($event)"
+      (pageChange)="handlePageChange($event)" (sortChange)="handleSortChange($event)"
+      (searchChange)="handleSearchChange($event)">
     </app-generic-table>
   </div>
 </div>

@@ -52,13 +52,16 @@ export class BoothComponent implements OnInit {
   pageNumber = 1;
   pageSize = 10;
   searchTerm = '';
-  sortBy = '';
-  isDescending = true;
+  sortBy = 'boothNumber';
+  isDescending = false;
   mandalId: string | number | null = null;
   sectorId: string | number | null = null;
 
   canManage(): boolean {
-    return !this.isListView && this.permissionService.hasPermission(ModulePermission.BoothVoterDescrition);
+    if (this.isListView) return false;
+    const role = (this.authService.getRole() || '').toUpperCase().trim();
+    if (role === 'VIDHANSABHAPRABHARI') return true;
+    return this.permissionService.hasPermission(ModulePermission.Booth);
   }
 
   isStatePrabhari(): boolean {
@@ -68,6 +71,22 @@ export class BoothComponent implements OnInit {
   defaultStateId: string | null = null;
 
   ngOnInit() {
+    const role = (this.authService.getRole() || '').toUpperCase().trim();
+    const isSectorSanyojak = role === 'SECTORSANYOJAK';
+
+    if (isSectorSanyojak) {
+      const mandalId = this.authService.getMandalId();
+      // Hide mandalId and sectorId fields
+      this.addBoothConfig.fields = this.addBoothConfig.fields.filter(f => f.id !== 'mandalId' && f.id !== 'sectorId');
+      
+      // Simplify villageId field
+      const villageField = this.addBoothConfig.fields.find(f => f.id === 'villageId');
+      if (villageField) {
+        delete (villageField as any).dependsOn;
+        villageField.apiUrl = () => `common/village?id=${mandalId}`;
+      }
+    }
+
     this.route.url.subscribe((url: UrlSegment[]) => {
       const path = url[0]?.path || '';
       this.isListView = path.includes('-list');
@@ -80,26 +99,39 @@ export class BoothComponent implements OnInit {
     });
 
     if (this.isStatePrabhari()) {
-      // Fetch the assigned state ID
-      this.stateService.getAllStates().subscribe({
-        next: (response) => {
-          const list = response?.data || response || [];
-          if (list.length > 0) {
-            this.defaultStateId = String(list[0].stateId || list[0].id);
+      const savedStateId = this.authService.getStateId();
+      if (savedStateId) {
+        this.defaultStateId = savedStateId;
 
-            // Simplify fields for State Prabhari
-            const districtField = this.addBoothConfig.fields.find(f => f.id === 'districtId');
-            if (districtField) {
-              delete (districtField as any).dependsOn;
-              districtField.apiUrl = () => `district/getAll?stateId=${this.defaultStateId}`;
+        // Simplify fields for State Prabhari
+        const districtField = this.addBoothConfig.fields.find(f => f.id === 'districtId');
+        if (districtField) {
+          delete (districtField as any).dependsOn;
+          districtField.apiUrl = () => `district/getAll?stateId=${this.defaultStateId}`;
+        }
+        this.loadBooths();
+      } else {
+        // Fetch the assigned state ID
+        this.stateService.getAllStates().subscribe({
+          next: (response) => {
+            const list = response?.data || response || [];
+            if (list.length > 0) {
+              this.defaultStateId = String(list[0].stateId || list[0].id);
+
+              // Simplify fields for State Prabhari
+              const districtField = this.addBoothConfig.fields.find(f => f.id === 'districtId');
+              if (districtField) {
+                delete (districtField as any).dependsOn;
+                districtField.apiUrl = () => `district/getAll?stateId=${this.defaultStateId}`;
+              }
+              this.loadBooths();
+            } else {
+              this.loadBooths();
             }
-            this.loadBooths();
-          } else {
-            this.loadBooths();
-          }
-        },
-        error: () => this.loadBooths()
-      });
+          },
+          error: () => this.loadBooths()
+        });
+      }
     } else {
       this.loadBooths();
     }
@@ -185,19 +217,23 @@ export class BoothComponent implements OnInit {
 
   loadBooths() {
     this.loading = true;
+    const role = (this.authService.getRole() || '').toUpperCase().trim();
+    const isSectorSanyojak = role === 'SECTORSANYOJAK';
+
     const params: any = {
-      pageNumber: this.pageNumber,
-      pageSize: this.pageSize,
-      searchTerm: this.searchTerm,
-      sortBy: this.sortBy,
-      isDescending: this.isDescending,
-      mandalIds: this.mandalId,
-      sectorIds: this.sectorId
+      PageNumber: this.pageNumber,
+      PageSize: this.pageSize,
+      SearchTerm: this.searchTerm,
+      SortBy: this.sortBy,
+      IsDescending: this.isDescending,
+      mandalIds: isSectorSanyojak ? this.authService.getMandalId() : this.mandalId,
+      sectorIds: isSectorSanyojak ? this.authService.getSectorId() : this.sectorId,
+      roleFilterFlag: !this.isListView
     };
 
     const userId = this.authService.getUserId();
     if (userId) {
-      params.userId = userId;
+      params.userId = null;
     }
 
     // Clean up empty params to prevent URL clutter (e.g. sectorId=)
@@ -322,7 +358,7 @@ export class BoothComponent implements OnInit {
       {
         id: 'isBoothSanyojak',
         name: 'isBoothSanyojak',
-        label: 'Booth Sanyojak',
+        label: 'Booth Adhyaksh',
         type: 'select',
         placeholder: '-- Select Yes/No --',
         options: [
@@ -335,9 +371,9 @@ export class BoothComponent implements OnInit {
       {
         id: 'inchargeName',
         name: 'inchargeName',
-        label: 'Incharge Name',
+        label: 'Booth Adhyaksh Name',
         type: 'text',
-        placeholder: 'Enter incharge full name',
+        placeholder: 'Enter booth adhyaksh full name',
         visibleIf: { field: 'isBoothSanyojak', operator: '==', value: 'Yes' },
         gridColSpan: 6
       },
@@ -438,6 +474,15 @@ export class BoothComponent implements OnInit {
   };
 
   columns: TableColumn[] = [
+    {
+      key: 'photo',
+      label: 'Profile',
+      type: 'avatar',
+      align: 'center',
+      sortable: false,
+      formatter: (val: any, row: any) => row.sanyojak?.profile || '',
+      avatarFallbackKey: 'inchargeName'
+    },
     { key: 'mandalName', label: 'Mandal', sortable: true },
     { key: 'sectorName', label: 'Sector', sortable: true },
     { key: 'boothNumber', label: 'Booth No.', sortable: true },
@@ -455,7 +500,7 @@ export class BoothComponent implements OnInit {
     { key: 'pollingStationName', label: 'Polling Station', sortable: true },
     {
       key: 'boothAathyaksh',
-      label: 'Booth Aathyaksh',
+      label: 'Booth Adhyaksh',
       sortable: true,
       formatter: (val: any, row: any) => row.sanyojak?.inchargeName || 'N/A'
     },
@@ -501,7 +546,7 @@ export class BoothComponent implements OnInit {
         'Booth deleted successfully!',
         () => this.loadBooths(),
         true,
-        ModulePermission.BoothVoterDescrition
+        ModulePermission.Booth
       );
     } else if (action.id === 'edit') {
       // Flatten nested data for form editing
@@ -564,49 +609,70 @@ export class BoothComponent implements OnInit {
     const isSanyojak = raw.isBoothSanyojak === 'Yes';
     const isUpdate = !!(raw.id || (this.boothModal.initialData && this.boothModal.initialData.id));
 
-    const submitData: any = {
-      MandalId: Number(raw.mandalId),
-      SectorId: Number(raw.sectorId),
-      Villages: [],
-      BoothNumber: Number(raw.boothNumber),
-      PollingStationName: raw.pollingStationName || "",
-      PollingStationLocation: raw.pollingStationLocation || "",
-      IsBoothSanyojak: isSanyojak,
-      Sanyojak: isSanyojak ? {
-        InchargeName: raw.inchargeName || "",
-        Age: raw.age ? Number(raw.age) : 0,
-        FatherName: raw.fatherName || "",
-        CategoryId: raw.categoryId ? Number(raw.categoryId) : 0,
-        CastId: raw.castId ? Number(raw.castId) : 0,
-        EducationLevel: raw.educationLevel || "",
-        PhoneNumber: raw.phoneNumber || "",
-        Address: raw.address || ""
-      } : null,
-      userId: this.authService.getUserId(),
-      stateId: this.defaultStateId ? Number(this.defaultStateId) : null
-    };
+    const role = (this.authService.getRole() || '').toUpperCase().trim();
+    const isSectorSanyojak = role === 'SECTORSANYOJAK';
 
-    // Transform anshikData or villageId to Villages array
+    const mandalId = isSectorSanyojak ? this.authService.getMandalId() : raw.mandalId;
+    const sectorId = isSectorSanyojak ? this.authService.getSectorId() : raw.sectorId;
+
+    const formData = new FormData();
+    formData.append('MandalId', String(mandalId));
+    formData.append('SectorId', String(sectorId));
+    formData.append('BoothNumber', String(raw.boothNumber));
+    formData.append('PollingStationName', raw.pollingStationName || "");
+    formData.append('PollingStationLocation', raw.pollingStationLocation || "");
+    formData.append('IsBoothSanyojak', String(isSanyojak));
+
+    if (isSanyojak) {
+      formData.append('Sanyojak.InchargeName', raw.inchargeName || "");
+      formData.append('Sanyojak.Age', String(raw.age || 0));
+      formData.append('Sanyojak.FatherName', raw.fatherName || "");
+      formData.append('Sanyojak.CategoryId', String(raw.categoryId || 0));
+      formData.append('Sanyojak.CastId', String(raw.castId || 0));
+      formData.append('Sanyojak.EducationLevel', raw.educationLevel || "");
+      formData.append('Sanyojak.PhoneNumber', raw.phoneNumber || "");
+      formData.append('Sanyojak.Address', raw.address || "");
+
+      if (result.files && result.files['profileImage']) {
+        formData.append('Sanyojak.ProfileImagePath', result.files['profileImage']);
+      }
+    }
+
+    let villages: any[] = [];
     if (raw.anshikData && Array.isArray(raw.anshikData)) {
-      submitData.Villages = raw.anshikData.map((v: any) => ({
+      villages = raw.anshikData.map((v: any) => ({
         VillageId: Number(v.id || v.villageId),
         HasAnshik: v.anshik === 'Yes'
       }));
     } else if (raw.villageId) {
       const ids = Array.isArray(raw.villageId) ? raw.villageId : [raw.villageId];
-      submitData.Villages = ids.map((id: any) => ({
+      villages = ids.map((id: any) => ({
         VillageId: Number(id),
         HasAnshik: false
       }));
     }
 
+    villages.forEach((v, index) => {
+      formData.append(`Villages[${index}].VillageId`, String(v.VillageId));
+      formData.append(`Villages[${index}].HasAnshik`, String(v.HasAnshik));
+    });
+
+    // Metadata
+    const userId = this.authService.getUserId();
+    if (userId) {
+      formData.append('userId', String(userId));
+    }
+    if (this.defaultStateId) {
+      formData.append('stateId', String(this.defaultStateId));
+    }
+
     if (isUpdate) {
-      submitData.Id = Number(raw.id || this.boothModal.initialData.id);
+      formData.append('Id', String(raw.id || this.boothModal.initialData.id));
     }
 
     const request = isUpdate
-      ? this.boothService.updateBooth(submitData)
-      : this.boothService.createBooth(submitData);
+      ? this.boothService.updateBooth(formData)
+      : this.boothService.createBooth(formData);
 
     this.crudHandler.handleRequest(
       request,
@@ -614,7 +680,7 @@ export class BoothComponent implements OnInit {
       `Booth ${isUpdate ? 'updated' : 'created'} successfully!`,
       () => this.loadBooths(),
       true,
-      ModulePermission.BoothVoterDescrition
+      ModulePermission.Booth
     );
   }
 

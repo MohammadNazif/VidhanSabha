@@ -23,8 +23,8 @@ export class DynamicFormModalComponent implements OnInit, OnDestroy {
   form!: FormGroup;
   fieldOptions: { [key: string]: DropdownOption[] } = {};
   fieldVisibility: { [key: string]: boolean } = {};
-  fileData: { [key: string]: File } = {};
-  previews: { [key: string]: string | ArrayBuffer | null } = {};
+  fileData: { [key: string]: any } = {};
+  previews: { [key: string]: any } = {};
 
   private subscriptions: Subscription = new Subscription();
   private isInitializing = true;
@@ -42,6 +42,7 @@ export class DynamicFormModalComponent implements OnInit, OnDestroy {
     this.createForm();
     this.initializeOptions();
     this.setupFieldInteractions();
+    this.setupCalculationLogic();
     this.updateCascadingOptions();
 
     // Disable reset logic for first 500ms to allow APIs to load
@@ -161,6 +162,39 @@ export class DynamicFormModalComponent implements OnInit, OnDestroy {
         this.updateCascadingOptions();
       })
     );
+  }
+
+  private setupCalculationLogic(): void {
+    const hasTotal = this.config.fields.some(f => f.id === 'totalVoter');
+    const hasMale = this.config.fields.some(f => f.id === 'male');
+    const hasFemale = this.config.fields.some(f => f.id === 'female');
+    const hasOther = this.config.fields.some(f => f.id === 'other');
+
+    if (hasTotal && hasMale && hasFemale && hasOther) {
+      const totalCtrl = this.form.get('totalVoter');
+      const maleCtrl = this.form.get('male');
+      const femaleCtrl = this.form.get('female');
+      const otherCtrl = this.form.get('other');
+
+      if (totalCtrl && maleCtrl && femaleCtrl && otherCtrl) {
+        const updateOther = () => {
+          const total = Number(totalCtrl.value || 0);
+          const male = Number(maleCtrl.value || 0);
+          const female = Number(femaleCtrl.value || 0);
+          const calculatedOther = Math.max(0, total - male - female);
+          
+          if (otherCtrl.value !== calculatedOther) {
+            otherCtrl.setValue(calculatedOther, { emitEvent: false });
+          }
+        };
+
+        updateOther();
+
+        this.subscriptions.add(totalCtrl.valueChanges.subscribe(updateOther));
+        this.subscriptions.add(maleCtrl.valueChanges.subscribe(updateOther));
+        this.subscriptions.add(femaleCtrl.valueChanges.subscribe(updateOther));
+      }
+    }
   }
 
   private updateVisibility(): void {
@@ -373,11 +407,26 @@ export class DynamicFormModalComponent implements OnInit, OnDestroy {
   private lastApiUrl: { [key: string]: string } = {};
 
   onFileChange(event: any, fieldId: string): void {
-    const file = event.target.files[0];
-    if (file) {
-      this.fileData[fieldId] = file;
+    const field = this.config.fields.find(f => f.id === fieldId);
+    const files = Array.from(event.target.files) as File[];
+    
+    if (files.length === 0) return;
 
-      // Create preview
+    if (field?.multiple) {
+      this.fileData[fieldId] = files;
+      this.previews[fieldId] = [];
+      
+      files.forEach(file => {
+        const reader = new FileReader();
+        reader.onload = e => {
+          if (!Array.isArray(this.previews[fieldId])) this.previews[fieldId] = [];
+          this.previews[fieldId].push(reader.result);
+        };
+        reader.readAsDataURL(file);
+      });
+    } else {
+      const file = files[0];
+      this.fileData[fieldId] = file;
       const reader = new FileReader();
       reader.onload = e => this.previews[fieldId] = reader.result;
       reader.readAsDataURL(file);

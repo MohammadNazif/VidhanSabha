@@ -12,10 +12,12 @@ import { CrudHandlerService } from '../../../Services/common/crud-handler.servic
 import { ActivatedRoute } from '@angular/router';
 import { AuthServiceService } from '../../../Services/Auth/auth.service';
 
+import { GenericExportComponent } from '../../shared/generic-export/generic-export.component';
+
 @Component({
   selector: 'app-block',
   standalone: true,
-  imports: [CommonModule, PageHeaderComponent, GenericTableComponent, GenericModalButtonComponent],
+  imports: [CommonModule, PageHeaderComponent, GenericTableComponent, GenericModalButtonComponent, GenericExportComponent],
   templateUrl: './block.component.html',
   styleUrl: './block.component.css'
 })
@@ -25,6 +27,7 @@ export class BlockComponent implements OnInit {
   blockList: any[] = [];
   totalCount = 0;
   loading = false;
+  isExporting = false;
 
   // Server-side state
   pageNumber = 1;
@@ -41,10 +44,11 @@ export class BlockComponent implements OnInit {
   }
 
   columns: TableColumn[] = [
+    { key: 'profile', label: 'Profile', type: 'avatar', align: 'center', sortable: false, avatarFallbackKey: 'blockPramukh' },
     { key: 'blockName', label: 'Block Name', sortable: true },
     { key: 'blockPramukh', label: 'Block Pramukh', sortable: true },
     { key: 'mobile', label: 'Mobile No.', sortable: true },
-    { key: 'partyName', label: 'Party', sortable: true },
+    { key: 'party', label: 'Party', sortable: true },
     { key: 'categoryName', label: 'Category', sortable: true },
     { key: 'castName', label: 'Caste', sortable: true },
     { key: 'occupation', label: 'Occupation', sortable: true }
@@ -173,6 +177,13 @@ export class BlockComponent implements OnInit {
         type: 'textarea',
         placeholder: 'Enter address...',
         gridColSpan: 12
+      },
+      {
+        id: 'profile',
+        name: 'profile',
+        label: 'Profile Image',
+        type: 'file',
+        gridColSpan: 12
       }
     ]
   };
@@ -267,24 +278,28 @@ export class BlockComponent implements OnInit {
     if (!result.status) return;
 
     const raw = result.data;
+    const files = result.files;
     const rowId = raw.id || (this.blockModal.initialData && this.blockModal.initialData.id);
 
-    const submitData: any = {
-      id: rowId ? Number(rowId) : null,
-      blockName: raw.blockName,
-      blockPramukh: raw.blockPramukh,
-      partyId: Number(raw.partyId),
-      mobile: raw.mobile,
-      address: raw.address,
-      categoryId: Number(raw.categoryId),
-      castId: Number(raw.castId),
-      occupationId: Number(raw.occupationId)
-    };
+    const formData = new FormData();
+    if (rowId) formData.append('Id', String(rowId));
+    formData.append('BlockName', raw.blockName || '');
+    formData.append('BlockPramukh', raw.blockPramukh || '');
+    formData.append('PartyId', String(raw.partyId || 0));
+    formData.append('Mobile', raw.mobile || '');
+    formData.append('Address', raw.address || '');
+    formData.append('CategoryId', String(raw.categoryId || 0));
+    formData.append('CastId', String(raw.castId || 0));
+    formData.append('OccupationId', String(raw.occupationId || 0));
 
-    const isUpdate = !!submitData.id;
+    if (files && files['profile']) {
+      formData.append('Profile', files['profile']);
+    }
+
+    const isUpdate = !!rowId;
     const request = isUpdate
-      ? this.blockService.updateBlock(submitData)
-      : this.blockService.createBlock(submitData);
+      ? this.blockService.updateBlock(formData)
+      : this.blockService.createBlock(formData);
 
     this.crudHandler.handleRequest(
       request,
@@ -292,5 +307,32 @@ export class BlockComponent implements OnInit {
       `Block ${isUpdate ? 'updated' : 'created'} successfully!`,
       () => this.loadData()
     );
+  }
+
+  handleExport(format: string) {
+    if (!format) return;
+    this.isExporting = true;
+    const exportFormat = format as 'excel' | 'pdf';
+    const request = exportFormat === 'excel' ? this.blockService.exportToExcel() : this.blockService.exportToPdf();
+
+    request.subscribe({
+      next: (blob: Blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Block_List.${format === 'excel' ? 'xlsx' : 'pdf'}`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        this.isExporting = false;
+        this.toastService.showSuccess('Success', `Block list exported to ${format.toUpperCase()} successfully!`);
+      },
+      error: (err: any) => {
+        console.error(`Error exporting to ${format}:`, err);
+        this.toastService.showError('Error', `Failed to export Block list to ${format.toUpperCase()}`);
+        this.isExporting = false;
+      }
+    });
   }
 }

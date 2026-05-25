@@ -76,8 +76,7 @@ export class GenericExportComponent implements OnInit, OnDestroy {
   @Input() fileName: string = 'Export';
   @Input() options: { label: string; value: string; icon?: string }[] = [
     { label: 'Export PDF', value: 'pdf' },
-    { label: 'Export Excel', value: 'excel' },
-    { label: 'Export CSV', value: 'csv' }
+    { label: 'Export Excel', value: 'excel' }
   ];
 
   @Output() export = new EventEmitter<string>();

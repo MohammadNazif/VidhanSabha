@@ -55,7 +55,7 @@ namespace VidhanSabha.Application.Pannels.Admin.Sector.Commands
             {
                 // ✅ UpdateBasic clears ProfileImage to null — is that intended?
                 // If not, add imagePath param to UpdateBasic too (see below)
-                sector.UpdateBasic(dto.MandalId, dto.VillageId, dto.SectorName);
+                sector.UpdateBasic(dto.MandalId, dto.VillageIds, dto.SectorName);
             }
             else
             {
@@ -69,7 +69,7 @@ namespace VidhanSabha.Application.Pannels.Admin.Sector.Commands
                 
                 sector.UpdateWithSanyojak(
                     dto.MandalId,
-                    dto.VillageId,
+                    dto.VillageIds,
                     dto.SectorName,
                     dto.InchargeName,
                     dto.Age.Value,

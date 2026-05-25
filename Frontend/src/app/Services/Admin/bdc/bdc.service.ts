@@ -23,4 +23,12 @@ export class BdcService extends BaseApiService {
   updateBdc(data: any): Observable<any> {
     return this.update(this.entity, data);
   }
+
+  exportToExcel(): Observable<Blob> {
+    return this.export(this.entity, 'excel');
+  }
+
+  exportToPdf(): Observable<Blob> {
+    return this.export(this.entity, 'pdf');
+  }
 }

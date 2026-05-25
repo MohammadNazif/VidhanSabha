@@ -6,8 +6,11 @@ using System.Threading.Tasks;
 
 namespace VidhanSabha.Application.Pannels.Auth.Interfaces
 {
-    public interface IJwtService
-    {
-        string GenerateToken(string userId, string mobile, string role);
-    }
+    
+        public interface IJwtService
+        {
+            string GenerateToken(string userId, string mobile, string role);
+            string GenerateRefreshToken();                   
+        }
+    
 }

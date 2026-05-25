@@ -29,21 +29,31 @@ namespace VidhanSabha.Application.Pannels.Admin.NewVoter.Command
             var req = request.Dto;
 
             string createdtouserId = null;
+            string createdsectorUserId = null;
             if (IsUserRole(request.Role, PrabhariRole.VidhanSabhaPrabhari))
             {
+                createdsectorUserId = await _booth.GetSectorUseridbyBoothId(request.Dto.BoothId);
                 createdtouserId = await _booth.GetUseridbyBoothId(request.Dto.BoothId);
             }
             else if (IsUserRole(request.Role, PrabhariRole.BoothSanyojak))
             {
                 createdtouserId = request.UserId;
+                createdsectorUserId = await _booth.GetSectorUseridbyBoothId(request.Dto.BoothId);
 
                 request.UserId = await _booth.GetadminUseridbyUserId(request.Dto.BoothId);
 
             }
+            else if (IsUserRole(request.Role, PrabhariRole.SectorSanyojak))
+            {
+                createdsectorUserId = request.UserId;
+                createdtouserId = await _booth.GetUseridbyBoothId(request.Dto.BoothId);
+                request.UserId = await _booth.GetadminUseridbyUserId(request.Dto.BoothId);
 
-            var data = Tbl_NewVoter.Create(
-                req.BoothId, req.Name, req.FatherName, req.Mobile, req.CategoryId, req.CastId, req.DOB, req.Age,
-                req.VoterId, request.UserId, createdtouserId, req.VillageId);
+            }
+
+                var data = Tbl_NewVoter.Create(
+                    req.BoothId, req.Name, req.FatherName, req.Mobile, req.CategoryId, req.CastId, req.DOB, req.Age,
+                    req.VoterId, request.UserId, createdtouserId, createdsectorUserId,request.Role, req.VillageId);
 
 
             return await _repo.AddAsync(data, cancellationToken);

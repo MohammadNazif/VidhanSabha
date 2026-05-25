@@ -18,15 +18,16 @@ import { BehaviorSubject } from 'rxjs';
 import { Validators } from '@angular/forms';
 import { environment } from '../../../../environments/environment';
 import { PermissionService } from '../../../Services/common/permission.service';
+import { GenericExportComponent } from '../../shared/generic-export/generic-export.component';
 
 
 @Component({
   selector: 'app-booth-samiti',
   standalone: true,
-  imports: [CommonModule, PageHeaderComponent, GenericTableComponent, LucideAngularModule, GenericModalButtonComponent],
+  imports: [CommonModule, PageHeaderComponent, GenericTableComponent, LucideAngularModule, GenericModalButtonComponent, GenericExportComponent],
   template: `
     <div class="h-screen p-6 flex flex-col overflow-hidden bg-slate-50/50">
-      <app-page-header [title]="isMemberView ? selectedBoothName : 'Booth Samiti Members'" 
+      <app-page-header [title]="isMemberView ? selectedBoothName : (isListView ? 'Booth Samiti List' : 'Booth Samiti Management')" 
                        [subtitle]="isMemberView ? 'Manage members assigned to this booth' : 'Overview of all registered booth samitis'">
         
         <div class="flex items-center gap-3">
@@ -39,6 +40,10 @@ import { PermissionService } from '../../../Services/common/permission.service';
           <app-generic-modal-button *ngIf="canManage() && !isMemberView" #samitiModal [config]="samitiFormConfig" (formSubmit)="handleFormSubmit($event)"
             label="Add Samiti" icon="+" variant="primary">
           </app-generic-modal-button>
+
+          <app-generic-export [show]="(isListView || isMemberView) && memberList && memberList.length > 0" 
+              [isExporting]="isExporting" (export)="handleExport($event)">
+          </app-generic-export>
         </div>
 
         <app-generic-modal-button #memberModal [config]="memberFormConfig" (formSubmit)="handleMemberSubmit($event)"
@@ -70,6 +75,7 @@ export class BoothSamitiComponent implements OnInit {
   memberList: any[] = [];
   totalCount = 0;
   loading = false;
+  isExporting = false;
 
   pageNumber = 1;
   pageSize = 50;
@@ -87,6 +93,7 @@ export class BoothSamitiComponent implements OnInit {
   // Cached options to minimize API calls
   designations: any[] = [];
   categories: any[] = [];
+  existingBoothIds = new Set<number>();
 
   // Observables for form fields
   private designationSubject = new BehaviorSubject<DropdownOption[]>([]);
@@ -118,7 +125,10 @@ export class BoothSamitiComponent implements OnInit {
   }
 
   canManage(): boolean {
-    return !this.isListView && this.permissionService.hasPermission(ModulePermission.BoothSamiti);
+    if (this.isListView) return false;
+    const role = (this.authService.getRole() || '').toUpperCase().trim();
+    if (role === 'VIDHANSABHAPRABHARI') return true;
+    return this.permissionService.hasPermission(ModulePermission.BoothSamiti);
   }
 
   backToList() {
@@ -138,7 +148,6 @@ export class BoothSamitiComponent implements OnInit {
   updateTableConfig() {
     if (this.isMemberView) {
       this.columns = [
-        { key: 'srNo', label: 'Sr. No.', width: '50px' as any },
         { key: 'name', label: 'Name', sortable: true },
         { key: 'designationName', label: 'Designation', sortable: true },
         { key: 'categoryName', label: 'Category', sortable: true },
@@ -152,15 +161,29 @@ export class BoothSamitiComponent implements OnInit {
         { id: 'delete_mem', label: '', variant: 'danger', icon: 'delete', show: () => this.canManage() }
       ];
     } else {
-      this.columns = [
-        { key: 'srNo', label: 'Sr. No.', width: '50px' as any },
-        { key: 'boothNo', label: 'Booth No.', sortable: true },
-        { key: 'village', label: 'Village', sortable: true },
-        { key: 'pollingStation', label: 'Polling Station', sortable: true },
-        { key: 'boothAdhayaksh', label: 'Booth Adhayaksh', sortable: true },
-        { key: 'totalMember', label: 'Total Members', sortable: true },
-        { key: 'contact', label: 'Contact', sortable: true }
-      ];
+      if (this.isListView) {
+        this.columns = [
+          { key: 'boothNo', label: 'Booth No.', sortable: true },
+          { key: 'village', label: 'Village', sortable: true },
+          { key: 'pollingStation', label: 'Polling Station', sortable: true },
+          { key: 'boothAdhayaksh', label: 'Booth Adhayaksh', sortable: true },
+          { key: 'designation', label: 'Designation', sortable: true },
+          { key: 'categoryName', label: 'Category', sortable: true },
+          { key: 'castName', label: 'Caste', sortable: true },
+          { key: 'age', label: 'Age', sortable: true },
+          { key: 'contact', label: 'Contact', sortable: true },
+          { key: 'totalMember', label: 'Total Members', sortable: true }
+        ];
+      } else {
+        this.columns = [
+          { key: 'boothNo', label: 'Booth No.', sortable: true },
+          { key: 'village', label: 'Village', sortable: true },
+          { key: 'pollingStation', label: 'Polling Station', sortable: true },
+          { key: 'boothAdhayaksh', label: 'Booth Adhayaksh', sortable: true },
+          { key: 'totalMember', label: 'Total Members', sortable: true },
+          { key: 'contact', label: 'Contact', sortable: true }
+        ];
+      }
       this.actions = [
         { id: 'view', label: 'View', variant: 'primary', icon: 'view' },
         { id: 'add_samiti', label: 'Add Member', variant: 'primary', icon: 'user', show: () => this.canManage() }
@@ -231,13 +254,23 @@ export class BoothSamitiComponent implements OnInit {
         label: 'Booth',
         type: 'select',
         placeholder: '-- Select Booth --',
-        apiUrl: 'common/boothNumber',
+        apiUrl: () => {
+          const role = (this.authService.getRole() || '').toUpperCase().trim();
+          if (role === 'SECTORSANYOJAK') {
+            return `booth/getAllBoothBySectorid?sectorid=${this.authService.getUserId()}`;
+          }
+          return 'common/boothNumber';
+        },
         apiMapper: (data: any) => {
           const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
-          return list.map((item: any) => ({
-            value: String(item.boothId || item.id),
-            label: `Booth No. ${item.boothNumber}`
-          }));
+          return list.map((item: any) => {
+            const bId = Number(item.boothId || item.id);
+            return {
+              value: String(bId),
+              label: `Booth No. ${item.boothNumber}`,
+              disabled: this.existingBoothIds.has(bId)
+            };
+          });
         },
         validations: [Validators.required],
         gridColSpan: 6
@@ -293,6 +326,16 @@ export class BoothSamitiComponent implements OnInit {
       this.categories = res.data || res || [];
       this.updateDropdownOptions();
     });
+
+    this.loadExistingSamitis();
+  }
+
+  loadExistingSamitis() {
+    this.boothSamitiService.getBoothSamiti({ PageNumber: 1, PageSize: 10000 }).subscribe(res => {
+      const dataWrap = res.data || res;
+      const list = Array.isArray(dataWrap) ? dataWrap : (dataWrap.items || []);
+      this.existingBoothIds = new Set(list.map((m: any) => Number(m.id || m.boothId)));
+    });
   }
 
   loadMembers() {
@@ -301,11 +344,31 @@ export class BoothSamitiComponent implements OnInit {
       this.boothSamitiService.getAllMembers(this.selectedBoothId).subscribe({
         next: (res) => {
           const dataWrap = res.data || res;
-          const list = Array.isArray(dataWrap) ? dataWrap : (dataWrap.items || []);
-          this.memberList = list.map((item: any, index: number) => ({
+          const apiMembers = dataWrap.members || (Array.isArray(dataWrap) ? dataWrap : []);
+          const sanyojak = dataWrap.boothSanyojak;
+
+          const mapped = apiMembers.map((item: any, index: number) => ({
             ...item,
             srNo: index + 1
           }));
+
+          if (this.isListView && sanyojak) {
+            const adhyaksh = {
+              id: -1,
+              name: sanyojak.inchargeName,
+              designationName: sanyojak.designation,
+              categoryName: sanyojak.categoryName,
+              casteName: sanyojak.castName,
+              age: sanyojak.age,
+              contact: sanyojak.phoneNumber,
+              occupation: 'Booth Adhayaksh',
+              isAdhyakshRow: true
+            };
+            this.memberList = [adhyaksh, ...mapped];
+          } else {
+            this.memberList = mapped;
+          }
+
           this.totalCount = this.memberList.length;
           this.updateDropdownOptions();
           this.loading = false;
@@ -315,13 +378,14 @@ export class BoothSamitiComponent implements OnInit {
       return;
     }
 
-    const params = {
+    const params: any = {
       PageNumber: this.pageNumber,
       PageSize: this.pageSize,
       SearchTerm: this.searchTerm,
       SortBy: this.sortBy || 'id',
       IsDescending: this.isDescending,
-      userId: this.authService.getRole() === 'BoothSanyojak' ? this.authService.getUserId() : null
+      userId: this.authService.getRole() === 'BoothSanyojak' ? this.authService.getUserId() : null,
+      roleFilterFlag: !this.isListView
     };
 
     this.boothSamitiService.getBoothSamiti(params).subscribe({
@@ -419,8 +483,13 @@ export class BoothSamitiComponent implements OnInit {
       };
     } else {
       // Create logic - ONLY send boothId as requested
+      const bId = Number(raw.boothId);
+      if (this.existingBoothIds.has(bId)) {
+        this.toastService.showError('Duplicate', 'A samiti for this booth already exists!');
+        return;
+      }
       submitData = {
-        boothId: Number(raw.boothId)
+        boothId: bId
       };
     }
 
@@ -432,7 +501,10 @@ export class BoothSamitiComponent implements OnInit {
       request,
       submitData.id ? 'Updated' : 'Created',
       `Member ${submitData.id ? 'updated' : 'added'} successfully!`,
-      () => this.loadMembers(),
+      () => {
+        this.loadMembers();
+        this.loadExistingSamitis();
+      },
       true,
       ModulePermission.BoothSamiti
     );
@@ -458,6 +530,46 @@ export class BoothSamitiComponent implements OnInit {
 
   handleExport(format: string) {
     if (!format) return;
-    this.toastService.showSuccess('Export Started', `Successfully generated ${format.toUpperCase()} export!`);
+    this.isExporting = true;
+
+    // Determine entity and parameters
+    // isMemberView: exports members of a specific booth
+    // !isMemberView (ListView or Management): exports the list of samitis/booths
+    const entity = this.isMemberView ? 'boothsamitimembers' : 'boothsamiti';
+    const params: any = {
+      UserId: this.authService.getUserId()
+    };
+
+    if (this.isMemberView && this.selectedBoothId) {
+      params.BoothMemId = this.selectedBoothId;
+    }
+
+    // Use the generic export service from BaseApiService
+    this.boothSamitiService.export(entity, format as 'pdf' | 'excel', params).subscribe({
+      next: (blob: Blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        
+        let fileName = 'Booth_Samiti_List';
+        if (this.isMemberView) {
+          fileName = this.selectedBoothName ? `${this.selectedBoothName}_Members` : 'Booth_Members';
+        }
+
+        a.download = `${fileName}.${format === 'excel' ? 'xlsx' : 'pdf'}`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+
+        this.isExporting = false;
+        this.toastService.showSuccess('Success', `List exported to ${format.toUpperCase()} successfully!`);
+      },
+      error: (err) => {
+        console.error(`Error exporting to ${format}:`, err);
+        this.toastService.showError('Error', `Failed to export list to ${format.toUpperCase()}`);
+        this.isExporting = false;
+      }
+    });
   }
 }

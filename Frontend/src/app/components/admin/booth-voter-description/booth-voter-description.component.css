@@ -1,1 +1,450 @@
 /* Booth Voter Description Component Styles */
+
+/* Modal Overlay with Glassmorphism */
+.caste-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: fadeIn 0.25s ease-out;
+}
+
+/* Modal Card Style - Highly Compact */
+.caste-modal-card {
+  background: #ffffff;
+  border-radius: 16px;
+  width: 90%;
+  max-width: 500px;
+  max-height: 80vh;
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.12), 0 0 30px rgba(0, 0, 0, 0.02);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid rgba(226, 232, 240, 0.7);
+  animation: slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Header styling - Compact */
+.caste-modal-header {
+  padding: 14px 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.header-icon {
+  font-size: 18px;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  width: 34px;
+  height: 34px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 10px;
+  box-shadow: 0 3px 8px rgba(59, 130, 246, 0.2);
+  color: white;
+}
+
+.modal-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.modal-subtitle {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #64748b;
+  margin: 1px 0 0 0;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 22px;
+  line-height: 1;
+  color: #94a3b8;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close-btn:hover {
+  background: #cbd5e1;
+  color: #334155;
+  transform: rotate(90deg);
+}
+
+/* Modal Body - Compact */
+.caste-modal-body {
+  padding: 16px 18px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* Summary Grid - Compact */
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.summary-card {
+  padding: 8px 4px;
+  border-radius: 10px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.01);
+  transition: transform 0.2s ease;
+}
+
+.summary-card:hover {
+  transform: translateY(-1px);
+}
+
+.summary-card.total {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #1e40af;
+}
+
+.summary-card.male {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #166534;
+}
+
+.summary-card.female {
+  background: #fdf2f8;
+  border: 1px solid #fbcfe8;
+  color: #9d174d;
+}
+
+.summary-card.other {
+  background: #fdf6ec;
+  border: 1px solid #fde6c4;
+  color: #b45309;
+}
+
+.card-label {
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin-bottom: 2px;
+  opacity: 0.85;
+}
+
+.card-value {
+  font-size: 0.95rem;
+  font-weight: 800;
+}
+
+/* Section Title - Compact */
+.caste-section {
+  border-top: 1px dashed #e2e8f0;
+  padding-top: 14px;
+}
+
+.section-title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #475569;
+  margin: 0 0 10px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Loading Indicator */
+.loading-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 30px 0;
+  color: #64748b;
+  gap: 8px;
+}
+
+.spinner {
+  width: 24px;
+  height: 24px;
+  border: 2px solid #e2e8f0;
+  border-top-color: #3b82f6;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+/* Empty State */
+.empty-caste-state {
+  text-align: center;
+  padding: 24px 12px;
+  background: #f8fafc;
+  border: 1.5px dashed #cbd5e1;
+  border-radius: 12px;
+  color: #64748b;
+}
+
+.empty-icon {
+  font-size: 24px;
+  margin-bottom: 8px;
+}
+
+.empty-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #334155;
+  margin: 0 0 2px 0;
+}
+
+.empty-desc {
+  font-size: 0.75rem;
+  color: #64748b;
+  margin: 0;
+  max-width: 280px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.35;
+}
+
+/* Caste Breakdown List - Compact */
+.caste-list-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 35vh;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.caste-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 2px 0;
+}
+
+.caste-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.825rem;
+}
+
+.caste-name {
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.caste-count {
+  font-size: 0.775rem;
+  color: #64748b;
+}
+
+.caste-count strong {
+  color: #0f172a;
+}
+
+.caste-percentage {
+  color: #3b82f6;
+  font-weight: 600;
+  margin-left: 3px;
+}
+
+/* Inline Edit Controls */
+.caste-edit-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.caste-inline-select {
+  flex: 1;
+  min-width: 110px;
+  padding: 2px 6px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 0.775rem;
+  font-weight: 700;
+  outline: none;
+  background-color: #ffffff;
+  color: #0f172a;
+  transition: border-color 0.2s ease;
+}
+
+.caste-inline-select:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+}
+
+.w-full {
+  width: 100%;
+}
+
+.caste-inline-input {
+  width: 65px;
+  padding: 2px 6px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  outline: none;
+  text-align: right;
+  background-color: #ffffff;
+  color: #0f172a;
+  transition: border-color 0.2s ease;
+}
+
+.caste-inline-input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+}
+
+.inline-action-btn {
+  border: none;
+  cursor: pointer;
+  width: 20px;
+  height: 20px;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: bold;
+  transition: all 0.2s ease;
+}
+
+.inline-action-btn.save {
+  background: #ecfdf5;
+  color: #059669;
+}
+
+.inline-action-btn.save:hover {
+  background: #d1fae5;
+  color: #047857;
+}
+
+.inline-action-btn.cancel {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.inline-action-btn.cancel:hover {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+/* Caste Display Controls & Actions */
+.caste-display-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.caste-actions-menu {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  opacity: 1;
+}
+
+.caste-action-icon {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 3px;
+  border-radius: 4px;
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.caste-action-icon:hover {
+  background: #f1f5f9;
+}
+
+.caste-action-icon.edit:hover {
+  color: #2563eb;
+  background: #eff6ff;
+}
+
+.caste-action-icon.delete:hover {
+  color: #dc2626;
+  background: #fef2f2;
+}
+
+/* Styled Progress Bar */
+.progress-bar-container {
+  width: 100%;
+  height: 6px;
+  background-color: #f1f5f9;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #3b82f6, #2563eb);
+  border-radius: 999px;
+  transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .summary-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .caste-modal-card {
+    width: 95%;
+    max-height: 85vh;
+  }
+}

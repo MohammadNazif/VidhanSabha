@@ -19,6 +19,7 @@ using VidhanSabha.Application.Common.SahmatAsahmatType.Interfaces;
 using VidhanSabha.Application.Common.SeniorDisabledType.Interfaces;
 using VidhanSabha.Application.Common.State.Interface;
 using VidhanSabha.Application.Common.UnitOfWork;
+using VidhanSabha.Application.Pannels.Admin.Activity.Interface;
 using VidhanSabha.Application.Pannels.Admin.BDC.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.Block.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.Booth.Interfaces;
@@ -29,6 +30,7 @@ using VidhanSabha.Application.Pannels.Admin.Dashboard.Interface;
 using VidhanSabha.Application.Pannels.Admin.DoubleVoter.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.Influencer.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.Mandal.Interfaces;
+using VidhanSabha.Application.Pannels.Admin.MandalSamiti.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.NewVoter.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.PannaPramukh.Interfaces;
 using VidhanSabha.Application.Pannels.Admin.PrabhavshaliVyakti.Interfaces;
@@ -113,8 +115,10 @@ namespace VidhanSabha.Infrastructure.DependencyInjection
             services.AddScoped<IDashboard, AdminDashboardCount>();
             services.AddScoped<ISocialMediaRepository,SocialMediaPostRepository>();
             services.AddScoped<IStateMembersRepository, StateMembersRepository>();
-
+            services.AddScoped<IMandalSamiti, MandalSamitiRepository>();
             services.AddScoped<IImageService, ImageService>();
+            services.AddScoped<IActivityRepository, ActivityRepository>();
+
 
             return services;
         }

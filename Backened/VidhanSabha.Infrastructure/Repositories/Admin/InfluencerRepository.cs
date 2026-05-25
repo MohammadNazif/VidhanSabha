@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using VidhanSabha.Application.Common.Dtos;
+using VidhanSabha.Application.Common.ExportPdfExcel.Dtos;
 using VidhanSabha.Application.Common.Village.DTOs;
 using VidhanSabha.Application.Pannels.Admin.Influencer.DTOs;
 using VidhanSabha.Application.Pannels.Admin.Influencer.Interfaces;
@@ -13,6 +14,7 @@ using VidhanSabha.Domain.Entities.Admin;
 using VidhanSabha.Infrastructure.Extensions;
 using VidhanSabha.Infrastructure.Persistence;
 using VidhanSabha.Infrastructure.Repositories.Common;
+using static VidhanSabha.Application.Common.ExportPdfExcel.Dtos.InfluencerExportDef;
 
 public class InfluencerRepository : BaseRepository<Tbl_Influencer>, IInfluencerRepository
 {
@@ -45,6 +47,10 @@ public class InfluencerRepository : BaseRepository<Tbl_Influencer>, IInfluencerR
         InfluencerQueryParams qp,
      CancellationToken ct = default)
        {
+        //var vidhanSabhaId = await _context.Tbl_StatePrabhari
+        //.Where(u => u.userId == qp.UserId)
+        //.Select(u => u.VidhansabhaId)
+        //.FirstOrDefaultAsync();
         var query = _context.Tbl_Influencer
             .AsNoTracking()
             .AsQueryable();
@@ -60,7 +66,7 @@ public class InfluencerRepository : BaseRepository<Tbl_Influencer>, IInfluencerR
         //    query = query.Where(x => x.CategoryId == qp.CategoryId);
 
 
-        query = query.Where(m => m.Status && (m.UserId == qp.UserId || m.CreatedToUserId == qp.UserId));
+        query = query.Where(b => b.Status && (b.Booth.Mandal.Status && b.Booth.Sector.Status) && (b.UserId == qp.UserId || b.CreatedToUserId == qp.UserId ));
         // Search
         Expression<Func<Tbl_Influencer, bool>>? search = null;
 
@@ -101,6 +107,43 @@ public class InfluencerRepository : BaseRepository<Tbl_Influencer>, IInfluencerR
             },
             ct: ct
         );
+    }
+
+    public async Task<List<InfluencerExportRow>> GetInfluencerExportAsync(InfluencerExportFilter qp)
+    {
+        var query = _context.Tbl_Influencer
+            .AsNoTracking()
+            .AsQueryable();
+
+        if (qp.BoothId.HasValue)
+            query = query.Where(x => x.BoothId == qp.BoothId);
+
+        query = query.Where(b => b.Status && (b.Booth.Mandal.Status && b.Booth.Sector.Status) &&
+                                 (b.UserId == qp.UserId || b.CreatedToUserId == qp.UserId));
+
+        if (!string.IsNullOrWhiteSpace(qp.SearchTerm))
+        {
+            var term = qp.SearchTerm.Trim().ToLower();
+            query = query.Where(x =>
+
+                x.Name.ToLower().Contains(term) ||
+                x.Mobile.Contains(term) ||
+                x.Cast.CastName.ToLower().Contains(term) ||
+                x.Category.Name.ToLower().Contains(term) ||
+                x.Booth.BoothNumber.ToString().Contains(term)
+            );
+        }
+
+        return await query.Select(x => new InfluencerExportRow
+        {
+            BoothNumber = x.Booth.BoothNumber,
+            Name = x.Name,
+            Mobile = x.Mobile,
+            Cast = x.Cast != null ? x.Cast.CastName : "",
+            Category = x.Category != null ? x.Category.Name : "",
+            Villages = string.Join(", ", x.Villages.Select(v => v.Village.VillageName)),
+            Description = x.Description
+        }).ToListAsync();
     }
     public async Task<Tbl_Influencer?> GetByIdAsync(int id, CancellationToken ct = default)
     {

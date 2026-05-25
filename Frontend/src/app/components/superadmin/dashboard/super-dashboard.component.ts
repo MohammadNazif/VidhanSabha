@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Chart, registerables } from 'chart.js';
 import { Router } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
+import { AuthServiceService } from '../../../Services/Auth/auth.service';
 
 Chart.register(...registerables);
 
@@ -32,8 +33,13 @@ export class SuperDashboardComponent implements OnInit, AfterViewInit {
 
   currentDate = new Date();
   loadingCounts = true;
+  userRole = '';
 
   ngOnInit() {
+    this.authService.userRole$.subscribe(role => {
+      this.userRole = role || '';
+    });
+
     // Simulate loading for consistency
     setTimeout(() => {
       this.loadingCounts = false;
@@ -95,7 +101,7 @@ export class SuperDashboardComponent implements OnInit, AfterViewInit {
 
   ];
 
-  constructor(private router: Router) { }
+  constructor(private router: Router, private authService: AuthServiceService) { }
 
   ngAfterViewInit() {
     this.createPrabhariChart();

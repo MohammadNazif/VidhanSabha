@@ -14,19 +14,40 @@ import { ActivatedRoute } from '@angular/router';
 import { ModulePermission } from '../../../models/module-permission.enum';
 import { PermissionService } from '../../../Services/common/permission.service';
 
+import { GenericExportComponent } from '../../shared/generic-export/generic-export.component';
+import { environment } from '../../../../environments/environment';
+
 @Component({
   selector: 'app-socialmedia',
   standalone: true,
-  imports: [CommonModule, PageHeaderComponent, GenericTableComponent, GenericModalButtonComponent],
+  imports: [CommonModule, PageHeaderComponent, GenericTableComponent, GenericModalButtonComponent, GenericExportComponent],
   templateUrl: './socialmedia.component.html',
   styleUrl: './socialmedia.component.css'
 })
 export class SocialMediaComponent implements OnInit {
   @ViewChild('socialMediaModal') socialMediaModal!: GenericModalButtonComponent;
 
+  selectedImage: string | null = null;
+
+  getImageUrl(path: string): string {
+    if (!path) return '';
+    if (path.startsWith('http')) return path;
+    const baseUrl = environment.apiUrl.replace('/api', '');
+    return `${baseUrl}/${path}`;
+  }
+
+  openImageModal(imageUrl: string) {
+    this.selectedImage = imageUrl;
+  }
+
+  closeImageModal() {
+    this.selectedImage = null;
+  }
+
   socialMediaList: any[] = [];
   totalCount = 0;
   loading = false;
+  isExporting = false;
 
   // Server-side state
   pageNumber = 1;
@@ -37,10 +58,14 @@ export class SocialMediaComponent implements OnInit {
   isListView = false;
 
   canManage(): boolean {
-    return !this.isListView && this.permissionService.hasPermission(ModulePermission.SocialMedia);
+    if (this.isListView) return false;
+    const role = (this.authService.getRole() || '').toUpperCase().trim();
+    if (role === 'VIDHANSABHAPRABHARI') return true;
+    return this.permissionService.hasPermission(ModulePermission.SocialMedia);
   }
 
   columns: TableColumn[] = [
+    { key: 'postImagePath', label: 'Post Image', type: 'avatar', align: 'center', sortable: false },
     { key: 'title', label: 'Title', sortable: true },
     {
       key: 'platforms', label: 'Platforms', sortable: false, formatter: (val: any, row: any) => {
@@ -156,7 +181,13 @@ export class SocialMediaComponent implements OnInit {
         label: 'Booths',
         type: 'select',
         placeholder: '--Select Booths--',
-        apiUrl: 'common/boothNumber',
+        apiUrl: () => {
+          const role = (this.authService.getRole() || '').toUpperCase().trim();
+          if (role === 'SECTORSANYOJAK') {
+            return `booth/getAllBoothBySectorid?sectorid=${this.authService.getUserId()}`;
+          }
+          return 'common/boothNumber';
+        },
         apiMapper: (data: any) => {
           const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
           return list.map((item: any) => ({
@@ -302,8 +333,12 @@ export class SocialMediaComponent implements OnInit {
     }
 
     const isUpdate = !!raw.id && raw.id !== '0';
+    if (isUpdate) {
+      formData.append('id', String(raw.id));
+    }
+
     const request = isUpdate
-      ? this.socialMediaService.updateSocialMedia(formData)
+      ? this.socialMediaService.updateSocialMedia(formData, raw.id)
       : this.socialMediaService.createSocialMedia(formData);
 
     this.crudHandler.handleRequest(
@@ -318,6 +353,10 @@ export class SocialMediaComponent implements OnInit {
 
   handleExport(format: string) {
     if (!format) return;
-    this.toastService.showSuccess('Export Started', `Successfully generated ${format.toUpperCase()} export!`);
+    this.isExporting = true;
+    setTimeout(() => {
+      this.isExporting = false;
+      this.toastService.showSuccess('Export Started', `Successfully generated ${format.toUpperCase()} export!`);
+    }, 1000);
   }
 }

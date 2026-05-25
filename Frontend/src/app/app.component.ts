@@ -3,13 +3,12 @@ import { RouterOutlet, Router, NavigationEnd } from '@angular/router';
 import { SidebarComponent } from './components/sidebar/sidebar.component';
 import { CommonModule } from '@angular/common';
 import { LoaderComponent } from './components/shared/loader/loader.component';
-import { ToastComponent } from './components/shared/toast/toast.component';
 import { LoaderService } from './Services/common/loader/loader.service';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, SidebarComponent, CommonModule, LoaderComponent, ToastComponent],
+  imports: [RouterOutlet, SidebarComponent, CommonModule, LoaderComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
@@ -24,7 +23,8 @@ export class AppComponent implements OnInit {
   ngOnInit() {
     this.router.events.subscribe(event => {
       if (event instanceof NavigationEnd) {
-        this.isLoginPage = event.urlAfterRedirects.includes('/login');
+        const url = event.urlAfterRedirects;
+        this.isLoginPage = url.includes('/login') || url === '/' || url === '';
       }
     });
     this.checkScreenSize();

@@ -24,7 +24,8 @@ namespace VidhanSabha.Application.Pannels.Admin.Mandal.Queries
 
         public async Task<PagedResult<MandalFullDto>> Handle(GetAllCombinedMandalReportsQuery request, CancellationToken ct)
         {
-            var mandals = await _repo.GetAllCombinedMandalReports(request.QueryParams,ct);
+            int? VidhanSabhaId = await _repo.GetVidhansabhaIdByuserIdAsync(request.QueryParams.UserId);
+            var mandals = await _repo.GetAllCombinedMandalReports(request.QueryParams, VidhanSabhaId,  ct);
 
             if (mandals == null)
             {

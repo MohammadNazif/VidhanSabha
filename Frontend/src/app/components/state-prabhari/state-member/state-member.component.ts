@@ -36,8 +36,8 @@ export class StateMemberMgmtComponent implements OnInit {
   isDescending = true;
   isListMode = false;
   filterDesignationId: number | null = null;
-  filterSamitiType: string | null = null;
-  listTitle = 'Samiti Member Management';
+  filterSamitiType: any = null;
+  listTitle = 'State Member Management';
 
   columns: TableColumn[] = [
     { key: 'name', label: 'Name', sortable: true },
@@ -95,7 +95,7 @@ export class StateMemberMgmtComponent implements OnInit {
         dependsOn: 'designationId',
         apiUrl: 'common/designationType',
         apiMapper: (data: any, formValues: any) => {
-          const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
+          const list = Array.isArray(data?.data?.items) ? data.data.items : (Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []));
           const selectedDesignationId = formValues?.designationId;
 
           return list.map((item: any) => {
@@ -239,9 +239,9 @@ export class StateMemberMgmtComponent implements OnInit {
       this.filterDesignationId = data['designationId'] || null;
       this.filterSamitiType = data['samitiType'] || null;
 
-      if (this.filterDesignationId === 1) this.listTitle = 'Pradesh Samiti Member List';
-      else if (this.filterDesignationId === 2) this.listTitle = 'Pradesh Karyakarini Samiti List';
-      else if (this.isListMode) this.listTitle = 'Samiti Member List';
+      if (this.filterSamitiType === 1 || this.filterSamitiType === '1') this.listTitle = 'Pradesh Samiti List';
+      else if (this.filterSamitiType === 2 || this.filterSamitiType === '2') this.listTitle = 'Pradesh Karyakarini Samiti List';
+      else if (this.isListMode) this.listTitle = 'State Member List';
     });
     this.loadData();
   }

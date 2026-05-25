@@ -32,8 +32,8 @@ namespace VidhanSabha.Application.Pannels.Admin.BDC.Command
 
             var req = request.Dto;
 
-            var data = Tbl_BDC.Create(
-                req.Block, req.Name,req.WardNumber, req.CategoryId, req.CastId,req.Age, 
+            var data = Tbl_BDC.Create(req.UserId,
+                req.BlockId, req.Name,req.WardNumber, req.CategoryId, req.CastId,req.Age, 
                 req.Mobile,req.PartyId,req.Education,imagePath,
                 req.VillageId);
 

@@ -9,6 +9,8 @@ using VidhanSabha.Domain.Entities.Auth;
 using VidhanSabha.Domain.Entities.Common;
 using VidhanSabha.Domain.Entities.StatePrabhari;
 using VidhanSabha.Domain.Entities.SuperAdmin;
+using static VidhanSabha.Domain.Entities.Admin.Tbl_Mandal;
+using static VidhanSabha.Domain.Entities.Admin.Tbl_MandalSamiti;
 
 namespace VidhanSabha.Infrastructure.Persistence
 {
@@ -38,6 +40,7 @@ namespace VidhanSabha.Infrastructure.Persistence
 
         public DbSet<Tbl_State> Tbl_State => Set<Tbl_State>();
         public DbSet<Tbl_District>Tbl_District=>Set<Tbl_District>();
+        public DbSet<Tbl_RefreshToken> Tbl_RefreshTokens => Set<Tbl_RefreshToken>();
 
 
         public DbSet<Tbl_VidhansabhaStatewiseCount> Tbl_VidhansabhaStatewiseCount => Set<Tbl_VidhansabhaStatewiseCount>();
@@ -73,6 +76,10 @@ namespace VidhanSabha.Infrastructure.Persistence
         public DbSet<Tbl_SocialMediaPlatform> Tbl_SocialMediaPlatform => Set<Tbl_SocialMediaPlatform>();
         public DbSet<Tbl_StateMembers> Tbl_StateMembers => Set<Tbl_StateMembers>();
         public DbSet<Tbl_SectorVillage> Tbl_SectorVillage => Set<Tbl_SectorVillage>();
+        public DbSet<Tbl_MandalSanyojak> Tbl_MandalSanyojak => Set<Tbl_MandalSanyojak>();
+        public DbSet<Tbl_MandalSamiti> Tbl_MandalSamiti => Set<Tbl_MandalSamiti>();
+        public DbSet<Tbl_MandalSamitiMem> Tbl_MandalSamitiMem => Set<Tbl_MandalSamitiMem>();
+        public DbSet<Tbl_MandalSamitiDesignation> Tbl_MandalSamitiDesignation => Set<Tbl_MandalSamitiDesignation>();
 
         #endregion
 
@@ -95,13 +102,35 @@ namespace VidhanSabha.Infrastructure.Persistence
 
 
         public DbSet<Tbl_VidhanSabha> Tbl_VidhanSabha => Set<Tbl_VidhanSabha>();
+        public DbSet<Tbl_Activity> Tbl_Activity => Set<Tbl_Activity>();
+        public DbSet<Tbl_ActivityImage> Tbl_ActivityImage => Set<Tbl_ActivityImage>();
 
 
         public DbSet<Tbl_MemberModulePermissions> Tbl_MemberModulePermissions => Set<Tbl_MemberModulePermissions>();
         protected override void OnModelCreating(ModelBuilder modelBuilder)
             {
-                // ✅ Ek line — is assembly ki saari Configuration classes auto-pick ho jayengi
-                modelBuilder.ApplyConfigurationsFromAssembly(typeof(DatabaseContext).Assembly);
+            // ✅ Ek line — is assembly ki saari Configuration classes auto-pick ho jayengi
+            modelBuilder.Entity<Tbl_Activity>(e =>
+            {
+                e.ToTable("Tbl_Activity");
+                e.HasKey(x => x.Id);
+                e.Property(x => x.Title).IsRequired().HasMaxLength(300);
+                e.Property(x => x.Description).IsRequired();
+                e.Property(x => x.YouTubeLink).HasMaxLength(500);
+                e.Property(x => x.VideoPath).HasMaxLength(500);
+                e.HasMany(x => x.Images)
+                 .WithOne()
+                 .HasForeignKey(x => x.ActivityId)
+                 .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<Tbl_ActivityImage>(e =>
+            {
+                e.ToTable("Tbl_ActivityImage");
+                e.HasKey(x => x.Id);
+                e.Property(x => x.ImagePath).IsRequired().HasMaxLength(500);
+            });
+            modelBuilder.ApplyConfigurationsFromAssembly(typeof(DatabaseContext).Assembly);
 
                 base.OnModelCreating(modelBuilder);
             }

@@ -1,23 +1,23 @@
 <div class="h-screen p-4 flex flex-col overflow-hidden bg-slate-50/50">
-    <app-page-header title="Booth Management" subtitle="Manage and view assembly booth configurations">
+    <app-page-header [title]="isListView ? 'Booth List' : 'Booth Management'"
+        subtitle="Manage and view assembly booth configurations">
         <div class="flex items-center gap-3">
-            <app-generic-modal-button *ngIf="canManage()" #boothModal [config]="addBoothConfig" label="Add New Booth" icon="+" variant="primary"
-                (formSubmit)="handleFormSubmit($event)">
+            <app-generic-modal-button *ngIf="canManage()" #boothModal [config]="addBoothConfig" label="Add New Booth"
+                icon="+" variant="primary" (formSubmit)="handleFormSubmit($event)">
             </app-generic-modal-button>
 
-            <app-generic-export [show]="isListView && boothList && boothList.length > 0" 
-                [isExporting]="isExporting" (export)="handleExport($event)">
+            <app-generic-export [show]="isListView && boothList && boothList.length > 0" [isExporting]="isExporting"
+                (export)="handleExport($event)">
             </app-generic-export>
         </div>
     </app-page-header>
 
-    <div class="flex-1 min-h-0 mt-4 bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
-        <app-generic-table class="flex-1 min-h-0" [columns]="columns" [data]="boothList" [config]="config" 
+    <div
+        class="flex-1 min-h-0 mt-4 bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
+        <app-generic-table class="flex-1 min-h-0" [columns]="columns" [data]="boothList" [config]="config"
             [actions]="actions" [totalItems]="totalCount" [loading]="loading" (actionClick)="handleAction($event)"
-            (pageChange)="handlePageChange($event)"
-            (sortChange)="handleSortChange($event)"
-            (searchChange)="handleSearchChange($event)"
-            (filterChange)="handleFilterChange($event)"
+            (pageChange)="handlePageChange($event)" (sortChange)="handleSortChange($event)"
+            (searchChange)="handleSearchChange($event)" (filterChange)="handleFilterChange($event)"
             (selectionChange)="handleSelection($event)">
         </app-generic-table>
     </div>

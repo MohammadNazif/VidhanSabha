@@ -23,4 +23,18 @@ export class PradhanService extends BaseApiService {
   updatePradhan(data: any): Observable<any> {
     return this.update(this.entity, data);
   }
+
+  exportToExcel(): Observable<Blob> {
+    return this.export(this.entity, 'excel');
+  }
+
+  exportToPdf(): Observable<Blob> {
+    return this.export(this.entity, 'pdf');
+  }
+
+  importExcel(file: File): Observable<any> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post(`${this.apiUrl}/${this.entity}/import/excel`, formData);
+  }
 }

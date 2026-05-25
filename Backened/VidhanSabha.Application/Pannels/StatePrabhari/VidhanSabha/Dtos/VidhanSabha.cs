@@ -14,12 +14,20 @@ namespace VidhanSabha.Application.Pannels.StatePrabhari.VidhanSabha.Dtos
         public string VidhanSabhaName { get;  set; }
 
         public int VidhanSabhaId { get; set; }
-        public int VidhanSabhaCount { get;  set; }
+        public int vidhanSabhaNumber { get;  set; }
         public int DistrictId { get;  set; }
 
         public int stateId { get; set; }
         public bool isPrabhari { get; set; }
         public CreatePrabhariRequestDto? Prabhari { get; set; }
+    }
+
+    public class UpdateVidhanSabhaRequestDto
+    {
+        public int Id { get; set; }
+        public string VidhanSabhaName { get; set; }
+        public int VidhanSabhaNumber { get; set; }
+
     }
 
     public class VidhanSabhaSatewiseResponseDto

@@ -11,13 +11,16 @@ namespace VidhanSabha.Application.Pannels.Admin.PrabhavshaliVyakti.DTOs
     public class PrabhavshaliQueryParams:BaseQueryParams
     {
         public int? Id { get; set; }
+        public bool rolefilterflag { get; set; }
         public int? BoothId { get; set; }
         public int? designationId { get; set; }
         public string? VillageIds { get; set; }
+        public string? BoothIds { get; set; }
 
         public string? DesignationIds { get; set; }
 
         public List<int> GetVillageIds() => FilterParse.ParseIds(VillageIds);
+        public List<int> GetBoothIds() => FilterParse.ParseIds(BoothIds);
         public List<int> GetDesignationIds() => FilterParse.ParseIds(DesignationIds);
         public int? CastId { get; set; }
 

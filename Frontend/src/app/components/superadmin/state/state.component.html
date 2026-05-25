@@ -1,9 +1,12 @@
 <div class="h-screen p-6 flex flex-col overflow-hidden bg-slate-50">
-  <app-page-header title="State Management" subtitle="Manage high-level state divisions"
-    icon="🗺️">
+  <app-page-header title="State Management" subtitle="Manage high-level state divisions" icon="🗺️">
     <div class="flex gap-3">
-      <app-generic-modal-button #stateModal [config]="addStateConfig" label="Add State" icon="+"
-        (formSubmit)="handleFormSubmit($event)">
+      <app-generic-export [show]="true" 
+        [isExporting]="isExporting" (export)="handleExport($event)">
+      </app-generic-export>
+
+      <app-generic-modal-button *ngIf="!isStatePrabhari()" #stateModal [config]="addStateConfig" label="Add State"
+        icon="+" (formSubmit)="handleFormSubmit($event)">
       </app-generic-modal-button>
     </div>
   </app-page-header>
@@ -18,8 +21,15 @@
   </app-generic-modal-button>
 
   <div class="flex-1 min-h-0 mt-6 bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
-    <app-generic-table class="flex-1 min-h-0" [data]="stateList" [columns]="columns" [config]="config" [actions]="actions"
-      (actionClick)="handleAction($event)">
+    <app-generic-table class="flex-1 min-h-0" 
+      [data]="stateList" 
+      [columns]="columns" 
+      [config]="config"
+      [actions]="actions"
+      (actionClick)="handleAction($event)"
+      (pageChange)="handlePageChange($event)"
+      (sortChange)="handleSortChange($event)"
+      (searchChange)="handleSearchChange($event)">
     </app-generic-table>
   </div>
 </div>

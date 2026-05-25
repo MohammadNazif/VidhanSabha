@@ -17,6 +17,12 @@ namespace VidhanSabha.Infrastructure.Repositories.Common
             
         }
 
+        public async Task<List<Tbl_Cast>> GetAllCastAsync()
+        {
+            return await _context.Tbl_Cast
+                .ToListAsync();
+        }
+
         public async Task<List<Tbl_Cast>> GetAllCastByIdAsync(int id)
         {
             return await _context.Tbl_Cast

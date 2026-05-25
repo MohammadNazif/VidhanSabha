@@ -42,7 +42,7 @@ namespace VidhanSabha.Application.Pannels.StatePrabhari.VidhanSabha.Command
                 Education = request.Education,
                 Profession = request.Profession,
                 CurrentAddress = request.CurrentAddress
-            }), cancellationToken);
+            },req.UserId), cancellationToken);
 
             return 1;
         }

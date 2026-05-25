@@ -10,14 +10,17 @@ import { ToastService } from '../../../Services/common/toast/toast.service';
 import { GenericModalButtonComponent } from '../../shared/generic-modal-form/generic-modal-button.component';
 import { PageHeaderComponent } from '../../shared/page-header/page-header.component';
 import { ActivatedRoute } from '@angular/router';
+import { AuthServiceService } from '../../../Services/Auth/auth.service';
+
+import { GenericExportComponent } from '../../shared/generic-export/generic-export.component';
 
 @Component({
   selector: 'app-pradhan',
   standalone: true,
-  imports: [CommonModule, FormsModule, GenericTableComponent, GenericModalButtonComponent, PageHeaderComponent],
+  imports: [CommonModule, FormsModule, GenericTableComponent, GenericModalButtonComponent, PageHeaderComponent, GenericExportComponent],
   template: `
     <div class="h-full flex flex-col p-4 gap-4 overflow-hidden">
-      <app-page-header title="Pradhan Management" subtitle="Manage village pradhans and their assignments">
+      <app-page-header [title]="isListView ? 'Pradhan List' : 'Pradhan Management'" subtitle="Manage village pradhans and their assignments">
         <app-generic-modal-button 
             *ngIf="canManage()"
             #pradhanModal 
@@ -28,19 +31,11 @@ import { ActivatedRoute } from '@angular/router';
             (formSubmit)="handleFormSubmit($event)">
         </app-generic-modal-button>
 
-        <div *ngIf="isListView && pradhans && pradhans.length > 0" class="relative">
-          <select #exportSelect (change)="handleExport(exportSelect.value); exportSelect.value = ''"
-            class="px-4 py-2 pr-8 rounded-xl text-xs font-bold text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 transition-all shadow-sm appearance-none cursor-pointer outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
-            <option value="" disabled selected>Export Data</option>
-            <option value="pdf">Export PDF</option>
-            <option value="excel">Export Excel</option>
-          </select>
-          <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-500">
-            <svg class="fill-current h-3 w-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-              <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
-            </svg>
-          </div>
-        </div>
+        <app-generic-export [show]="isListView" [options]="exportOptions"
+            [isExporting]="isExporting" (export)="handleExport($event)">
+        </app-generic-export>
+
+        <input type="file" id="importFileInput" class="hidden" accept=".xlsx, .xls" (change)="onFileImport($event)">
       </app-page-header>
 
       <div class="flex-1 min-h-0 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col p-2">
@@ -52,7 +47,9 @@ import { ActivatedRoute } from '@angular/router';
           [loading]="loading"
           [totalItems]="totalItems"
           (actionClick)="handleAction($event)"
-          (searchChange)="handleSearchChange($event)">
+          (searchChange)="handleSearchChange($event)"
+          (pageChange)="handlePageChange($event)"
+          (sortChange)="handleSortChange($event)">
         </app-generic-table>
       </div>
     </div>
@@ -66,14 +63,21 @@ export class PradhanComponent implements OnInit {
   totalItems = 0;
   searchTerm = '';
   isListView = false;
+  isExporting = false;
+  exportOptions = [
+    { label: 'Export PDF', value: 'pdf' },
+    { label: 'Export Excel', value: 'excel' },
+    { label: 'Import Excel', value: 'import' }
+  ];
 
   canManage(): boolean {
-    return !this.isListView;
+    if (this.isListView) return false;
+    const role = (this.authService.getRole() || '').toUpperCase().trim();
+    return ['SUPERADMIN', 'ADMIN', 'VIDHANSABHAPRABHARI'].includes(role);
   }
 
   columns: TableColumn[] = [
     { key: 'name', label: 'Name', sortable: true },
-    { key: 'designationName', label: 'Designation' },
     { key: 'contact', label: 'Contact' },
     { key: 'genderValue', label: 'Gender' },
     {
@@ -174,7 +178,8 @@ export class PradhanComponent implements OnInit {
     private pradhanService: PradhanService,
     private toastService: ToastService,
     private crudHandler: CrudHandlerService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private authService: AuthServiceService
   ) { }
 
   ngOnInit() {
@@ -185,9 +190,22 @@ export class PradhanComponent implements OnInit {
     });
   }
 
+  pageNumber = 1;
+  pageSize = 50;
+  sortBy = '';
+  isDescending = false;
+
   loadPradhans() {
     this.loading = true;
-    this.pradhanService.getAllPradhans({ searchTerm: this.searchTerm }).subscribe({
+    const params: any = {
+      pageNumber: this.pageNumber,
+      pageSize: this.pageSize,
+      searchTerm: this.searchTerm,
+      sortBy: this.sortBy,
+      isDescending: this.isDescending
+    };
+
+    this.pradhanService.getAllPradhans(params).subscribe({
       next: (res: any) => {
         this.pradhans = res.data?.items || res.data || [];
         this.totalItems = res.data?.totalCount || this.pradhans.length;
@@ -198,6 +216,19 @@ export class PradhanComponent implements OnInit {
         this.toastService.showError('Error', 'Failed to load pradhans');
       }
     });
+  }
+
+  handlePageChange(event: any) {
+    this.pageNumber = event.currentPage;
+    this.pageSize = event.pageSize;
+    this.loadPradhans();
+  }
+
+  handleSortChange(event: any) {
+    this.sortBy = event.column;
+    this.isDescending = event.direction === 'desc';
+    this.pageNumber = 1;
+    this.loadPradhans();
   }
 
   handleAction(event: { action: TableAction; row: any; index: number }) {
@@ -264,6 +295,53 @@ export class PradhanComponent implements OnInit {
 
   handleExport(format: string) {
     if (!format) return;
-    this.toastService.showSuccess('Export Started', `Successfully generated ${format.toUpperCase()} export!`);
+    if (format === 'import') {
+      const fileInput = document.getElementById('importFileInput') as HTMLInputElement;
+      if (fileInput) fileInput.click();
+      return;
+    }
+
+    this.isExporting = true;
+    const request = format === 'excel' ? this.pradhanService.exportToExcel() : this.pradhanService.exportToPdf();
+
+    request.subscribe({
+      next: (blob: Blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Pradhan_List.${format === 'excel' ? 'xlsx' : 'pdf'}`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        this.isExporting = false;
+        this.toastService.showSuccess('Success', `List exported to ${format.toUpperCase()} successfully!`);
+      },
+      error: (err: any) => {
+        console.error(`Error exporting to ${format}:`, err);
+        this.toastService.showError('Error', `Failed to export list to ${format.toUpperCase()}`);
+        this.isExporting = false;
+      }
+    });
+  }
+
+  onFileImport(event: any) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    this.loading = true;
+    this.pradhanService.importExcel(file).subscribe({
+      next: (res: any) => {
+        this.toastService.showSuccess('Success', 'Pradhan data imported successfully!');
+        this.loadPradhans();
+        event.target.value = '';
+      },
+      error: (err: any) => {
+        console.error('Import error:', err);
+        this.toastService.showError('Error', 'Failed to import pradhan data');
+        this.loading = false;
+        event.target.value = '';
+      }
+    });
   }
 }

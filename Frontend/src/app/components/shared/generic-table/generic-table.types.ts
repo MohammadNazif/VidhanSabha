@@ -3,7 +3,7 @@
  * Reusable across the entire project
  */
 
-export type ColumnType = 'text' | 'number' | 'date' | 'badge' | 'avatar' | 'progress' | 'actions' | 'custom';
+export type ColumnType = 'text' | 'number' | 'date' | 'badge' | 'badge-html' | 'avatar' | 'progress' | 'actions' | 'custom';
 export type SortDirection = 'asc' | 'desc' | null;
 export type BadgeVariant = 'success' | 'warning' | 'danger' | 'info' | 'default';
 
@@ -44,6 +44,8 @@ export interface TableColumn {
   badgeVariant?: (value: any, row: any) => BadgeVariant;
   /** Format function for display value */
   formatter?: (value: any, row: any) => string;
+  /** Max characters to display before truncating (only for text/default type) */
+  truncate?: number;
   /** Avatar fallback field (for avatar type, uses initials) */
   avatarFallbackKey?: string;
   /** Progress max value (for progress type, default 100) */

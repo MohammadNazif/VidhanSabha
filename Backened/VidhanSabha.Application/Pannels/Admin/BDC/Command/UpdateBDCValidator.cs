@@ -16,10 +16,10 @@ namespace VidhanSabha.Application.Pannels.Admin.BDC.Command
                 .GreaterThan(0)
                 .OverridePropertyName("Id");
 
-            RuleFor(x => x.Dto.Block)
-                .NotEmpty()
-                .MaximumLength(200)
-                .OverridePropertyName("Block");
+            //RuleFor(x => x.Dto.Block)
+            //    .NotEmpty()
+            //    .MaximumLength(200)
+            //    .OverridePropertyName("Block");
 
             RuleFor(x => x.Dto.Name)
                 .NotEmpty()

@@ -22,6 +22,8 @@ namespace VidhanSabha.Domain.Entities.Admin
         public bool Status { get; private set; } = true;
         public string? UserId { get; private set; }
         public string? CreatedToUserId { get; private set; }
+        public string? CreatedsectorUserId { get; private set; }
+        public string? Role { get; private set; }
         
 
         private readonly List<Tbl_NewVoterVillage> _villages = new();
@@ -38,7 +40,7 @@ namespace VidhanSabha.Domain.Entities.Admin
             int BoothId, string Name, string FatherName,
             string Mobile, int CategoryId,
             int CastId, DateOnly DOB,int Age,
-            string VoterId, string UserId,string createdToUserId,
+            string VoterId, string UserId,string createdToUserId,string createdsectorUserId,string role,
             List<int> villageIds
             )
         {
@@ -55,6 +57,8 @@ namespace VidhanSabha.Domain.Entities.Admin
                 VoterId = VoterId,
                 UserId = UserId,
                 CreatedToUserId = createdToUserId,
+                CreatedsectorUserId = createdsectorUserId,
+                Role = role
             };
             newvoter.SetVillages(villageIds);
             return newvoter;

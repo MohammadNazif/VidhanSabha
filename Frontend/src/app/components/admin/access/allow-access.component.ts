@@ -37,7 +37,7 @@ export interface SelectionField {
   ],
   template: `
     <div class="h-full flex flex-col p-4 gap-4 overflow-hidden">
-      <app-page-header title="Allow Access" subtitle="Manage module-level permissions for different roles">
+      <app-page-header title="Allow Access Management" subtitle="Manage module-level permissions for different roles">
         <button 
           class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm font-medium flex items-center gap-2" 
           (click)="savePermissions()">
@@ -128,7 +128,7 @@ export class AllowAccessComponent implements OnInit {
   ];
 
   loading = false;
-  permissionData: any[] = [
+  basePermissions: any[] = [
     { id: ModulePermission.PannaPramukh, moduleName: 'Create Panna Pramukh', hasPermission: false },
     { id: ModulePermission.NewVoter, moduleName: 'Create New Voters', hasPermission: false },
     { id: ModulePermission.BoothVoterDescrition, moduleName: 'Create Booth Voter Description', hasPermission: false },
@@ -139,6 +139,8 @@ export class AllowAccessComponent implements OnInit {
     { id: ModulePermission.Activity, moduleName: 'Create Activity', hasPermission: false },
     { id: ModulePermission.SeniororDisabled, moduleName: 'Create Senior Or Disabled', hasPermission: false }
   ];
+
+  permissionData: any[] = [...this.basePermissions];
 
   columns: TableColumn[] = [
     { key: 'moduleName', label: 'Allow Permission', sortable: false },
@@ -192,6 +194,16 @@ export class AllowAccessComponent implements OnInit {
     entityField.visible = false;
     entityField.value = '';
     entityField.options = [];
+
+    // Rebuild permission list dynamically
+    if (typeField.value === 'sector') {
+      this.permissionData = [
+        ...this.basePermissions,
+        { id: ModulePermission.Booth, moduleName: 'Create Booth', hasPermission: false }
+      ];
+    } else {
+      this.permissionData = [...this.basePermissions];
+    }
     this.resetPermissions();
 
     if (!typeField.value) return;
@@ -219,7 +231,7 @@ export class AllowAccessComponent implements OnInit {
           const list = res.data || [];
           entityField.options = list.map((o: any) => ({
             id: o.userId || String(o.id),
-            name: o.sectorIncharge
+            name: o.sectorSanyojak || o.sectorIncharge
           }));
           this.loading = false;
         },
@@ -232,7 +244,7 @@ export class AllowAccessComponent implements OnInit {
           const list = res.data || [];
           entityField.options = list.map((o: any) => ({
             id: o.userId || String(o.boothId),
-            name: o.boothInchargeName
+            name: o.boothAdhyakshName || o.boothInchargeName
           }));
         },
         error: () => this.loading = false

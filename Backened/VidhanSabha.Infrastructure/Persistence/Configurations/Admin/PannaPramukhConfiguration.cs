@@ -35,6 +35,7 @@ namespace VidhanSabha.Infrastructure.Persistence.Configurations.Admin
                   .HasForeignKey(e => e.BoothId)
                   .OnDelete(DeleteBehavior.Restrict);
 
+
             entity.HasOne(e => e.Category)
                   .WithMany()
                   .HasForeignKey(e => e.CategoryId)

@@ -27,4 +27,28 @@ export class SectorService extends BaseApiService {
   getSectorIncharge(): Observable<any> {
     return this.http.get(`${this.apiUrl}/${this.entity}/getSectorIncharge`);
   }
+
+  getAllAdminSectorReports(params: any = {}): Observable<any> {
+    return this.getWithParams(`${this.apiUrl}/${this.entity}/getAllAdminSectorReports`, params);
+  }
+
+  getAllSectorReports(params: any = {}): Observable<any> {
+    return this.getWithParams(`${this.apiUrl}/${this.entity}/getAllSectorReports`, params);
+  }
+
+  exportAdminSectorReport(format: 'excel' | 'pdf', params: any = {}): Observable<Blob> {
+    return this.export('sectorreport', format, params);
+  }
+
+  exportSectorReportExcel(): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/${this.entity}/exportSectorReport/excel`, { responseType: 'blob' });
+  }
+
+  exportSectorReportPdf(): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/${this.entity}/exportSectorReport/pdf`, { responseType: 'blob' });
+  }
+
+  getAllSectorVillages(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/${this.entity}/getAllSectorVillages`);
+  }
 }

@@ -12,10 +12,10 @@ namespace VidhanSabha.Application.Pannels.Admin.BDC.Command
     {
         public CreateBDCValidator() 
         {
-            RuleFor(x => x.Dto.Block)
-                .NotEmpty()
-                .MaximumLength(200)
-                .OverridePropertyName("Block");
+            //RuleFor(x => x.Dto.BlockId)
+            //    .NotEmpty()
+            //    .MaximumLength(200)
+            //    .OverridePropertyName("Block");
 
             RuleFor(x => x.Dto.Name)
                 .NotEmpty()

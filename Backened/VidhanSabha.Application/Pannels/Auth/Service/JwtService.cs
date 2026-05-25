@@ -1,13 +1,12 @@
-﻿using System;
-using System.IdentityModel.Tokens.Jwt;
+﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using VidhanSabha.Application.Pannels.Auth.DTOs;
 using VidhanSabha.Application.Pannels.Auth.Interfaces;
 
-    
 public class JwtService : IJwtService
 {
     private readonly JwtSettings _settings;
@@ -34,10 +33,18 @@ public class JwtService : IJwtService
             issuer: _settings.Issuer,
             audience: _settings.Audience,
             claims: claims,
-            expires: DateTime.UtcNow.AddMinutes(_settings.ExpiryMinutes),
+            expires: DateTime.UtcNow.AddMinutes(_settings.AccessTokenExpiryMinutes),
             signingCredentials: creds
         );
 
         return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+
+    // ✅ Add this only
+    public string GenerateRefreshToken()
+    {
+        var bytes = new byte[64];
+        RandomNumberGenerator.Fill(bytes);
+        return Convert.ToBase64String(bytes);
     }
 }

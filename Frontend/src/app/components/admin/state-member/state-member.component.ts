@@ -53,9 +53,14 @@ export class StateMemberComponent implements OnInit {
     defaultPageSize: 50
   };
 
+  canManage(): boolean {
+    const role = (this.authService.getRole() || '').toUpperCase().trim();
+    return (role === 'VIDHANSABHAPRABHARI' || role === 'SUPERADMIN' || role === 'ADMIN');
+  }
+
   actions: TableAction[] = [
-    { id: 'edit', label: '', variant: 'default', icon: 'edit', show: () => true },
-    { id: 'delete', label: '', variant: 'danger', icon: 'delete', show: () => true }
+    { id: 'edit', label: '', variant: 'default', icon: 'edit', show: () => this.canManage() },
+    { id: 'delete', label: '', variant: 'danger', icon: 'delete', show: () => this.canManage() }
   ];
 
   formConfig: FormConfig = {

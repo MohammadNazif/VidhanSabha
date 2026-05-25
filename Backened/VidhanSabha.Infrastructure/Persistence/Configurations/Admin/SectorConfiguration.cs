@@ -40,6 +40,12 @@ namespace VidhanSabha.Infrastructure.Persistence.Configurations.Admin
                   .WithMany(m => m.Sectors)
                   .HasForeignKey(s => s.MandalId)  
                   .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(s => s.Cast)
+        .WithMany()
+        .HasForeignKey(s => s.CastId)
+        .IsRequired(false)
+        .OnDelete(DeleteBehavior.SetNull);
         }
     }
     public class Tbl_SectorVillageConfiguration : IEntityTypeConfiguration<Tbl_SectorVillage>

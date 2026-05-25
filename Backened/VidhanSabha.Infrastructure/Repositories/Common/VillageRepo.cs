@@ -49,17 +49,23 @@ namespace VidhanSabha.Infrastructure.Repositories.Common
                    ToListAsync();
         }
 
-        public async Task<List<VillageByBoothResponseDto>> GetAllByBoothIdAsync(int boothId)
+        public async Task<List<VillageByBoothResponseDto>> GetAllByBoothIdAsync(int? boothId)
         {
-            return await _context.Set<Tbl_BoothVillage>().
-                  Where(m => m.BoothId == boothId)
-                  .Select(m => new VillageByBoothResponseDto
-                  {
-                      Id = m.VillageId,
-                      Name = m.Village.VillageName
-                  }
-                  ).
-                   ToListAsync();
-        }
+            var query = _context.Set<Tbl_BoothVillage>().AsQueryable();
+
+            // ✅ Apply filter only if boothId has value
+            if (boothId.HasValue)
+            {
+                query = query.Where(m => m.BoothId == boothId.Value);
+            }
+
+            return await query
+                .Select(m => new VillageByBoothResponseDto
+                {
+                    Id = m.VillageId,
+                    Name = m.Village != null ? m.Village.VillageName : null
+                })
+                .ToListAsync();
+        }   
     }
 }

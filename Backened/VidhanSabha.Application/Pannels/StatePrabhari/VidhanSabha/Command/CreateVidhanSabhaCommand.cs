@@ -12,10 +12,13 @@ namespace VidhanSabha.Application.Pannels.StatePrabhari.VidhanSabha.Command
     {
        public CreateVidhanSabhaRequestDto Dto;
         public string UserId { get; set; }
-        public CreateVidhanSabhaCommand(CreateVidhanSabhaRequestDto dto,string userId)
+
+        public string Role { get; set; }
+        public CreateVidhanSabhaCommand(CreateVidhanSabhaRequestDto dto,string userId,string role)
         {
             Dto = dto;
             UserId = userId;
+            Role = role;
         }
        
  

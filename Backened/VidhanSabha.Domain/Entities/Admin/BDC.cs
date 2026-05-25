@@ -10,7 +10,8 @@ namespace VidhanSabha.Domain.Entities.Admin
     public class Tbl_BDC
     {
         public int Id { get; private set; }
-        public string Block { get; private set; }
+        public int Block { get; private set; }
+        public string UserId { get; private set; }
         public string Name { get; private set; }
         public string WardNumber { get; private set; }
         public int CategoryId { get; private set; }
@@ -28,10 +29,12 @@ namespace VidhanSabha.Domain.Entities.Admin
         //Navigations
         public Tbl_Party Party { get; private set; } = null!;
         public Tbl_Cast? Cast { get; private set; }
+        public Tbl_Block? Blocknav { get; private set; }
         public Tbl_Category? Category { get; private set; }
 
         public static Tbl_BDC Create(
-            string Block, string Name,string WardNumber,
+            string userId,
+            int blockId, string Name,string WardNumber,
              int CategoryId,int CastId,int Age, string Mobile,
             int PartyId, string Education,string profile,
             List<int> villageIds
@@ -39,7 +42,8 @@ namespace VidhanSabha.Domain.Entities.Admin
         {
             var bdc = new Tbl_BDC
             {
-                Block=Block,
+                UserId = userId,
+                Block =blockId,
                 Name = Name,
                 WardNumber=WardNumber,
                 CategoryId = CategoryId,
@@ -71,7 +75,7 @@ namespace VidhanSabha.Domain.Entities.Admin
         }
 
         public void Update(
-            string Block, string Name, string WardNumber,
+            int Block, string Name, string WardNumber,
              int CategoryId, int CastId, int Age, string Mobile,
             int PartyId, string Education,string profile,
             List<int> villageIds

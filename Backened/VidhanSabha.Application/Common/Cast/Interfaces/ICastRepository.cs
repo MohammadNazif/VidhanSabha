@@ -10,5 +10,7 @@ namespace VidhanSabha.Application.Common.Cast.Interfaces
     public interface ICastRepository
     {
         Task<List<Tbl_Cast>> GetAllCastByIdAsync(int id);
+
+        Task<List<Tbl_Cast>> GetAllCastAsync();
     }
 }

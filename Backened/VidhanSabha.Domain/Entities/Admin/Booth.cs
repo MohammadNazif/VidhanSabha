@@ -12,6 +12,8 @@ namespace VidhanSabha.Domain.Entities.Admin
     {
         public int Id { get; private set; }
         public string? UserId { get; private set; }
+        public string? CreatedToSectorUserId { get; private set; }
+        public string? Role { get; private set; }
         public int MandalId { get; private set; }
         public int SectorId { get; private set; }
         public int BoothNumber { get; private set; }
@@ -34,7 +36,7 @@ namespace VidhanSabha.Domain.Entities.Admin
         private Tbl_Booth() { }
 
         public static Tbl_Booth Create(
-            string UserId, int mandalId, int sectorId, int boothNumber,
+            string UserId,string role,string sectorUserId, int mandalId, int sectorId, int boothNumber,
             string pollingStationName, string pollingStationLocation,
             bool isBoothSanyojak, List<Tbl_BoothVillage> villages,
             Tbl_BoothSanyojak? sanyojak)
@@ -42,6 +44,8 @@ namespace VidhanSabha.Domain.Entities.Admin
             var booth = new Tbl_Booth
             {
                 UserId=UserId,
+                Role  = role,
+                CreatedToSectorUserId=sectorUserId,
                 MandalId = mandalId,
                 SectorId = sectorId,
                 BoothNumber = boothNumber,
@@ -81,6 +85,7 @@ namespace VidhanSabha.Domain.Entities.Admin
                 else
                 {
                     Sanyojak.UpdateProfile(
+
                         sanyojak.InchargeName,
                         sanyojak.Age,
                         sanyojak.FatherName,
@@ -161,6 +166,7 @@ namespace VidhanSabha.Domain.Entities.Admin
         public string? Address { get; private set; }
         public string? ProfileImagePath { get; private set; }
         public Tbl_Cast? Cast { get; private set; }
+        public Tbl_Category? Category { get; private set; }
 
         public Tbl_Booth? Booth { get; set; }
 

@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿using DocumentFormat.OpenXml.Drawing.Charts;
+using MediatR;
 using VidhanSabha.Application.Common.CredentialMananger;
 using VidhanSabha.Application.Common.ImageService;
 using VidhanSabha.Application.Common.ImageService.Interface;
@@ -16,35 +17,44 @@ namespace VidhanSabha.Application.Pannels.Admin.Booth.Command
         private readonly CredentialManagerFunc _credentialManager;
         private readonly IUnitOfWork _uow;
         private readonly IImageService _imageService;
+        private readonly IBoothRepository _booth;
 
         public CreateBoothHandler(
             IBoothRepository repo,
             CredentialManagerFunc credentialManager,
             IUnitOfWork uow,
-            IImageService imageService)
+            IImageService imageService,IBoothRepository
+             booth)
         {
             _repo = repo;
             _credentialManager = credentialManager;
             _uow = uow;
             _imageService = imageService;
+            _booth = booth;
         }
 
         public async Task<int> Handle(CreateBoothCommand request, CancellationToken ct)
         {
-            var imagePath = await request.Dto.ResolveImageAsync(
-            _imageService,
-            subFolder: "profiles/booth",
-            imageSelector: dto => dto.Sanyojak.ProfileImagePath
-        );
-
             var cmd = request.Dto;
-
-            // Generate userId the same way as StatePrabhari
-            var userId = $"USR_{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}";
-
             await _uow.BeginTransactionAsync();
             try
             {
+
+               
+                string createdsectorUserId = null;
+                if (IsUserRole(request.Role, PrabhariRole.VidhanSabhaPrabhari))
+                {
+                    createdsectorUserId = await _booth.GetSectorUseridbySectorId(request.Dto.SectorId);
+                   
+                }
+                else if (IsUserRole(request.Role, PrabhariRole.SectorSanyojak))
+                {
+
+                    createdsectorUserId = request.UserId;
+
+                    request.UserId = await _booth.GetadminUseridbySectorUserId(request.Dto.SectorId);
+
+                }
                 // ── Step 1: Build villages (no DB call, just domain objects) ──────
                 var villages = cmd.Villages
                     .Select(v => Tbl_BoothVillage.Create(v.VillageId, v.HasAnshik))
@@ -55,6 +65,13 @@ namespace VidhanSabha.Application.Pannels.Admin.Booth.Command
 
                 if (cmd.IsBoothSanyojak && cmd.Sanyojak is not null)
                 {
+
+                    var imagePath = await request.Dto.ResolveImageAsync(
+                    _imageService,
+                     subFolder: "profiles/booth",
+                    imageSelector: dto => dto.Sanyojak.ProfileImagePath
+                    );
+                    var userId = $"USR_{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}";
                     // Step 2a — Insert credential (tbl_login) first, same as Prabhari
                     await _credentialManager.InsertCredentialAsync(
                         userId: userId,
@@ -81,6 +98,8 @@ namespace VidhanSabha.Application.Pannels.Admin.Booth.Command
                 // ── Step 3: Build Booth aggregate and persist ─────────────────────
                 var booth = Tbl_Booth.Create(
                     request.UserId,
+                    request.Role,
+                    createdsectorUserId,
                     cmd.MandalId,
                     cmd.SectorId,
                     cmd.BoothNumber,
@@ -102,6 +121,10 @@ namespace VidhanSabha.Application.Pannels.Admin.Booth.Command
                 throw new ApplicationException(
                     $"Booth registration failed. Rolled back. Reason: {ex.Message}", ex);
             }
+        }
+        private bool IsUserRole(string currentRole, PrabhariRole roleToCheck)
+        {
+            return currentRole == roleToCheck.ToString();
         }
     }
 }

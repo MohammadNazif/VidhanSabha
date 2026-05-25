@@ -11,6 +11,7 @@ namespace VidhanSabha.Application.Pannels.Admin.DoubleVoter.DTOs
     public class DoubleVoterQueryParams: BaseQueryParams
     {
         public int? Id { get; set; }
+        public bool rolefilterflag { get; set; }
         public string? BoothIds { get; set; }
         public string? SectorIds { get; set; }
         public string? VillageIds { get; set; }

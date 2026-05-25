@@ -16,7 +16,7 @@ namespace VidhanSabha.Infrastructure.Repositories.Common
         public BaseRepository(DatabaseContext context)
         {
             _context = context;
-            _dbSet = context.Set<T>();
+           _dbSet = context.Set<T>();
         }
 
         public async Task<List<T>> GetAllAsync()

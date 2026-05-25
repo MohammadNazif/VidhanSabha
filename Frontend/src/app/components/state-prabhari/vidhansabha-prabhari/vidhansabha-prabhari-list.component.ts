@@ -60,6 +60,7 @@ export class VidhanSabhaPrabhariListComponent implements OnInit {
       }
     },
     { key: 'contactNumber', label: 'Contact', sortable: true },
+    { key: 'password', label: 'Password', sortable: false },
     { key: 'categoryName', label: 'Category', sortable: true },
     { key: 'castName', label: 'Caste', sortable: true },
     { key: 'education', label: 'Education', sortable: true },
@@ -68,7 +69,7 @@ export class VidhanSabhaPrabhariListComponent implements OnInit {
 
   config: TableConfig = {
     selectable: false,
-    filterable: true,
+    // filterable: true,
     paginated: true,
     serverSide: true,
     defaultPageSize: 50,
@@ -96,7 +97,7 @@ export class VidhanSabhaPrabhariListComponent implements OnInit {
         type: 'select',
         apiUrl: 'common/getstates',
         apiMapper: (data: any) => {
-          const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
+          const list = Array.isArray(data?.data?.items) ? data.data.items : (Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []));
           return list.map((item: any) => ({
             value: String(item.id),
             label: item.stateName
@@ -114,7 +115,7 @@ export class VidhanSabhaPrabhariListComponent implements OnInit {
         placeholder: '-- Select District --',
         apiUrl: () => `vidhansabhacount/districtwise/getAll?userId=${this.authService.getUserId()}`,
         apiMapper: (data: any) => {
-          const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
+          const list = Array.isArray(data?.data?.items) ? data.data.items : (Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []));
           return list.map((item: any) => ({
             value: String(item.districtId || item.id),
             label: item.dsitrictName || item.districtName || item.name
@@ -133,7 +134,7 @@ export class VidhanSabhaPrabhariListComponent implements OnInit {
         dependsOn: 'districtId',
         apiUrl: (distId: any) => `stateprabhari/vidhansabha/getAll?districtId=${distId}&pageNumber=1&pageSize=100000&sortBy=id&IsDescending=true`,
         apiMapper: (data: any) => {
-          const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
+          const list = Array.isArray(data?.data?.items) ? data.data.items : (Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []));
           return list.map((item: any) => ({
             value: String(item.id),
             label: item.vidhanSabhaName + (item.hasPrabhari ? ' (Already Assigned)' : ''),
@@ -191,7 +192,7 @@ export class VidhanSabhaPrabhariListComponent implements OnInit {
         placeholder: '-- Select Category --',
         apiUrl: 'common/category',
         apiMapper: (data: any) => {
-          const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
+          const list = Array.isArray(data?.data?.items) ? data.data.items : (Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []));
           return list.map((item: any) => ({
             value: String(item.id),
             label: item.name
@@ -209,7 +210,7 @@ export class VidhanSabhaPrabhariListComponent implements OnInit {
         dependsOn: 'categoryId',
         apiUrl: (catId: any) => `common/cast?id=${catId}`,
         apiMapper: (data: any) => {
-          const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
+          const list = Array.isArray(data?.data?.items) ? data.data.items : (Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []));
           return list.map((item: any) => ({
             value: String(item.id),
             label: item.name
@@ -272,19 +273,24 @@ export class VidhanSabhaPrabhariListComponent implements OnInit {
     });
 
     if (this.isStatePrabhari()) {
-      this.stateService.getAllStates().subscribe({
-        next: (response) => {
-          const list = response?.data || response || [];
-          if (list.length > 0) {
-            this.defaultStateId = String(list[0].stateId || list[0].id);
-            this.addPrabhariConfig.fields = this.addPrabhariConfig.fields.filter(f => f.id !== 'stateId');
-
-
-            this.loadPrabharis();
-          }
-        },
-        error: () => this.loadPrabharis()
-      });
+      const savedStateId = this.authService.getStateId();
+      if (savedStateId) {
+        this.defaultStateId = savedStateId;
+        this.addPrabhariConfig.fields = this.addPrabhariConfig.fields.filter(f => f.id !== 'stateId');
+        this.loadPrabharis();
+      } else {
+        this.stateService.getAllStates().subscribe({
+          next: (response) => {
+            const list = response?.data || response || [];
+            if (list.length > 0) {
+              this.defaultStateId = String(list[0].stateId || list[0].id);
+              this.addPrabhariConfig.fields = this.addPrabhariConfig.fields.filter(f => f.id !== 'stateId');
+              this.loadPrabharis();
+            }
+          },
+          error: () => this.loadPrabharis()
+        });
+      }
     } else {
       this.loadPrabharis();
     }
@@ -293,11 +299,11 @@ export class VidhanSabhaPrabhariListComponent implements OnInit {
   loadPrabharis() {
     this.loading = true;
     const params: any = {
-      pageNumber: this.pageNumber,
-      pageSize: this.pageSize,
-      searchTerm: this.searchTerm,
-      sortBy: this.sortBy,
-      isDescending: this.isDescending
+      PageNumber: this.pageNumber,
+      PageSize: this.pageSize,
+      SearchTerm: this.searchTerm,
+      SortBy: this.sortBy,
+      IsDescending: this.isDescending
     };
 
     if (this.defaultStateId) {
@@ -375,6 +381,7 @@ export class VidhanSabhaPrabhariListComponent implements OnInit {
     if (isUpdate) {
       submitData = {
         Id: raw.id ?? initialId,
+        UserId: raw.userId || this.prabhariModal.initialData?.userId || this.authService.getUserId(),
         PrabhariName: raw.prabhariName,
         PrabhariEmail: raw.prabhariEmail,
         Gender: raw.gender,

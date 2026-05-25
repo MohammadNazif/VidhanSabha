@@ -28,22 +28,31 @@ namespace VidhanSabha.Application.Pannels.Admin.PrabhavshaliVyakti.Command
 
             var req = request.Dto;
             string createdtouserId = null;
+            string createdsectorUserId = null;
             if (IsUserRole(request.Role, PrabhariRole.VidhanSabhaPrabhari))
             {
-                createdtouserId = await _booth.GetUseridbyBoothId(request.Dto.BoothId);
+                createdsectorUserId = await _booth.GetSectorUseridbyBoothId(req.BoothId);
+                createdtouserId = await _booth.GetUseridbyBoothId(req.BoothId);
             }
             else if (IsUserRole(request.Role, PrabhariRole.BoothSanyojak))
             {
                 createdtouserId = request.UserId;
+                createdsectorUserId = await _booth.GetSectorUseridbyBoothId(req.BoothId);
 
-                request.UserId = await _booth.GetadminUseridbyUserId(request.Dto.BoothId);
+                request.UserId = await _booth.GetadminUseridbyUserId(req.BoothId);
+
+            }
+            else if (IsUserRole(request.Role, PrabhariRole.SectorSanyojak))
+            {
+                createdsectorUserId = request.UserId;
+                createdtouserId = await _booth.GetUseridbyBoothId(req.BoothId);
+                request.UserId = await _booth.GetadminUseridbyUserId(req.BoothId);
 
             }
 
 
-
             var data = Tbl_PrabhavshaliVyakti.Create(
-                req.BoothId, req.DesignationId, req.Name, req.CategoryId, req.CastId, req.Mobile, req.Description, request.UserId, createdtouserId,
+                req.BoothId, req.DesignationId, req.Name, req.CategoryId, req.CastId, req.Mobile, req.Description, request.UserId, createdtouserId, createdsectorUserId,request.Role,
                 req.VillageId);
 
             return await _repo.AddAsync(data, cancellationToken);

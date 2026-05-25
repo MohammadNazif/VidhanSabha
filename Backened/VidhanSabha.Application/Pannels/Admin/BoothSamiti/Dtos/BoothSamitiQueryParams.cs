@@ -10,6 +10,7 @@ namespace VidhanSabha.Application.Pannels.Admin.BoothSamiti.Dtos
     public class BoothSamitiQueryParams:BaseQueryParams
     {
         public int? Id { get; set; }
+        public bool rolefilterflag { get; set; }
         public int? BoothId { get; set; }
         public int? SectorId { get; set; }
     }

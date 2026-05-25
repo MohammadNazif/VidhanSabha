@@ -36,11 +36,19 @@ export class InfluencerComponent implements OnInit {
   sortBy = '';
   isDescending = false;
   isListView = false;
-  pageTitle = 'Influencer Management';
+  pageTitle = 'Influencer Person Management';
   pageSubtitle = 'Manage master data for influential people';
+  exportOptions = [
+    { label: 'Export PDF', value: 'pdf' },
+    { label: 'Export Excel', value: 'excel' },
+    { label: 'Import Excel', value: 'import' }
+  ];
 
   canManage(): boolean {
-    return !this.isListView;
+    if (this.isListView) return false;
+    const role = (this.authService.getRole() || '').toUpperCase().trim();
+    if (role === 'VIDHANSABHAPRABHARI') return true;
+    return true; // Influencer Master Data is usually manageable by authorized roles
   }
 
   columns: TableColumn[] = [
@@ -72,7 +80,7 @@ export class InfluencerComponent implements OnInit {
   ];
 
   formConfig: FormConfig = {
-    title: 'Register Prabhavshali Vyakt',
+    title: 'Influencer Person Registration',
     submitLabel: 'Save Entry',
     fields: [
       {
@@ -134,7 +142,13 @@ export class InfluencerComponent implements OnInit {
         label: 'Booth',
         type: 'select',
         placeholder: '-- Select Booth --',
-        apiUrl: 'common/boothNumber',
+        apiUrl: () => {
+          const role = (this.authService.getRole() || '').toUpperCase().trim();
+          if (role === 'SECTORSANYOJAK') {
+            return `booth/getAllBoothBySectorid?sectorid=${this.authService.getUserId()}`;
+          }
+          return 'common/boothNumber';
+        },
         apiMapper: (data: any) => {
           const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
           return list.map((item: any) => ({
@@ -252,7 +266,7 @@ export class InfluencerComponent implements OnInit {
         this.pageTitle = 'Influencer Person List';
         this.pageSubtitle = 'View and export influential people list';
       } else {
-        this.pageTitle = 'Master Data - Influencer';
+        this.pageTitle = 'Influencer Person Management';
         this.pageSubtitle = 'Manage master data for influential people';
       }
 
@@ -385,6 +399,12 @@ export class InfluencerComponent implements OnInit {
 
   handleExport(format: string) {
     if (!format) return;
+    if (format === 'import') {
+      const fileInput = document.getElementById('importFileInput') as HTMLInputElement;
+      if (fileInput) fileInput.click();
+      return;
+    }
+
     this.isExporting = true;
     const exportFormat = format as 'excel' | 'pdf';
     const request = exportFormat === 'excel' ? this.influencerService.exportToExcel() : this.influencerService.exportToPdf();
@@ -406,6 +426,26 @@ export class InfluencerComponent implements OnInit {
         console.error(`Error exporting:`, err);
         this.toastService.showError('Error', `Failed to export list`);
         this.isExporting = false;
+      }
+    });
+  }
+
+  onFileImport(event: any) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    this.loading = true;
+    this.influencerService.importExcel(file).subscribe({
+      next: (res: any) => {
+        this.toastService.showSuccess('Success', 'Influencer data imported successfully!');
+        this.loadData();
+        event.target.value = '';
+      },
+      error: (err: any) => {
+        console.error('Import error:', err);
+        this.toastService.showError('Error', 'Failed to import influencer data');
+        this.loading = false;
+        event.target.value = '';
       }
     });
   }

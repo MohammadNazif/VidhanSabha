@@ -75,7 +75,10 @@ export class NewVoterComponent implements OnInit {
   ];
 
   canManageVoters(): boolean {
-    return !this.isListView && this.permissionService.hasPermission(ModulePermission.NewVoter);
+    if (this.isListView) return false;
+    const role = (this.authService.getRole() || '').toUpperCase().trim();
+    if (role === 'VIDHANSABHAPRABHARI') return true;
+    return this.permissionService.hasPermission(ModulePermission.NewVoter);
   }
 
   addVoterConfig: FormConfig = {
@@ -88,7 +91,13 @@ export class NewVoterComponent implements OnInit {
         label: 'Booth No',
         type: 'select',
         placeholder: '-- Select Booth No --',
-        apiUrl: 'common/boothNumber',
+        apiUrl: () => {
+          const role = (this.authService.getRole() || '').toUpperCase().trim();
+          if (role === 'SECTORSANYOJAK') {
+            return `booth/getAllBoothBySectorid?sectorid=${this.authService.getUserId()}`;
+          }
+          return 'common/boothNumber';
+        },
         apiMapper: (data: any) => {
           const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
           return list.map((item: any) => ({
@@ -249,7 +258,13 @@ export class NewVoterComponent implements OnInit {
 
     // Load Booths
     if (!isBoothSanyojak) {
-      this.http.get<any>(`${environment.apiUrl}/common/boothNumber`).subscribe(res => {
+      const role = (this.authService.getRole() || '').toUpperCase().trim();
+      const isSectorSanyojak = role === 'SECTORSANYOJAK';
+      const boothUrl = isSectorSanyojak
+        ? `${environment.apiUrl}/booth/getAllBoothBySectorid?sectorid=${this.authService.getUserId()}`
+        : `${environment.apiUrl}/common/boothNumber`;
+
+      this.http.get<any>(boothUrl).subscribe(res => {
         const filter = this.config.filters?.find(f => f.key === 'boothIds');
         if (filter) {
           const list = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
@@ -278,7 +293,7 @@ export class NewVoterComponent implements OnInit {
     });
 
     // Load Castes
-    this.http.get<any>(`${environment.apiUrl}/common/cast?pageSize=500000`).subscribe(res => {
+    this.http.get<any>(`${environment.apiUrl}/common/getAllCast`).subscribe(res => {
       const filter = this.config.filters?.find(f => f.key === 'castIds');
       if (filter) {
         const list = Array.isArray(res?.data?.items) ? res.data.items : (Array.isArray(res?.items) ? res.items : (Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : [])));
@@ -327,7 +342,8 @@ export class NewVoterComponent implements OnInit {
       isDescending: this.isDescending,
       boothIds: this.boothIds,
       villageIds: this.villageIds,
-      castIds: this.castIds
+      castIds: this.castIds,
+      roleFilterFlag: !this.isListView
     };
 
     // Clean up empty params

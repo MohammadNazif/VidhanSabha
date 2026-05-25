@@ -26,8 +26,12 @@ namespace VidhanSabha.Application.Pannels.Admin.SocialMediaPost.Command
             var req = request.Dto;
             var social = await _repo.GetByIdAsync(req.Id);
             
+            if (social == null)
+            {
+                throw new NotFoundException("Social Media Post Not Found");
+            }
 
-              string? newImagePath = null;
+            string? newImagePath = null;
             if (req.PostImagePath != null)
             {
                 //if (!_imageService.IsValidImage(request.ProfileImage))
@@ -35,16 +39,13 @@ namespace VidhanSabha.Application.Pannels.Admin.SocialMediaPost.Command
 
                 newImagePath = await _imageService.SaveImageAsync(
                     req.PostImagePath,
-                    subFolder: "profiles/sector"
+                    subFolder: "SocialMediaPost"
                 );
 
                 // Delete old image only after new one saved successfully
                 await _imageService.DeleteImageAsync(social.PostImagePath);
             }
-            if (social == null)
-            {
-                throw new NotFoundException("Social Media Post Not Found");
-            }
+            
             social.Update(
                 req.Title,newImagePath, req.Description, req.PlatformIds, req.BoothIds, req.SectorIds
                 );

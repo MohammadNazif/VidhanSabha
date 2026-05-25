@@ -27,6 +27,7 @@ import {
   SortDirection,
   BadgeVariant
 } from './generic-table.types';
+import { environment } from '../../../../environments/environment';
 
 /** Built-in Lucide-style SVG icons — pass the key as `action.icon` */
 const ICON_MAP: Record<string, string> = {
@@ -42,6 +43,7 @@ const ICON_MAP: Record<string, string> = {
 
 /** Pre-sanitized SafeHtml icon cache — built once per app lifecycle, never re-created */
 const _iconCache = new Map<string, SafeHtml>();
+const _htmlCache = new Map<string, SafeHtml>();
 
 @Component({
   selector: 'app-generic-table',
@@ -61,6 +63,14 @@ export class GenericTableComponent implements OnInit, OnChanges, OnDestroy {
       _iconCache.set(key, this.sanitizer.bypassSecurityTrustHtml(svg));
     }
     return _iconCache.get(key)!;
+  }
+
+  getSafeHtml(html: string): SafeHtml {
+    const key = html || '';
+    if (!_htmlCache.has(key)) {
+      _htmlCache.set(key, this.sanitizer.bypassSecurityTrustHtml(key));
+    }
+    return _htmlCache.get(key)!;
   }
   // ── Inputs ──
   @Input() data: any[] = [];
@@ -107,7 +117,7 @@ export class GenericTableComponent implements OnInit, OnChanges, OnDestroy {
   private defaultConfig: TableConfig = {
     selectable: false,
     paginated: true,
-    pageSizeOptions: [5, 10, 25, 50],
+    pageSizeOptions: [50, 100, 150, 200],
     defaultPageSize: 50,
     searchable: true,
     searchPlaceholder: 'Search records...',
@@ -148,7 +158,7 @@ export class GenericTableComponent implements OnInit, OnChanges, OnDestroy {
         return true;
       }
     }
-    return this.actions.some(action => 
+    return this.actions.some(action =>
       this.displayedData.some(row => this.isActionVisible(action, row))
     );
   }
@@ -279,7 +289,7 @@ export class GenericTableComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     this.sortChange.emit(this.sortState);
-    
+
     if (!this.mergedConfig.serverSide) {
       this.processData();
     }
@@ -309,7 +319,7 @@ export class GenericTableComponent implements OnInit, OnChanges, OnDestroy {
   onFilterChange(filter: any, event: any) {
     const value = event && event.target ? event.target.value : event;
     filter.value = value;
-    
+
     // Build filter map to emit
     const filterState: Record<string, any> = {};
     if (this.mergedConfig.filters) {
@@ -319,11 +329,11 @@ export class GenericTableComponent implements OnInit, OnChanges, OnDestroy {
         }
       });
     }
-    
+
     // Reset to page 1
     this.pageState.currentPage = 1;
     this.filterChange.emit(filterState);
-    
+
     if (!this.mergedConfig.serverSide) {
       // Local filtering logic could be implemented here in the future
       this.processData();
@@ -349,21 +359,21 @@ export class GenericTableComponent implements OnInit, OnChanges, OnDestroy {
 
   toggleMultiFilterOption(filter: any, value: any, event?: Event): void {
     if (event) event.stopPropagation();
-    
+
     if (!Array.isArray(filter.value)) {
       filter.value = filter.value ? [filter.value] : [];
     }
-    
+
     const index = filter.value.findIndex((v: any) => String(v) === String(value));
     if (index > -1) {
       filter.value.splice(index, 1);
     } else {
       filter.value.push(value);
     }
-    
+
     // Create new array reference for change detection
     filter.value = [...filter.value];
-    
+
     this.onFilterChange(filter, filter.value);
   }
 
@@ -383,7 +393,7 @@ export class GenericTableComponent implements OnInit, OnChanges, OnDestroy {
     if (page < 1 || page > this.pageState.totalPages) return;
     this.pageState.currentPage = page;
     this.pageChange.emit(this.pageState);
-    
+
     if (!this.mergedConfig.serverSide) {
       this.updateDisplayedData();
     }
@@ -393,7 +403,7 @@ export class GenericTableComponent implements OnInit, OnChanges, OnDestroy {
     this.pageState.pageSize = size;
     this.pageState.currentPage = 1;
     this.pageChange.emit(this.pageState);
-    
+
     if (!this.mergedConfig.serverSide) {
       this.processData();
     }
@@ -477,9 +487,39 @@ export class GenericTableComponent implements OnInit, OnChanges, OnDestroy {
     this.rowDoubleClick.emit({ row, index });
   }
 
-  onActionClick(action: TableAction, row: any, index: number, event: Event) {
+  async onActionClick(action: TableAction, row: any, index: number, event: Event) {
     event.stopPropagation();
     if (action.disabled && action.disabled(row)) return;
+
+    if (action.id === 'delete') {
+      const { default: Swal } = await import('sweetalert2');
+      const result = await Swal.fire({
+        title: 'Delete record?',
+        text: "This action cannot be undone.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Delete',
+        cancelButtonText: 'Cancel',
+        reverseButtons: true,
+        background: '#ffffff',
+        color: '#333',
+        iconColor: '#ef4444',
+        width: '320px',
+        padding: '1.25rem',
+        customClass: {
+          title: 'swal2-compact-title',
+          htmlContainer: 'swal2-compact-text',
+          actions: 'swal2-compact-actions',
+          confirmButton: 'swal2-compact-btn',
+          cancelButton: 'swal2-compact-btn'
+        }
+      });
+
+      if (!result.isConfirmed) return;
+    }
+
     this.actionClick.emit({ action, row, index });
   }
 
@@ -489,10 +529,16 @@ export class GenericTableComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   getCellValue(row: any, column: TableColumn): any {
-    const value = this.getNestedValue(row, column.key);
+    let value = this.getNestedValue(row, column.key);
+
     if (column.formatter) {
-      return column.formatter(value, row);
+      value = column.formatter(value, row);
     }
+
+    if (column.truncate && typeof value === 'string' && value.length > column.truncate) {
+      return value.substring(0, column.truncate) + '...';
+    }
+
     return value;
   }
 
@@ -536,5 +582,35 @@ export class GenericTableComponent implements OnInit, OnChanges, OnDestroy {
 
   isActionDisabled(action: TableAction, row: any): boolean {
     return action.disabled ? action.disabled(row) : false;
+  }
+
+  isNumericColumn(col: TableColumn): boolean {
+    if (col.align) return false;
+    if (col.type === 'number') return true;
+
+    // Detection logic: check if the first few rows have numeric-like values
+    if (!this.data || this.data.length === 0) return false;
+    const sample = this.data.slice(0, 5);
+    return sample.some(row => {
+      const val = this.getCellValue(row, col);
+      if (val === null || val === undefined || val === '') return false;
+      return typeof val === 'number' || (typeof val === 'string' && /^\d+$/.test(val.trim()));
+    });
+  }
+
+  getImageUrl(path: string): string {
+    if (!path) return '';
+    if (path.startsWith('http')) return path;
+    const baseUrl = environment.apiUrl.replace('/api', '');
+    return `${baseUrl}/${path}`;
+  }
+
+  handleImageError(event: any) {
+    event.target.style.display = 'none';
+    const parent = event.target.parentElement;
+    if (parent) {
+      const fallback = parent.querySelector('.avatar-placeholder');
+      if (fallback) fallback.style.display = 'flex';
+    }
   }
 }

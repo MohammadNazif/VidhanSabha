@@ -41,6 +41,7 @@ export class PannapramukhComponent implements OnInit {
   isListView = false;
 
   columns: TableColumn[] = [
+    { key: 'profilePictureUrl', label: 'Profile', type: 'avatar', align: 'center', sortable: false, avatarFallbackKey: 'pannaPramukhName' },
     { key: 'boothNumber', label: 'Booth No.', sortable: true },
     {
       key: 'villageName', label: 'Village', sortable: true, formatter: (val: any, row: any) => {
@@ -78,6 +79,8 @@ export class PannapramukhComponent implements OnInit {
 
   canManageVoters(): boolean {
     if (this.isListView) return false;
+    const role = (this.authService.getRole() || '').toUpperCase().trim();
+    if (role === 'VIDHANSABHAPRABHARI') return true;
     return this.permissionService.hasPermission(ModulePermission.PannaPramukh);
   }
 
@@ -97,7 +100,13 @@ export class PannapramukhComponent implements OnInit {
         label: 'Booth',
         type: 'select',
         placeholder: '--Select Booth--',
-        apiUrl: 'common/boothNumber',
+        apiUrl: () => {
+          const role = (this.authService.getRole() || '').toUpperCase().trim();
+          if (role === 'SECTORSANYOJAK') {
+            return `booth/getAllBoothBySectorid`;
+          }
+          return 'common/boothNumber';
+        },
         apiMapper: (data: any) => {
           const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
           return list.map((item: any) => ({
@@ -257,10 +266,17 @@ export class PannapramukhComponent implements OnInit {
       { key: 'castIds', label: 'Caste', type: 'select', options: [], placeholder: '-- Select Caste --', multiple: true }
     ];
 
-    const userId = this.authService.getUserId();
+
     // Load Booths
     if (!isBoothSanyojak) {
-      this.pannaService.getCommonData('boothNumber', userId).subscribe((res: any) => {
+      const role = (this.authService.getRole() || '').toUpperCase().trim();
+      const isSectorSanyojak = role === 'SECTORSANYOJAK';
+
+      const request = isSectorSanyojak
+        ? this.pannaService.getCustom(`booth/getAllBoothBySectorid?sectorid=${this.authService.getUserId()}`)
+        : this.pannaService.getCommonData('boothNumber');
+
+      request.subscribe((res: any) => {
         const filter = this.config.filters?.find(f => f.key === 'boothIds');
         if (filter) {
           const list = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
@@ -342,7 +358,8 @@ export class PannapramukhComponent implements OnInit {
       isDescending: this.isDescending,
       boothIds: this.boothIds,
       villageIds: this.villageIds,
-      castIds: this.castIds
+      castIds: this.castIds,
+      roleFilterFlag: !this.isListView
     };
 
     const userId = this.authService.getUserId();

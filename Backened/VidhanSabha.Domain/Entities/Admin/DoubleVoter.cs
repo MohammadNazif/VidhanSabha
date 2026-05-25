@@ -20,6 +20,8 @@ namespace VidhanSabha.Domain.Entities.Admin
         public bool Status { get; private set; } = true;
         public string? UserId { get; private set; }
         public string? CreatedToUserId { get; private set; }
+        public string? CreatedsectorUserId { get; private set; }
+        public string? Role { get; private set; }
 
         private readonly List<Tbl_DoubleVoterVillage> _villages = new();
         public IReadOnlyCollection<Tbl_DoubleVoterVillage> Villages => _villages.AsReadOnly();
@@ -31,7 +33,7 @@ namespace VidhanSabha.Domain.Entities.Admin
         public static Tbl_DoubleVoter Create(
             int BoothId, string Name, string FatherName,
             string VoterId, string PreviousAddress,
-            string CurrentAddress, string Description,string UserId,string CreatedtouserId, List<int> villageIds
+            string CurrentAddress, string Description,string UserId,string CreatedtouserId,string createdsectorUserId,string role, List<int> villageIds
             )
         {
             var Double = new Tbl_DoubleVoter
@@ -44,7 +46,9 @@ namespace VidhanSabha.Domain.Entities.Admin
                 CurrentAddress = CurrentAddress,
                 Description = Description,
                 UserId=UserId,
-                CreatedToUserId = CreatedtouserId
+                CreatedToUserId = CreatedtouserId,
+                CreatedsectorUserId = createdsectorUserId,
+                Role = role
 
             };
             Double.SetVillages(villageIds);

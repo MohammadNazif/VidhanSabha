@@ -11,6 +11,7 @@ namespace VidhanSabha.Domain.Entities.Admin
     {
         public int Id { get; private set; }
         public string BlockName { get; private set; }
+        public string UserId { get; private set; }
         public string BlockPramukh { get; private set; }
         public int PartyId { get; private set; }
         public string Mobile { get; private set; }
@@ -18,7 +19,7 @@ namespace VidhanSabha.Domain.Entities.Admin
         public int CategoryId { get; private set; }
         public int CastId { get; private set; }
         public int OccupationId { get; private set; }
-        public string Profile { get; private set; }
+        public string? Profile { get; private set; }
         public bool Status { get; private set; } = true;
 
         //Navigations
@@ -30,6 +31,7 @@ namespace VidhanSabha.Domain.Entities.Admin
         private Tbl_Block() { }
 
         public static Tbl_Block Create(
+            string userId,
             string BlockName,string BlockPramukh,int PartyId,
             string Mobile,string Address, int CategoryId,
             int CastId,int OccupationId,string Profile
@@ -37,6 +39,7 @@ namespace VidhanSabha.Domain.Entities.Admin
         {
             var block = new Tbl_Block
             {
+                UserId =userId,
                 BlockName = BlockName,
                 BlockPramukh = BlockPramukh,
                 PartyId = PartyId,

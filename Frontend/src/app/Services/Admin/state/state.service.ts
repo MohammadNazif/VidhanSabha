@@ -14,8 +14,9 @@ export class StateService extends BaseApiService {
   }
 
   getAllStates(params: any = {}): Observable<any> {
+    const role = localStorage.getItem('userRole');
     const userId = localStorage.getItem('userId');
-    if (userId) {
+    if (role === 'STATEPRABHARI' && userId) {
       params['userId'] = userId;
     }
     return this.getAllByParams(this.entity, params);

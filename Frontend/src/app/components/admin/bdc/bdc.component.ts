@@ -10,27 +10,37 @@ import { BdcService } from '../../../Services/Admin/bdc/bdc.service';
 import { ToastService } from '../../../Services/common/toast/toast.service';
 import { CrudHandlerService } from '../../../Services/common/crud-handler.service';
 import { ActivatedRoute } from '@angular/router';
+import { AuthServiceService } from '../../../Services/Auth/auth.service';
+
+import { GenericExportComponent } from '../../shared/generic-export/generic-export.component';
 
 @Component({
   selector: 'app-bdc',
   standalone: true,
-  imports: [CommonModule, FormsModule, GenericTableComponent, GenericModalButtonComponent, PageHeaderComponent],
+  imports: [CommonModule, FormsModule, GenericTableComponent, GenericModalButtonComponent, PageHeaderComponent, GenericExportComponent],
   template: `
-    <div class="h-full flex flex-col p-4 gap-4 overflow-hidden">
-      <app-page-header title="BDC Management" subtitle="Manage Block Development Council members and assignments">
-        <app-generic-modal-button 
-            *ngIf="canManage()"
-            #bdcModal 
-            [config]="addBdcConfig" 
-            label="Add BDC" 
-            icon="+"
-            variant="primary" 
-            (formSubmit)="handleFormSubmit($event)">
-        </app-generic-modal-button>
+    <div class="h-screen p-4 flex flex-col overflow-hidden bg-slate-50/50">
+      <app-page-header [title]="isListView ? 'BDC List' : 'BDC Management'" subtitle="Manage Block Development Council members and assignments">
+        <div class="flex items-center gap-3">
+          <app-generic-modal-button 
+              *ngIf="canManage()"
+              #bdcModal 
+              [config]="addBdcConfig" 
+              label="Add BDC" 
+              icon="+"
+              variant="primary" 
+              (formSubmit)="handleFormSubmit($event)">
+          </app-generic-modal-button>
+
+          <app-generic-export [show]="isListView && bdcs && bdcs.length > 0" 
+              [isExporting]="isExporting" (export)="handleExport($event)">
+          </app-generic-export>
+        </div>
       </app-page-header>
 
-      <div class="flex-1 min-h-0 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col p-2">
+      <div class="flex-1 min-h-0 mt-4 bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
         <app-generic-table
+          class="flex-1 min-h-0"
           [config]="tableConfig"
           [columns]="columns"
           [actions]="actions"
@@ -52,12 +62,16 @@ export class BdcComponent implements OnInit {
   totalItems = 0;
   searchTerm = '';
   isListView = false;
+  isExporting = false;
 
   canManage(): boolean {
-    return !this.isListView;
+    if (this.isListView) return false;
+    const role = (this.authService.getRole() || '').toUpperCase().trim();
+    return ['SUPERADMIN', 'ADMIN', 'VIDHANSABHAPRABHARI'].includes(role);
   }
 
   columns: TableColumn[] = [
+    { key: 'profile', label: 'Profile', type: 'avatar', align: 'center', sortable: false, avatarFallbackKey: 'name' },
     { key: 'name', label: 'Name', sortable: true },
     { key: 'block', label: 'Block', sortable: true },
     { key: 'wardNumber', label: 'Ward No.', sortable: true },
@@ -101,11 +115,19 @@ export class BdcComponent implements OnInit {
         validations: [Validators.required]
       },
       {
-        id: 'block',
-        name: 'block',
+        id: 'blockId',
+        name: 'blockId',
         label: 'Block',
-        type: 'text',
-        placeholder: 'Enter block name',
+        type: 'select',
+        placeholder: '-- Select Block --',
+        apiUrl: 'block/getAllBlockName',
+        apiMapper: (data: any) => {
+          const list = data?.data || data?.items || data || [];
+          return list.map((item: any) => ({
+            value: String(item.id || item.blockId),
+            label: item.blockName || item.name || item
+          }));
+        },
         gridColSpan: 6,
         validations: [Validators.required]
       },
@@ -210,6 +232,13 @@ export class BdcComponent implements OnInit {
             label: item.villageName || item.name,
           }));
         }
+      },
+      {
+        id: 'profile',
+        name: 'profile',
+        label: 'Profile Image',
+        type: 'file',
+        gridColSpan: 12
       }
     ]
   };
@@ -218,7 +247,8 @@ export class BdcComponent implements OnInit {
     private bdcService: BdcService,
     private toastService: ToastService,
     private crudHandler: CrudHandlerService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private authService: AuthServiceService
   ) { }
 
   ngOnInit() {
@@ -256,7 +286,7 @@ export class BdcComponent implements OnInit {
     } else if (action.id === 'edit') {
       const editData = { ...row };
       // Standardize IDs for select controls
-      ['categoryId', 'castId', 'partyId'].forEach(key => {
+      ['blockId', 'categoryId', 'castId', 'partyId'].forEach(key => {
         if (editData[key]) editData[key] = String(editData[key]);
       });
       // Map all assigned villages for multi-select binding
@@ -276,30 +306,36 @@ export class BdcComponent implements OnInit {
     if (!result.status) return;
 
     const raw = result.data;
-    const isUpdate = !!(raw.id || (this.bdcModal.initialData && this.bdcModal.initialData.id));
+    const rowId = raw.id || (this.bdcModal.initialData && this.bdcModal.initialData.id);
 
-    const submitData: any = {
-      block: raw.block,
-      name: raw.name,
-      wardNumber: raw.wardNumber,
-      villageId: Array.isArray(raw.villageId)
-        ? raw.villageId.map((v: any) => Number(v.id || v))
-        : [Number(raw.villageId)],
-      categoryId: Number(raw.categoryId),
-      castId: Number(raw.castId),
-      age: Number(raw.age),
-      mobile: String(raw.mobile),
-      partyId: Number(raw.partyId),
-      education: raw.education
-    };
+    const formData = new FormData();
+    if (rowId) formData.append('Id', String(rowId));
+    formData.append('BlockId', String(raw.blockId || 0));
+    formData.append('Name', raw.name || '');
+    formData.append('WardNumber', raw.wardNumber || '');
+    formData.append('CategoryId', String(raw.categoryId || 0));
+    formData.append('CastId', String(raw.castId || 0));
+    formData.append('Age', String(raw.age || 0));
+    formData.append('Mobile', String(raw.mobile || ''));
+    formData.append('PartyId', String(raw.partyId || 0));
+    formData.append('Education', raw.education || '');
 
-    if (isUpdate) {
-      submitData.id = Number(raw.id || this.bdcModal.initialData.id);
+    if (Array.isArray(raw.villageId)) {
+      raw.villageId.forEach((v: any) => {
+        formData.append('VillageId', String(v.id || v));
+      });
+    } else if (raw.villageId) {
+      formData.append('VillageId', String(raw.villageId));
     }
 
+    if (result.files && result.files['profile']) {
+      formData.append('Profile', result.files['profile']);
+    }
+
+    const isUpdate = !!rowId;
     const request = isUpdate
-      ? this.bdcService.updateBdc(submitData)
-      : this.bdcService.createBdc(submitData);
+      ? this.bdcService.updateBdc(formData)
+      : this.bdcService.createBdc(formData);
 
     this.crudHandler.handleRequest(
       request,
@@ -311,6 +347,29 @@ export class BdcComponent implements OnInit {
 
   handleExport(format: string) {
     if (!format) return;
-    this.toastService.showSuccess('Export Started', `Successfully generated ${format.toUpperCase()} export!`);
+    this.isExporting = true;
+    const exportFormat = format as 'excel' | 'pdf';
+    const request = exportFormat === 'excel' ? this.bdcService.exportToExcel() : this.bdcService.exportToPdf();
+
+    request.subscribe({
+      next: (blob: Blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `BDC_List.${format === 'excel' ? 'xlsx' : 'pdf'}`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        this.isExporting = false;
+        this.toastService.showSuccess('Success', `BDC list exported to ${format.toUpperCase()} successfully!`);
+      },
+      error: (err: any) => {
+        console.error(`Error exporting to ${format}:`, err);
+        this.toastService.showError('Error', `Failed to export BDC list to ${format.toUpperCase()}`);
+        this.isExporting = false;
+      }
+    });
   }
 }
+
