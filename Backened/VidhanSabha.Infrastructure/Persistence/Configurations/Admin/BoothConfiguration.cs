@@ -33,6 +33,11 @@ namespace VidhanSabha.Infrastructure.Persistence.Configurations.Admin
                     .WithOne(s => s.Booth)
                   .HasForeignKey<Tbl_BoothSanyojak>(s => s.BoothId)
                   .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(s => s.Login)
+       .WithMany()
+       .HasForeignKey(s => s.UserId)
+       .HasPrincipalKey(s => s.UserId)
+       .OnDelete(DeleteBehavior.Restrict);
         }
     }
     public class BoothVillageConfiguration : IEntityTypeConfiguration<Tbl_BoothVillage>
@@ -53,6 +58,8 @@ namespace VidhanSabha.Infrastructure.Persistence.Configurations.Admin
                   .WithMany()
                   .HasForeignKey(e => e.VillageId)
                   .OnDelete(DeleteBehavior.Restrict);
+     
+
 
             entity.Navigation(e => e.Village).AutoInclude(false);
         }

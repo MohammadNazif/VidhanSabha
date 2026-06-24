@@ -41,6 +41,12 @@ namespace VidhanSabha.Infrastructure.Persistence.Configurations.Admin
                   .HasForeignKey(s => s.MandalId)  
                   .OnDelete(DeleteBehavior.Restrict);
 
+            entity.HasOne(s => s.Login)
+                .WithMany()
+                .HasForeignKey(s => s.UserId)
+                .HasPrincipalKey(s => s.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
             entity.HasOne(s => s.Cast)
         .WithMany()
         .HasForeignKey(s => s.CastId)

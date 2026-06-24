@@ -14,6 +14,7 @@ using VidhanSabha.Application.Pannels.Auth.DTOs;
 using VidhanSabha.Application.Pannels.Auth.Interfaces;
 using VidhanSabha.Domain.Enums;
 using VidhanSabha.Infrastructure.DependencyInjection;
+using VidhanSabha.Infrastructure.Persistence;
 var builder = WebApplication.CreateBuilder(args);
 
 
@@ -22,7 +23,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowAngular",
         policy =>
         {
-            policy.WithOrigins("http://localhost:4200", "https://localhost:4200","http://localhost:8081", "https://localhost:8081", "http://localhost:8082", "https://localhost:8082")
+            policy.WithOrigins("http://localhost:4200", "https://localhost:4200","http://localhost:8081", "https://localhost:8081", "http://localhost:8082", "https://localhost:8082","https://matdaancrm.in")
                   .AllowAnyHeader()
                   .AllowAnyMethod();
         });
@@ -67,6 +68,18 @@ builder.Services.AddAuthorization(options =>
         });
     }
 });
+
+builder.Services.AddDbContext<DatabaseContext>(options =>
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("DefaultConnection"),
+        sqlServerOptionsAction: sqlOptions =>
+        {
+            sqlOptions.EnableRetryOnFailure(
+                maxRetryCount: 5,
+                maxRetryDelay: TimeSpan.FromSeconds(10),
+                errorNumbersToAdd: null);
+        }));
+
 builder.Services.AddSwaggerGen(options =>
 {
     options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme

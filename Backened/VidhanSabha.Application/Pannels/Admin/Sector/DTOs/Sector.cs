@@ -69,6 +69,7 @@ namespace VidhanSabha.Application.Pannels.Admin.Sector.DTOs
         public string? PhoneNumber { get; set; }
         public string? Address { get; set; }
         public string? Profile { get; set; }
+        public string? Password { get; set; }
         public bool Status { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }

@@ -56,7 +56,7 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
                  PrabhavshaliVyakti = await _context.Tbl_PrabhavshaliVyakti.CountAsync(x => boothIds.Contains(x.BoothId) && x.Status && x.UserId == userId),
                  Block = await _context.Tbl_Block.CountAsync( x => x.Status && x.UserId == userId
                  ),
-                 BDC  = await _context.Tbl_Block.CountAsync(x => x.Status && x.UserId ==userId),
+                 BDC  = await _context.Tbl_BDC.CountAsync(x => x.Status && x.UserId ==userId && x.Blocknav.Status),
                 InfluencerPerson = await _context.Tbl_Influencer.CountAsync(x => boothIds.Contains(x.BoothId) && x.Status && x.UserId == userId),
                 Pradhan = await _context.Tbl_Pradhan.CountAsync(x => x.Status && x.UserId == userId),
 

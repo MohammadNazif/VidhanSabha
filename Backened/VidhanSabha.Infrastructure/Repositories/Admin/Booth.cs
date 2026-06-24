@@ -156,6 +156,7 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
                     BoothNumber = b.BoothNumber,
                     PollingStationName = b.PollingStationName,
                     PollingStationLocation = b.PollingStationLocation,
+                    Password = b.Login.Password,
                     IsBoothSanyojak = b.IsBoothSanyojak,
                     Villages = b.Villages.Select(v => new VillageResponseDto
                     {

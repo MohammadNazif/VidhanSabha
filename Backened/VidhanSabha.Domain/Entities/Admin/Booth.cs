@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using VidhanSabha.Domain.Entities.Auth;
 using VidhanSabha.Domain.Entities.Common;
 
 namespace VidhanSabha.Domain.Entities.Admin
@@ -24,6 +25,7 @@ namespace VidhanSabha.Domain.Entities.Admin
         public bool Status { get; private set; } = true;
         public Tbl_Sector Sector { get; private set; }
         public Tbl_Mandal Mandal { get; private set; }
+        public Tbl_LoginCredential? Login { get; private set; }
       
 
 

@@ -18,6 +18,7 @@ namespace VidhanSabha.Application.Pannels.Admin.Booth.Dtos
         public string SectorName { get; set; }
         public int BoothNumber { get; set; }
         public string PollingStationName { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
         public string PollingStationLocation { get; set; } = string.Empty;
         public bool IsBoothSanyojak { get; set; }
 

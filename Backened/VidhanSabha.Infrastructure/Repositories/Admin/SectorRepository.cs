@@ -65,6 +65,7 @@ namespace VidhanSabha.Infrastructure.Repositories.Admin
                     PhoneNumber = s.PhoneNumber,
                     Address = s.Address,
                     Profile = s.ProfileImage,
+                    Password = s.Login.Password,
                     Status = s.Status
                 },
                 ct: ct
