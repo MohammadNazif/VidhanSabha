@@ -10,14 +10,37 @@ env:
 
 jobs:
 
-  # ── DEPLOY BACKEND ─────────────────────────────────────────────────
-  deploy-backend:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # ── BUILD ANGULAR FIRST ──────────────────────────────────────
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: ./Frontend/package-lock.json
+
+      - name: Install Angular dependencies
+        run: npm ci
+        working-directory: ./Frontend
+
+      - name: Build Angular app
+        run: npm run build -- --configuration production
+        working-directory: ./Frontend
+
+      # ── COPY ANGULAR OUTPUT TO BACKEND WWWROOT ───────────────────
+      - name: Copy Angular build to backend wwwroot
+        run: |
+          rm -rf ./Backened/VidhanSabha.Api/wwwroot
+          mkdir -p ./Backened/VidhanSabha.Api/wwwroot
+          cp -r ./Frontend/dist/vidhan-sabha/* ./Backened/VidhanSabha.Api/wwwroot/
+
+      # ── BUILD & PUBLISH BACKEND ──────────────────────────────────
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
@@ -32,47 +55,16 @@ jobs:
       - name: Publish API
         run: dotnet publish ./Backened/VidhanSabha.Api/VidhanSabha.Api.csproj --configuration Release --output ./backend-publish
 
-      - name: Deploy Backend via FTP
+      # ── DEPLOY TO PLESK ──────────────────────────────────────────
+      - name: Deploy to Plesk via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.PLESK_HOST }}
           username: ${{ secrets.PLESK_USERNAME }}
           password: ${{ secrets.PLESK_PASSWORD }}
           local-dir: ./backend-publish/
-          server-dir: ${{ secrets.BACKEND_REMOTE_PATH }}/
-
-  # ── DEPLOY FRONTEND ────────────────────────────────────────────────
-  deploy-frontend:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-          cache-dependency-path: ./Frontend/package-lock.json
-
-      - name: Install dependencies
-        run: npm ci
-        working-directory: ./Frontend
-
-      - name: Build Angular app
-        run: npm run build -- --configuration production
-        working-directory: ./Frontend
-
-      - name: Deploy Frontend via FTP
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-        with:
-          server: ${{ secrets.PLESK_HOST }}
-          username: ${{ secrets.PLESK_USERNAME }}
-          password: ${{ secrets.PLESK_PASSWORD }}
-          local-dir: ./Frontend/dist/vidhan-sabha/
-          server-dir: ${{ secrets.FRONTEND_REMOTE_PATH }}
-          dangerous-clean-slate: true        
+          server-dir: /httpdocs/
+          dangerous-clean-slate: true
           exclude: |
             **/uploads/**
             **/logs/**
