@@ -55,25 +55,19 @@ jobs:
       - name: Publish API
         run: dotnet publish ./Backened/VidhanSabha.Api/VidhanSabha.Api.csproj --configuration Release --output ./backend-publish
 
-      # ── STEP 1: CREATE app_offline.htm TO STOP IIS APP ───────────
-      - name: Create app_offline file
+      # ── STEP 1: STOP APP VIA FTP CURL ────────────────────────────
+      - name: Upload app_offline.htm to stop IIS
         run: |
-          echo "<html><body>Deploying update, please wait...</body></html>" > ./app_offline.htm
-
-      - name: Upload app_offline to stop app
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-        with:
-          server: ${{ secrets.PLESK_HOST }}
-          username: ${{ secrets.PLESK_USERNAME }}
-          password: ${{ secrets.PLESK_PASSWORD }}
-          local-dir: ./
-          server-dir: /httpdocs/
-          include: |
-            app_offline.htm
+          echo "<html><body>Deploying...</body></html>" > /tmp/app_offline.htm
+          curl -T /tmp/app_offline.htm ftp://${{ secrets.PLESK_HOST }}/httpdocs/app_offline.htm \
+            --user "${{ secrets.PLESK_USERNAME }}:${{ secrets.PLESK_PASSWORD }}" \
+            --ftp-create-dirs \
+            --connect-timeout 30 \
+            --max-time 60
 
       # ── STEP 2: WAIT FOR IIS TO RELEASE FILES ────────────────────
       - name: Wait for app to stop
-        run: sleep 5
+        run: sleep 8
 
       # ── STEP 3: DEPLOY BACKEND FILES ─────────────────────────────
       - name: Deploy Backend files via FTP
@@ -103,15 +97,10 @@ jobs:
           exclude: |
             **/uploads/**
 
-      # ── STEP 5: REMOVE app_offline.htm TO START APP AGAIN ────────
-      - name: Remove app_offline to restart app
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-        with:
-          server: ${{ secrets.PLESK_HOST }}
-          username: ${{ secrets.PLESK_USERNAME }}
-          password: ${{ secrets.PLESK_PASSWORD }}
-          local-dir: ./backend-publish/
-          server-dir: /httpdocs/
-          dangerous-clean-slate: false
-          exclude: |
-            **/app_offline.htm
+      # ── STEP 5: REMOVE app_offline.htm TO RESTART APP ────────────
+      - name: Remove app_offline.htm to restart IIS
+        run: |
+          curl -X DELETE ftp://${{ secrets.PLESK_HOST }}/httpdocs/app_offline.htm \
+            --user "${{ secrets.PLESK_USERNAME }}:${{ secrets.PLESK_PASSWORD }}" \
+            --connect-timeout 30 \
+            --max-time 60
