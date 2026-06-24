@@ -55,10 +55,10 @@ jobs:
       - name: Publish API
         run: dotnet publish ./Backened/VidhanSabha.Api/VidhanSabha.Api.csproj --configuration Release --output ./backend-publish
 
-      # ── STEP 1: STOP APP VIA FTP CURL ────────────────────────────
+      # ── STEP 1: STOP APP VIA CURL ────────────────────────────────
       - name: Upload app_offline.htm to stop IIS
         run: |
-          echo "<html><body>Deploying...</body></html>" > /tmp/app_offline.htm
+          echo "<html><body>Deploying update please wait...</body></html>" > /tmp/app_offline.htm
           curl -T /tmp/app_offline.htm ftp://${{ secrets.PLESK_HOST }}/httpdocs/app_offline.htm \
             --user "${{ secrets.PLESK_USERNAME }}:${{ secrets.PLESK_PASSWORD }}" \
             --ftp-create-dirs \
@@ -100,7 +100,5 @@ jobs:
       # ── STEP 5: REMOVE app_offline.htm TO RESTART APP ────────────
       - name: Remove app_offline.htm to restart IIS
         run: |
-          curl -X DELETE ftp://${{ secrets.PLESK_HOST }}/httpdocs/app_offline.htm \
-            --user "${{ secrets.PLESK_USERNAME }}:${{ secrets.PLESK_PASSWORD }}" \
-            --connect-timeout 30 \
-            --max-time 60
+          sudo apt-get install -y lftp
+          lftp -c "open -u ${{ secrets.PLESK_USERNAME }},${{ secrets.PLESK_PASSWORD }} ftp://${{ secrets.PLESK_HOST }}; rm /httpdocs/app_offline.htm"
