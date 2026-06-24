@@ -71,4 +71,8 @@ jobs:
           username: ${{ secrets.PLESK_USERNAME }}
           password: ${{ secrets.PLESK_PASSWORD }}
           local-dir: ./Frontend/dist/vidhan-sabha/
-          server-dir: ${{ secrets.FRONTEND_REMOTE_PATH }}/
+          server-dir: ${{ secrets.FRONTEND_REMOTE_PATH }}
+          dangerous-clean-slate: true        
+          exclude: |
+            **/uploads/**
+            **/logs/**
