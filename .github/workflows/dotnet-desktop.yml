@@ -38,7 +38,7 @@ jobs:
         run: |
           rm -rf ./Backened/VidhanSabha.Api/wwwroot
           mkdir -p ./Backened/VidhanSabha.Api/wwwroot
-          cp -r ./Frontend/dist/vidhan-sabha/* ./Backened/VidhanSabha.Api/wwwroot/
+          cp -r ./Frontend/dist/vidhan-sabha/browser/* ./Backened/VidhanSabha.Api/wwwroot/
 
       # ── BUILD & PUBLISH BACKEND ──────────────────────────────────
       - name: Setup .NET
