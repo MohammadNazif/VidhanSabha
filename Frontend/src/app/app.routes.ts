@@ -42,6 +42,9 @@ import { GlobalLandingComponent } from './components/global-landing/global-landi
 import { ContactUsComponent } from './components/contact-us/contact-us.component';
 import { ActivityComponent } from './components/admin/activity/activity.component';
 import { ProfileComponent } from './components/profile/profile.component';
+import { PrivacyPolicyComponent } from './components/privacy-policy/privacy-policy.component';
+// import { TermConditionComponent } from './components/term-condition/term-condition.component';
+import { ChildPolicyComponent } from './components/child-policy/child-policy.component';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -50,7 +53,6 @@ export const routes: Routes = [
   { path: 'global', component: GlobalLandingComponent },
   { path: 'contact-us', component: ContactUsComponent },
   { path: '', component: LandingPageComponent, pathMatch: 'full' },
-
   { path: 'combined-report', component: CombinedReportComponent },
   { path: 'mandal-report', component: MandalReportComponent },
   { path: 'sector-with-booth-report', component: SectorWithBoothReportComponent },
@@ -122,5 +124,8 @@ export const routes: Routes = [
   { path: 'mandal-samiti', component: MandalSamitiComponent },
   { path: 'mandal-samiti-list', component: MandalSamitiComponent },
   { path: 'activity', component: ActivityComponent },
+  { path: 'privacy-policy', component: PrivacyPolicyComponent },
+  { path: 'child-policy', component: ChildPolicyComponent },
+  // { path: 'term-condition', component: TermConditionComponent },
   { path: '**', redirectTo: '' }
 ];

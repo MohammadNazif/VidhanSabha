@@ -138,28 +138,13 @@ export class PradhanComponent implements OnInit {
         gridColSpan: 6,
         validations: [Validators.required, Validators.pattern('^[0-9]{10}$')]
       },
-      {
-        id: 'designationId',
-        name: 'designationId',
-        label: 'Designation',
-        type: 'select',
-        gridColSpan: 6,
-        validations: [Validators.required],
-        apiUrl: 'common/getadmindesignation',
-        apiMapper: (data: any) => {
-          const list = Array.isArray(data?.data?.items) ? data.data.items : (Array.isArray(data?.items) ? data.items : (Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : [])));
-          return list.map((item: any) => ({
-            value: String(item.id),
-            label: item.designationName || item.name || item.Name
-          }));
-        }
-      },
+
       {
         id: 'villageId',
         name: 'villageId',
         label: 'Assigned Villages',
         type: 'select',
-        gridColSpan: 12,
+        gridColSpan: 6,
         multiple: true,
         validations: [Validators.required],
         apiUrl: 'common/getallvillages',
@@ -269,7 +254,7 @@ export class PradhanComponent implements OnInit {
 
     const submitData: any = {
       name: raw.name,
-      designationId: Number(raw.designationId),
+      designationId: 1,
       contact: String(raw.contact),
       gender: Number(raw.gender),
       villageId: Array.isArray(raw.villageId)

@@ -62,6 +62,7 @@ export class SectorComponent implements OnInit {
     { key: 'sectorName', label: 'Sector', sortable: true },
     { key: 'inchargeName', label: 'Sector Sanyojak', sortable: true },
     { key: 'phoneNumber', label: 'Contact', sortable: true },
+    { key: 'password', label: 'Password', sortable: true, },
     // { key: 'profileImage', label: 'Profile Image', sortable: true, avatarFallbackKey: 'name' },
   ];
 
@@ -458,7 +459,7 @@ export class SectorComponent implements OnInit {
   handleExport(format: string) {
     if (!format) return;
     this.isExporting = true;
-    
+
     const params: any = {
       SearchTerm: this.searchTerm,
       SortBy: this.sortBy,
@@ -467,7 +468,7 @@ export class SectorComponent implements OnInit {
     };
 
     if (this.defaultStateId) {
-       params.stateId = this.defaultStateId;
+      params.stateId = this.defaultStateId;
     }
 
     this.sectorService.exportSector(format as 'excel' | 'pdf', params).subscribe({

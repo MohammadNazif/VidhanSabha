@@ -270,7 +270,7 @@ export class InfluencerComponent implements OnInit {
         this.pageSubtitle = 'Manage master data for influential people';
       }
 
-      this.config.filterable = this.isListView;
+      // this.config.filterable = this.isListView;
       this.loadData();
     });
   }

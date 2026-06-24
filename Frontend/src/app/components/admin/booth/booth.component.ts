@@ -78,7 +78,7 @@ export class BoothComponent implements OnInit {
       const mandalId = this.authService.getMandalId();
       // Hide mandalId and sectorId fields
       this.addBoothConfig.fields = this.addBoothConfig.fields.filter(f => f.id !== 'mandalId' && f.id !== 'sectorId');
-      
+
       // Simplify villageId field
       const villageField = this.addBoothConfig.fields.find(f => f.id === 'villageId');
       if (villageField) {
@@ -509,6 +509,10 @@ export class BoothComponent implements OnInit {
       label: 'Contact Number',
       sortable: true,
       formatter: (val: any, row: any) => row.sanyojak?.phoneNumber || 'N/A'
+    },
+    {
+      key: 'password',
+      label: 'Password',
     },
     {
       key: 'castName',
