@@ -17,7 +17,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # ── BUILD ANGULAR FIRST ──────────────────────────────────────
+      # ── BUILD ANGULAR ────────────────────────────────────────────
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -33,7 +33,7 @@ jobs:
         run: npm run build -- --configuration production
         working-directory: ./Frontend
 
-      # ── COPY ANGULAR OUTPUT TO BACKEND WWWROOT ───────────────────
+      # ── COPY ANGULAR TO WWWROOT ──────────────────────────────────
       - name: Copy Angular build to backend wwwroot
         run: |
           rm -rf ./Backened/VidhanSabha.Api/wwwroot
@@ -55,8 +55,28 @@ jobs:
       - name: Publish API
         run: dotnet publish ./Backened/VidhanSabha.Api/VidhanSabha.Api.csproj --configuration Release --output ./backend-publish
 
-      # ── DEPLOY TO PLESK ──────────────────────────────────────────
-      - name: Deploy to Plesk via FTP
+      # ── STEP 1: CREATE app_offline.htm TO STOP IIS APP ───────────
+      - name: Create app_offline file
+        run: |
+          echo "<html><body>Deploying update, please wait...</body></html>" > ./app_offline.htm
+
+      - name: Upload app_offline to stop app
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.PLESK_HOST }}
+          username: ${{ secrets.PLESK_USERNAME }}
+          password: ${{ secrets.PLESK_PASSWORD }}
+          local-dir: ./
+          server-dir: /httpdocs/
+          include: |
+            app_offline.htm
+
+      # ── STEP 2: WAIT FOR IIS TO RELEASE FILES ────────────────────
+      - name: Wait for app to stop
+        run: sleep 5
+
+      # ── STEP 3: DEPLOY BACKEND FILES ─────────────────────────────
+      - name: Deploy Backend files via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.PLESK_HOST }}
@@ -64,7 +84,34 @@ jobs:
           password: ${{ secrets.PLESK_PASSWORD }}
           local-dir: ./backend-publish/
           server-dir: /httpdocs/
+          dangerous-clean-slate: false
+          exclude: |
+            **/wwwroot/**
+            **/uploads/**
+            **/logs/**
+
+      # ── STEP 4: DEPLOY FRONTEND FILES ────────────────────────────
+      - name: Deploy Frontend files via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.PLESK_HOST }}
+          username: ${{ secrets.PLESK_USERNAME }}
+          password: ${{ secrets.PLESK_PASSWORD }}
+          local-dir: ./backend-publish/wwwroot/
+          server-dir: /httpdocs/wwwroot/
           dangerous-clean-slate: true
           exclude: |
             **/uploads/**
-            **/logs/**
+
+      # ── STEP 5: REMOVE app_offline.htm TO START APP AGAIN ────────
+      - name: Remove app_offline to restart app
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.PLESK_HOST }}
+          username: ${{ secrets.PLESK_USERNAME }}
+          password: ${{ secrets.PLESK_PASSWORD }}
+          local-dir: ./backend-publish/
+          server-dir: /httpdocs/
+          dangerous-clean-slate: false
+          exclude: |
+            **/app_offline.htm
