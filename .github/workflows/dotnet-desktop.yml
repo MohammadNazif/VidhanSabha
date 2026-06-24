@@ -101,4 +101,4 @@ jobs:
       - name: Remove app_offline.htm to restart IIS
         run: |
           sudo apt-get install -y lftp
-          lftp -c "open -u ${{ secrets.PLESK_USERNAME }},${{ secrets.PLESK_PASSWORD }} ftp://${{ secrets.PLESK_HOST }}; rm /httpdocs/app_offline.htm"
+          lftp -c "set ssl:verify-certificate no; open -u ${{ secrets.PLESK_USERNAME }},${{ secrets.PLESK_PASSWORD }} ftp://${{ secrets.PLESK_HOST }}; rm /httpdocs/app_offline.htm"
